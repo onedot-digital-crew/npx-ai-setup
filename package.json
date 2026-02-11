@@ -1,0 +1,20 @@
+{
+  "name": "@onedot/ai-setup",
+  "version": "1.0.0",
+  "description": "AI project setup: Claude Code, GSD, Memory Bank, Hooks",
+  "bin": {
+    "ai-setup": "./bin/ai-setup.sh"
+  },
+  "files": [
+    "bin/",
+    "templates/",
+    "README.md"
+  ],
+  "keywords": [
+    "claude-code",
+    "ai-setup",
+    "gsd",
+    "onedot"
+  ],
+  "license": "MIT"
+}
