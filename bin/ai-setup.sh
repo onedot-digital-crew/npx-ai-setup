@@ -331,10 +331,22 @@ $CONTEXT" >/dev/null 2>&1 &
     claude -p "/gsd:map-codebase" >/dev/null 2>&1 &
     progress_bar $! "Codebase-Analyse (GSD)" 180 600
 
-    # Step 4: Skills (Hinweis, nicht automatisch)
+    # Step 4: Skills suchen und installieren
+    echo ""
+    claude -p --model sonnet --max-turns 5 "Lies package.json und identifiziere den Tech Stack.
+Suche fuer jede erkannte Technologie passende Skills:
+  npx skills find <technologie>
+
+Installiere gefundene Skills mit:
+  npx skills add <owner/repo@skill> --agent claude-code --agent github-copilot -y
+
+Antworte mit einer Liste der installierten Skills, oder 'Keine passenden Skills gefunden'.
+
+$CONTEXT" >/dev/null 2>&1 &
+    progress_bar $! "Skills suchen + installieren" 30 120
+
     echo ""
     echo "✅ Auto-Init abgeschlossen!"
-    echo "💡 Skills suchen: claude -p 'Lies package.json, suche passende Skills mit npx skills find'"
     osascript -e 'display notification "Auto-Init abgeschlossen. Starte /gsd:new-project" with title "AI Setup" sound name "Glass"' 2>/dev/null
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
