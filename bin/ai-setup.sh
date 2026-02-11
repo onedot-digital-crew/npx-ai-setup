@@ -402,33 +402,46 @@ $CONTEXT" >/dev/null 2>&1 &
         command -v timeout &>/dev/null && TIMEOUT_CMD="timeout 30"
         command -v gtimeout &>/dev/null && TIMEOUT_CMD="gtimeout 30"
 
+        SKILL_PATTERN='^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+'
+
+        # Search function with retry
+        search_skills() {
+          local kw=$1
+          local result=""
+          if [ -n "$TIMEOUT_CMD" ]; then
+            result=$($TIMEOUT_CMD npx -y skills@latest find "$kw" 2>/dev/null \
+              | sed 's/\x1b\[[0-9;]*m//g' \
+              | grep -E "$SKILL_PATTERN" || true)
+          else
+            local tmp=$(mktemp)
+            npx -y skills@latest find "$kw" > "$tmp" 2>/dev/null &
+            local pid=$!
+            local wait_s=0
+            while kill -0 "$pid" 2>/dev/null && [ "$wait_s" -lt 30 ]; do
+              sleep 1
+              wait_s=$((wait_s + 1))
+            done
+            if kill -0 "$pid" 2>/dev/null; then
+              kill "$pid" 2>/dev/null
+              wait "$pid" 2>/dev/null
+            else
+              wait "$pid" 2>/dev/null
+              result=$(sed 's/\x1b\[[0-9;]*m//g' "$tmp" \
+                | grep -E "$SKILL_PATTERN" || true)
+            fi
+            rm -f "$tmp"
+          fi
+          echo "$result"
+        }
+
         ALL_SKILLS=""
         for kw in "${KEYWORDS[@]}"; do
           printf "  🔍 Searching: %s ..." "$kw"
-          if [ -n "$TIMEOUT_CMD" ]; then
-            FOUND=$($TIMEOUT_CMD npx -y skills@latest find "$kw" 2>/dev/null \
-              | sed 's/\x1b\[[0-9;]*m//g' \
-              | grep -E '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+@' || true)
-          else
-            # No timeout available — run with background kill fallback
-            SEARCH_TMP=$(mktemp)
-            npx -y skills@latest find "$kw" > "$SEARCH_TMP" 2>/dev/null &
-            SEARCH_PID=$!
-            SEARCH_WAIT=0
-            while kill -0 "$SEARCH_PID" 2>/dev/null && [ "$SEARCH_WAIT" -lt 30 ]; do
-              sleep 1
-              SEARCH_WAIT=$((SEARCH_WAIT + 1))
-            done
-            if kill -0 "$SEARCH_PID" 2>/dev/null; then
-              kill "$SEARCH_PID" 2>/dev/null
-              wait "$SEARCH_PID" 2>/dev/null
-              FOUND=""
-            else
-              wait "$SEARCH_PID" 2>/dev/null
-              FOUND=$(sed 's/\x1b\[[0-9;]*m//g' "$SEARCH_TMP" \
-                | grep -E '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+@' || true)
-            fi
-            rm -f "$SEARCH_TMP"
+          FOUND=$(search_skills "$kw")
+          # Retry once on failure
+          if [ -z "$FOUND" ]; then
+            sleep 1
+            FOUND=$(search_skills "$kw")
           fi
           if [ -n "$FOUND" ]; then
             COUNT=$(echo "$FOUND" | wc -l | tr -d ' ')
