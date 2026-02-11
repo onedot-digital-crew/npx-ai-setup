@@ -3,7 +3,7 @@
 # ==============================================================================
 # @onedot/ai-setup - AI infrastructure for projects
 # ==============================================================================
-# Installs GSD, Memory Bank, Hooks, Auto-Init
+# Installs GSD, Claude Code hooks, and AI-curated skills
 # Usage: npx @onedot/ai-setup
 # ==============================================================================
 
@@ -13,7 +13,32 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TPL="$SCRIPT_DIR/templates"
 
-echo "🚀 Starting AI Setup (GSD + Lean Memory Bank)..."
+# Efficiently collect project files (git-aware with fallback)
+collect_project_files() {
+  local max_files=${1:-80}
+
+  # Try git first (10x faster)
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    git ls-files -z '*.js' '*.ts' '*.jsx' '*.tsx' '*.vue' '*.svelte' \
+      '*.css' '*.scss' '*.liquid' '*.php' '*.html' '*.twig' \
+      '*.blade.php' '*.erb' '*.py' '*.rb' '*.go' '*.rs' '*.astro' \
+      2>/dev/null | tr '\0' '\n' | head -n "$max_files"
+  else
+    # Fallback: optimized find with early pruning
+    find . -maxdepth 4 \
+      \( -name node_modules -o -name .git -o -name dist -o -name build \
+         -o -name assets -o -name .next -o -name vendor -o -name .nuxt \) -prune -o \
+      -type f \( \
+        -iname '*.js' -o -iname '*.ts' -o -iname '*.jsx' -o -iname '*.tsx' \
+        -o -iname '*.vue' -o -iname '*.svelte' -o -iname '*.css' -o -iname '*.scss' \
+        -o -iname '*.liquid' -o -iname '*.php' -o -iname '*.html' -o -iname '*.twig' \
+        -o -iname '*.blade.php' -o -iname '*.erb' -o -iname '*.py' -o -iname '*.rb' \
+        -o -iname '*.go' -o -iname '*.rs' -o -iname '*.astro' \
+      \) -print | head -n "$max_files"
+  fi
+}
+
+echo "🚀 Starting AI Setup (GSD + Claude Code + Skills)..."
 
 # ------------------------------------------------------------------------------
 # 0. REQUIREMENTS CHECK
@@ -156,7 +181,28 @@ if [ -d "$GSD_GLOBAL_DIR" ] || [ -d ".claude/commands/gsd" ] || [ -d ".claude/ge
   echo "🎯 GSD already installed, skipping."
 else
   echo "🎯 Installing GSD (Get Shit Done) globally..."
-  npx -y get-shit-done-cc@latest --claude --global 2>/dev/null || echo "  GSD installation failed. Manual: npx get-shit-done-cc@latest --claude --global"
+
+  # Run in background with progress spinner
+  npx -y get-shit-done-cc@latest --claude --global >/dev/null 2>&1 &
+  GSD_PID=$!
+
+  # Simple spinner
+  SPIN='-\|/'
+  i=0
+  while kill -0 $GSD_PID 2>/dev/null; do
+    i=$(( (i+1) %4 ))
+    printf "\r  ${SPIN:$i:1} Installing... (may take 30-60 seconds)"
+    sleep 0.2
+  done
+
+  wait $GSD_PID
+  GSD_EXIT=$?
+
+  if [ $GSD_EXIT -eq 0 ]; then
+    printf "\r  ✅ GSD installed successfully%*s\n" 40 ""
+  else
+    printf "\r  ⚠️  GSD installation failed. Manual: npx get-shit-done-cc@latest --claude --global\n"
+  fi
 fi
 
 # GSD Companion Skill (global)
@@ -284,7 +330,7 @@ $(cat package.json 2>/dev/null)
 --- package.json scripts ---
 $(jq -r '.scripts | to_entries[] | "- \(.key): \(.value)"' package.json 2>/dev/null)
 --- Directory structure (max 80 files) ---
-$(find . -maxdepth 4 -type f \( -name '*.js' -o -name '*.ts' -o -name '*.jsx' -o -name '*.tsx' -o -name '*.vue' -o -name '*.svelte' -o -name '*.css' -o -name '*.scss' -o -name '*.liquid' -o -name '*.php' -o -name '*.html' -o -name '*.twig' -o -name '*.blade.php' -o -name '*.erb' -o -name '*.py' -o -name '*.rb' -o -name '*.go' -o -name '*.rs' -o -name '*.astro' \) ! -path './node_modules/*' ! -path './.git/*' ! -path './dist/*' ! -path './build/*' ! -path './assets/*' ! -path './.next/*' ! -path './vendor/*' ! -path './.nuxt/*' 2>/dev/null | sort | head -80)
+$(collect_project_files 80)
 --- ESLint Config ---
 $(cat eslint.config.* .eslintrc* 2>/dev/null | head -100)
 --- Prettier Config ---
@@ -404,17 +450,20 @@ $CONTEXT" >/dev/null 2>&1 &
         for kw in "${KEYWORDS[@]}"; do
           printf "  🔍 Searching: %s ..." "$kw"
           FOUND=$(search_skills "$kw")
+
           # Retry once on failure
           if [ -z "$FOUND" ]; then
+            printf " (retrying)"
             sleep 1
             FOUND=$(search_skills "$kw")
           fi
+
           if [ -n "$FOUND" ]; then
             COUNT=$(echo "$FOUND" | wc -l | tr -d ' ')
-            printf " %s skills found\n" "$COUNT"
+            printf "\r  ✅ %-20s %s skills found%*s\n" "$kw:" "$COUNT" 15 ""
             ALL_SKILLS="${ALL_SKILLS}${FOUND}"$'\n'
           else
-            printf " ⚠️  no skills found\n"
+            printf "\r  ⚠️  %-20s no skills found%*s\n" "$kw:" 20 ""
           fi
         done
 
@@ -424,9 +473,15 @@ $CONTEXT" >/dev/null 2>&1 &
         if [ -n "$ALL_SKILLS" ]; then
           TOTAL_FOUND=$(echo "$ALL_SKILLS" | wc -l | tr -d ' ')
 
+          # Cache search results for fallback
+          ALL_SKILLS_CACHE=$(mktemp)
+          echo "$ALL_SKILLS" > "$ALL_SKILLS_CACHE"
+          trap "rm -f '$ALL_SKILLS_CACHE'" EXIT INT TERM
+
           # Phase 1.5: Fetch weekly install counts from skills.sh (parallel)
           echo ""
-          echo "  📊 Fetching install counts..."
+          echo "  📊 Fetching popularity metrics from skills.sh..."
+          echo "     (Used to rank skills by real-world usage)"
           INSTALLS_DIR=$(mktemp -d)
           while IFS= read -r sid; do
             if [ -n "$sid" ]; then
@@ -529,13 +584,11 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
             echo "  Total: $INSTALLED skills installed"
           else
             echo "  ⚠️  Claude could not select skills. Installing top 3 per technology..."
-            # Fallback: Top 3 per keyword without AI
+            # Fallback: Top 3 per keyword using cached results
             INSTALLED=0
             for kw in "${KEYWORDS[@]}"; do
-              SKILL_IDS=$(npx -y skills@latest find "$kw" 2>/dev/null \
-                | sed 's/\x1b\[[0-9;]*m//g' \
-                | grep -E '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+@' \
-                | head -3)
+              # Use cached results instead of re-searching
+              SKILL_IDS=$(grep -iE "$kw" "$ALL_SKILLS_CACHE" 2>/dev/null | head -3)
               if [ -n "$SKILL_IDS" ]; then
                 while IFS= read -r skill_id; do
                   skill_id=$(echo "$skill_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -579,6 +632,32 @@ fi
 
 echo ""
 echo "🎉 AI Setup complete! Your project is ready for AI-assisted development."
+echo ""
+echo "================================================================"
+echo "INSTALLATION SUMMARY"
+echo "================================================================"
+echo ""
+echo "✅ Files created:"
+[ -f CLAUDE.md ] && echo "   - CLAUDE.md (project rules)"
+[ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
+[ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
+echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker)"
+echo ""
+echo "✅ Tools installed:"
+[ -d "${HOME}/.claude/commands/gsd" ] && echo "   - GSD (Get Shit Done) - globally in ~/.claude/"
+[ -d "${HOME}/.claude/skills/gsd" ] && echo "   - GSD Companion Skill"
+
+if [ "$AI_CLI" = "claude" ] && [[ ! "$RUN_INIT" =~ ^[Nn]$ ]]; then
+  echo ""
+  echo "✅ Auto-Init completed:"
+  echo "   - CLAUDE.md extended with Commands & Critical Rules"
+  if [ ${INSTALLED:-0} -gt 0 ]; then
+    echo "   - ${INSTALLED} skills installed"
+  fi
+fi
+
+echo ""
+echo "📂 Project structure ready for AI development"
 echo ""
 echo "================================================================"
 echo "NEXT STEPS"

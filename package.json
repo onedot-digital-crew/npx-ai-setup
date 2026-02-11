@@ -1,7 +1,7 @@
 {
   "name": "@onedot/ai-setup",
   "version": "1.0.0",
-  "description": "AI project setup: Claude Code, GSD, Memory Bank, Hooks",
+  "description": "AI project setup: Claude Code, GSD, Hooks, and AI-curated skills",
   "bin": {
     "ai-setup": "./bin/ai-setup.sh"
   },
