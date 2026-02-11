@@ -3,6 +3,8 @@
 AI infrastructure for projects: Claude Code, GSD, Memory Bank, Hooks.
 One command creates the complete setup, then Claude analyzes the code and populates everything automatically.
 
+[![GSD Workflow Demo](https://img.youtube.com/vi/SqmXS8q_2BM/maxresdefault.jpg)](https://www.youtube.com/watch?v=SqmXS8q_2BM)
+
 ## Installation
 
 ```bash
