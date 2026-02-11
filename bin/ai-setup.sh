@@ -85,18 +85,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 2. MEMORY BANK (copy from templates)
-# ------------------------------------------------------------------------------
-echo "🧠 Creating Lean Memory Bank..."
-mkdir -p memory-bank
-
-[ ! -f memory-bank/projectbrief.md ] && cp "$TPL/memory-bank/projectbrief.md" memory-bank/projectbrief.md
-[ ! -f memory-bank/systemPatterns.md ] && cp "$TPL/memory-bank/systemPatterns.md" memory-bank/systemPatterns.md
-
-echo "✅ Memory Bank created."
-
-# ------------------------------------------------------------------------------
-# 3. CLAUDE.md
+# 2. CLAUDE.md
 # ------------------------------------------------------------------------------
 echo "📝 Writing CLAUDE.md..."
 
@@ -108,7 +97,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 4. SETTINGS.JSON (granular permissions)
+# 3. SETTINGS.JSON (granular permissions)
 # ------------------------------------------------------------------------------
 echo "⚙️  Writing .claude/settings.json..."
 mkdir -p .claude
@@ -120,7 +109,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 5. HOOKS
+# 4. HOOKS
 # ------------------------------------------------------------------------------
 echo "🛡️  Creating hooks..."
 mkdir -p .claude/hooks
@@ -135,7 +124,7 @@ for hook in protect-files.sh post-edit-lint.sh circuit-breaker.sh; do
 done
 
 # ------------------------------------------------------------------------------
-# 6. COPILOT INSTRUCTIONS
+# 5. COPILOT INSTRUCTIONS
 # ------------------------------------------------------------------------------
 mkdir -p .github
 
@@ -146,7 +135,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 7. GITIGNORE
+# 6. GITIGNORE
 # ------------------------------------------------------------------------------
 if [ -f .gitignore ]; then
   if ! grep -q "claude/settings.local" .gitignore 2>/dev/null; then
@@ -160,7 +149,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 8. GSD INSTALL (global — commands in ~/.claude/, state in project/.planning/)
+# 7. GSD INSTALL (global — commands in ~/.claude/, state in project/.planning/)
 # ------------------------------------------------------------------------------
 GSD_GLOBAL_DIR="${HOME}/.claude/commands/gsd"
 if [ -d "$GSD_GLOBAL_DIR" ] || [ -d ".claude/commands/gsd" ] || [ -d ".claude/get-shit-done" ]; then
@@ -179,17 +168,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 9. INIT PROMPT
-# ------------------------------------------------------------------------------
-if [ -f .claude/init-prompt.md ]; then
-  read -p "  init-prompt.md already exists. Overwrite? (Y/n) " OVERWRITE_INIT
-  [[ ! "$OVERWRITE_INIT" =~ ^[Nn]$ ]] && cp "$TPL/claude/init-prompt.md" .claude/init-prompt.md || echo "  ⏭️  init-prompt.md skipped."
-else
-  cp "$TPL/claude/init-prompt.md" .claude/init-prompt.md
-fi
-
-# ------------------------------------------------------------------------------
-# 11. AUTO-INIT (Claude populates Memory Bank + CLAUDE.md)
+# 8. AUTO-INIT (Claude populates CLAUDE.md)
 # ------------------------------------------------------------------------------
 
 # Kill process + all child processes (Claude spawns sub-agents)
@@ -313,20 +292,7 @@ $(cat .prettierrc* 2>/dev/null)
 --- CLAUDE.md (current) ---
 $(cat CLAUDE.md 2>/dev/null)"
 
-    # Step 1: Populate Memory Bank (PARALLEL with Step 2)
-    claude -p --model sonnet --max-turns 3 "Populate memory-bank/ based on the project context.
-
-1. memory-bank/projectbrief.md (via Bash, is write-protected):
-   Goal, Tech Stack (with versions), Architecture, Constraints
-2. memory-bank/systemPatterns.md:
-   Architecture Decisions, Coding Standards, Key Patterns
-
-Rules: ONLY use what is in the context. No umlauts. Max 60 lines per file. Reply 'Done'.
-
-$CONTEXT" >/dev/null 2>&1 &
-    PID_MB=$!
-
-    # Step 2: Extend CLAUDE.md (PARALLEL with Step 1)
+    # Step 1: Extend CLAUDE.md
     claude -p --model sonnet --max-turns 3 "Add two sections to CLAUDE.md:
 
 ## Commands
@@ -341,11 +307,11 @@ Rules: ONLY use what is in the context. No umlauts. Reply 'Done'.
 $CONTEXT" >/dev/null 2>&1 &
     PID_CM=$!
 
-    # Parallel progress bars
+    # Progress bar
     echo ""
-    wait_parallel "$PID_MB:Memory Bank:30:120" "$PID_CM:CLAUDE.md:30:120"
+    progress_bar $PID_CM "CLAUDE.md" 30 120
 
-    # Step 3: Search and install skills (AI-curated)
+    # Step 2: Search and install skills (AI-curated)
     echo ""
     echo "🔌 Searching and installing skills..."
     if [ -f package.json ]; then
@@ -600,15 +566,15 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
   echo "💡 GitHub Copilot detected (no claude CLI)."
-  echo "   Auto-Init must be run manually in Copilot Chat:"
+  echo "   Manual steps required:"
   echo ""
   echo "   1. Open VS Code / GitHub Copilot Chat"
-  echo "   2. Copy the content from: .claude/init-prompt.md"
+  echo "   2. Ask Copilot to extend CLAUDE.md with Commands and Critical Rules"
   echo "   3. Run /gsd:map-codebase and /gsd:new-project"
 else
   echo "⚠️  No AI CLI detected (neither claude nor gh copilot)."
   echo "   Install Claude Code: npm i -g @anthropic-ai/claude-code"
-  echo "   Or run the init prompt manually: .claude/init-prompt.md"
+  echo "   Then run the setup steps in NEXT STEPS below"
 fi
 
 echo ""
@@ -627,11 +593,10 @@ if [ "$AI_CLI" = "claude" ]; then
   echo ""
   echo "  /gsd:new-project         Define project, requirements & roadmap"
 else
-  echo "  1. Run init prompt: .claude/init-prompt.md"
-  echo "  2. /gsd:map-codebase     Analyze your codebase"
+  echo "  1. /gsd:map-codebase     Analyze your codebase"
   echo ""
   echo "  When ready to start building:"
-  echo "  3. /gsd:new-project      Define project, requirements & roadmap"
+  echo "  2. /gsd:new-project      Define project, requirements & roadmap"
 fi
 echo ""
 echo "================================================================"

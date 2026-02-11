@@ -2,7 +2,6 @@
   "permissions": {
     "allow": [
       "Read(src/**)",
-      "Read(memory-bank/**)",
       "Read(.planning/**)",
       "Bash(date:*)",
       "Bash(echo:*)",
@@ -61,17 +60,6 @@
           {
             "type": "command",
             "command": "osascript -e 'display notification \"Claude Code wartet auf dich\" with title \"Claude Code\"'"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '--- Memory Bank ---' && cat \"$CLAUDE_PROJECT_DIR/memory-bank/systemPatterns.md\" 2>/dev/null && echo '---'"
           }
         ]
       }

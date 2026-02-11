@@ -1,6 +1,6 @@
 # @onedot/ai-setup
 
-AI infrastructure for projects: Claude Code, GSD, Memory Bank, Hooks.
+AI infrastructure for projects: Claude Code, GSD, Hooks.
 One command creates the complete setup, then Claude analyzes the code and populates everything automatically.
 
 [![GSD Workflow Demo](https://img.youtube.com/vi/SqmXS8q_2BM/maxresdefault.jpg)](https://www.youtube.com/watch?v=SqmXS8q_2BM)
@@ -22,8 +22,7 @@ npx @onedot/ai-setup
 ## Architecture
 
 ```
-GSD (.planning/)          = Process (plan > execute > verify)
-Memory Bank (memory-bank/) = Knowledge (Patterns, Tech Stack)
+GSD (.planning/)          = Process (plan > execute > verify) + Knowledge (codebase analysis)
 CLAUDE.md                  = Rules (Critical Rules, Workflow)
 ```
 
@@ -33,25 +32,21 @@ CLAUDE.md                  = Rules (Critical Rules, Workflow)
 
 ### 1. Project scaffolding (instant)
 
-- Creates `memory-bank/` with project brief and system patterns templates
 - Copies `CLAUDE.md` with communication protocol and GSD workflow
 - Sets up `.claude/settings.json` with granular bash permissions (no `Bash(*)`)
-- Installs hooks: auto-lint on edit, file protection (.env, projectbrief.md), circuit breaker (detects edit loops)
+- Installs hooks: auto-lint on edit, file protection (.env, package-lock.json), circuit breaker (detects edit loops)
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Installs GSD (Get Shit Done) workflow engine globally
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
 ### 2. Auto-Init (optional, requires Claude CLI)
 
-Runs 3 steps after scaffolding:
+Runs 2 steps after scaffolding:
 
 | Step | What | Mode |
 |------|------|------|
-| **Memory Bank** | Claude reads your code, populates `projectbrief.md` + `systemPatterns.md` | Parallel |
-| **CLAUDE.md** | Claude adds `## Commands` (from package.json) + `## Critical Rules` (from linting config) | Parallel |
+| **CLAUDE.md** | Claude adds `## Commands` (from package.json) + `## Critical Rules` (from linting config) | Sequential |
 | **Skills** | AI-curated skill installation with live progress (see below) | Sequential |
-
-Steps 1+2 run in parallel (Sonnet, max 3 turns each). Step 3 runs sequentially after.
 
 ### 3. AI-curated Skills installation
 
@@ -97,7 +92,7 @@ Selected skills are installed one by one with live status updates:
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| **protect-files.sh** | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/`, `projectbrief.md` |
+| **protect-files.sh** | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/` |
 | **post-edit-lint.sh** | After Edit/Write | Auto-runs `eslint --fix` on .js/.ts files |
 | **circuit-breaker.sh** | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min |
 
@@ -214,18 +209,22 @@ Use this mode **only** for isolated, small tasks without architectural impact.
 
 ```
 project/
-+-- memory-bank/
-|   +-- projectbrief.md      # North Star (write-protected)
-|   +-- systemPatterns.md     # Coding Patterns
 +-- .planning/                # GSD State (created by /gsd:new-project)
-|   +-- PROJECT.md
-|   +-- ROADMAP.md
-|   +-- STATE.md
+|   +-- PROJECT.md            # Project context
+|   +-- ROADMAP.md            # Phase structure
+|   +-- STATE.md              # Project memory
+|   +-- codebase/             # Created by /gsd:map-codebase
+|       +-- ARCHITECTURE.md
+|       +-- STRUCTURE.md
+|       +-- CONVENTIONS.md
+|       +-- STACK.md
+|       +-- INTEGRATIONS.md
+|       +-- TESTING.md
+|       +-- CONCERNS.md
 +-- .claude/
 |   +-- settings.json         # Permissions + Hooks
-|   +-- init-prompt.md        # Init-Prompt Template
 |   +-- hooks/
-|       +-- protect-files.sh  # Protects .env, projectbrief.md
+|       +-- protect-files.sh  # Protects .env, package-lock.json, .git/
 |       +-- post-edit-lint.sh # Auto-Lint after Edit
 |       +-- circuit-breaker.sh # Detects edit loops
 +-- .github/
@@ -248,9 +247,6 @@ project/
 | `.env` | Secrets |
 | `package-lock.json` | Dependency Integrity |
 | `.git/` | Repository History |
-| `memory-bank/projectbrief.md` | North Star, change manually only |
-
-`systemPatterns.md` is **not** protected — Claude should be able to update patterns.
 
 ---
 
@@ -288,11 +284,8 @@ Invoke in Claude Code: `/my-skill`
 
 ## FAQ
 
-**Memory Bank vs. GSD — what's the difference?**
-GSD = Process (what do we do next?). Memory Bank = Knowledge (how do we code here?).
-
-**Do I need to maintain memory-bank/ manually?**
-No. The init prompt populates it. `systemPatterns.md` is updated by Claude as needed.
+**Where is the codebase documentation?**
+GSD creates comprehensive technical docs in `.planning/codebase/` via `/gsd:map-codebase` (ARCHITECTURE.md, STRUCTURE.md, CONVENTIONS.md, STACK.md, INTEGRATIONS.md, TESTING.md, CONCERNS.md).
 
 **What happens with `.planning/` on `git pull`?**
 `.planning/` is committed. On merge conflicts: GSD state is per-developer, keep your own version when in doubt.
