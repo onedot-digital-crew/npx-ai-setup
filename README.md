@@ -21,18 +21,58 @@ npx @onedot/ai-setup
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
 ### 2. Auto-Init (optional, requires Claude CLI)
-Runs 4 steps with progress bars after scaffolding:
+Runs 4 steps after scaffolding:
 
 | Step | What | Mode |
 |------|------|------|
 | **Memory Bank** | Claude reads your code, populates `projectbrief.md` + `systemPatterns.md` | Parallel |
 | **CLAUDE.md** | Claude adds `## Commands` (from package.json) + `## Critical Rules` (from linting config) | Parallel |
+| **Skills** | AI-curated skill installation with live progress (see below) | Sequential |
 | **GSD Map** | `/gsd:map-codebase` — autonomous codebase analysis | Sequential |
-| **Skills** | Detects tech stack from package.json, searches and installs matching skills | Sequential |
 
 Steps 1+2 run in parallel (Sonnet, max 3 turns each). Steps 3+4 run sequentially after.
 
-### 3. Hooks (active after setup)
+### 3. AI-curated Skills installation
+
+Skills are automatically detected, curated, and installed in 4 phases:
+
+**Phase 1 — Detect & Search** (bash, 30s timeout per search)
+Reads `package.json` dependencies, maps them to technology keywords, and searches for available skills.
+
+Supported technologies: Vue, Nuxt, Nuxt UI, React, Next.js, Svelte, Astro, Tailwind, Shadcn, Radix, Headless UI, TypeScript, Express, NestJS, Hono, Shopify, Angular, Prisma, Drizzle, Supabase, Firebase, Vitest, Playwright, Pinia, TanStack, Zustand
+
+**Phase 2 — Fetch Install Counts** (parallel curl, ~1s)
+Fetches weekly install counts from [skills.sh](https://skills.sh) for all found skills in parallel. This data is used to rank skills by real-world popularity.
+
+**Phase 3 — AI Curation** (Claude Sonnet, 1 turn, 60s timeout)
+Claude receives the full list of found skills with their install counts and selects the top 5 most relevant ones. It prefers higher install counts, avoids duplicates, prefers well-known maintainers, and picks only what fits the actual tech stack.
+
+**Phase 4 — Install** (bash, live output)
+Selected skills are installed one by one with live status updates:
+
+```
+🔌 Searching and installing skills...
+  Detected: vue nuxt tailwind typescript
+  🔍 Searching: vue ... 6 skills found
+  🔍 Searching: nuxt ... 5 skills found
+  🔍 Searching: tailwind ... 4 skills found
+
+  📊 Fetching install counts...
+  🤖 Claude selecting best skills (17 found)...
+  ✨ 5 skills selected:
+
+     ✅ antfu/skills@vue
+     ✅ antfu/skills@nuxt
+     ✅ antfu/skills@tailwind-css
+     ✅ antfu/skills@vue-router-best-practices
+     ✅ antfu/skills@typescript-best-practices
+
+  Total: 5 skills installed
+```
+
+**Fallback**: If Claude is unavailable or times out, top 3 per technology are installed without AI curation.
+
+### 4. Hooks (active after setup)
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
@@ -40,7 +80,7 @@ Steps 1+2 run in parallel (Sonnet, max 3 turns each). Steps 3+4 run sequentially
 | **post-edit-lint.sh** | After Edit/Write | Auto-runs `eslint --fix` on .js/.ts files |
 | **circuit-breaker.sh** | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min |
 
-### 4. Permissions
+### 5. Permissions
 
 Granular bash permissions instead of `Bash(*)`:
 - **Allowed**: `git add/commit/status/log/diff/tag`, `npm run`, `eslint`, `cat/ls/grep/...`
@@ -66,8 +106,6 @@ Granular bash permissions instead of `Bash(*)`:
 - Claude Code CLI (optional, for Auto-Init)
 
 ## Skills
-
-Skills are automatically detected and installed during Auto-Init (based on `package.json`).
 
 ### Search and install manually
 
