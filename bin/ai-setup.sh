@@ -160,36 +160,26 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 8. GSD INSTALL (project-local, non-interactive)
+# 8. GSD INSTALL (global — commands in ~/.claude/, state in project/.planning/)
 # ------------------------------------------------------------------------------
-if [ -d ".claude/commands/gsd" ] || [ -d ".claude/get-shit-done" ]; then
+GSD_GLOBAL_DIR="${HOME}/.claude/commands/gsd"
+if [ -d "$GSD_GLOBAL_DIR" ] || [ -d ".claude/commands/gsd" ] || [ -d ".claude/get-shit-done" ]; then
   echo "🎯 GSD already installed, skipping."
 else
-  echo "🎯 Installing GSD (Get Shit Done)..."
-  npx -y get-shit-done-cc@latest --claude --local 2>/dev/null || echo "  GSD installation failed. Manual: npx get-shit-done-cc@latest --claude --local"
+  echo "🎯 Installing GSD (Get Shit Done) globally..."
+  npx -y get-shit-done-cc@latest --claude --global 2>/dev/null || echo "  GSD installation failed. Manual: npx get-shit-done-cc@latest --claude --global"
 fi
 
-# GSD Companion Skill
-if [ -d ".claude/skills/gsd" ]; then
+# GSD Companion Skill (global)
+GSD_SKILL_GLOBAL="${HOME}/.claude/skills/gsd"
+if [ -d "$GSD_SKILL_GLOBAL" ] || [ -d ".claude/skills/gsd" ]; then
   echo "  GSD Companion Skill already installed, skipping."
 else
-  npx skills add https://github.com/ctsstc/get-shit-done-skills --skill gsd --agent claude-code --agent github-copilot -y 2>/dev/null || echo "  Skills CLI not available, skipping."
+  npx skills add https://github.com/ctsstc/get-shit-done-skills --skill gsd --agent claude-code --agent github-copilot -g -y 2>/dev/null || echo "  Skills CLI not available, skipping."
 fi
 
 # ------------------------------------------------------------------------------
-# 9. AI-SETUP.md
-# ------------------------------------------------------------------------------
-echo "📚 Creating AI-SETUP.md..."
-
-if [ -f AI-SETUP.md ]; then
-  read -p "  AI-SETUP.md already exists. Overwrite? (Y/n) " OVERWRITE_AISETUP
-  [[ ! "$OVERWRITE_AISETUP" =~ ^[Nn]$ ]] && cp "$TPL/AI-SETUP.md" AI-SETUP.md || echo "  ⏭️  AI-SETUP.md skipped."
-else
-  cp "$TPL/AI-SETUP.md" AI-SETUP.md
-fi
-
-# ------------------------------------------------------------------------------
-# 10. INIT PROMPT
+# 9. INIT PROMPT
 # ------------------------------------------------------------------------------
 if [ -f .claude/init-prompt.md ]; then
   read -p "  init-prompt.md already exists. Overwrite? (Y/n) " OVERWRITE_INIT
@@ -364,10 +354,10 @@ $CONTEXT" >/dev/null 2>&1 &
 
       for dep in $DEPS; do
         case "$dep" in
-          # Frontend frameworks
+          # Frontend frameworks (specific patterns before general globs)
           vue|vue-router|@vue/*) [[ ! " ${KEYWORDS[*]} " =~ " vue " ]] && KEYWORDS+=("vue") ;;
-          nuxt|@nuxt/*) [[ ! " ${KEYWORDS[*]} " =~ " nuxt " ]] && KEYWORDS+=("nuxt") ;;
           @nuxt/ui|@nuxt/ui-pro) [[ ! " ${KEYWORDS[*]} " =~ " nuxt-ui " ]] && KEYWORDS+=("nuxt-ui") ;;
+          nuxt|@nuxt/*) [[ ! " ${KEYWORDS[*]} " =~ " nuxt " ]] && KEYWORDS+=("nuxt") ;;
           react|react-dom|@react/*) [[ ! " ${KEYWORDS[*]} " =~ " react " ]] && KEYWORDS+=("react") ;;
           next|@next/*) [[ ! " ${KEYWORDS[*]} " =~ " next " ]] && KEYWORDS+=("next") ;;
           svelte|@sveltejs/*) [[ ! " ${KEYWORDS[*]} " =~ " svelte " ]] && KEYWORDS+=("svelte") ;;
@@ -540,14 +530,14 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
               if [ -n "$skill_id" ]; then
                 printf "     ⏳ %s ..." "$skill_id"
                 if [ -n "$TIMEOUT_CMD" ]; then
-                  if $TIMEOUT_CMD npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y >/dev/null 2>&1; then
+                  if $TIMEOUT_CMD npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y</dev/null >/dev/null 2>&1; then
                     printf "\r     ✅ %s\n" "$skill_id"
                     INSTALLED=$((INSTALLED + 1))
                   else
                     printf "\r     ❌ %s (install failed)\n" "$skill_id"
                   fi
                 else
-                  if npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y >/dev/null 2>&1; then
+                  if npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y</dev/null >/dev/null 2>&1; then
                     printf "\r     ✅ %s\n" "$skill_id"
                     INSTALLED=$((INSTALLED + 1))
                   else
@@ -572,7 +562,7 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
                   skill_id=$(echo "$skill_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
                   if [ -n "$skill_id" ]; then
                     printf "     ⏳ %s ..." "$skill_id"
-                    if npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y >/dev/null 2>&1; then
+                    if npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y</dev/null >/dev/null 2>&1; then
                       printf "\r     ✅ %s\n" "$skill_id"
                       INSTALLED=$((INSTALLED + 1))
                     else
@@ -591,14 +581,9 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
       echo "  No package.json found."
     fi
 
-    # Step 4: GSD Map Codebase (sequential, after skills)
-    echo ""
-    claude -p "/gsd:map-codebase" >/dev/null 2>&1 &
-    progress_bar $! "Codebase analysis (GSD)" 180 600
-
     echo ""
     echo "✅ Auto-Init complete!"
-    osascript -e 'display notification "Auto-Init complete. Run /gsd:new-project" with title "AI Setup" sound name "Glass"' 2>/dev/null
+    osascript -e 'display notification "Auto-Init complete. Run /gsd:map-codebase" with title "AI Setup" sound name "Glass"' 2>/dev/null
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
   echo "💡 GitHub Copilot detected (no claude CLI)."
@@ -614,16 +599,60 @@ else
 fi
 
 echo ""
-echo "--------------------------------------------------------"
-echo "NEXT STEPS:"
+echo "🎉 AI Setup complete! Your project is ready for AI-assisted development."
+echo ""
+echo "================================================================"
+echo "NEXT STEPS"
+echo "================================================================"
 echo ""
 if [ "$AI_CLI" = "claude" ]; then
-  echo "1. /gsd:new-project (interactive, in Claude Code session)"
+  echo "Run this in a Claude Code session to complete the setup:"
+  echo ""
+  echo "  /gsd:map-codebase        Analyze your codebase"
+  echo ""
+  echo "When you're ready to start building:"
+  echo ""
+  echo "  /gsd:new-project         Define project, requirements & roadmap"
 else
-  echo "1. Run init prompt (.claude/init-prompt.md)"
-  echo "2. /gsd:map-codebase"
-  echo "3. /gsd:new-project"
+  echo "  1. Run init prompt: .claude/init-prompt.md"
+  echo "  2. /gsd:map-codebase     Analyze your codebase"
+  echo ""
+  echo "  When ready to start building:"
+  echo "  3. /gsd:new-project      Define project, requirements & roadmap"
 fi
-echo "--------------------------------------------------------"
 echo ""
-echo "📚 Documentation: AI-SETUP.md"
+echo "================================================================"
+echo "GSD WORKFLOW CHEAT SHEET"
+echo "================================================================"
+echo ""
+echo "  Core Loop:"
+echo "  /gsd:discuss-phase N      Clarify requirements before planning"
+echo "  /gsd:plan-phase N         Create step-by-step plan"
+echo "  /gsd:execute-phase N      Write code & commit atomically"
+echo "  /gsd:verify-work N        User acceptance testing"
+echo ""
+echo "  Quick Tasks:"
+echo "  /gsd:quick \"task\"          Fast fix (typos, CSS, config)"
+echo "  /gsd:debug                Systematic debugging"
+echo ""
+echo "  Session Management:"
+echo "  /gsd:pause-work           Save context for later"
+echo "  /gsd:resume-work          Restore previous session"
+echo "  /gsd:progress             Status & next action"
+echo ""
+echo "  Roadmap:"
+echo "  /gsd:add-phase            Add phase to roadmap"
+echo "  /gsd:insert-phase         Insert urgent work (e.g. 3.1)"
+echo "  /gsd:add-todo             Capture idea as todo"
+echo "  /gsd:check-todos          Show open todos"
+echo ""
+echo "================================================================"
+echo "LINKS"
+echo "================================================================"
+echo ""
+echo "  Skills:   https://skills.sh/"
+echo "  GSD:      https://github.com/get-shit-done-cc/get-shit-done-cc"
+echo "  Claude:   https://docs.anthropic.com/en/docs/claude-code"
+echo "  Hooks:    https://docs.anthropic.com/en/docs/claude-code/hooks"
+echo ""
+echo "================================================================"

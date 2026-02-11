@@ -1,7 +1,7 @@
 # Copilot Instructions
 
-Dieses Projekt verwendet **Claude Code** als primaeren AI-Assistenten.
-Alle Coding-Regeln stehen in `CLAUDE.md`.
+This project uses **Claude Code** as the primary AI assistant.
+All coding rules are in `CLAUDE.md`.
 
 ## Context
 - **MUST READ**: `memory-bank/systemPatterns.md` for coding rules

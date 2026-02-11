@@ -1,8 +1,8 @@
 # CLAUDE.md
 
 ## Communication Protocol
-Kein Smalltalk. Einfach machen.
-Bestaetigungen einsilbig (Done, Fixed). Code-Aenderungen nur als Diff zeigen.
+No small talk. Just do it.
+Confirmations one word (Done, Fixed). Show code changes as diff only.
 
 ## Memory Bank
 Project knowledge in `memory-bank/`. Read on session start.
