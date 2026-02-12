@@ -20,14 +20,24 @@ awk -v c="$CUTOFF" '$1 >= c' "$LOG" > "${LOG}.tmp" 2>/dev/null && mv "${LOG}.tmp
 COUNT=$(grep -cF "$FILE_PATH" "$LOG" 2>/dev/null || echo 0)
 
 if [ "$COUNT" -ge "$BLOCK" ]; then
-  echo "Circuit Breaker: $FILE_PATH edited ${COUNT}x in 10min. STOP." >&2
-  echo "You are going in circles. Explain the problem to the user." >&2
+  echo "⛔ Circuit Breaker TRIGGERED: ${FILE_PATH} edited ${COUNT}x in 10min" >&2
+  echo "" >&2
+  echo "This usually means:" >&2
+  echo "  • The current approach isn't working" >&2
+  echo "  • You're stuck in a loop trying the same fix repeatedly" >&2
+  echo "  • The file has a deeper issue that needs investigation" >&2
+  echo "" >&2
+  echo "Recommended actions:" >&2
+  echo "  1. Explain to the user what you were trying to do" >&2
+  echo "  2. Describe what went wrong and why you kept editing" >&2
+  echo "  3. Propose a different approach or ask for guidance" >&2
+  echo "  4. If needed: Clear the circuit breaker log with: rm ${LOG}" >&2
   exit 2
 fi
 
 if [ "$COUNT" -ge "$WARN" ]; then
-  echo "Circuit Breaker: $FILE_PATH edited ${COUNT}x in 10min." >&2
-  echo "Check if you are repeating yourself. Consider a different approach." >&2
+  echo "⚠️  Circuit Breaker Warning: ${FILE_PATH} edited ${COUNT}x in 10min (blocks at ${BLOCK})" >&2
+  echo "Consider: Is this the right approach? Should you try something different?" >&2
 fi
 
 exit 0

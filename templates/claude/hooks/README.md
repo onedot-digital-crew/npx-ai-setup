@@ -16,10 +16,17 @@
 #### 2. circuit-breaker.sh
 **Purpose:** Detects infinite loops and repetitive behavior
 **Thresholds:**
-- Warning at 5 edits to same file within 10 minutes
-- Hard block at 8 edits to same file within 10 minutes
+- ⚠️  Warning at 5 edits to same file within 10 minutes
+- ⛔ Hard block at 8 edits to same file within 10 minutes
 
-**Customization:** Edit `WARN`, `BLOCK`, and `WINDOW` variables
+**What happens when triggered:**
+- Provides diagnostic context about why the loop occurred
+- Suggests alternative approaches
+- Shows how to clear the circuit breaker if needed
+
+**Customization:**
+- Edit `WARN`, `BLOCK`, and `WINDOW` variables in the script
+- For large refactoring sessions, consider raising `BLOCK` to 12-15
 
 ### PostToolUse Hooks (Run AFTER Edit/Write)
 
@@ -43,6 +50,16 @@ echo $?  # 0 = allowed, 2 = blocked
 View circuit breaker log:
 ```bash
 cat /tmp/claude-cb-*.log
+```
+
+Clear circuit breaker for a fresh start:
+```bash
+rm /tmp/claude-cb-*.log
+```
+
+Check how many times a file was edited recently:
+```bash
+grep "path/to/file" /tmp/claude-cb-*.log | wc -l
 ```
 
 ## Disabling Hooks

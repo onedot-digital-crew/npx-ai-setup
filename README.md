@@ -8,7 +8,7 @@ One command creates the complete setup, then Claude analyzes the code and popula
 ## Installation
 
 ```bash
-npx @onedot/ai-setup
+npx github:onedot-digital-crew/npx-ai-setup
 ```
 
 ## Requirements
