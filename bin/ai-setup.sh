@@ -3,8 +3,8 @@
 # ==============================================================================
 # @onedot/ai-setup - AI infrastructure for projects
 # ==============================================================================
-# Installs GSD, Claude Code hooks, and AI-curated skills
-# Usage: npx @onedot/ai-setup
+# Installs Claude Code hooks, project context, and AI-curated skills
+# Usage: npx @onedot/ai-setup [--with-gsd] [--no-gsd]
 # ==============================================================================
 
 set -e
@@ -12,6 +12,15 @@ set -e
 # Package root (one level above bin/)
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TPL="$SCRIPT_DIR/templates"
+
+# Parse flags
+WITH_GSD=""
+for arg in "$@"; do
+  case "$arg" in
+    --with-gsd) WITH_GSD="yes" ;;
+    --no-gsd) WITH_GSD="no" ;;
+  esac
+done
 
 # Efficiently collect project files (git-aware with fallback)
 collect_project_files() {
@@ -38,7 +47,7 @@ collect_project_files() {
   fi
 }
 
-echo "🚀 Starting AI Setup (GSD + Claude Code + Skills)..."
+echo "🚀 Starting AI Setup (Claude Code + Skills)..."
 
 # ------------------------------------------------------------------------------
 # 0. REQUIREMENTS CHECK
@@ -160,8 +169,18 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 6. GITIGNORE
+# 6. AGENTS DIRECTORY (regenerate script)
 # ------------------------------------------------------------------------------
+mkdir -p .agents
+if [ ! -f .agents/regenerate.sh ]; then
+  cp "$TPL/agents/regenerate.sh" .agents/regenerate.sh
+  chmod +x .agents/regenerate.sh
+fi
+
+# ------------------------------------------------------------------------------
+# 7. GITIGNORE
+# ------------------------------------------------------------------------------
+# (renumbered: sections 6=agents, 7=gitignore, 8=gsd, 9=auto-init)
 if [ -f .gitignore ]; then
   if ! grep -q "claude/settings.local" .gitignore 2>/dev/null; then
     echo "" >> .gitignore
@@ -174,47 +193,80 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 7. GSD INSTALL (global — commands in ~/.claude/, state in project/.planning/)
+# 8. GSD INSTALL (optional — opt-in)
 # ------------------------------------------------------------------------------
-GSD_GLOBAL_DIR="${HOME}/.claude/commands/gsd"
-if [ -d "$GSD_GLOBAL_DIR" ] || [ -d ".claude/commands/gsd" ] || [ -d ".claude/get-shit-done" ]; then
-  echo "🎯 GSD already installed, skipping."
-else
-  echo "🎯 Installing GSD (Get Shit Done) globally..."
+if [ "$WITH_GSD" = "" ]; then
+  echo ""
+  echo "📦 GSD (Get Shit Done) is a workflow engine for structured AI development."
+  echo "   It adds phase planning, codebase mapping, and session management."
+  echo "   More info: https://github.com/get-shit-done-cc/get-shit-done-cc"
+  echo ""
+  read -p "   Install GSD? (y/N) " INSTALL_GSD
+  [[ "$INSTALL_GSD" =~ ^[Yy]$ ]] && WITH_GSD="yes" || WITH_GSD="no"
+fi
 
-  # Run in background with progress spinner
-  npx -y get-shit-done-cc@latest --claude --global >/dev/null 2>&1 &
-  GSD_PID=$!
-
-  # Simple spinner
-  SPIN='-\|/'
-  i=0
-  while kill -0 $GSD_PID 2>/dev/null; do
-    i=$(( (i+1) %4 ))
-    printf "\r  ${SPIN:$i:1} Installing... (may take 30-60 seconds)"
-    sleep 0.2
-  done
-
-  wait $GSD_PID
-  GSD_EXIT=$?
-
-  if [ $GSD_EXIT -eq 0 ]; then
-    printf "\r  ✅ GSD installed successfully%*s\n" 40 ""
+if [ "$WITH_GSD" = "yes" ]; then
+  GSD_GLOBAL_DIR="${HOME}/.claude/commands/gsd"
+  if [ -d "$GSD_GLOBAL_DIR" ] || [ -d ".claude/commands/gsd" ] || [ -d ".claude/get-shit-done" ]; then
+    echo "🎯 GSD already installed, skipping."
   else
-    printf "\r  ⚠️  GSD installation failed. Manual: npx get-shit-done-cc@latest --claude --global\n"
-  fi
-fi
+    echo "🎯 Installing GSD (Get Shit Done) globally..."
 
-# GSD Companion Skill (global)
-GSD_SKILL_GLOBAL="${HOME}/.claude/skills/gsd"
-if [ -d "$GSD_SKILL_GLOBAL" ] || [ -d ".claude/skills/gsd" ]; then
-  echo "  GSD Companion Skill already installed, skipping."
+    # Run in background with progress spinner
+    npx -y get-shit-done-cc@latest --claude --global >/dev/null 2>&1 &
+    GSD_PID=$!
+
+    # Simple spinner
+    SPIN='-\|/'
+    i=0
+    while kill -0 $GSD_PID 2>/dev/null; do
+      i=$(( (i+1) %4 ))
+      printf "\r  ${SPIN:$i:1} Installing... (may take 30-60 seconds)"
+      sleep 0.2
+    done
+
+    wait $GSD_PID
+    GSD_EXIT=$?
+
+    if [ $GSD_EXIT -eq 0 ]; then
+      printf "\r  ✅ GSD installed successfully%*s\n" 40 ""
+    else
+      printf "\r  ⚠️  GSD installation failed. Manual: npx get-shit-done-cc@latest --claude --global\n"
+    fi
+  fi
+
+  # GSD Companion Skill (global)
+  GSD_SKILL_GLOBAL="${HOME}/.claude/skills/gsd"
+  if [ -d "$GSD_SKILL_GLOBAL" ] || [ -d ".claude/skills/gsd" ]; then
+    echo "  GSD Companion Skill already installed, skipping."
+  else
+    npx skills add https://github.com/ctsstc/get-shit-done-skills --skill gsd --agent claude-code --agent github-copilot -g -y 2>/dev/null || echo "  Skills CLI not available, skipping."
+  fi
+
+  # Append GSD workflow to CLAUDE.md
+  if [ -f CLAUDE.md ] && ! grep -q "Workflow (GSD)" CLAUDE.md 2>/dev/null; then
+    cat >> CLAUDE.md << 'GSDEOF'
+
+## Workflow (GSD)
+1. `/gsd:map-codebase` - Analyze existing code (brownfield)
+2. `/gsd:new-project` - Initialize project planning
+3. `/gsd:plan-phase N` - Plan next phase
+4. `/gsd:execute-phase N` - Execute phase
+5. `/gsd:verify-work N` - User acceptance testing
+GSDEOF
+  fi
+
+  # Append GSD lines to copilot-instructions.md
+  if [ -f .github/copilot-instructions.md ] && ! grep -q "planning/PROJECT" .github/copilot-instructions.md 2>/dev/null; then
+    echo "- **MUST READ**: \`.planning/PROJECT.md\` for project identity and goals" >> .github/copilot-instructions.md
+    echo "- GSD workflow in \`.planning/\` for task management" >> .github/copilot-instructions.md
+  fi
 else
-  npx skills add https://github.com/ctsstc/get-shit-done-skills --skill gsd --agent claude-code --agent github-copilot -g -y 2>/dev/null || echo "  Skills CLI not available, skipping."
+  echo "⏭️  GSD skipped."
 fi
 
 # ------------------------------------------------------------------------------
-# 8. AUTO-INIT (Claude populates CLAUDE.md)
+# 9. AUTO-INIT (Claude populates CLAUDE.md + generates project context)
 # ------------------------------------------------------------------------------
 
 # Kill process + all child processes (Claude spawns sub-agents)
@@ -324,7 +376,7 @@ if [ "$AI_CLI" = "claude" ]; then
   if [[ ! "$RUN_INIT" =~ ^[Nn]$ ]]; then
     echo "🚀 Scanning project structure..."
 
-    # Collect context in bash (Claude only needs to write)
+    # Gather all context upfront (both steps share some data)
     CONTEXT="--- package.json ---
 $(cat package.json 2>/dev/null)
 --- package.json scripts ---
@@ -338,7 +390,36 @@ $(cat .prettierrc* 2>/dev/null)
 --- CLAUDE.md (current) ---
 $(cat CLAUDE.md 2>/dev/null)"
 
-    # Step 1: Extend CLAUDE.md
+    # Extended context for project context generation
+    CTX_PKG=$(cat package.json 2>/dev/null || echo "No package.json")
+    CTX_TSCONFIG=$(cat tsconfig.json tsconfig.*.json 2>/dev/null | head -80 || echo "No tsconfig")
+    CTX_DIRS=$(find . -maxdepth 3 -type d \
+      \( -name node_modules -o -name .git -o -name dist -o -name build \
+         -o -name .next -o -name vendor -o -name .nuxt -o -name .output \) -prune -o \
+      -type d -print 2>/dev/null | head -60)
+    CTX_FILES=$(collect_project_files 120)
+    CTX_CONFIGS=$(ls -1 *.config.* .eslintrc* .prettierrc* tailwind.config.* \
+      vite.config.* nuxt.config.* next.config.* astro.config.* \
+      webpack.config.* rollup.config.* docker-compose* Dockerfile \
+      Makefile Cargo.toml go.mod requirements.txt pyproject.toml \
+      biome.json 2>/dev/null || echo "No config files found")
+    CTX_README=$(head -50 README.md 2>/dev/null || echo "No README")
+
+    # Sample 3 representative source files (first 50 lines each)
+    CTX_SAMPLE=""
+    for f in $(collect_project_files 5 | head -3); do
+      CTX_SAMPLE="${CTX_SAMPLE}
+--- $f (first 50 lines) ---
+$(head -50 "$f" 2>/dev/null)"
+    done
+
+    # Check if context generation should be skipped
+    SKIP_CTX=false
+    if [ -f .agents/context/STACK.md ] && [ -f .agents/context/ARCHITECTURE.md ] && [ -f .agents/context/CONVENTIONS.md ]; then
+      SKIP_CTX=true
+    fi
+
+    # Step 1: Extend CLAUDE.md (background)
     claude -p --model sonnet --max-turns 3 "Add two sections to CLAUDE.md:
 
 ## Commands
@@ -353,11 +434,87 @@ Rules: ONLY use what is in the context. No umlauts. Reply 'Done'.
 $CONTEXT" >/dev/null 2>&1 &
     PID_CM=$!
 
-    # Progress bar
-    echo ""
-    progress_bar $PID_CM "CLAUDE.md" 30 120
+    # Step 2: Generate project context (background, parallel with Step 1)
+    if [ "$SKIP_CTX" = "false" ]; then
+      mkdir -p .agents/context
 
-    # Step 2: Search and install skills (AI-curated)
+      claude -p --model haiku --max-turns 5 "You are analyzing a codebase to create project context documentation.
+Create exactly 3 files in .agents/context/ using the Write tool.
+
+## File 1: .agents/context/STACK.md
+Document the technology stack:
+- Runtime & language (with versions from config files)
+- Framework (with version from package.json)
+- Key dependencies (categorized: UI, state, data, testing, build)
+- Package manager
+- Build tooling
+
+## File 2: .agents/context/ARCHITECTURE.md
+Document the architecture:
+- Project type (SPA, SSR, API, monorepo, library, etc.)
+- Directory structure overview (what each top-level dir contains)
+- Entry points (main files, route definitions)
+- Data flow (state management, API layer, data fetching pattern)
+- Key patterns (composition API vs options API, server components, etc.)
+
+## File 3: .agents/context/CONVENTIONS.md
+Document coding conventions found in the codebase:
+- Naming patterns (files, components, variables, CSS classes)
+- Import style (absolute vs relative, barrel files)
+- Component structure (script-template-style order, composition patterns)
+- Error handling patterns
+- TypeScript usage (strict mode, type vs interface preference)
+
+Rules:
+- Base ALL content on the provided context. Do not invent details.
+- Keep each file concise: 30-60 lines max.
+- Use markdown headers and bullet points.
+- Include file paths where relevant.
+- If information is not available, write 'Not determined from available context.'
+- No umlauts. All content in English.
+- Reply 'Done' after creating all 3 files.
+
+--- package.json ---
+$CTX_PKG
+--- tsconfig ---
+$CTX_TSCONFIG
+--- Directory tree ---
+$CTX_DIRS
+--- File list (120 files) ---
+$CTX_FILES
+--- Config files present ---
+$CTX_CONFIGS
+--- README (first 50 lines) ---
+$CTX_README
+--- Sample source files ---
+$CTX_SAMPLE" >/dev/null 2>&1 &
+      PID_CTX=$!
+    fi
+
+    # Wait for both steps with parallel progress bars
+    echo ""
+    if [ "$SKIP_CTX" = "false" ]; then
+      wait_parallel "$PID_CM:CLAUDE.md:30:120" "$PID_CTX:Project context:30:90"
+
+      # Verify context files were created
+      CTX_COUNT=0
+      [ -f .agents/context/STACK.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+      [ -f .agents/context/ARCHITECTURE.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+      [ -f .agents/context/CONVENTIONS.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+
+      if [ "$CTX_COUNT" -eq 3 ]; then
+        echo "  ✅ All 3 context files created in .agents/context/"
+      elif [ "$CTX_COUNT" -gt 0 ]; then
+        echo "  ⚠️  $CTX_COUNT of 3 context files created (partial)"
+      else
+        echo "  ⚠️  Context generation failed. Regenerate: .agents/regenerate.sh"
+      fi
+    else
+      progress_bar $PID_CM "CLAUDE.md" 30 120
+      echo "  📊 .agents/context/ already populated, skipping."
+    fi
+
+    # Step 3: Search and install skills (AI-curated)
     echo ""
     echo "🔌 Searching and installing skills..."
     if [ -f package.json ]; then
@@ -615,7 +772,11 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
 
     echo ""
     echo "✅ Auto-Init complete!"
-    osascript -e 'display notification "Auto-Init complete. Run /gsd:map-codebase" with title "AI Setup" sound name "Glass"' 2>/dev/null
+    if [ "$WITH_GSD" = "yes" ]; then
+      osascript -e 'display notification "Auto-Init complete. Run /gsd:map-codebase for deeper analysis" with title "AI Setup" sound name "Glass"' 2>/dev/null
+    else
+      osascript -e 'display notification "Auto-Init complete!" with title "AI Setup" sound name "Glass"' 2>/dev/null
+    fi
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
   echo "💡 GitHub Copilot detected (no claude CLI)."
@@ -623,7 +784,9 @@ elif [ "$AI_CLI" = "copilot" ]; then
   echo ""
   echo "   1. Open VS Code / GitHub Copilot Chat"
   echo "   2. Ask Copilot to extend CLAUDE.md with Commands and Critical Rules"
-  echo "   3. Run /gsd:map-codebase and /gsd:new-project"
+  if [ "$WITH_GSD" = "yes" ]; then
+    echo "   3. Run /gsd:map-codebase and /gsd:new-project"
+  fi
 else
   echo "⚠️  No AI CLI detected (neither claude nor gh copilot)."
   echo "   Install Claude Code: npm i -g @anthropic-ai/claude-code"
@@ -642,15 +805,19 @@ echo "✅ Files created:"
 [ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
 [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
 echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker)"
-echo ""
-echo "✅ Tools installed:"
-[ -d "${HOME}/.claude/commands/gsd" ] && echo "   - GSD (Get Shit Done) - globally in ~/.claude/"
-[ -d "${HOME}/.claude/skills/gsd" ] && echo "   - GSD Companion Skill"
+
+if [ "$WITH_GSD" = "yes" ]; then
+  echo ""
+  echo "✅ Tools installed:"
+  [ -d "${HOME}/.claude/commands/gsd" ] && echo "   - GSD (Get Shit Done) - globally in ~/.claude/"
+  [ -d "${HOME}/.claude/skills/gsd" ] && echo "   - GSD Companion Skill"
+fi
 
 if [ "$AI_CLI" = "claude" ] && [[ ! "$RUN_INIT" =~ ^[Nn]$ ]]; then
   echo ""
   echo "✅ Auto-Init completed:"
   echo "   - CLAUDE.md extended with Commands & Critical Rules"
+  [ -d .agents/context ] && echo "   - .agents/context/ (STACK.md, ARCHITECTURE.md, CONVENTIONS.md)"
   if [ ${INSTALLED:-0} -gt 0 ]; then
     echo "   - ${INSTALLED} skills installed"
   fi
@@ -663,52 +830,64 @@ echo "================================================================"
 echo "NEXT STEPS"
 echo "================================================================"
 echo ""
-if [ "$AI_CLI" = "claude" ]; then
-  echo "Run this in a Claude Code session to complete the setup:"
-  echo ""
-  echo "  /gsd:map-codebase        Analyze your codebase"
-  echo ""
-  echo "When you're ready to start building:"
-  echo ""
-  echo "  /gsd:new-project         Define project, requirements & roadmap"
+if [ "$WITH_GSD" = "yes" ]; then
+  if [ "$AI_CLI" = "claude" ]; then
+    echo "Run this in a Claude Code session to complete the setup:"
+    echo ""
+    echo "  /gsd:map-codebase        Deep codebase analysis (enhances .agents/context/)"
+    echo ""
+    echo "When you're ready to start building:"
+    echo ""
+    echo "  /gsd:new-project         Define project, requirements & roadmap"
+  else
+    echo "  1. /gsd:map-codebase     Deep codebase analysis"
+    echo ""
+    echo "  When ready to start building:"
+    echo "  2. /gsd:new-project      Define project, requirements & roadmap"
+  fi
 else
-  echo "  1. /gsd:map-codebase     Analyze your codebase"
+  echo "Start a Claude Code session and begin working."
+  echo "Your project context and CLAUDE.md are ready."
   echo ""
-  echo "  When ready to start building:"
-  echo "  2. /gsd:new-project      Define project, requirements & roadmap"
+  echo "Optional: Install GSD later for structured workflow management:"
+  echo "  npx get-shit-done-cc@latest --claude --global"
 fi
-echo ""
-echo "================================================================"
-echo "GSD WORKFLOW CHEAT SHEET"
-echo "================================================================"
-echo ""
-echo "  Core Loop:"
-echo "  /gsd:discuss-phase N      Clarify requirements before planning"
-echo "  /gsd:plan-phase N         Create step-by-step plan"
-echo "  /gsd:execute-phase N      Write code & commit atomically"
-echo "  /gsd:verify-work N        User acceptance testing"
-echo ""
-echo "  Quick Tasks:"
-echo "  /gsd:quick \"task\"          Fast fix (typos, CSS, config)"
-echo "  /gsd:debug                Systematic debugging"
-echo ""
-echo "  Session Management:"
-echo "  /gsd:pause-work           Save context for later"
-echo "  /gsd:resume-work          Restore previous session"
-echo "  /gsd:progress             Status & next action"
-echo ""
-echo "  Roadmap:"
-echo "  /gsd:add-phase            Add phase to roadmap"
-echo "  /gsd:insert-phase         Insert urgent work (e.g. 3.1)"
-echo "  /gsd:add-todo             Capture idea as todo"
-echo "  /gsd:check-todos          Show open todos"
+
+if [ "$WITH_GSD" = "yes" ]; then
+  echo ""
+  echo "================================================================"
+  echo "GSD WORKFLOW CHEAT SHEET"
+  echo "================================================================"
+  echo ""
+  echo "  Core Loop:"
+  echo "  /gsd:discuss-phase N      Clarify requirements before planning"
+  echo "  /gsd:plan-phase N         Create step-by-step plan"
+  echo "  /gsd:execute-phase N      Write code & commit atomically"
+  echo "  /gsd:verify-work N        User acceptance testing"
+  echo ""
+  echo "  Quick Tasks:"
+  echo "  /gsd:quick \"task\"          Fast fix (typos, CSS, config)"
+  echo "  /gsd:debug                Systematic debugging"
+  echo ""
+  echo "  Session Management:"
+  echo "  /gsd:pause-work           Save context for later"
+  echo "  /gsd:resume-work          Restore previous session"
+  echo "  /gsd:progress             Status & next action"
+  echo ""
+  echo "  Roadmap:"
+  echo "  /gsd:add-phase            Add phase to roadmap"
+  echo "  /gsd:insert-phase         Insert urgent work (e.g. 3.1)"
+  echo "  /gsd:add-todo             Capture idea as todo"
+  echo "  /gsd:check-todos          Show open todos"
+fi
+
 echo ""
 echo "================================================================"
 echo "LINKS"
 echo "================================================================"
 echo ""
 echo "  Skills:   https://skills.sh/"
-echo "  GSD:      https://github.com/get-shit-done-cc/get-shit-done-cc"
+[ "$WITH_GSD" = "yes" ] && echo "  GSD:      https://github.com/get-shit-done-cc/get-shit-done-cc"
 echo "  Claude:   https://docs.anthropic.com/en/docs/claude-code"
 echo "  Hooks:    https://docs.anthropic.com/en/docs/claude-code/hooks"
 echo ""

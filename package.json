@@ -1,7 +1,7 @@
 {
   "name": "@onedot/ai-setup",
   "version": "1.0.0",
-  "description": "AI project setup: Claude Code, GSD, Hooks, and AI-curated skills",
+  "description": "AI project setup: Claude Code, Hooks, and AI-curated skills",
   "bin": {
     "ai-setup": "./bin/ai-setup.sh"
   },
@@ -13,7 +13,6 @@
   "keywords": [
     "claude-code",
     "ai-setup",
-    "gsd",
     "onedot"
   ],
   "license": "MIT"
