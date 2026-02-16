@@ -23,7 +23,12 @@ while [[ $# -gt 0 ]]; do
     --with-gsd) WITH_GSD="yes"; shift ;;
     --no-gsd) WITH_GSD="no"; shift ;;
     --regenerate) REGENERATE="yes"; shift ;;
-    --system) SYSTEM="$2"; shift 2 ;;
+    --system)
+      if [[ $# -lt 2 ]]; then
+        echo "❌ --system requires a value (auto|shopify|nuxt|laravel|shopware|storyblok)"
+        exit 1
+      fi
+      SYSTEM="$2"; shift 2 ;;
     *) shift ;;
   esac
 done
@@ -52,6 +57,21 @@ collect_project_files() {
       \) -print | head -n "$max_files"
   fi
 }
+
+VALID_SYSTEMS=(auto shopify nuxt laravel shopware storyblok)
+
+# Validate --system value
+if [ -n "$SYSTEM" ]; then
+  VALID=false
+  for s in "${VALID_SYSTEMS[@]}"; do
+    [ "$SYSTEM" = "$s" ] && VALID=true
+  done
+  if [ "$VALID" = false ]; then
+    echo "❌ Unknown system: $SYSTEM"
+    echo "   Valid options: ${VALID_SYSTEMS[*]}"
+    exit 1
+  fi
+fi
 
 # System/framework selection menu
 select_system() {
@@ -189,13 +209,16 @@ run_generation() {
 
   echo "🚀 Generating project context (System: $SYSTEM)..."
 
+  # Cache file list once (avoid running collect_project_files 3x)
+  CACHED_FILES=$(collect_project_files 80)
+
   # Gather all context upfront
   CONTEXT="--- package.json ---
 $(cat package.json 2>/dev/null)
 --- package.json scripts ---
 $(jq -r '.scripts | to_entries[] | "- \(.key): \(.value)"' package.json 2>/dev/null)
 --- Directory structure (max 80 files) ---
-$(collect_project_files 80)
+$CACHED_FILES
 --- ESLint Config ---
 $(cat eslint.config.* .eslintrc* 2>/dev/null | head -100)
 --- Prettier Config ---
@@ -205,12 +228,13 @@ $(cat CLAUDE.md 2>/dev/null)"
 
   # Extended context for project context generation
   CTX_PKG=$(cat package.json 2>/dev/null || echo "No package.json")
-  CTX_TSCONFIG=$(cat tsconfig.json tsconfig.*.json 2>/dev/null | head -80 || echo "No tsconfig")
+  CTX_TSCONFIG=$(cat tsconfig.*.json 2>/dev/null; [ -f tsconfig.json ] && cat tsconfig.json 2>/dev/null || echo "No tsconfig")
+  CTX_TSCONFIG=$(echo "$CTX_TSCONFIG" | head -80)
   CTX_DIRS=$(find . -maxdepth 3 -type d \
     \( -name node_modules -o -name .git -o -name dist -o -name build \
        -o -name .next -o -name vendor -o -name .nuxt -o -name .output \) -prune -o \
     -type d -print 2>/dev/null | head -60)
-  CTX_FILES=$(collect_project_files 80)
+  CTX_FILES="$CACHED_FILES"
   CTX_CONFIGS=$(ls -1 *.config.* .eslintrc* .prettierrc* tailwind.config.* \
     vite.config.* nuxt.config.* next.config.* astro.config.* \
     webpack.config.* rollup.config.* docker-compose* Dockerfile \
@@ -220,15 +244,16 @@ $(cat CLAUDE.md 2>/dev/null)"
 
   # Sample source files (generic: first 3 project files)
   CTX_SAMPLE=""
-  for f in $(collect_project_files 5 | head -3); do
+  for f in $(echo "$CACHED_FILES" | head -3); do
     CTX_SAMPLE+="
 --- $f (first 50 lines) ---
 $(head -50 "$f" 2>/dev/null)"
   done
 
-  # Temp files for error capture
+  # Temp files for error capture (cleaned up on exit/interrupt)
   ERR_CM=$(mktemp)
   ERR_CTX=$(mktemp)
+  trap "rm -f '$ERR_CM' '$ERR_CTX'" RETURN
 
   # Step 1: Extend CLAUDE.md (sonnet, background)
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
@@ -344,8 +369,6 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
     fi
     echo "  Fix: Check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
   fi
-
-  rm -f "$ERR_CM" "$ERR_CTX"
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
   echo ""
@@ -468,7 +491,6 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
         # Cache search results for fallback
         ALL_SKILLS_CACHE=$(mktemp)
         echo "$ALL_SKILLS" > "$ALL_SKILLS_CACHE"
-        trap "rm -f '$ALL_SKILLS_CACHE'" EXIT INT TERM
 
         # Phase 1.5: Fetch weekly install counts from skills.sh (parallel)
         echo ""
@@ -549,26 +571,24 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
           echo "  ✨ $SELECTED_COUNT skills selected:"
           echo ""
 
+          # Install a single skill (uses $TIMEOUT_CMD if available)
+          install_skill() {
+            local sid=$1
+            printf "     ⏳ %s ..." "$sid"
+            if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
+              printf "\r     ✅ %s\n" "$sid"
+              return 0
+            else
+              printf "\r     ❌ %s (install failed)\n" "$sid"
+              return 1
+            fi
+          }
+
           # Phase 3: Install selected skills (30s timeout per install)
           while IFS= read -r skill_id; do
             skill_id=$(echo "$skill_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             if [ -n "$skill_id" ]; then
-              printf "     ⏳ %s ..." "$skill_id"
-              if [ -n "$TIMEOUT_CMD" ]; then
-                if $TIMEOUT_CMD npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
-                  printf "\r     ✅ %s\n" "$skill_id"
-                  INSTALLED=$((INSTALLED + 1))
-                else
-                  printf "\r     ❌ %s (install failed)\n" "$skill_id"
-                fi
-              else
-                if npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
-                  printf "\r     ✅ %s\n" "$skill_id"
-                  INSTALLED=$((INSTALLED + 1))
-                else
-                  printf "\r     ❌ %s (install failed)\n" "$skill_id"
-                fi
-              fi
+              install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
             fi
           done <<< "$SELECTED"
           echo ""
@@ -577,19 +597,12 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
           echo "  ⚠️  Claude could not select skills. Installing top 3 per technology..."
           # Fallback: Top 3 per keyword using cached results
           for kw in "${KEYWORDS[@]}"; do
-            # Use cached results instead of re-searching
             SKILL_IDS=$(grep -iE "$kw" "$ALL_SKILLS_CACHE" 2>/dev/null | head -3)
             if [ -n "$SKILL_IDS" ]; then
               while IFS= read -r skill_id; do
                 skill_id=$(echo "$skill_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
                 if [ -n "$skill_id" ]; then
-                  printf "     ⏳ %s ..." "$skill_id"
-                  if npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
-                    printf "\r     ✅ %s\n" "$skill_id"
-                    INSTALLED=$((INSTALLED + 1))
-                  else
-                    printf "\r     ❌ %s (install failed)\n" "$skill_id"
-                  fi
+                  install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
                 fi
               done <<< "$SKILL_IDS"
             fi
@@ -597,6 +610,7 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
           echo ""
           echo "  Total: $INSTALLED skills installed (fallback)"
         fi
+        rm -f "$ALL_SKILLS_CACHE"
       fi
     fi
   else
