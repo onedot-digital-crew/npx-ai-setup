@@ -387,7 +387,7 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
 
   # Wait for both steps with parallel progress bars
   echo ""
-  wait_parallel "$PID_CM:CLAUDE.md:30:120" "$PID_CTX:Project context:30:90"
+  wait_parallel "$PID_CM:CLAUDE.md:30:120" "$PID_CTX:Project context:45:180"
 
   # Verify Step 1: CLAUDE.md was actually modified
   EXIT_CM=0
