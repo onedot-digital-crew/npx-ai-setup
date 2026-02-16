@@ -258,7 +258,7 @@ $(head -50 "$f" 2>/dev/null)"
   # Step 1: Extend CLAUDE.md (sonnet, background)
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
 
-  claude -p --model sonnet --max-turns 3 "Update CLAUDE.md: replace or add these two sections (overwrite if they already exist):
+  claude -p --model sonnet --permission-mode acceptEdits --max-turns 5 "Update CLAUDE.md: replace or add these two sections (overwrite if they already exist):
 
 ## Commands
 Read package.json scripts, document the most important ones (dev, build, lint, test).
@@ -276,7 +276,7 @@ $CONTEXT" >"$ERR_CM" 2>&1 &
   # Step 2: Generate project context (sonnet, background, parallel with Step 1)
   mkdir -p .agents/context
 
-  claude -p --model sonnet --max-turns 5 "You are analyzing a codebase to create project context documentation.
+  claude -p --model sonnet --permission-mode acceptEdits --max-turns 5 "You are analyzing a codebase to create project context documentation.
 Create exactly 3 files in .agents/context/ using the Write tool.
 
 ## File 1: .agents/context/STACK.md
