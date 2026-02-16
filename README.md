@@ -9,10 +9,40 @@ One command creates the complete setup, then Claude analyzes the code and popula
 npx github:onedot-digital-crew/npx-ai-setup
 ```
 
+**With specific system/framework:**
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --system nuxt
+```
+
 **With GSD workflow engine (optional):**
 
 ```bash
 npx github:onedot-digital-crew/npx-ai-setup --with-gsd
+```
+
+**With Claude-Mem persistent memory (optional):**
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-claude-mem
+```
+
+**With official Claude Code plugins (optional):**
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-plugins
+```
+
+**With Context7 MCP server (optional):**
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-context7
+```
+
+**Skip plugins/context7:**
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --no-plugins --no-context7
 ```
 
 ## Requirements
@@ -46,27 +76,28 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 
 Runs 3 steps after scaffolding (Steps 1+2 run in parallel):
 
-| Step | What | Details |
-|------|------|---------|
-| **CLAUDE.md** | Claude adds `## Commands` (from package.json) + `## Critical Rules` (from linting config) | Sonnet, max 3 turns |
-| **Project Context** | Generates `.agents/context/` with STACK.md, ARCHITECTURE.md, CONVENTIONS.md | Haiku, max 5 turns |
-| **Skills** | AI-curated skill installation with live progress (see below) | Sonnet, 1 turn |
+| Step                | What                                                                                      | Details                 |
+| ------------------- | ----------------------------------------------------------------------------------------- | ----------------------- |
+| **CLAUDE.md**       | Claude adds `## Commands` (from package.json) + `## Critical Rules` (from linting config) | Sonnet, max 3 turns     |
+| **Project Context** | Generates `.agents/context/` with STACK.md, ARCHITECTURE.md, CONVENTIONS.md               | Sonnet, max 4 turns     |
+| **Skills**          | AI-curated skill installation + system-specific default skills                            | Haiku (ranking), 1 turn |
 
 ### 3. Project Context Generation
 
 During Auto-Init, Claude analyzes the codebase and generates 3 context files in `.agents/context/`:
 
-| File | Contents |
-|------|----------|
-| **STACK.md** | Runtime, framework, key dependencies, package manager, build tools |
-| **ARCHITECTURE.md** | Project type, directory structure, entry points, data flow, key patterns |
-| **CONVENTIONS.md** | Naming patterns, import style, component structure, error handling, TypeScript usage |
+| File                | Contents                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| **STACK.md**        | Runtime, framework, key dependencies, package manager, build tools                   |
+| **ARCHITECTURE.md** | Project type, directory structure, entry points, data flow, key patterns             |
+| **CONVENTIONS.md**  | Naming patterns, import style, component structure, error handling, TypeScript usage |
 
 These files are referenced by both `CLAUDE.md` and `.github/copilot-instructions.md`, giving AI assistants instant project understanding.
 
 **Regenerate later:**
+
 ```bash
-.agents/regenerate.sh
+npx github:onedot-digital-crew/npx-ai-setup --regenerate
 ```
 
 ### 4. AI-curated Skills installation
@@ -81,25 +112,35 @@ Supported technologies: Vue, Nuxt, Nuxt UI, React, Next.js, Svelte, Astro, Tailw
 **Phase 2 — Fetch Install Counts** (parallel curl, ~1s)
 Fetches weekly install counts from [skills.sh](https://skills.sh) for all found skills in parallel.
 
-**Phase 3 — AI Curation** (Claude Sonnet, 1 turn, 60s timeout)
+**Phase 3 — AI Curation** (Claude Haiku, 1 turn, 60s timeout)
 Claude selects the top 5 most relevant skills based on install counts, maintainer reputation, and tech stack fit.
 
 **Phase 4 — Install** (bash, live output)
 Selected skills are installed with live status updates.
 
+**Phase 5 — System-specific Skills** (always installed for known systems)
+Default skills per system:
+
+- **Shopify**: `sickn33/antigravity-awesome-skills@shopify-development`, `jeffallan/claude-skills@shopify-expert`
+- **Nuxt**: `antfu/skills@nuxt`, `onmax/nuxt-skills@nuxt`
+- **Laravel**: `jeffallan/claude-skills@laravel-specialist`
+- **Shopware**: `bartundmett/skills@shopware6-best-practices`
+- **Storyblok**: `bartundmett/skills@storyblok-best-practices`
+
 **Fallback**: If Claude is unavailable or times out, top 3 per technology are installed without AI curation.
 
 ### 5. Hooks (active after setup)
 
-| Hook | Trigger | What it does |
-|------|---------|-------------|
-| **protect-files.sh** | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/` |
-| **post-edit-lint.sh** | After Edit/Write | Auto-runs `eslint --fix` on .js/.ts files |
+| Hook                   | Trigger           | What it does                                                     |
+| ---------------------- | ----------------- | ---------------------------------------------------------------- |
+| **protect-files.sh**   | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/`           |
+| **post-edit-lint.sh**  | After Edit/Write  | Auto-runs `eslint --fix` on .js/.ts files                        |
 | **circuit-breaker.sh** | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min |
 
 ### 6. Permissions
 
 Granular bash permissions instead of `Bash(*)`:
+
 - **Allowed**: `git add/commit/status/log/diff/tag`, `npm run`, `eslint`, `cat/ls/grep/...`
 - **Denied**: `git push`, `rm -rf`, reading `.env`
 
@@ -112,19 +153,19 @@ For maximum autonomy: `claude --dangerously-skip-permissions`
 ```
 project/
 +-- .agents/
-|   +-- regenerate.sh            # Regenerate context files
 |   +-- context/                 # Created by Auto-Init
 |       +-- STACK.md             # Technology stack
 |       +-- ARCHITECTURE.md      # Project architecture
 |       +-- CONVENTIONS.md       # Coding conventions
 +-- .claude/
-|   +-- settings.json            # Permissions + Hooks
+|   +-- settings.json            # Permissions + Hooks + Plugin config
 |   +-- hooks/
 |       +-- protect-files.sh     # Protects .env, package-lock.json, .git/
 |       +-- post-edit-lint.sh    # Auto-Lint after Edit
 |       +-- circuit-breaker.sh   # Detects edit loops
 +-- .github/
 |   +-- copilot-instructions.md
++-- .mcp.json                    # MCP server config (Context7)
 +-- CLAUDE.md                    # AI Rules + Critical Rules
 ```
 
@@ -132,11 +173,11 @@ project/
 
 ## Security
 
-| Protected | Why |
-|-----------|-----|
-| `.env` | Secrets |
+| Protected           | Why                  |
+| ------------------- | -------------------- |
+| `.env`              | Secrets              |
 | `package-lock.json` | Dependency Integrity |
-| `.git/` | Repository History |
+| `.git/`             | Repository History   |
 
 ---
 
@@ -158,12 +199,14 @@ mkdir -p .claude/skills/my-skill
 ```
 
 `.claude/skills/my-skill/prompt.md`:
+
 ```markdown
 # My Skill
 
 Description of what this skill does.
 
 ## Rules
+
 - Rule 1
 - Rule 2
 ```
@@ -178,13 +221,89 @@ Invoke in Claude Code: `/my-skill`
 Auto-Init generates 3 context files in `.agents/context/` (STACK.md, ARCHITECTURE.md, CONVENTIONS.md). These are referenced by CLAUDE.md and copilot-instructions.md.
 
 **Can I regenerate the context files?**
-Yes: `.agents/regenerate.sh` — runs Claude Haiku to re-analyze the codebase and update all 3 files.
+Yes: `npx github:onedot-digital-crew/npx-ai-setup --regenerate` — runs Claude Sonnet to re-analyze the codebase and update CLAUDE.md + all 3 context files + skills.
 
 **Claude CLI vs. Copilot CLI?**
 The script automatically detects which AI CLI is installed. Claude gets Auto-Init (context generation + skill curation), Copilot gets manual instructions.
 
 **What about GSD?**
 GSD is an optional workflow engine for structured AI development. Install it with `--with-gsd` flag or choose it during interactive setup. See the section below.
+
+---
+
+## Plugins & Extensions
+
+The setup installs plugins via 3 mechanisms:
+
+| Plugin              | Type        | Install Mechanism                           | Slash Command  |
+| ------------------- | ----------- | ------------------------------------------- | -------------- |
+| **claude-mem**      | Marketplace | `extraKnownMarketplaces` in settings.json   | automatic      |
+| **code-review**     | Official    | `claude plugin install` / `/plugin install` | `/code-review` |
+| **feature-dev**     | Official    | `claude plugin install` / `/plugin install` | `/feature-dev` |
+| **ralph-wiggum**    | Official    | `claude plugin install` / `/plugin install` | `/ralph-loop`  |
+| **frontend-design** | Official    | `claude plugin install` / `/plugin install` | — (skill)      |
+| **Context7**        | MCP Server  | `.mcp.json`                                 | "use context7" |
+
+### Claude-Mem (Persistent Memory)
+
+[Claude-Mem](https://claude-mem.ai) captures tool usage, generates semantic summaries, and injects relevant context into future sessions.
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-claude-mem
+
+# Or manually in Claude Code:
+/plugin marketplace add thedotmack/claude-mem
+/plugin install claude-mem
+```
+
+- **Persistent Memory** — Context survives across sessions
+- **Progressive Disclosure** — Layered memory retrieval, token-efficient
+- **MCP Search Tools** — Query project history with natural language
+- **Web Viewer** — Real-time memory stream at http://localhost:37777
+
+### Official Plugins
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-plugins
+```
+
+| Plugin              | What it does                                                                 |
+| ------------------- | ---------------------------------------------------------------------------- |
+| **code-review**     | 4 parallel review agents with confidence scoring. `/code-review [--comment]` |
+| **feature-dev**     | 7-phase feature workflow: discovery → architecture → review. `/feature-dev`  |
+| **ralph-wiggum**    | Iterative loop — Claude keeps working until task is done. `/ralph-loop`      |
+| **frontend-design** | Anti-generic design guidance for frontend projects                           |
+
+During interactive setup, you select which plugins to install (numbers, "all", or "none").
+
+### Context7 (MCP Server)
+
+[Context7](https://github.com/upstash/context7) fetches up-to-date library docs directly into Claude's context (45k+ ⭐).
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-context7
+```
+
+Creates `.mcp.json` in project root:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
+```
+
+Usage: Add "use context7" to any prompt for current library docs.
+
+### How plugins are shared with the team
+
+- **Marketplace plugins**: `extraKnownMarketplaces` + `enabledPlugins` in `.claude/settings.json` (committed to git) — teammates get prompted to install on first trust
+- **Official plugins**: Installed per-project via `--scope project`, config in `.claude/settings.json`
+- **MCP servers**: `.mcp.json` in project root (committed to git) — automatically available to all team members
 
 ---
 
@@ -266,7 +385,13 @@ Roadmap:
 ## Links
 
 - [Skills — Browse & Install](https://skills.sh/)
+- [Claude-Mem — Persistent Memory](https://claude-mem.ai)
 - [GSD (Get Shit Done)](https://github.com/get-shit-done-cc/get-shit-done-cc)
+- [Context7 — Up-to-date Library Docs](https://github.com/upstash/context7)
+- [Code-Review Plugin](https://github.com/anthropics/claude-code-plugins/tree/main/code-review)
+- [Feature-Dev Plugin](https://github.com/anthropics/claude-code-plugins/tree/main/feature-dev)
+- [Ralph-Wiggum Plugin](https://github.com/anthropics/claude-code-plugins/tree/main/ralph-wiggum)
+- [Frontend-Design Plugin](https://github.com/anthropics/claude-code-plugins/tree/main/frontend-design)
 - [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
 - [Claude Code Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks)
 - [CLAUDE.md Best Practices](https://docs.anthropic.com/en/docs/claude-code/memory)

@@ -4,7 +4,8 @@
 # @onedot/ai-setup - AI infrastructure for projects
 # ==============================================================================
 # Installs Claude Code hooks, project context, and AI-curated skills
-# Usage: npx @onedot/ai-setup [--with-gsd] [--no-gsd] [--system <name>]
+# Usage: npx @onedot/ai-setup [--with-gsd] [--no-gsd] [--with-claude-mem] [--no-claude-mem]
+#        [--with-plugins] [--no-plugins] [--with-context7] [--no-context7] [--system <name>]
 #        npx @onedot/ai-setup --regenerate [--system <name>]
 # ==============================================================================
 
@@ -16,12 +17,21 @@ TPL="$SCRIPT_DIR/templates"
 
 # Parse flags
 WITH_GSD=""
+WITH_CLAUDE_MEM=""
+WITH_PLUGINS=""
+WITH_CONTEXT7=""
 SYSTEM=""
 REGENERATE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --with-gsd) WITH_GSD="yes"; shift ;;
     --no-gsd) WITH_GSD="no"; shift ;;
+    --with-claude-mem) WITH_CLAUDE_MEM="yes"; shift ;;
+    --no-claude-mem) WITH_CLAUDE_MEM="no"; shift ;;
+    --with-plugins) WITH_PLUGINS="yes"; shift ;;
+    --no-plugins) WITH_PLUGINS="no"; shift ;;
+    --with-context7) WITH_CONTEXT7="yes"; shift ;;
+    --no-context7) WITH_CONTEXT7="no"; shift ;;
     --regenerate) REGENERATE="yes"; shift ;;
     --system)
       if [[ $# -lt 2 ]]; then
@@ -73,28 +83,69 @@ if [ -n "$SYSTEM" ]; then
   fi
 fi
 
-# System/framework selection menu
+# System/framework selection menu (arrow-key navigation)
 select_system() {
+  local options=("auto" "shopify" "nuxt" "laravel" "shopware" "storyblok")
+  local descriptions=("Claude detects automatically" "Shopify Theme" "Nuxt 3+" "Laravel / PHP" "Shopware 6" "Storyblok CMS")
+  local selected=0
+  local count=${#options[@]}
+
   echo ""
   echo "Which system/framework does this project use?"
+  echo "  (Use ↑↓ arrows, Enter to confirm)"
   echo ""
-  echo "  1) auto        (Claude detects automatically)"
-  echo "  2) shopify"
-  echo "  3) nuxt"
-  echo "  4) laravel"
-  echo "  5) shopware"
-  echo "  6) storyblok"
+
+  # Hide cursor
+  printf '\033[?25l'
+  # Restore cursor on exit
+  trap 'printf "\033[?25l"' RETURN 2>/dev/null || true
+
+  # Print initial menu
+  for ((i=0; i<count; i++)); do
+    if [ $i -eq $selected ]; then
+      printf '  \033[7m ▸ %-12s %s \033[0m\n' "${options[$i]}" "${descriptions[$i]}"
+    else
+      printf '    %-12s %s\n' "${options[$i]}" "${descriptions[$i]}"
+    fi
+  done
+
+  while true; do
+    # Read a single keypress
+    IFS= read -rsn1 key
+    case "$key" in
+      $'\x1b')  # Escape sequence (arrow keys)
+        read -rsn2 seq
+        case "$seq" in
+          '[A') # Up
+            selected=$(( (selected - 1 + count) % count ))
+            ;;
+          '[B') # Down
+            selected=$(( (selected + 1) % count ))
+            ;;
+        esac
+        ;;
+      "")  # Enter
+        break
+        ;;
+    esac
+
+    # Redraw menu (move cursor up)
+    printf "\033[${count}A"
+    for ((i=0; i<count; i++)); do
+      if [ $i -eq $selected ]; then
+        printf '  \033[7m ▸ %-12s %s \033[0m\033[K\n' "${options[$i]}" "${descriptions[$i]}"
+      else
+        printf '    %-12s %s\033[K\n' "${options[$i]}" "${descriptions[$i]}"
+      fi
+    done
+  done
+
+  # Show cursor
+  printf '\033[?25h'
+
+  SYSTEM="${options[$selected]}"
   echo ""
-  read -p "Choose (1-6) [1]: " choice
-  case "$choice" in
-    1|""|auto) SYSTEM="auto" ;;
-    2|shopify) SYSTEM="shopify" ;;
-    3|nuxt) SYSTEM="nuxt" ;;
-    4|laravel) SYSTEM="laravel" ;;
-    5|shopware) SYSTEM="shopware" ;;
-    6|storyblok) SYSTEM="storyblok" ;;
-    *) SYSTEM="auto" ;;
-  esac
+  echo "  Selected: $SYSTEM"
 }
 
 # Kill process + all child processes (Claude spawns sub-agents)
@@ -621,6 +672,52 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
     echo "  No package.json found."
   fi
 
+  # System-specific default skills (always installed for known systems)
+  SYSTEM_SKILLS=()
+  case "$SYSTEM" in
+    shopify)
+      SYSTEM_SKILLS+=(
+        "sickn33/antigravity-awesome-skills@shopify-development"
+        "jeffallan/claude-skills@shopify-expert"
+      ) ;;
+    nuxt)
+      SYSTEM_SKILLS+=(
+        "antfu/skills@nuxt"
+        "onmax/nuxt-skills@nuxt"
+      ) ;;
+    laravel)
+      SYSTEM_SKILLS+=(
+        "jeffallan/claude-skills@laravel-specialist"
+      ) ;;
+    shopware)
+      SYSTEM_SKILLS+=(
+        "bartundmett/skills@shopware6-best-practices"
+      ) ;;
+    storyblok)
+      SYSTEM_SKILLS+=(
+        "bartundmett/skills@storyblok-best-practices"
+      ) ;;
+  esac
+
+  if [ ${#SYSTEM_SKILLS[@]} -gt 0 ]; then
+    echo ""
+    echo "  📦 Installing system-specific skills ($SYSTEM)..."
+
+    TIMEOUT_CMD=""
+    command -v timeout &>/dev/null && TIMEOUT_CMD="timeout 30"
+    command -v gtimeout &>/dev/null && TIMEOUT_CMD="gtimeout 30"
+
+    for skill_id in "${SYSTEM_SKILLS[@]}"; do
+      printf "     ⏳ %s ..." "$skill_id"
+      if ${TIMEOUT_CMD:-} npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
+        printf "\r     ✅ %s\n" "$skill_id"
+        INSTALLED=$((INSTALLED + 1))
+      else
+        printf "\r     ❌ %s (install failed)\n" "$skill_id"
+      fi
+    done
+  fi
+
   set -e
 }
 
@@ -866,7 +963,196 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 9. AUTO-INIT (Claude populates CLAUDE.md + generates project context)
+# 9. PLUGINS & EXTENSIONS
+# ------------------------------------------------------------------------------
+echo ""
+echo "================================================================"
+echo "PLUGINS & EXTENSIONS"
+echo "================================================================"
+
+# --- 9a. Claude-Mem (Marketplace Plugin — persistent memory) -----------------
+CLAUDE_MEM_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
+PENDING_PLUGINS=""
+
+if [ "$WITH_CLAUDE_MEM" = "" ]; then
+  echo ""
+  echo "🧠 Claude-Mem adds persistent memory across Claude Code sessions."
+  echo "   Every decision, bug fix, and architectural choice — remembered automatically."
+  echo "   More info: https://claude-mem.ai"
+  echo ""
+  read -p "   Install Claude-Mem? (y/N) " INSTALL_CMEM
+  [[ "$INSTALL_CMEM" =~ ^[Yy]$ ]] && WITH_CLAUDE_MEM="yes" || WITH_CLAUDE_MEM="no"
+fi
+
+if [ "$WITH_CLAUDE_MEM" = "yes" ]; then
+  if [ -d "$CLAUDE_MEM_DIR" ]; then
+    echo "  🧠 Claude-Mem already installed, skipping."
+  else
+    # Merge extraKnownMarketplaces + enabledPlugins into .claude/settings.json
+    if command -v jq &>/dev/null && [ -f .claude/settings.json ]; then
+      CLAUDE_MEM_MERGE='{
+        "extraKnownMarketplaces": {
+          "thedotmack": {
+            "source": { "source": "github", "repo": "thedotmack/claude-mem" }
+          }
+        },
+        "enabledPlugins": {
+          "claude-mem@thedotmack": true
+        }
+      }'
+      TMP_SETTINGS=$(mktemp)
+      jq --argjson merge "$CLAUDE_MEM_MERGE" '. * $merge' .claude/settings.json > "$TMP_SETTINGS" && mv "$TMP_SETTINGS" .claude/settings.json
+      echo "  🧠 Claude-Mem marketplace registered in .claude/settings.json"
+    fi
+
+    # Try CLI install (works if claude is available)
+    if command -v claude &>/dev/null; then
+      echo "  🧠 Attempting Claude-Mem install via CLI..."
+      if claude plugin install claude-mem@thedotmack --scope project 2>/dev/null; then
+        echo "  ✅ Claude-Mem installed via CLI"
+      else
+        PENDING_PLUGINS="${PENDING_PLUGINS}claude-mem "
+        echo "  📋 Claude-Mem registered — will be prompted on next Claude Code session"
+      fi
+    else
+      PENDING_PLUGINS="${PENDING_PLUGINS}claude-mem "
+      echo "  📋 Claude-Mem registered — teammates will be prompted to install when they trust this project"
+    fi
+  fi
+else
+  echo "⏭️  Claude-Mem skipped."
+fi
+
+# --- 9b. Official Claude Code Plugins (code-review, feature-dev, etc.) -------
+OFFICIAL_PLUGINS=(
+  "code-review:Automated PR review with 4 parallel agents + confidence scoring"
+  "feature-dev:7-phase feature workflow (discovery → architecture → review)"
+  "ralph-wiggum:Iterative AI loop — Claude keeps working until task is done"
+  "frontend-design:Anti-generic design guidance for frontend projects"
+)
+
+if [ "$WITH_PLUGINS" = "" ]; then
+  echo ""
+  echo "🔌 Official Claude Code Plugins (from Anthropic):"
+  echo ""
+  for i in "${!OFFICIAL_PLUGINS[@]}"; do
+    IFS=':' read -r pname pdesc <<< "${OFFICIAL_PLUGINS[$i]}"
+    printf "   [%d] %-18s %s\n" "$((i+1))" "$pname" "$pdesc"
+  done
+  echo ""
+  echo "   [a] All plugins    [n] None"
+  echo ""
+  read -p "   Select plugins (comma-separated numbers, a=all, n=none): " PLUGIN_CHOICE
+  case "$PLUGIN_CHOICE" in
+    [Nn]) WITH_PLUGINS="no" ;;
+    [Aa]) WITH_PLUGINS="yes"; SELECTED_PLUGINS="1,2,3,4" ;;
+    *)    WITH_PLUGINS="yes"; SELECTED_PLUGINS="$PLUGIN_CHOICE" ;;
+  esac
+fi
+
+if [ "$WITH_PLUGINS" = "yes" ]; then
+  # Default to all if flag used without interactive selection
+  [ -z "$SELECTED_PLUGINS" ] && SELECTED_PLUGINS="1,2,3,4"
+
+  INSTALLED_PLUGINS=""
+  for idx in $(echo "$SELECTED_PLUGINS" | tr ',' ' '); do
+    idx=$(echo "$idx" | tr -d ' ')
+    [ -z "$idx" ] && continue
+    PIDX=$((idx - 1))
+    [ $PIDX -lt 0 ] || [ $PIDX -ge ${#OFFICIAL_PLUGINS[@]} ] && continue
+
+    IFS=':' read -r PNAME PDESC <<< "${OFFICIAL_PLUGINS[$PIDX]}"
+
+    # Check if already installed (plugin cache or .claude/settings.json)
+    if [ -d "${HOME}/.claude/plugins/cache/anthropics/${PNAME}" ] 2>/dev/null; then
+      echo "  🔌 ${PNAME} already installed, skipping."
+      continue
+    fi
+
+    # Try CLI install
+    if command -v claude &>/dev/null; then
+      echo "  🔌 Installing ${PNAME}..."
+      if claude plugin install "${PNAME}" --scope project 2>/dev/null; then
+        INSTALLED_PLUGINS="${INSTALLED_PLUGINS}${PNAME} "
+        echo "  ✅ ${PNAME} installed"
+      else
+        PENDING_PLUGINS="${PENDING_PLUGINS}${PNAME} "
+        echo "  📋 ${PNAME} — install manually: /plugin install ${PNAME}"
+      fi
+    else
+      PENDING_PLUGINS="${PENDING_PLUGINS}${PNAME} "
+      echo "  📋 ${PNAME} — install manually: /plugin install ${PNAME}"
+    fi
+  done
+elif [ "$WITH_PLUGINS" = "no" ]; then
+  echo "⏭️  Official plugins skipped."
+fi
+
+# --- 9c. Context7 MCP Server (up-to-date library docs) ----------------------
+if [ "$WITH_CONTEXT7" = "" ]; then
+  echo ""
+  echo "📚 Context7 fetches up-to-date library docs directly into Claude's context."
+  echo "   No more hallucinated APIs or outdated code examples. 45k+ ⭐ on GitHub."
+  echo "   Works via MCP Server — add \"use context7\" to any prompt."
+  echo ""
+  read -p "   Install Context7? (y/N) " INSTALL_CTX7
+  [[ "$INSTALL_CTX7" =~ ^[Yy]$ ]] && WITH_CONTEXT7="yes" || WITH_CONTEXT7="no"
+fi
+
+if [ "$WITH_CONTEXT7" = "yes" ]; then
+  # Create or merge .mcp.json
+  CTX7_CONFIG='{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp"]}}}'
+
+  if [ -f .mcp.json ]; then
+    if grep -q '"context7"' .mcp.json 2>/dev/null; then
+      echo "  📚 Context7 already configured in .mcp.json, skipping."
+    elif command -v jq &>/dev/null; then
+      TMP_MCP=$(mktemp)
+      jq --argjson ctx "$CTX7_CONFIG" '.mcpServers += $ctx.mcpServers' .mcp.json > "$TMP_MCP" && mv "$TMP_MCP" .mcp.json
+      echo "  📚 Context7 MCP server added to .mcp.json"
+    else
+      echo "  ⚠️  .mcp.json exists but jq not available to merge. Add manually."
+    fi
+  else
+    echo "$CTX7_CONFIG" | jq '.' > .mcp.json 2>/dev/null || echo "$CTX7_CONFIG" > .mcp.json
+    echo "  📚 Context7 MCP server configured in .mcp.json"
+  fi
+
+  # Add Context7 rule to CLAUDE.md
+  if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2>/dev/null; then
+    cat >> CLAUDE.md << 'CTX7EOF'
+
+## Documentation Lookup
+Always use Context7 MCP when you need library/API documentation, code generation,
+setup or configuration steps. Add "use context7" to prompts or it will be auto-invoked.
+CTX7EOF
+    echo "  📚 Context7 rule added to CLAUDE.md"
+  fi
+else
+  echo "⏭️  Context7 skipped."
+fi
+
+# --- 9d. Plugin summary -----------------------------------------------------
+if [ -n "$PENDING_PLUGINS" ]; then
+  echo ""
+  echo "  ⚡ Pending plugin installations (run in a Claude Code session):"
+  for PP in $PENDING_PLUGINS; do
+    case "$PP" in
+      claude-mem)
+        echo "     /plugin marketplace add thedotmack/claude-mem"
+        echo "     /plugin install claude-mem"
+        ;;
+      *)
+        echo "     /plugin install ${PP}"
+        ;;
+    esac
+  done
+  echo ""
+  echo "  Then restart Claude Code."
+fi
+
+# ------------------------------------------------------------------------------
+# 10. AUTO-INIT (Claude populates CLAUDE.md + generates project context)
 # ------------------------------------------------------------------------------
 echo ""
 echo "✅ Setup complete!"
@@ -917,12 +1203,25 @@ echo "✅ Files created:"
 [ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
 [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
 echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker)"
+[ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
 
-if [ "$WITH_GSD" = "yes" ]; then
+if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ]; then
   echo ""
-  echo "✅ Tools installed:"
-  [ -d "${HOME}/.claude/commands/gsd" ] && echo "   - GSD (Get Shit Done) - globally in ~/.claude/"
-  [ -d "${HOME}/.claude/skills/gsd" ] && echo "   - GSD Companion Skill"
+  echo "✅ Tools & Plugins:"
+  [ "$WITH_GSD" = "yes" ] && [ -d "${HOME}/.claude/commands/gsd" ] && echo "   - GSD (Get Shit Done) - globally in ~/.claude/"
+  [ "$WITH_GSD" = "yes" ] && [ -d "${HOME}/.claude/skills/gsd" ] && echo "   - GSD Companion Skill"
+  if [ "$WITH_CLAUDE_MEM" = "yes" ]; then
+    if [ -d "$CLAUDE_MEM_DIR" ]; then
+      echo "   - Claude-Mem (persistent memory) ✅"
+    else
+      echo "   - Claude-Mem (pending — run install commands in Claude Code)"
+    fi
+  fi
+  [ -n "$INSTALLED_PLUGINS" ] && echo "   - Plugins: ${INSTALLED_PLUGINS}"
+  [ "$WITH_CONTEXT7" = "yes" ] && [ -f .mcp.json ] && echo "   - Context7 MCP server (.mcp.json)"
+  if [ -n "$PENDING_PLUGINS" ]; then
+    echo "   - ⚠️  Pending plugins: ${PENDING_PLUGINS}(see install commands above)"
+  fi
 fi
 
 if [ "$AI_CLI" = "claude" ] && [[ ! "$RUN_INIT" =~ ^[Nn]$ ]]; then
@@ -1003,6 +1302,7 @@ echo "================================================================"
 echo ""
 echo "  Skills:   https://skills.sh/"
 [ "$WITH_GSD" = "yes" ] && echo "  GSD:      https://github.com/get-shit-done-cc/get-shit-done-cc"
+[ "$WITH_CLAUDE_MEM" = "yes" ] && echo "  Memory:   https://claude-mem.ai"
 echo "  Claude:   https://docs.anthropic.com/en/docs/claude-code"
 echo "  Hooks:    https://docs.anthropic.com/en/docs/claude-code/hooks"
 echo ""
