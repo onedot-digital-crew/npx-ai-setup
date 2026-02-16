@@ -258,17 +258,20 @@ $(head -50 "$f" 2>/dev/null)"
   # Step 1: Extend CLAUDE.md (sonnet, background)
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
 
-  claude -p --model sonnet --permission-mode acceptEdits --max-turns 5 "Update CLAUDE.md: replace or add these two sections (overwrite if they already exist):
+  claude -p --model sonnet --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
+
+Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any HTML comments in those sections).
 
 ## Commands
-Read package.json scripts, document the most important ones (dev, build, lint, test).
+Based on the package.json scripts below, document the most important ones (dev, build, lint, test, etc.) as a bullet list.
 
 ## Critical Rules
-Analyze linting config (eslint, prettier). Identify framework patterns.
-Write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
-System/Framework: $SYSTEM (analyze the codebase to identify specifics and include platform-specific rules)
+Based on the eslint/prettier config below and the framework/system ($SYSTEM), write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
 
-Rules: ONLY use what is in the context. Always overwrite existing sections. No umlauts. Reply 'Done'.
+Rules:
+- Do NOT read any files. Everything you need is in this prompt.
+- Edit CLAUDE.md directly. Replace both sections including any <!-- comments -->.
+- No umlauts. English only.
 
 $CONTEXT" >"$ERR_CM" 2>&1 &
   PID_CM=$!
