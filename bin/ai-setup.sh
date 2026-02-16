@@ -279,13 +279,14 @@ $CONTEXT" >"$ERR_CM" 2>&1 &
   # Step 2: Generate project context (sonnet, background, parallel with Step 1)
   mkdir -p .agents/context
 
-  claude -p --model sonnet --permission-mode acceptEdits --max-turns 5 "You are analyzing a codebase to create project context documentation.
-Create exactly 3 files in .agents/context/ using the Write tool.
+  claude -p --model sonnet --permission-mode acceptEdits --max-turns 4 "IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
+
+Create exactly 3 files in .agents/context/ using the Write tool:
 
 ## File 1: .agents/context/STACK.md
 Document the technology stack:
-- Runtime & language (with versions from config files)
-- Framework (with version from package.json)
+- Runtime & language (with versions from the context below)
+- Framework (with version from package.json below)
 - Key dependencies (categorized: UI, state, data, testing, build)
 - Package manager
 - Build tooling
@@ -306,16 +307,16 @@ Document coding conventions found in the codebase:
 - Error handling patterns
 - TypeScript usage (strict mode, type vs interface preference)
 
-Project system/framework: $SYSTEM (analyze the codebase to understand the specific setup and document platform-specific patterns)
+Project system/framework: $SYSTEM
 
 Rules:
+- Do NOT read any files. Everything you need is in this prompt below.
+- Create all 3 files in one turn using the Write tool.
 - Base ALL content on the provided context. Do not invent details.
 - Keep each file concise: 30-60 lines max.
 - Use markdown headers and bullet points.
-- Include file paths where relevant.
 - If information is not available, write 'Not determined from available context.'
-- No umlauts. All content in English.
-- Reply 'Done' after creating all 3 files.
+- No umlauts. English only.
 
 --- package.json ---
 $CTX_PKG
