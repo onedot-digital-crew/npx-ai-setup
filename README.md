@@ -72,7 +72,18 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Auto-Init (optional, requires Claude CLI)
+### 2. Spec-driven workflow
+
+Scaffolds a `specs/` directory with a template and workflow guide, plus a `/spec` slash command:
+
+- `specs/TEMPLATE.md` — 7-section spec template (Goal, Context, Steps, Acceptance Criteria, Files, Out of Scope, Notes)
+- `specs/README.md` — When to create specs, naming conventions, workflow guide
+- `specs/completed/` — Archive for finished specs
+- `.claude/commands/spec.md` — `/spec "task description"` slash command for quick spec creation
+
+**Hybrid automation**: Claude suggests creating a spec when a task touches 3+ files or involves new features. Simple fixes skip specs entirely.
+
+### 3. Auto-Init (optional, requires Claude CLI)
 
 Runs 3 steps after scaffolding (Steps 1+2 run in parallel):
 
@@ -82,7 +93,7 @@ Runs 3 steps after scaffolding (Steps 1+2 run in parallel):
 | **Project Context** | Generates `.agents/context/` with STACK.md, ARCHITECTURE.md, CONVENTIONS.md               | Sonnet, max 4 turns     |
 | **Skills**          | AI-curated skill installation + system-specific default skills                            | Haiku (ranking), 1 turn |
 
-### 3. Project Context Generation
+### 4. Project Context Generation
 
 During Auto-Init, Claude analyzes the codebase and generates 3 context files in `.agents/context/`:
 
@@ -100,7 +111,7 @@ These files are referenced by both `CLAUDE.md` and `.github/copilot-instructions
 npx github:onedot-digital-crew/npx-ai-setup --regenerate
 ```
 
-### 4. AI-curated Skills installation
+### 5. AI-curated Skills installation
 
 Skills are automatically detected, curated, and installed in 4 phases:
 
@@ -129,7 +140,7 @@ Default skills per system:
 
 **Fallback**: If Claude is unavailable or times out, top 3 per technology are installed without AI curation.
 
-### 5. Hooks (active after setup)
+### 6. Hooks (active after setup)
 
 | Hook                   | Trigger           | What it does                                                     |
 | ---------------------- | ----------------- | ---------------------------------------------------------------- |
@@ -137,7 +148,7 @@ Default skills per system:
 | **post-edit-lint.sh**  | After Edit/Write  | Auto-runs `eslint --fix` on .js/.ts files                        |
 | **circuit-breaker.sh** | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min |
 
-### 6. Permissions
+### 7. Permissions
 
 Granular bash permissions instead of `Bash(*)`:
 
@@ -159,12 +170,18 @@ project/
 |       +-- CONVENTIONS.md       # Coding conventions
 +-- .claude/
 |   +-- settings.json            # Permissions + Hooks + Plugin config
+|   +-- commands/
+|   |   +-- spec.md              # /spec slash command
 |   +-- hooks/
 |       +-- protect-files.sh     # Protects .env, package-lock.json, .git/
 |       +-- post-edit-lint.sh    # Auto-Lint after Edit
 |       +-- circuit-breaker.sh   # Detects edit loops
 +-- .github/
 |   +-- copilot-instructions.md
++-- specs/                         # Spec-driven development
+|   +-- TEMPLATE.md              # Spec template
+|   +-- README.md                # Workflow guide
+|   +-- completed/               # Archive for finished specs
 +-- .mcp.json                    # MCP server config (Context7)
 +-- CLAUDE.md                    # AI Rules + Critical Rules
 ```

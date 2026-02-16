@@ -29,3 +29,12 @@ Example rules to consider:
 - Follow existing naming conventions (check CONVENTIONS.md)
 - Run tests before committing (npm run test)
 -->
+
+## Spec-Driven Development
+Specs live in `specs/` -- structured task plans created before coding.
+
+**When to suggest a spec:** Changes across 3+ files, new features, architectural changes, ambiguous requirements.
+**Skip specs for:** Single-file fixes, typos, config changes.
+
+Workflow: `/spec "task"` -> Review -> Implement -> Move to `specs/completed/`
+See `specs/README.md` for details.

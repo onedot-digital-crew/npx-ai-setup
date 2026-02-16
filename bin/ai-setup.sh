@@ -812,7 +812,6 @@ FOUND=()
 [ -d ".claude/skills/template-skill" ] && FOUND+=(".claude/skills/template-skill/")
 [ -d ".claude/skills/learn" ] && FOUND+=(".claude/skills/learn/")
 [ -f ".claude/INIT.md" ] && FOUND+=(".claude/INIT.md")
-[ -f "specs/TEMPLATE.md" ] && FOUND+=("specs/TEMPLATE.md")
 [ -d "skills/" ] && FOUND+=("skills/")
 [ -d ".skillkit/" ] && FOUND+=(".skillkit/")
 [ -f "skillkit.yaml" ] && FOUND+=("skillkit.yaml")
@@ -886,6 +885,21 @@ fi
 # 6. AGENTS DIRECTORY
 # ------------------------------------------------------------------------------
 mkdir -p .agents
+
+# ------------------------------------------------------------------------------
+# 6b. SPECS DIRECTORY (spec-driven development)
+# ------------------------------------------------------------------------------
+echo "📋 Setting up spec-driven workflow..."
+mkdir -p specs/completed
+[ ! -f specs/TEMPLATE.md ] && cp "$TPL/specs/TEMPLATE.md" specs/TEMPLATE.md
+[ ! -f specs/README.md ] && cp "$TPL/specs/README.md" specs/README.md
+[ ! -f specs/completed/.gitkeep ] && touch specs/completed/.gitkeep
+
+# ------------------------------------------------------------------------------
+# 6c. SPEC SLASH COMMAND
+# ------------------------------------------------------------------------------
+mkdir -p .claude/commands
+[ ! -f .claude/commands/spec.md ] && cp "$TPL/commands/spec.md" .claude/commands/spec.md
 
 # ------------------------------------------------------------------------------
 # 7. GITIGNORE
@@ -1216,6 +1230,8 @@ echo "✅ Files created:"
 [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
 echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker)"
 [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
+[ -d specs ] && echo "   - specs/ (spec-driven workflow)"
+[ -f .claude/commands/spec.md ] && echo "   - /spec command (.claude/commands/spec.md)"
 
 if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ]; then
   echo ""
@@ -1271,6 +1287,9 @@ if [ "$WITH_GSD" = "yes" ]; then
 else
   echo "Start a Claude Code session and begin working."
   echo "Your project context and CLAUDE.md are ready."
+  echo ""
+  echo "Spec-driven workflow:"
+  echo "  /spec \"task description\"    Create a structured spec before coding"
   echo ""
   echo "To regenerate context files later:"
   echo "  npx @onedot/ai-setup --regenerate"
