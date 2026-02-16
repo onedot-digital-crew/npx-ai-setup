@@ -429,6 +429,7 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
   echo ""
   echo "🔌 Searching and installing skills..."
   INSTALLED=0
+  SKIPPED=0
 
   if [ -f package.json ]; then
     DEPS=$(jq -r '(.dependencies // {} | keys[]) , (.devDependencies // {} | keys[])' package.json 2>/dev/null | sort -u)
@@ -621,23 +622,32 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
             | head -5)
         fi
 
+        # Install a single skill with duplicate detection (uses $TIMEOUT_CMD if available)
+        install_skill() {
+          local sid=$1
+          local skill_name="${sid##*@}"  # Extract skill name after @
+          
+          # Check if already installed (local or global)
+          if [ -d ".claude/skills/$skill_name" ] || [ -d "${HOME}/.claude/skills/$skill_name" ]; then
+            printf "     ⏭️  %s (already installed)\n" "$sid"
+            SKIPPED=$((SKIPPED + 1))
+            return 0
+          fi
+          
+          printf "     ⏳ %s ..." "$sid"
+          if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
+            printf "\r     ✅ %s\n" "$sid"
+            return 0
+          else
+            printf "\r     ❌ %s (install failed)\n" "$sid"
+            return 1
+          fi
+        }
+
         if [ -n "$SELECTED" ]; then
           SELECTED_COUNT=$(echo "$SELECTED" | wc -l | tr -d ' ')
           echo "  ✨ $SELECTED_COUNT skills selected:"
           echo ""
-
-          # Install a single skill (uses $TIMEOUT_CMD if available)
-          install_skill() {
-            local sid=$1
-            printf "     ⏳ %s ..." "$sid"
-            if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
-              printf "\r     ✅ %s\n" "$sid"
-              return 0
-            else
-              printf "\r     ❌ %s (install failed)\n" "$sid"
-              return 1
-            fi
-          }
 
           # Phase 3: Install selected skills (30s timeout per install)
           while IFS= read -r skill_id; do
@@ -647,7 +657,11 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
             fi
           done <<< "$SELECTED"
           echo ""
-          echo "  Total: $INSTALLED skills installed"
+          if [ $SKIPPED -gt 0 ]; then
+            echo "  Total: $INSTALLED installed, $SKIPPED skipped (already present)"
+          else
+            echo "  Total: $INSTALLED skills installed"
+          fi
         else
           echo "  ⚠️  Claude could not select skills. Installing top 3 per technology..."
           # Fallback: Top 3 per keyword using cached results
@@ -663,7 +677,11 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
             fi
           done
           echo ""
-          echo "  Total: $INSTALLED skills installed (fallback)"
+          if [ $SKIPPED -gt 0 ]; then
+            echo "  Total: $INSTALLED installed, $SKIPPED skipped (fallback)"
+          else
+            echo "  Total: $INSTALLED skills installed (fallback)"
+          fi
         fi
         rm -f "$ALL_SKILLS_CACHE"
       fi
@@ -708,13 +726,7 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
     command -v gtimeout &>/dev/null && TIMEOUT_CMD="gtimeout 30"
 
     for skill_id in "${SYSTEM_SKILLS[@]}"; do
-      printf "     ⏳ %s ..." "$skill_id"
-      if ${TIMEOUT_CMD:-} npx -y skills@latest add "$skill_id" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
-        printf "\r     ✅ %s\n" "$skill_id"
-        INSTALLED=$((INSTALLED + 1))
-      else
-        printf "\r     ❌ %s (install failed)\n" "$skill_id"
-      fi
+      install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
     done
   fi
 
