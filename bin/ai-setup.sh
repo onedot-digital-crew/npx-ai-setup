@@ -542,10 +542,16 @@ This project uses STORYBLOK CMS. In ARCHITECTURE.md: document component schemas,
       SKIP_CTX=true
     fi
 
+    # Temp files for error capture
+    ERR_CM=$(mktemp)
+    ERR_CTX=$(mktemp)
+
     # Step 1: Extend CLAUDE.md (background)
     STEP1_PLATFORM=""
     [ -n "$PLATFORM_RULES" ] && STEP1_PLATFORM="
 Platform-specific rules to include in Critical Rules: $PLATFORM_RULES"
+
+    CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
 
     claude -p --model sonnet --max-turns 3 "Add two sections to CLAUDE.md:
 
@@ -559,7 +565,7 @@ $STEP1_PLATFORM
 
 Rules: ONLY use what is in the context. No umlauts. Reply 'Done'.
 
-$CONTEXT" >/dev/null 2>&1 &
+$CONTEXT" >/dev/null 2>"$ERR_CM" &
     PID_CM=$!
 
     # Step 2: Generate project context (background, parallel with Step 1)
@@ -618,7 +624,7 @@ $CTX_CONFIGS
 $CTX_README
 --- Sample source files ---
 $CTX_SAMPLE
-$CTX_PLATFORM" >/dev/null 2>&1 &
+$CTX_PLATFORM" >/dev/null 2>"$ERR_CTX" &
       PID_CTX=$!
     fi
 
@@ -626,8 +632,28 @@ $CTX_PLATFORM" >/dev/null 2>&1 &
     echo ""
     if [ "$SKIP_CTX" = "false" ]; then
       wait_parallel "$PID_CM:CLAUDE.md:30:120" "$PID_CTX:Project context:30:90"
+    else
+      progress_bar $PID_CM "CLAUDE.md" 30 120
+      echo "  📊 .agents/context/ already populated, skipping."
+    fi
 
-      # Verify context files were created
+    # Verify Step 1: CLAUDE.md was actually modified
+    wait "$PID_CM" 2>/dev/null
+    EXIT_CM=$?
+    CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+    if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
+      echo ""
+      echo "  ⚠️  CLAUDE.md was not updated."
+      if [ -s "$ERR_CM" ]; then
+        echo "  Error: $(head -3 "$ERR_CM")"
+      fi
+      echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run the setup."
+    fi
+
+    # Verify Step 2: context files were created
+    if [ "$SKIP_CTX" = "false" ]; then
+      wait "$PID_CTX" 2>/dev/null
+      EXIT_CTX=$?
       CTX_COUNT=0
       [ -f .agents/context/STACK.md ] && CTX_COUNT=$((CTX_COUNT + 1))
       [ -f .agents/context/ARCHITECTURE.md ] && CTX_COUNT=$((CTX_COUNT + 1))
@@ -637,13 +663,19 @@ $CTX_PLATFORM" >/dev/null 2>&1 &
         echo "  ✅ All 3 context files created in .agents/context/"
       elif [ "$CTX_COUNT" -gt 0 ]; then
         echo "  ⚠️  $CTX_COUNT of 3 context files created (partial)"
+        if [ -s "$ERR_CTX" ]; then
+          echo "  Error: $(head -3 "$ERR_CTX")"
+        fi
       else
-        echo "  ⚠️  Context generation failed. Regenerate: .agents/regenerate.sh"
+        echo "  ⚠️  Context generation failed."
+        if [ -s "$ERR_CTX" ]; then
+          echo "  Error: $(head -3 "$ERR_CTX")"
+        fi
+        echo "  Fix: Check 'claude' works, then run: .agents/regenerate.sh"
       fi
-    else
-      progress_bar $PID_CM "CLAUDE.md" 30 120
-      echo "  📊 .agents/context/ already populated, skipping."
     fi
+
+    rm -f "$ERR_CM" "$ERR_CTX"
 
     # Step 3: Search and install skills (AI-curated)
     echo ""
