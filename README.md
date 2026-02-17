@@ -12,8 +12,14 @@ npx github:onedot-digital-crew/npx-ai-setup
 **With specific system/framework:**
 
 ```bash
+# Single system
 npx github:onedot-digital-crew/npx-ai-setup --system nuxt
+
+# Multiple systems (comma-separated)
+npx github:onedot-digital-crew/npx-ai-setup --system nuxt,storyblok
 ```
+
+During interactive setup, use **Space** to toggle multiple selections (e.g., Nuxt + Storyblok).
 
 **With GSD workflow engine (optional):**
 
@@ -39,11 +45,40 @@ npx github:onedot-digital-crew/npx-ai-setup --with-plugins
 npx github:onedot-digital-crew/npx-ai-setup --with-context7
 ```
 
-**Skip plugins/context7:**
+**With Playwright MCP for UI verification (optional):**
 
 ```bash
-npx github:onedot-digital-crew/npx-ai-setup --no-plugins --no-context7
+npx github:onedot-digital-crew/npx-ai-setup --with-playwright
 ```
+
+**Skip optional features:**
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --no-plugins --no-context7 --no-playwright
+```
+
+## Update
+
+Just run the same command again:
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup
+```
+
+The script automatically detects what to do:
+
+| Situation | What happens |
+|---|---|
+| **Fresh install** (no `.ai-setup.json`) | Normal installation |
+| **Same version** | "Already up to date" + optional regenerate |
+| **New version available** | Offers: **Update** / **Clean reinstall** / **Skip** |
+
+**Update** compares each template file:
+- Unmodified files are updated silently
+- User-modified files are backed up to `.ai-setup-backup/` before updating
+- New files (added in newer version) are installed automatically
+
+**Clean reinstall** removes all managed files and runs a fresh install.
 
 ## Requirements
 
@@ -72,14 +107,38 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Spec-driven workflow
+### 2. Slash Commands (8 commands)
 
-Scaffolds a `specs/` directory with a template and workflow guide, plus a `/spec` slash command:
+| Command | Model | Description |
+|---------|-------|-------------|
+| `/spec "task"` | Opus (plan mode) | Create a structured spec — you approve before the file is written |
+| `/spec-work 001` | Sonnet | Execute a spec step by step |
+| `/commit` | Sonnet | Stage changes + create descriptive commit (no push) |
+| `/pr` | Sonnet | Prepare a PR — drafts title/body, you push and create manually |
+| `/review` | Opus (plan mode) | Review uncommitted changes — bugs, security, performance |
+| `/test` | Sonnet | Run tests + fix failures (up to 3 attempts) |
+| `/techdebt` | Sonnet | End-of-session sweep — dead code, unused imports, duplicates |
+| `/grill` | Opus (plan mode) | Adversarial code review — blocks until all issues resolved |
+
+### 3. Subagent Templates (5 agents)
+
+Subagents run as isolated agents for parallel or specialized work:
+
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| `code-reviewer` | Opus | Code review with confidence scoring (HIGH/MEDIUM only) |
+| `verify-app` | Sonnet | Validate functionality — tests, build, edge cases |
+| `build-validator` | Haiku | Quick build verification — pass/fail with output |
+| `code-architect` | Opus | Architecture review — patterns, coupling, boundaries |
+| `staff-reviewer` | Opus (plan mode) | Skeptical staff engineer review of plans/implementations |
+
+### 4. Spec-driven workflow
+
+Scaffolds a `specs/` directory with a template and workflow guide:
 
 - `specs/TEMPLATE.md` — 7-section spec template (Goal, Context, Steps, Acceptance Criteria, Files, Out of Scope, Notes)
 - `specs/README.md` — When to create specs, naming conventions, workflow guide
 - `specs/completed/` — Archive for finished specs
-- `.claude/commands/spec.md` — `/spec "task description"` slash command for quick spec creation
 
 **Hybrid automation**: Claude suggests creating a spec when a task touches 3+ files or involves new features. Simple fixes skip specs entirely.
 
@@ -145,15 +204,15 @@ Default skills per system:
 | Hook                   | Trigger           | What it does                                                     |
 | ---------------------- | ----------------- | ---------------------------------------------------------------- |
 | **protect-files.sh**   | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/`           |
-| **post-edit-lint.sh**  | After Edit/Write  | Auto-runs `eslint --fix` on .js/.ts files                        |
+| **post-edit-lint.sh**  | After Edit/Write  | Auto-runs `eslint --fix` on .js/.ts/.jsx/.tsx, Prettier on .css/.html/.json/.md/.vue/.svelte |
 | **circuit-breaker.sh** | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min |
 
 ### 7. Permissions
 
 Granular bash permissions instead of `Bash(*)`:
 
-- **Allowed**: `git add/commit/status/log/diff/tag`, `npm run`, `eslint`, `cat/ls/grep/...`
-- **Denied**: `git push`, `rm -rf`, reading `.env`
+- **Allowed**: `git add/commit/status/log/diff/tag/branch/checkout/stash`, `npm run/test/install`, `eslint`, `prettier`, `vitest`, `playwright`, `gh pr/issue`, `jq`, `curl`, `cat/ls/grep/...`
+- **Denied**: `git push`, `git reset --hard`, `rm -r`, `rm -rf`, `npm publish`, reading `.env`
 
 For maximum autonomy: `claude --dangerously-skip-permissions`
 
@@ -170,19 +229,33 @@ project/
 |       +-- CONVENTIONS.md       # Coding conventions
 +-- .claude/
 |   +-- settings.json            # Permissions + Hooks + Plugin config
-|   +-- commands/
-|   |   +-- spec.md              # /spec slash command
+|   +-- commands/                # Slash commands
+|   |   +-- spec.md              # /spec — create specs (Opus)
+|   |   +-- spec-work.md         # /spec-work — execute specs (Sonnet)
+|   |   +-- commit.md            # /commit — stage + commit
+|   |   +-- pr.md                # /pr — prepare PR
+|   |   +-- review.md            # /review — code review (Opus)
+|   |   +-- test.md              # /test — run + fix tests
+|   |   +-- techdebt.md          # /techdebt — debt sweep
+|   |   +-- grill.md             # /grill — adversarial review (Opus)
+|   +-- agents/                  # Subagent templates
+|   |   +-- code-reviewer.md     # Confidence-scored code review
+|   |   +-- verify-app.md        # App functionality validation
+|   |   +-- build-validator.md   # Build success check
+|   |   +-- code-architect.md    # Architecture review
+|   |   +-- staff-reviewer.md    # Skeptical staff engineer
 |   +-- hooks/
 |       +-- protect-files.sh     # Protects .env, package-lock.json, .git/
-|       +-- post-edit-lint.sh    # Auto-Lint after Edit
+|       +-- post-edit-lint.sh    # ESLint + Prettier after Edit
 |       +-- circuit-breaker.sh   # Detects edit loops
+|       +-- context-freshness.sh # Stale context warning
 +-- .github/
 |   +-- copilot-instructions.md
 +-- specs/                         # Spec-driven development
 |   +-- TEMPLATE.md              # Spec template
 |   +-- README.md                # Workflow guide
 |   +-- completed/               # Archive for finished specs
-+-- .mcp.json                    # MCP server config (Context7)
++-- .mcp.json                    # MCP server config (Context7, Playwright)
 +-- CLAUDE.md                    # AI Rules + Critical Rules
 ```
 
@@ -315,6 +388,27 @@ Creates `.mcp.json` in project root:
 ```
 
 Usage: Add "use context7" to any prompt for current library docs.
+
+### Playwright MCP (Browser Automation)
+
+[Playwright MCP](https://github.com/anthropics/mcp-playwright) enables Claude to interact with web browsers for UI verification — taking screenshots, clicking elements, and validating frontend behavior.
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-playwright
+```
+
+Adds to `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-playwright"]
+    }
+  }
+}
+```
 
 ### How plugins are shared with the team
 

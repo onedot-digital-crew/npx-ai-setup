@@ -5,8 +5,10 @@
 # ==============================================================================
 # Installs Claude Code hooks, project context, and AI-curated skills
 # Usage: npx @onedot/ai-setup [--with-gsd] [--no-gsd] [--with-claude-mem] [--no-claude-mem]
-#        [--with-plugins] [--no-plugins] [--with-context7] [--no-context7] [--system <name>]
+#        [--with-plugins] [--no-plugins] [--with-context7] [--no-context7]
+#        [--with-playwright] [--no-playwright] [--system <name>]
 #        npx @onedot/ai-setup --regenerate [--system <name>]
+# Auto-detects updates: if .ai-setup.json exists with older version, offers update/reinstall
 # ==============================================================================
 
 set -e
@@ -20,6 +22,7 @@ WITH_GSD=""
 WITH_CLAUDE_MEM=""
 WITH_PLUGINS=""
 WITH_CONTEXT7=""
+WITH_PLAYWRIGHT=""
 SYSTEM=""
 REGENERATE=""
 while [[ $# -gt 0 ]]; do
@@ -32,6 +35,8 @@ while [[ $# -gt 0 ]]; do
     --no-plugins) WITH_PLUGINS="no"; shift ;;
     --with-context7) WITH_CONTEXT7="yes"; shift ;;
     --no-context7) WITH_CONTEXT7="no"; shift ;;
+    --with-playwright) WITH_PLAYWRIGHT="yes"; shift ;;
+    --no-playwright) WITH_PLAYWRIGHT="no"; shift ;;
     --regenerate) REGENERATE="yes"; shift ;;
     --system)
       if [[ $# -lt 2 ]]; then
@@ -42,6 +47,108 @@ while [[ $# -gt 0 ]]; do
     *) shift ;;
   esac
 done
+
+# ==============================================================================
+# UPDATE SYSTEM HELPERS
+# ==============================================================================
+
+# Template mapping: "source_in_package:target_in_project"
+TEMPLATE_MAP=(
+  "templates/CLAUDE.md:CLAUDE.md"
+  "templates/claude/settings.json:.claude/settings.json"
+  "templates/claude/hooks/protect-files.sh:.claude/hooks/protect-files.sh"
+  "templates/claude/hooks/post-edit-lint.sh:.claude/hooks/post-edit-lint.sh"
+  "templates/claude/hooks/circuit-breaker.sh:.claude/hooks/circuit-breaker.sh"
+  "templates/claude/hooks/context-freshness.sh:.claude/hooks/context-freshness.sh"
+  "templates/github/copilot-instructions.md:.github/copilot-instructions.md"
+  "templates/specs/TEMPLATE.md:specs/TEMPLATE.md"
+  "templates/specs/README.md:specs/README.md"
+  "templates/commands/spec.md:.claude/commands/spec.md"
+  "templates/commands/spec-work.md:.claude/commands/spec-work.md"
+  "templates/commands/commit.md:.claude/commands/commit.md"
+  "templates/commands/pr.md:.claude/commands/pr.md"
+  "templates/commands/review.md:.claude/commands/review.md"
+  "templates/commands/test.md:.claude/commands/test.md"
+  "templates/commands/techdebt.md:.claude/commands/techdebt.md"
+  "templates/commands/grill.md:.claude/commands/grill.md"
+  "templates/agents/verify-app.md:.claude/agents/verify-app.md"
+  "templates/agents/build-validator.md:.claude/agents/build-validator.md"
+  "templates/agents/staff-reviewer.md:.claude/agents/staff-reviewer.md"
+)
+
+# Get package version from package.json
+get_package_version() {
+  jq -r '.version' "$SCRIPT_DIR/package.json" 2>/dev/null || echo "unknown"
+}
+
+# Get installed version from .ai-setup.json
+get_installed_version() {
+  if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
+    jq -r '.version // empty' .ai-setup.json 2>/dev/null || echo ""
+  else
+    echo ""
+  fi
+}
+
+# Compute checksum for a file (cksum outputs: checksum size filename)
+compute_checksum() {
+  if [ -f "$1" ]; then
+    cksum "$1" 2>/dev/null | awk '{print $1, $2}' || echo ""
+  else
+    echo ""
+  fi
+}
+
+# Write .ai-setup.json with current version and checksums
+write_metadata() {
+  local version
+  version=$(get_package_version)
+  local timestamp
+  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  # Preserve original install time if updating
+  local install_time="$timestamp"
+  if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
+    local prev
+    prev=$(jq -r '.installed_at // empty' .ai-setup.json 2>/dev/null)
+    [ -n "$prev" ] && install_time="$prev"
+  fi
+
+  # Build JSON with jq
+  local json
+  json=$(jq -n \
+    --arg ver "$version" \
+    --arg inst "$install_time" \
+    --arg upd "$timestamp" \
+    '{version: $ver, installed_at: $inst, updated_at: $upd, files: {}}')
+
+  for mapping in "${TEMPLATE_MAP[@]}"; do
+    local tpl="${mapping%%:*}"
+    local target="${mapping#*:}"
+    if [ -f "$target" ]; then
+      local cs
+      cs=$(compute_checksum "$target")
+      json=$(echo "$json" | jq --arg f "$target" --arg c "$cs" '.files[$f] = $c')
+    fi
+  done
+
+  echo "$json" > .ai-setup.json
+}
+
+# Backup a file to .ai-setup-backup/ with timestamp
+backup_file() {
+  local file="$1"
+  local ts
+  ts=$(date +"%Y%m%d_%H%M%S")
+  mkdir -p .ai-setup-backup
+
+  # Use flat filename with path separators replaced
+  local safe_name
+  safe_name=$(echo "$file" | tr '/' '_')
+  local backup_path=".ai-setup-backup/${safe_name}.${ts}"
+  cp "$file" "$backup_path"
+  echo "$backup_path"
+}
 
 # Efficiently collect project files (git-aware with fallback)
 collect_project_files() {
@@ -70,42 +177,59 @@ collect_project_files() {
 
 VALID_SYSTEMS=(auto shopify nuxt laravel shopware storyblok)
 
-# Validate --system value
+# Validate --system value (supports comma-separated list)
 if [ -n "$SYSTEM" ]; then
-  VALID=false
-  for s in "${VALID_SYSTEMS[@]}"; do
-    [ "$SYSTEM" = "$s" ] && VALID=true
+  IFS=',' read -ra SYSTEMS_TO_VALIDATE <<< "$SYSTEM"
+  for sys in "${SYSTEMS_TO_VALIDATE[@]}"; do
+    VALID=false
+    for s in "${VALID_SYSTEMS[@]}"; do
+      [ "$sys" = "$s" ] && VALID=true
+    done
+    if [ "$VALID" = false ]; then
+      echo "❌ Unknown system: $sys"
+      echo "   Valid options: ${VALID_SYSTEMS[*]}"
+      exit 1
+    fi
   done
-  if [ "$VALID" = false ]; then
-    echo "❌ Unknown system: $SYSTEM"
-    echo "   Valid options: ${VALID_SYSTEMS[*]}"
+  # Ensure "auto" is not combined with other systems
+  if [[ "$SYSTEM" == *"auto"* ]] && [[ "$SYSTEM" == *","* ]]; then
+    echo "❌ 'auto' cannot be combined with other systems"
     exit 1
   fi
 fi
 
-# System/framework selection menu (arrow-key navigation)
+# System/framework selection menu (multiselect with arrow-key navigation)
 select_system() {
   local options=("auto" "shopify" "nuxt" "laravel" "shopware" "storyblok")
   local descriptions=("Claude detects automatically" "Shopify Theme" "Nuxt 3+" "Laravel / PHP" "Shopware 6" "Storyblok CMS")
   local selected=0
   local count=${#options[@]}
+  local -a checked=()
+
+  # Initialize all as unchecked
+  for ((i=0; i<count; i++)); do
+    checked[$i]=0
+  done
 
   echo ""
   echo "Which system/framework does this project use?"
-  echo "  (Use ↑↓ arrows, Enter to confirm)"
+  echo "  (Use ↑↓ arrows, Space to toggle, Enter to confirm)"
   echo ""
 
   # Hide cursor
   printf '\033[?25l'
   # Restore cursor on exit
-  trap 'printf "\033[?25l"' RETURN 2>/dev/null || true
+  trap 'printf "\033[?25h"' RETURN 2>/dev/null || true
 
   # Print initial menu
   for ((i=0; i<count; i++)); do
+    local checkbox="[ ]"
+    [ "${checked[$i]}" -eq 1 ] && checkbox="[✓]"
+
     if [ $i -eq $selected ]; then
-      printf '  \033[7m ▸ %-12s %s \033[0m\n' "${options[$i]}" "${descriptions[$i]}"
+      printf '  \033[7m ▸ %s %-12s %s \033[0m\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
     else
-      printf '    %-12s %s\n' "${options[$i]}" "${descriptions[$i]}"
+      printf '    %s %-12s %s\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
     fi
   done
 
@@ -124,6 +248,24 @@ select_system() {
             ;;
         esac
         ;;
+      " ")  # Space - toggle selection
+        if [ "${options[$selected]}" = "auto" ]; then
+          # Auto is exclusive - uncheck all others
+          for ((i=0; i<count; i++)); do
+            checked[$i]=0
+          done
+          checked[$selected]=1
+        else
+          # Toggle current selection
+          if [ "${checked[$selected]}" -eq 1 ]; then
+            checked[$selected]=0
+          else
+            checked[$selected]=1
+            # If any other is selected, uncheck "auto"
+            checked[0]=0
+          fi
+        fi
+        ;;
       "")  # Enter
         break
         ;;
@@ -132,10 +274,13 @@ select_system() {
     # Redraw menu (move cursor up)
     printf "\033[${count}A"
     for ((i=0; i<count; i++)); do
+      local checkbox="[ ]"
+      [ "${checked[$i]}" -eq 1 ] && checkbox="[✓]"
+
       if [ $i -eq $selected ]; then
-        printf '  \033[7m ▸ %-12s %s \033[0m\033[K\n' "${options[$i]}" "${descriptions[$i]}"
+        printf '  \033[7m ▸ %s %-12s %s \033[0m\033[K\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
       else
-        printf '    %-12s %s\033[K\n' "${options[$i]}" "${descriptions[$i]}"
+        printf '    %s %-12s %s\033[K\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
       fi
     done
   done
@@ -143,7 +288,21 @@ select_system() {
   # Show cursor
   printf '\033[?25h'
 
-  SYSTEM="${options[$selected]}"
+  # Build comma-separated list of selected systems
+  local selected_systems=()
+  for ((i=0; i<count; i++)); do
+    if [ "${checked[$i]}" -eq 1 ]; then
+      selected_systems+=("${options[$i]}")
+    fi
+  done
+
+  # If nothing selected, default to auto
+  if [ ${#selected_systems[@]} -eq 0 ]; then
+    SYSTEM="auto"
+  else
+    SYSTEM=$(IFS=,; echo "${selected_systems[*]}")
+  fi
+
   echo ""
   echo "  Selected: $SYSTEM"
 }
@@ -318,6 +477,7 @@ Based on the package.json scripts below, document the most important ones (dev, 
 
 ## Critical Rules
 Based on the eslint/prettier config below and the framework/system ($SYSTEM), write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
+Cover these categories where evidence exists: code style (formatting, naming), TypeScript (strict mode, type patterns), imports (path aliases, barrel files), framework-specific (SSR, routing, state), testing (commands, patterns). Omit categories where no evidence exists in the config — do not fabricate rules.
 
 Rules:
 - Do NOT read any files. Everything you need is in this prompt.
@@ -341,6 +501,7 @@ Document the technology stack:
 - Key dependencies (categorized: UI, state, data, testing, build)
 - Package manager
 - Build tooling
+- Avoid: Libraries or patterns NOT used in this project (e.g., if the project uses a custom apiClient, list 'Do not use axios/fetch directly')
 
 ## File 2: .agents/context/ARCHITECTURE.md
 Document the architecture:
@@ -355,8 +516,9 @@ Document coding conventions found in the codebase:
 - Naming patterns (files, components, variables, CSS classes)
 - Import style (absolute vs relative, barrel files)
 - Component structure (script-template-style order, composition patterns)
-- Error handling patterns
+- Error handling patterns (try-catch style, error boundaries, API error handling, logging approach)
 - TypeScript usage (strict mode, type vs interface preference)
+- Testing patterns (test file location, naming convention, test framework, what is typically tested)
 
 Project system/framework: $SYSTEM
 
@@ -423,6 +585,15 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
       echo "  Output: $(tail -5 "$ERR_CTX")"
     fi
     echo "  Fix: Check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
+  fi
+
+  # Save state for freshness detection
+  STATE_FILE=".agents/context/.state"
+  if [ -d ".agents/context" ]; then
+    echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)" > "$STATE_FILE"
+    echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
+    echo "DIR_HASH=$(echo "$CACHED_FILES" | cksum | cut -d' ' -f1,2)" >> "$STATE_FILE"
+    echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
   fi
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
@@ -691,31 +862,35 @@ antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
   fi
 
   # System-specific default skills (always installed for known systems)
+  # Support multiple systems (comma-separated)
   SYSTEM_SKILLS=()
-  case "$SYSTEM" in
-    shopify)
-      SYSTEM_SKILLS+=(
-        "sickn33/antigravity-awesome-skills@shopify-development"
-        "jeffallan/claude-skills@shopify-expert"
-      ) ;;
-    nuxt)
-      SYSTEM_SKILLS+=(
-        "antfu/skills@nuxt"
-        "onmax/nuxt-skills@nuxt"
-      ) ;;
-    laravel)
-      SYSTEM_SKILLS+=(
-        "jeffallan/claude-skills@laravel-specialist"
-      ) ;;
-    shopware)
-      SYSTEM_SKILLS+=(
-        "bartundmett/skills@shopware6-best-practices"
-      ) ;;
-    storyblok)
-      SYSTEM_SKILLS+=(
-        "bartundmett/skills@storyblok-best-practices"
-      ) ;;
-  esac
+  IFS=',' read -ra SYSTEMS <<< "$SYSTEM"
+  for sys in "${SYSTEMS[@]}"; do
+    case "$sys" in
+      shopify)
+        SYSTEM_SKILLS+=(
+          "sickn33/antigravity-awesome-skills@shopify-development"
+          "jeffallan/claude-skills@shopify-expert"
+        ) ;;
+      nuxt)
+        SYSTEM_SKILLS+=(
+          "antfu/skills@nuxt"
+          "onmax/nuxt-skills@nuxt"
+        ) ;;
+      laravel)
+        SYSTEM_SKILLS+=(
+          "jeffallan/claude-skills@laravel-specialist"
+        ) ;;
+      shopware)
+        SYSTEM_SKILLS+=(
+          "bartundmett/skills@shopware6-best-practices"
+        ) ;;
+      storyblok)
+        SYSTEM_SKILLS+=(
+          "bartundmett/skills@storyblok-best-practices"
+        ) ;;
+    esac
+  done
 
   if [ ${#SYSTEM_SKILLS[@]} -gt 0 ]; then
     echo ""
@@ -756,6 +931,162 @@ if [ "$REGENERATE" = "yes" ]; then
   [ -d .agents/context ] && echo "   - .agents/context/ regenerated"
   [ ${INSTALLED:-0} -gt 0 ] && echo "   - $INSTALLED skills installed"
   exit 0
+fi
+
+# ==============================================================================
+# AUTO-DETECT: UPDATE / REINSTALL / FRESH INSTALL
+# ==============================================================================
+if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
+  INSTALLED_VERSION=$(get_installed_version)
+  PACKAGE_VERSION=$(get_package_version)
+
+  if [ -n "$INSTALLED_VERSION" ] && [ "$INSTALLED_VERSION" = "$PACKAGE_VERSION" ]; then
+    # Same version — already up to date
+    echo ""
+    echo "✅ Already up to date (v${PACKAGE_VERSION})."
+    echo ""
+    if command -v claude &>/dev/null; then
+      read -p "   Regenerate AI content (CLAUDE.md, context, skills)? (y/N) " REGEN_CHOICE
+      if [[ "$REGEN_CHOICE" =~ ^[Yy]$ ]]; then
+        if [ -z "$SYSTEM" ]; then
+          select_system
+        fi
+        run_generation
+        write_metadata
+        echo ""
+        echo "✅ Regeneration complete!"
+      fi
+    fi
+    exit 0
+
+  elif [ -n "$INSTALLED_VERSION" ]; then
+    # Different version — offer update options
+    echo ""
+    echo "🔄 Update available: v${INSTALLED_VERSION} → v${PACKAGE_VERSION}"
+    echo ""
+    echo "   1) Update       — smart update (backup modified files, update templates)"
+    echo "   2) Reinstall    — delete managed files, fresh install from scratch"
+    echo "   3) Skip         — exit without changes"
+    echo ""
+    read -p "   Choose [1/2/3]: " UPDATE_CHOICE
+
+    case "$UPDATE_CHOICE" in
+      1)
+        # ----------------------------------------------------------------
+        # SMART UPDATE
+        # ----------------------------------------------------------------
+        echo ""
+        echo "🔍 Analyzing templates..."
+        echo ""
+
+        UPD_UPDATED=0
+        UPD_SKIPPED=0
+        UPD_NEW=0
+        UPD_BACKED_UP=0
+
+        for mapping in "${TEMPLATE_MAP[@]}"; do
+          tpl="${mapping%%:*}"
+          target="${mapping#*:}"
+
+          # Target doesn't exist — install as new
+          if [ ! -f "$target" ]; then
+            if [ -f "$SCRIPT_DIR/$tpl" ]; then
+              mkdir -p "$(dirname "$target")"
+              cp "$SCRIPT_DIR/$tpl" "$target"
+              [[ "$target" == *.sh ]] && chmod +x "$target"
+              echo "  ✨ $target (new)"
+              UPD_NEW=$((UPD_NEW + 1))
+            fi
+            continue
+          fi
+
+          # Compare template to installed file
+          tpl_cs=$(compute_checksum "$SCRIPT_DIR/$tpl")
+          cur_cs=$(compute_checksum "$target")
+
+          if [ "$tpl_cs" = "$cur_cs" ]; then
+            # Template and installed file are identical — skip
+            echo "  ⏭️  $target (unchanged)"
+            UPD_SKIPPED=$((UPD_SKIPPED + 1))
+            continue
+          fi
+
+          # Template differs — check if user modified the file
+          stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+
+          if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
+            # User modified — backup first
+            bp=$(backup_file "$target")
+            cp "$SCRIPT_DIR/$tpl" "$target"
+            [[ "$target" == *.sh ]] && chmod +x "$target"
+            echo "  ⚠️  $target (user-modified — backed up to $bp)"
+            UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+          else
+            # Not modified by user — silent update
+            cp "$SCRIPT_DIR/$tpl" "$target"
+            [[ "$target" == *.sh ]] && chmod +x "$target"
+            echo "  ✅ $target (updated)"
+          fi
+          UPD_UPDATED=$((UPD_UPDATED + 1))
+        done
+
+        echo ""
+        echo "📊 Update summary:"
+        echo "   Updated:   $UPD_UPDATED"
+        [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
+        [ $UPD_SKIPPED -gt 0 ] && echo "   Unchanged: $UPD_SKIPPED"
+        [ $UPD_BACKED_UP -gt 0 ] && echo "   Backed up: $UPD_BACKED_UP (see .ai-setup-backup/)"
+
+        # Update metadata
+        write_metadata
+
+        # Offer regeneration
+        if command -v claude &>/dev/null; then
+          echo ""
+          read -p "   Regenerate AI content? (Y/n) " REGEN_CHOICE
+          if [[ ! "$REGEN_CHOICE" =~ ^[Nn]$ ]]; then
+            if [ -z "$SYSTEM" ]; then
+              select_system
+            fi
+            run_generation
+            write_metadata
+          fi
+        fi
+
+        echo ""
+        echo "✅ Update complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+        exit 0
+        ;;
+
+      2)
+        # ----------------------------------------------------------------
+        # CLEAN REINSTALL
+        # ----------------------------------------------------------------
+        echo ""
+        echo "🗑️  Removing managed files..."
+
+        for mapping in "${TEMPLATE_MAP[@]}"; do
+          target="${mapping#*:}"
+          if [ -f "$target" ]; then
+            rm -f "$target"
+            echo "   Removed: $target"
+          fi
+        done
+
+        # Remove metadata and backup dir
+        rm -f .ai-setup.json
+        echo ""
+        echo "   Clean slate ready. Running fresh install..."
+        echo ""
+        # Fall through to normal setup below
+        ;;
+
+      *)
+        echo "   Skipped. No changes made."
+        exit 0
+        ;;
+    esac
+  fi
 fi
 
 # ==============================================================================
@@ -808,7 +1139,7 @@ echo "✅ Requirements OK (AI CLI: ${AI_CLI:-none detected})"
 FOUND=()
 [ -d ".ai" ] && FOUND+=(".ai/")
 [ -d ".claude/skills/create-spec" ] && FOUND+=(".claude/skills/create-spec/")
-[ -d ".claude/skills/work-spec" ] && FOUND+=(".claude/skills/work-spec/")
+[ -d ".claude/skills/spec-work" ] && FOUND+=(".claude/skills/spec-work/")
 [ -d ".claude/skills/template-skill" ] && FOUND+=(".claude/skills/template-skill/")
 [ -d ".claude/skills/learn" ] && FOUND+=(".claude/skills/learn/")
 [ -f ".claude/INIT.md" ] && FOUND+=(".claude/INIT.md")
@@ -861,7 +1192,7 @@ fi
 echo "🛡️  Creating hooks..."
 mkdir -p .claude/hooks
 
-for hook in protect-files.sh post-edit-lint.sh circuit-breaker.sh; do
+for hook in protect-files.sh post-edit-lint.sh circuit-breaker.sh context-freshness.sh; do
   if [ ! -f ".claude/hooks/$hook" ]; then
     cp "$TPL/claude/hooks/$hook" ".claude/hooks/$hook"
     chmod +x ".claude/hooks/$hook"
@@ -896,10 +1227,36 @@ mkdir -p specs/completed
 [ ! -f specs/completed/.gitkeep ] && touch specs/completed/.gitkeep
 
 # ------------------------------------------------------------------------------
-# 6c. SPEC SLASH COMMAND
+# 6c. SLASH COMMANDS
 # ------------------------------------------------------------------------------
+echo "⚡ Installing slash commands..."
 mkdir -p .claude/commands
-[ ! -f .claude/commands/spec.md ] && cp "$TPL/commands/spec.md" .claude/commands/spec.md
+for cmd in spec.md spec-work.md commit.md pr.md review.md test.md techdebt.md grill.md; do
+  if [ ! -f ".claude/commands/$cmd" ]; then
+    cp "$TPL/commands/$cmd" ".claude/commands/$cmd"
+  else
+    echo "  .claude/commands/$cmd already exists, skipping."
+  fi
+done
+
+# ------------------------------------------------------------------------------
+# 6d. SUBAGENT TEMPLATES
+# ------------------------------------------------------------------------------
+echo "🤖 Installing subagent templates..."
+mkdir -p .claude/agents
+for agent in verify-app.md build-validator.md staff-reviewer.md; do
+  if [ ! -f ".claude/agents/$agent" ]; then
+    cp "$TPL/agents/$agent" ".claude/agents/$agent"
+  else
+    echo "  .claude/agents/$agent already exists, skipping."
+  fi
+done
+
+# ------------------------------------------------------------------------------
+# 6e. METADATA TRACKING
+# ------------------------------------------------------------------------------
+echo "📋 Writing installation metadata..."
+write_metadata
 
 # ------------------------------------------------------------------------------
 # 7. GITIGNORE
@@ -907,12 +1264,23 @@ mkdir -p .claude/commands
 if [ -f .gitignore ]; then
   if ! grep -q "claude/settings.local" .gitignore 2>/dev/null; then
     echo "" >> .gitignore
-    echo "# Claude Code local settings" >> .gitignore
+    echo "# Claude Code / AI Setup" >> .gitignore
     echo ".claude/settings.local.json" >> .gitignore
+    echo ".ai-setup.json" >> .gitignore
+    echo ".ai-setup-backup/" >> .gitignore
+    echo ".agents/context/.state" >> .gitignore
+  else
+    # Add new entries if missing from existing block
+    grep -q "\.ai-setup\.json" .gitignore 2>/dev/null || echo ".ai-setup.json" >> .gitignore
+    grep -q "\.ai-setup-backup" .gitignore 2>/dev/null || echo ".ai-setup-backup/" >> .gitignore
+    grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
   fi
 else
-  echo "# Claude Code local settings" > .gitignore
+  echo "# Claude Code / AI Setup" > .gitignore
   echo ".claude/settings.local.json" >> .gitignore
+  echo ".ai-setup.json" >> .gitignore
+  echo ".ai-setup-backup/" >> .gitignore
+  echo ".agents/context/.state" >> .gitignore
 fi
 
 # ------------------------------------------------------------------------------
@@ -1053,7 +1421,6 @@ fi
 OFFICIAL_PLUGINS=(
   "code-review:Automated PR review with 4 parallel agents + confidence scoring"
   "feature-dev:7-phase feature workflow (discovery → architecture → review)"
-  "ralph-wiggum:Iterative AI loop — Claude keeps working until task is done"
   "frontend-design:Anti-generic design guidance for frontend projects"
 )
 
@@ -1158,6 +1525,37 @@ else
   echo "⏭️  Context7 skipped."
 fi
 
+# --- 9c2. Playwright MCP Server (UI verification via browser automation) ------
+if [ "$WITH_PLAYWRIGHT" = "" ]; then
+  echo ""
+  echo "🎭 Playwright MCP enables Claude to interact with web browsers for UI verification."
+  echo "   Useful for testing UI changes, taking screenshots, and validating frontend behavior."
+  echo ""
+  read -p "   Install Playwright MCP? (y/N) " INSTALL_PW
+  [[ "$INSTALL_PW" =~ ^[Yy]$ ]] && WITH_PLAYWRIGHT="yes" || WITH_PLAYWRIGHT="no"
+fi
+
+if [ "$WITH_PLAYWRIGHT" = "yes" ]; then
+  PW_CONFIG='{"mcpServers":{"playwright":{"command":"npx","args":["-y","@anthropic-ai/mcp-playwright"]}}}'
+
+  if [ -f .mcp.json ]; then
+    if grep -q '"playwright"' .mcp.json 2>/dev/null; then
+      echo "  🎭 Playwright already configured in .mcp.json, skipping."
+    elif command -v jq &>/dev/null; then
+      TMP_MCP=$(mktemp)
+      jq --argjson pw "$PW_CONFIG" '.mcpServers += $pw.mcpServers' .mcp.json > "$TMP_MCP" && mv "$TMP_MCP" .mcp.json
+      echo "  🎭 Playwright MCP server added to .mcp.json"
+    else
+      echo "  ⚠️  .mcp.json exists but jq not available to merge. Add manually."
+    fi
+  else
+    echo "$PW_CONFIG" | jq '.' > .mcp.json 2>/dev/null || echo "$PW_CONFIG" > .mcp.json
+    echo "  🎭 Playwright MCP server configured in .mcp.json"
+  fi
+else
+  echo "⏭️  Playwright MCP skipped."
+fi
+
 # --- 9d. Plugin summary -----------------------------------------------------
 if [ -n "$PENDING_PLUGINS" ]; then
   echo ""
@@ -1228,12 +1626,13 @@ echo "✅ Files created:"
 [ -f CLAUDE.md ] && echo "   - CLAUDE.md (project rules)"
 [ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
 [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
-echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker)"
+echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, context-freshness)"
 [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
 [ -d specs ] && echo "   - specs/ (spec-driven workflow)"
-[ -f .claude/commands/spec.md ] && echo "   - /spec command (.claude/commands/spec.md)"
+[ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, grill)"
+[ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer)"
 
-if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ]; then
+if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ] || [ "$WITH_PLAYWRIGHT" = "yes" ]; then
   echo ""
   echo "✅ Tools & Plugins:"
   [ "$WITH_GSD" = "yes" ] && [ -d "${HOME}/.claude/commands/gsd" ] && echo "   - GSD (Get Shit Done) - globally in ~/.claude/"
@@ -1247,6 +1646,7 @@ if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS
   fi
   [ -n "$INSTALLED_PLUGINS" ] && echo "   - Plugins: ${INSTALLED_PLUGINS}"
   [ "$WITH_CONTEXT7" = "yes" ] && [ -f .mcp.json ] && echo "   - Context7 MCP server (.mcp.json)"
+  [ "$WITH_PLAYWRIGHT" = "yes" ] && [ -f .mcp.json ] && echo "   - Playwright MCP server (.mcp.json)"
   if [ -n "$PENDING_PLUGINS" ]; then
     echo "   - ⚠️  Pending plugins: ${PENDING_PLUGINS}(see install commands above)"
   fi
@@ -1290,6 +1690,7 @@ else
   echo ""
   echo "Spec-driven workflow:"
   echo "  /spec \"task description\"    Create a structured spec before coding"
+  echo "  /spec-work 001              Execute a spec step by step"
   echo ""
   echo "To regenerate context files later:"
   echo "  npx @onedot/ai-setup --regenerate"

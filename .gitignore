@@ -1,2 +1,8 @@
 node_modules/
 .DS_Store
+
+# Claude Code / AI Setup
+.claude/settings.local.json
+.ai-setup.json
+.ai-setup-backup/
+.agents/context/.state
