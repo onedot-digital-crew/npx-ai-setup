@@ -112,12 +112,12 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | Command | Model | Description |
 |---------|-------|-------------|
 | `/spec "task"` | Opus (plan mode) | Create a structured spec — you approve before the file is written |
-| `/spec-work 001` | Sonnet | Execute a spec step by step |
-| `/commit` | Sonnet | Stage changes + create descriptive commit (no push) |
-| `/pr` | Sonnet | Prepare a PR — drafts title/body, you push and create manually |
+| `/spec-work 001` | Sonnet 4.6 | Execute a spec step by step |
+| `/commit` | Sonnet 4.6 | Stage changes + create descriptive commit (no push) |
+| `/pr` | Sonnet 4.6 | Prepare a PR — drafts title/body, you push and create manually |
 | `/review` | Opus (plan mode) | Review uncommitted changes — bugs, security, performance |
-| `/test` | Sonnet | Run tests + fix failures (up to 3 attempts) |
-| `/techdebt` | Sonnet | End-of-session sweep — dead code, unused imports, duplicates |
+| `/test` | Sonnet 4.6 | Run tests + fix failures (up to 3 attempts) |
+| `/techdebt` | Sonnet 4.6 | End-of-session sweep — dead code, unused imports, duplicates |
 | `/grill` | Opus (plan mode) | Adversarial code review — blocks until all issues resolved |
 
 ### 3. Subagent Templates (5 agents)
@@ -127,7 +127,7 @@ Subagents run as isolated agents for parallel or specialized work:
 | Agent | Model | Purpose |
 |-------|-------|---------|
 | `code-reviewer` | Opus | Code review with confidence scoring (HIGH/MEDIUM only) |
-| `verify-app` | Sonnet | Validate functionality — tests, build, edge cases |
+| `verify-app` | Sonnet 4.6 | Validate functionality — tests, build, edge cases |
 | `build-validator` | Haiku | Quick build verification — pass/fail with output |
 | `code-architect` | Opus | Architecture review — patterns, coupling, boundaries |
 | `staff-reviewer` | Opus (plan mode) | Skeptical staff engineer review of plans/implementations |

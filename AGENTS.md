@@ -102,11 +102,11 @@ Two slash commands enable structured task planning:
 
 When `--regenerate` or during initial setup with Claude CLI:
 
-1. **CLAUDE.md extension** (Sonnet, max 3 turns):
+1. **CLAUDE.md extension** (Sonnet 4.6, max 3 turns):
    - Populates `## Commands` from package.json scripts
    - Populates `## Critical Rules` from eslint/prettier config
 
-2. **Project Context Generation** (Sonnet, max 4 turns):
+2. **Project Context Generation** (Sonnet 4.6, max 4 turns):
    - Creates `.agents/context/STACK.md` - Technology stack
    - Creates `.agents/context/ARCHITECTURE.md` - System architecture
    - Creates `.agents/context/CONVENTIONS.md` - Coding standards

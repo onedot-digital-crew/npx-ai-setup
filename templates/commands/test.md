@@ -1,5 +1,5 @@
 ---
-model: sonnet
+model: sonnet-4-6
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

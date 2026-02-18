@@ -468,7 +468,7 @@ $(head -50 "$f" 2>/dev/null)"
   # Step 1: Extend CLAUDE.md (sonnet, background)
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
 
-  claude -p --model sonnet --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
+  claude -p --model sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
 
 Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any HTML comments in those sections).
 
@@ -490,7 +490,7 @@ $CONTEXT" >"$ERR_CM" 2>&1 &
   # Step 2: Generate project context (sonnet, background, parallel with Step 1)
   mkdir -p .agents/context
 
-  claude -p --model sonnet --permission-mode acceptEdits --max-turns 4 "IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
+  claude -p --model sonnet-4-6 --permission-mode acceptEdits --max-turns 4 "IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
 
 Create exactly 3 files in .agents/context/ using the Write tool:
 
