@@ -6,3 +6,5 @@ node_modules/
 .ai-setup.json
 .ai-setup-backup/
 .agents/context/.state
+
+.idea
