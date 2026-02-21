@@ -439,11 +439,11 @@ wait_parallel() {
 # Returns 1 if the user selected nothing (skip).
 ask_regen_parts() {
   # Arrow keys + Space to toggle + Enter to confirm (same style as select_system)
-  local options=("CLAUDE.md" "Context" "Skills")
-  local descriptions=("Commands & Critical Rules" ".agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)" "Search & install relevant skills")
-  local count=3
+  local options=("CLAUDE.md" "Context" "Commands" "Skills")
+  local descriptions=("Commands & Critical Rules" ".agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)" "Slash commands & agents (spec, commit, grill...)" "External skills from skills.sh")
+  local count=4
   local selected=0
-  local checked=(1 1 1)  # all pre-selected
+  local checked=(1 1 1 1)  # all pre-selected
 
   echo ""
   echo "  Select what to regenerate:"
@@ -495,12 +495,13 @@ ask_regen_parts() {
 
   printf '\033[?25h'
 
-  REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_SKILLS="no"
+  REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_COMMANDS="no"; REGEN_SKILLS="no"
   [ "${checked[0]}" -eq 1 ] && REGEN_CLAUDE_MD="yes"
   [ "${checked[1]}" -eq 1 ] && REGEN_CONTEXT="yes"
-  [ "${checked[2]}" -eq 1 ] && REGEN_SKILLS="yes"
+  [ "${checked[2]}" -eq 1 ] && REGEN_COMMANDS="yes"
+  [ "${checked[3]}" -eq 1 ] && REGEN_SKILLS="yes"
 
-  if [ "$REGEN_CLAUDE_MD" = "no" ] && [ "$REGEN_CONTEXT" = "no" ] && [ "$REGEN_SKILLS" = "no" ]; then
+  if [ "$REGEN_CLAUDE_MD" = "no" ] && [ "$REGEN_CONTEXT" = "no" ] && [ "$REGEN_COMMANDS" = "no" ] && [ "$REGEN_SKILLS" = "no" ]; then
     echo ""
     return 1
   fi
@@ -522,7 +523,26 @@ run_generation() {
   # Default: regenerate everything unless flags were explicitly set by ask_regen_parts
   : "${REGEN_CLAUDE_MD:=yes}"
   : "${REGEN_CONTEXT:=yes}"
+  : "${REGEN_COMMANDS:=yes}"
   : "${REGEN_SKILLS:=yes}"
+
+  # Re-deploy slash commands & agents from package templates
+  if [ "$REGEN_COMMANDS" = "yes" ]; then
+    echo "📋 Updating slash commands & agents..."
+    local cmd_updated=0
+    for mapping in "${TEMPLATE_MAP[@]}"; do
+      local tpl="${mapping%%:*}"
+      local target="${mapping#*:}"
+      if [[ "$tpl" == templates/commands/* ]] || [[ "$tpl" == templates/agents/* ]]; then
+        if [ -f "$SCRIPT_DIR/$tpl" ]; then
+          mkdir -p "$(dirname "$target")"
+          cp "$SCRIPT_DIR/$tpl" "$target"
+          cmd_updated=$((cmd_updated + 1))
+        fi
+      fi
+    done
+    echo "  ✅ $cmd_updated command/agent files updated"
+  fi
 
   echo "🚀 Generating project context (System: $SYSTEM)..."
 
