@@ -60,6 +60,7 @@ TEMPLATE_MAP=(
   "templates/claude/hooks/post-edit-lint.sh:.claude/hooks/post-edit-lint.sh"
   "templates/claude/hooks/circuit-breaker.sh:.claude/hooks/circuit-breaker.sh"
   "templates/claude/hooks/context-freshness.sh:.claude/hooks/context-freshness.sh"
+  "templates/claude/hooks/update-check.sh:.claude/hooks/update-check.sh"
   "templates/github/copilot-instructions.md:.github/copilot-instructions.md"
   "templates/specs/TEMPLATE.md:specs/TEMPLATE.md"
   "templates/specs/README.md:specs/README.md"
@@ -1363,7 +1364,7 @@ fi
 echo "🛡️  Creating hooks..."
 mkdir -p .claude/hooks
 
-for hook in protect-files.sh post-edit-lint.sh circuit-breaker.sh context-freshness.sh; do
+for hook in protect-files.sh post-edit-lint.sh circuit-breaker.sh context-freshness.sh update-check.sh; do
   if [ ! -f ".claude/hooks/$hook" ]; then
     cp "$TPL/claude/hooks/$hook" ".claude/hooks/$hook"
     chmod +x ".claude/hooks/$hook"
@@ -1798,7 +1799,7 @@ echo "✅ Files created:"
 [ -f CLAUDE.md ] && echo "   - CLAUDE.md (project rules)"
 [ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
 [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
-echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, context-freshness)"
+echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, context-freshness, update-check)"
 [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
 [ -d specs ] && echo "   - specs/ (spec-driven workflow)"
 [ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, grill)"
