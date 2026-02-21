@@ -10,6 +10,8 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-21
 
+- **feat**: Add Next.js/React system option with auto-detection and skill routing; update Nuxt label to "Nuxt 4 / Vue".
+
 - **Spec 010**: Aura Frog Quality Patterns — Added Task Complexity Routing section (simple/medium/complex with model guidance), dual-condition verification gate, and conditional TDD enforcement to `templates/CLAUDE.md`; added test framework detection (jest/vitest/mocha/pytest) to `bin/ai-setup.sh` Auto-Init to include TDD rules only when tests exist; confirmed Context7 MCP already implemented.
 
 - **Spec 009**: Auto-Detect System from Codebase Signals — Added `detect_system()` to resolve `--system auto` to a concrete system (shopify/nuxt/laravel/shopware/storyblok) via shell signals (`theme.liquid`, `artisan`, `composer.json`, `package.json` keywords), stores the resolved system in `.ai-setup.json`, and restores it on `--regenerate` runs.
