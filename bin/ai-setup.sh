@@ -433,6 +433,58 @@ wait_parallel() {
 }
 
 # ==============================================================================
+# REGENERATION PART SELECTOR
+# ==============================================================================
+# Sets REGEN_CLAUDE_MD, REGEN_CONTEXT, REGEN_SKILLS globals.
+# Returns 1 if the user selected nothing (skip).
+ask_regen_parts() {
+  # Interactive checkbox — all pre-selected, toggle with 1/2/3, Enter to confirm, q to skip
+  local sel_cm=1 sel_ctx=1 sel_skills=1
+  local c1 c2 c3 key
+
+  while true; do
+    [ "$sel_cm" = 1 ]     && c1="x" || c1=" "
+    [ "$sel_ctx" = 1 ]    && c2="x" || c2=" "
+    [ "$sel_skills" = 1 ] && c3="x" || c3=" "
+
+    echo ""
+    echo "   Select what to regenerate (1/2/3 to toggle, Enter to confirm, q to skip):"
+    echo "   [$c1] 1) CLAUDE.md  — Commands & Critical Rules"
+    echo "   [$c2] 2) Context    — .agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)"
+    echo "   [$c3] 3) Skills     — Search & install relevant skills"
+    echo ""
+    printf "   > "
+    read -r -n 1 -s key
+    echo ""
+
+    case "$key" in
+      1) [ "$sel_cm" = 1 ] && sel_cm=0 || sel_cm=1 ;;
+      2) [ "$sel_ctx" = 1 ] && sel_ctx=0 || sel_ctx=1 ;;
+      3) [ "$sel_skills" = 1 ] && sel_skills=0 || sel_skills=1 ;;
+      q|Q)
+        REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_SKILLS="no"
+        return 1
+        ;;
+      "")
+        break
+        ;;
+    esac
+    # Move cursor up 7 lines and clear to redraw
+    printf "\033[7A\033[J"
+  done
+
+  REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_SKILLS="no"
+  [ "$sel_cm" = 1 ]     && REGEN_CLAUDE_MD="yes"
+  [ "$sel_ctx" = 1 ]    && REGEN_CONTEXT="yes"
+  [ "$sel_skills" = 1 ] && REGEN_SKILLS="yes"
+
+  if [ "$REGEN_CLAUDE_MD" = "no" ] && [ "$REGEN_CONTEXT" = "no" ] && [ "$REGEN_SKILLS" = "no" ]; then
+    return 1
+  fi
+  return 0
+}
+
+# ==============================================================================
 # GENERATION: Claude populates CLAUDE.md + generates project context + skills
 # ==============================================================================
 # Called by both normal setup (Section 9) and --regenerate mode.
@@ -443,6 +495,11 @@ run_generation() {
   # cause silent exits with set -e (especially bash 3.2 on macOS).
   # This function has comprehensive error handling for all steps.
   set +e
+
+  # Default: regenerate everything unless flags were explicitly set by ask_regen_parts
+  : "${REGEN_CLAUDE_MD:=yes}"
+  : "${REGEN_CONTEXT:=yes}"
+  : "${REGEN_SKILLS:=yes}"
 
   echo "🚀 Generating project context (System: $SYSTEM)..."
 
@@ -514,6 +571,8 @@ If a test framework is present, add a 'TDD Workflow' subsection under Critical R
   fi
 
   # Step 1: Extend CLAUDE.md (sonnet, background)
+  PID_CM=""
+  if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
 
   claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
@@ -535,8 +594,11 @@ Rules:
 
 $CONTEXT" >"$ERR_CM" 2>&1 &
   PID_CM=$!
+  fi
 
   # Step 2: Generate project context (sonnet, background, parallel with Step 1)
+  PID_CTX=""
+  if [ "$REGEN_CONTEXT" = "yes" ]; then
   mkdir -p .agents/context
 
   claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 4 "IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
@@ -572,45 +634,53 @@ $CTX_README
 --- Sample source files ---
 $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
   PID_CTX=$!
+  fi
 
-  # Wait for both steps with parallel progress bars
+  # Wait for background processes
+  WAIT_ARGS=()
+  [ -n "$PID_CM" ] && WAIT_ARGS+=("$PID_CM:CLAUDE.md:30:120")
+  [ -n "$PID_CTX" ] && WAIT_ARGS+=("$PID_CTX:Project context:45:180")
   echo ""
-  wait_parallel "$PID_CM:CLAUDE.md:30:120" "$PID_CTX:Project context:45:180"
+  [ ${#WAIT_ARGS[@]} -gt 0 ] && wait_parallel "${WAIT_ARGS[@]}"
 
   # Verify Step 1: CLAUDE.md was actually modified
-  EXIT_CM=0
-  wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
-  CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
-  if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
-    echo ""
-    echo "  ⚠️  CLAUDE.md was not updated (exit code $EXIT_CM)."
-    if [ -s "$ERR_CM" ]; then
-      echo "  Output: $(tail -5 "$ERR_CM")"
+  if [ -n "$PID_CM" ]; then
+    EXIT_CM=0
+    wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
+    CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+    if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
+      echo ""
+      echo "  ⚠️  CLAUDE.md was not updated (exit code $EXIT_CM)."
+      if [ -s "$ERR_CM" ]; then
+        echo "  Output: $(tail -5 "$ERR_CM")"
+      fi
+      echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
     fi
-    echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
   fi
 
   # Verify Step 2: context files were created
-  EXIT_CTX=0
-  wait "$PID_CTX" 2>/dev/null || EXIT_CTX=$?
-  CTX_COUNT=0
-  [ -f .agents/context/STACK.md ] && CTX_COUNT=$((CTX_COUNT + 1))
-  [ -f .agents/context/ARCHITECTURE.md ] && CTX_COUNT=$((CTX_COUNT + 1))
-  [ -f .agents/context/CONVENTIONS.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+  if [ -n "$PID_CTX" ]; then
+    EXIT_CTX=0
+    wait "$PID_CTX" 2>/dev/null || EXIT_CTX=$?
+    CTX_COUNT=0
+    [ -f .agents/context/STACK.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+    [ -f .agents/context/ARCHITECTURE.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+    [ -f .agents/context/CONVENTIONS.md ] && CTX_COUNT=$((CTX_COUNT + 1))
 
-  if [ "$CTX_COUNT" -eq 3 ]; then
-    echo "  ✅ All 3 context files created in .agents/context/"
-  elif [ "$CTX_COUNT" -gt 0 ]; then
-    echo "  ⚠️  $CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
-    if [ -s "$ERR_CTX" ]; then
-      echo "  Output: $(tail -5 "$ERR_CTX")"
+    if [ "$CTX_COUNT" -eq 3 ]; then
+      echo "  ✅ All 3 context files created in .agents/context/"
+    elif [ "$CTX_COUNT" -gt 0 ]; then
+      echo "  ⚠️  $CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
+      if [ -s "$ERR_CTX" ]; then
+        echo "  Output: $(tail -5 "$ERR_CTX")"
+      fi
+    else
+      echo "  ⚠️  Context generation failed (exit code $EXIT_CTX)."
+      if [ -s "$ERR_CTX" ]; then
+        echo "  Output: $(tail -5 "$ERR_CTX")"
+      fi
+      echo "  Fix: Check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
     fi
-  else
-    echo "  ⚠️  Context generation failed (exit code $EXIT_CTX)."
-    if [ -s "$ERR_CTX" ]; then
-      echo "  Output: $(tail -5 "$ERR_CTX")"
-    fi
-    echo "  Fix: Check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
   fi
 
   # Save state for freshness detection
@@ -623,6 +693,7 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
   fi
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
+  if [ "$REGEN_SKILLS" = "yes" ]; then
   echo ""
   echo "🔌 Searching and installing skills..."
   INSTALLED=0
@@ -950,6 +1021,7 @@ Rules:
       install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
     done
   fi
+  fi # REGEN_SKILLS
 
   set -e
 }
@@ -1003,8 +1075,7 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
     echo "✅ Already up to date (v${PACKAGE_VERSION})."
     echo ""
     if command -v claude &>/dev/null; then
-      read -p "   Regenerate AI content (CLAUDE.md, context, skills)? (y/N) " REGEN_CHOICE
-      if [[ "$REGEN_CHOICE" =~ ^[Yy]$ ]]; then
+      if ask_regen_parts; then
         if [ -z "$SYSTEM" ]; then
           select_system
         fi
@@ -1100,9 +1171,7 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
 
         # Offer regeneration
         if command -v claude &>/dev/null; then
-          echo ""
-          read -p "   Regenerate AI content? (Y/n) " REGEN_CHOICE
-          if [[ ! "$REGEN_CHOICE" =~ ^[Nn]$ ]]; then
+          if ask_regen_parts; then
             if [ -z "$SYSTEM" ]; then
               select_system
             fi
