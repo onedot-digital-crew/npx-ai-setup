@@ -906,20 +906,25 @@ Rules:
         SYSTEM_SKILLS+=(
           "sickn33/antigravity-awesome-skills@shopify-development"
           "jeffallan/claude-skills@shopify-expert"
+          "henkisdabro/wookstar-claude-code-plugins@shopify-theme-dev"
         ) ;;
       nuxt)
         SYSTEM_SKILLS+=(
           "antfu/skills@nuxt"
           "onmax/nuxt-skills@nuxt"
+          "onmax/nuxt-skills@vue"
+          "onmax/nuxt-skills@vueuse"
         ) ;;
       next)
         SYSTEM_SKILLS+=(
           "vercel-labs/agent-skills@vercel-react-best-practices"
           "jeffallan/claude-skills@nextjs-developer"
+          "wshobson/agents@nextjs-app-router-patterns"
         ) ;;
       laravel)
         SYSTEM_SKILLS+=(
           "jeffallan/claude-skills@laravel-specialist"
+          "iserter/laravel-claude-agents@eloquent-best-practices"
         ) ;;
       shopware)
         SYSTEM_SKILLS+=(

@@ -10,6 +10,7 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-21
 
+- **feat**: Expand system skill sets with verified skills — Nuxt adds vue+vueuse, Shopify adds shopify-theme-dev, Next.js adds nextjs-app-router-patterns, Laravel adds eloquent-best-practices.
 - **fix**: Add skills.sh registry pre-check in `install_skill()` — skills not found in registry are skipped with a warning instead of failing.
 - **fix**: Replace unverified Next.js skills with `vercel-labs/agent-skills@vercel-react-best-practices` and `jeffallan/claude-skills@nextjs-developer`.
 - **fix**: Anchor skill validation regex with `$` to reject invalid skill IDs containing colons (e.g. `react:components`).
