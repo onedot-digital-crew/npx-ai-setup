@@ -72,6 +72,7 @@ TEMPLATE_MAP=(
   "templates/commands/review.md:.claude/commands/review.md"
   "templates/commands/test.md:.claude/commands/test.md"
   "templates/commands/techdebt.md:.claude/commands/techdebt.md"
+  "templates/commands/bug.md:.claude/commands/bug.md"
   "templates/commands/grill.md:.claude/commands/grill.md"
   "templates/agents/verify-app.md:.claude/agents/verify-app.md"
   "templates/agents/build-validator.md:.claude/agents/build-validator.md"
@@ -1403,7 +1404,7 @@ mkdir -p specs/completed
 # ------------------------------------------------------------------------------
 echo "⚡ Installing slash commands..."
 mkdir -p .claude/commands
-for cmd in spec.md spec-work.md commit.md pr.md review.md test.md techdebt.md grill.md; do
+for cmd in spec.md spec-work.md commit.md pr.md review.md test.md techdebt.md bug.md grill.md; do
   if [ ! -f ".claude/commands/$cmd" ]; then
     cp "$TPL/commands/$cmd" ".claude/commands/$cmd"
   else
@@ -1802,7 +1803,7 @@ echo "✅ Files created:"
 echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, context-freshness, update-check)"
 [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
 [ -d specs ] && echo "   - specs/ (spec-driven workflow)"
-[ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, grill)"
+[ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, bug, grill)"
 [ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer, context-refresher)"
 
 if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ] || [ "$WITH_PLAYWRIGHT" = "yes" ]; then

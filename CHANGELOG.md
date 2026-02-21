@@ -8,6 +8,10 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 <!-- Entries are prepended below this line, newest first -->
 
+## 2026-02-21
+
+- **Spec 012**: /bug Command for Bug Investigation — added `/bug` slash command template with structured reproduce → root cause → fix → verify workflow, registered in TEMPLATE_MAP and install loop.
+
 ## 2026-02-21 — v1.1.0
 
 - **feat**: Merge `/challenge` into `/spec` — spec now challenges the idea first (GO/SIMPLIFY/REJECT verdict in chat) before writing the spec; `/challenge` command removed.

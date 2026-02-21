@@ -121,6 +121,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | `/review` | Opus (plan mode) | Review uncommitted changes — bugs, security, performance |
 | `/test` | Sonnet 4.6 | Run tests + fix failures (up to 3 attempts) |
 | `/techdebt` | Sonnet 4.6 | End-of-session sweep — dead code, unused imports, duplicates |
+| `/bug "description"` | Sonnet 4.6 | Structured bug investigation: reproduce → root cause → fix → verify |
 | `/grill` | Opus (plan mode) | Adversarial code review — blocks until all issues resolved |
 
 ### 3. Subagent Templates (4 agents)
@@ -259,6 +260,7 @@ project/
 |   |   +-- review.md            # /review — code review (Opus)
 |   |   +-- test.md              # /test — run + fix tests
 |   |   +-- techdebt.md          # /techdebt — debt sweep
+|   |   +-- bug.md               # /bug — bug investigation (Sonnet)
 |   |   +-- grill.md             # /grill — adversarial review (Opus)
 |   +-- agents/                  # Subagent templates
 |   |   +-- verify-app.md        # App functionality validation
