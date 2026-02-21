@@ -109,7 +109,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Slash Commands (8 commands)
+### 2. Slash Commands (9 commands)
 
 | Command | Model | Description |
 |---------|-------|-------------|
@@ -121,6 +121,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | `/test` | Sonnet 4.6 | Run tests + fix failures (up to 3 attempts) |
 | `/techdebt` | Sonnet 4.6 | End-of-session sweep — dead code, unused imports, duplicates |
 | `/grill` | Opus (plan mode) | Adversarial code review — blocks until all issues resolved |
+| `/challenge "idea"` | Sonnet 4.6 | Adversarial feature evaluation — GO / SIMPLIFY / REJECT verdict |
 
 ### 3. Subagent Templates (4 agents)
 
