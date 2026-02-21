@@ -120,17 +120,18 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | `/techdebt` | Sonnet 4.6 | End-of-session sweep — dead code, unused imports, duplicates |
 | `/grill` | Opus (plan mode) | Adversarial code review — blocks until all issues resolved |
 
-### 3. Subagent Templates (5 agents)
+### 3. Subagent Templates (4 agents)
 
 Subagents run as isolated agents for parallel or specialized work:
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `code-reviewer` | Opus | Code review with confidence scoring (HIGH/MEDIUM only) |
 | `verify-app` | Sonnet 4.6 | Validate functionality — tests, build, edge cases |
 | `build-validator` | Haiku | Quick build verification — pass/fail with output |
-| `code-architect` | Opus | Architecture review — patterns, coupling, boundaries |
 | `staff-reviewer` | Opus (plan mode) | Skeptical staff engineer review of plans/implementations |
+| `context-refresher` | Sonnet 4.6 | Regenerate `.agents/context/` when project config changes |
+
+`context-refresher` is invoked automatically when the `context-freshness` hook detects stale context (`[CONTEXT STALE]` signal). Claude invokes it as a subagent before proceeding with the task.
 
 ### 4. Spec-driven workflow
 
@@ -490,6 +491,14 @@ Roadmap:
   /gsd:add-todo             Capture idea as todo
   /gsd:check-todos          Show open todos
 ```
+
+---
+
+## Documentation
+
+- [Concept](docs/CONCEPT.md) — Why this project exists, design philosophy, key ideas
+- [Architecture](docs/ARCHITECTURE.md) — How the system works end-to-end (setup flow, Auto-Init, hooks, skill curation)
+- [Design Decisions](docs/DESIGN-DECISIONS.md) — Key technical decisions with rationale
 
 ---
 
