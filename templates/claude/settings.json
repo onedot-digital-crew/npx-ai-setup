@@ -42,6 +42,9 @@
       "Bash(rm -r *)",
       "Bash(rm -rf *)",
       "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(git checkout -- *)",
+      "Bash(git restore *)",
       "Bash(npm publish *)"
     ]
   },
