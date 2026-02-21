@@ -20,6 +20,11 @@ Execute the spec: $ARGUMENTS
 
 5. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
+5.5. **Update CHANGELOG.md**: Prepend an entry to `CHANGELOG.md` in the project root:
+   - Find or create a `## YYYY-MM-DD` heading for today's date at the top of the entries section
+   - Under it, add: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
+   - Use the Edit tool to insert the entry after the `<!-- Entries are prepended below this line, newest first -->` comment
+
 6. **Complete the spec**:
    - Change status from `draft` to `completed` in the spec header
    - Move the file: `specs/NNN-*.md` -> `specs/completed/NNN-*.md`
