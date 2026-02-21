@@ -31,7 +31,7 @@ if [ "$COUNT" -ge "$BLOCK" ]; then
   echo "  1. Explain to the user what you were trying to do" >&2
   echo "  2. Describe what went wrong and why you kept editing" >&2
   echo "  3. Propose a different approach or ask for guidance" >&2
-  echo "  4. If needed: Clear the circuit breaker log with: rm ${LOG}" >&2
+  echo "  (Circuit breaker resets automatically when you send the next message)" >&2
   exit 2
 fi
 

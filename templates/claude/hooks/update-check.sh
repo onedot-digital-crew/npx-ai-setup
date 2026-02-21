@@ -1,5 +1,11 @@
 #!/bin/bash
-# Check for @onedot/ai-setup updates (background, cached, <50ms)
+# UserPromptSubmit hook: update check + circuit breaker reset
+# Runs on each user message (~15ms, no blocking calls)
+
+# Auto-reset circuit breaker — user sending a message = they've acknowledged the loop
+PROJ_HASH=$(echo "$PWD" | shasum | cut -c1-8)
+CB_LOG="/tmp/claude-cb-${PROJ_HASH}.log"
+[ -f "$CB_LOG" ] && rm -f "$CB_LOG"
 
 SETUP_JSON=".ai-setup.json"
 [ ! -f "$SETUP_JSON" ] && exit 0
