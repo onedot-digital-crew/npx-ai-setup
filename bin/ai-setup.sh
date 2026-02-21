@@ -900,7 +900,8 @@ Rules:
         ) ;;
       next)
         SYSTEM_SKILLS+=(
-          "grapeot/nextjs-claude-skills@nextjs"
+          "wshobson/agents@nextjs-app-router-patterns"
+          "sickn33/antigravity-awesome-skills@nextjs-best-practices"
         ) ;;
       laravel)
         SYSTEM_SKILLS+=(

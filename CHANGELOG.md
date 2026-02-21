@@ -10,6 +10,7 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-21
 
+- **fix**: Replace invalid Next.js skill with verified registry skills (wshobson/agents@nextjs-app-router-patterns, sickn33/antigravity-awesome-skills@nextjs-best-practices).
 - **feat**: Add Next.js/React system option with auto-detection and skill routing; update Nuxt label to "Nuxt 4 / Vue".
 
 - **Spec 010**: Aura Frog Quality Patterns — Added Task Complexity Routing section (simple/medium/complex with model guidance), dual-condition verification gate, and conditional TDD enforcement to `templates/CLAUDE.md`; added test framework detection (jest/vitest/mocha/pytest) to `bin/ai-setup.sh` Auto-Init to include TDD rules only when tests exist; confirmed Context7 MCP already implemented.
