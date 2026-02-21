@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
     --regenerate) REGENERATE="yes"; shift ;;
     --system)
       if [[ $# -lt 2 ]]; then
-        echo "❌ --system requires a value (auto|shopify|nuxt|laravel|shopware|storyblok)"
+        echo "❌ --system requires a value (auto|shopify|nuxt|next|laravel|shopware|storyblok)"
         exit 1
       fi
       SYSTEM="$2"; shift 2 ;;
@@ -177,7 +177,7 @@ collect_project_files() {
   fi
 }
 
-VALID_SYSTEMS=(auto shopify nuxt laravel shopware storyblok)
+VALID_SYSTEMS=(auto shopify nuxt next laravel shopware storyblok)
 
 # Validate --system value (supports comma-separated list)
 if [ -n "$SYSTEM" ]; then
@@ -202,8 +202,8 @@ fi
 
 # System/framework selection menu (multiselect with arrow-key navigation)
 select_system() {
-  local options=("auto" "shopify" "nuxt" "laravel" "shopware" "storyblok")
-  local descriptions=("Claude detects automatically" "Shopify Theme" "Nuxt 3+" "Laravel / PHP" "Shopware 6" "Storyblok CMS")
+  local options=("auto" "shopify" "nuxt" "next" "laravel" "shopware" "storyblok")
+  local descriptions=("Claude detects automatically" "Shopify Theme" "Nuxt 4 / Vue" "Next.js / React" "Laravel / PHP" "Shopware 6" "Storyblok CMS")
   local selected=0
   local count=${#options[@]}
   local -a checked=()
@@ -322,6 +322,8 @@ detect_system() {
     SYSTEM="shopware"
   elif [ -f package.json ] && grep -q '"nuxt"' package.json 2>/dev/null; then
     SYSTEM="nuxt"
+  elif [ -f package.json ] && grep -q '"next"' package.json 2>/dev/null; then
+    SYSTEM="next"
   elif [ -f package.json ] && grep -q '"@storyblok' package.json 2>/dev/null; then
     SYSTEM="storyblok"
   fi
@@ -895,6 +897,10 @@ Rules:
         SYSTEM_SKILLS+=(
           "antfu/skills@nuxt"
           "onmax/nuxt-skills@nuxt"
+        ) ;;
+      next)
+        SYSTEM_SKILLS+=(
+          "grapeot/nextjs-claude-skills@nextjs"
         ) ;;
       laravel)
         SYSTEM_SKILLS+=(
