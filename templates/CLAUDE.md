@@ -17,19 +17,34 @@ Before multi-file changes or new features, read `.agents/context/`:
 ## Critical Rules
 <!-- Auto-Init populates this -->
 
+## Task Complexity Routing
+Before starting, classify and state the task tier:
+
+- **Simple** (typos, single-file fixes, config tweaks): proceed directly
+- **Medium** (new feature, 2-3 files, component): use plan mode
+- **Complex** (architecture, refactor, new system): stop and tell the user to run
+  `/gsd:set-profile quality` or restart with `claude --model claude-opus-4-6`
+
+Never start a complex task without flagging the model requirement first.
+
 ## Verification
 After completing work, verify before marking done:
 - Run tests if available (`/test`)
 - For UI changes: use browser tools or describe expected result
 - For API changes: make a test request
 - Check the build still passes
-Never mark work as completed without verification.
+
+Never mark work as completed without BOTH:
+1. Automated checks pass (tests green, linter clean, build succeeds)
+2. Explicit statement: "Verification complete: [what was checked and result]"
 
 ## Context Management
 Your context will be compacted automatically — this is normal. Before compaction:
 - Commit current work or save state to HANDOFF.md
 - Track remaining work in the spec or a todo list
 After fresh start: review git log, open specs, check test state.
+
+If you see `[CONTEXT STALE]` in your context: invoke the `context-refresher` subagent before proceeding with the task. This regenerates `.agents/context/` to reflect the current project state.
 
 ## Prompt Cache Strategy
 Claude caches prompts as a prefix — static content first, dynamic content last maximizes cache hits:

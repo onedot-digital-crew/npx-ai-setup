@@ -74,6 +74,7 @@ TEMPLATE_MAP=(
   "templates/agents/verify-app.md:.claude/agents/verify-app.md"
   "templates/agents/build-validator.md:.claude/agents/build-validator.md"
   "templates/agents/staff-reviewer.md:.claude/agents/staff-reviewer.md"
+  "templates/agents/context-refresher.md:.claude/agents/context-refresher.md"
 )
 
 # Get package version from package.json
@@ -120,7 +121,8 @@ write_metadata() {
     --arg ver "$version" \
     --arg inst "$install_time" \
     --arg upd "$timestamp" \
-    '{version: $ver, installed_at: $inst, updated_at: $upd, files: {}}')
+    --arg sys "${SYSTEM:-}" \
+    '{version: $ver, installed_at: $inst, updated_at: $upd, system: $sys, files: {}}')
 
   for mapping in "${TEMPLATE_MAP[@]}"; do
     local tpl="${mapping%%:*}"
@@ -307,6 +309,28 @@ select_system() {
   echo "  Selected: $SYSTEM"
 }
 
+# Detect system from codebase signals when SYSTEM="auto"
+# Updates SYSTEM in-place if a concrete signal is found
+detect_system() {
+  [ "$SYSTEM" != "auto" ] && return 0
+
+  if find . -maxdepth 4 -name "theme.liquid" -not -path "*/node_modules/*" 2>/dev/null | grep -q .; then
+    SYSTEM="shopify"
+  elif [ -f composer.json ] && [ -f artisan ]; then
+    SYSTEM="laravel"
+  elif [ -f composer.json ] && [ -d vendor/shopware ]; then
+    SYSTEM="shopware"
+  elif [ -f package.json ] && grep -q '"nuxt"' package.json 2>/dev/null; then
+    SYSTEM="nuxt"
+  elif [ -f package.json ] && grep -q '"@storyblok' package.json 2>/dev/null; then
+    SYSTEM="storyblok"
+  fi
+
+  if [ "$SYSTEM" != "auto" ]; then
+    echo "  🔍 Detected system: $SYSTEM"
+  fi
+}
+
 # Kill process + all child processes (Claude spawns sub-agents)
 kill_tree() {
   local pid=$1
@@ -465,6 +489,27 @@ $(head -50 "$f" 2>/dev/null)"
   ERR_CTX=$(mktemp)
   trap "rm -f '$ERR_CM' '$ERR_CTX'" RETURN
 
+  # Detect test framework for conditional TDD rule
+  HAS_TESTS=""
+  if cat package.json 2>/dev/null | grep -qE '"(jest|vitest|mocha|jasmine|ava)"'; then
+    HAS_TESTS="jest/vitest/mocha"
+  elif [ -f "pytest.ini" ] || [ -f "pyproject.toml" ] && grep -q "pytest" pyproject.toml 2>/dev/null; then
+    HAS_TESTS="pytest"
+  elif [ -f "requirements.txt" ] && grep -qi "pytest" requirements.txt 2>/dev/null; then
+    HAS_TESTS="pytest"
+  fi
+
+  TDD_INSTRUCTION=""
+  if [ -n "$HAS_TESTS" ]; then
+    TDD_INSTRUCTION="
+## TDD Workflow ($HAS_TESTS detected)
+If a test framework is present, add a 'TDD Workflow' subsection under Critical Rules:
+- Before implementing ANY logic, write a failing test first (Red)
+- Implement minimum code to make the test pass (Green)
+- Refactor if needed, keep tests green (Refactor)
+- Never write implementation code without a test first"
+  fi
+
   # Step 1: Extend CLAUDE.md (sonnet, background)
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
 
@@ -478,6 +523,7 @@ Based on the package.json scripts below, document the most important ones (dev, 
 ## Critical Rules
 Based on the eslint/prettier config below and the framework/system ($SYSTEM), write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
 Cover these categories where evidence exists: code style (formatting, naming), TypeScript (strict mode, type patterns), imports (path aliases, barrel files), framework-specific (SSR, routing, state), testing (commands, patterns). Omit categories where no evidence exists in the config — do not fabricate rules.
+$TDD_INSTRUCTION
 
 Rules:
 - Edit CLAUDE.md directly. Replace both sections including any <!-- comments -->.
@@ -893,8 +939,19 @@ if [ "$REGENERATE" = "yes" ]; then
 
   # Select system if not provided via --system flag
   if [ -z "$SYSTEM" ]; then
+    # Try to restore from previous run stored in .ai-setup.json
+    if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
+      STORED_SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+      if [ -n "$STORED_SYSTEM" ] && [ "$STORED_SYSTEM" != "auto" ]; then
+        SYSTEM="$STORED_SYSTEM"
+        echo "  🔍 Restored system from previous run: $SYSTEM"
+      fi
+    fi
+  fi
+  if [ -z "$SYSTEM" ]; then
     select_system
   fi
+  detect_system
 
   run_generation
 
@@ -924,6 +981,7 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         if [ -z "$SYSTEM" ]; then
           select_system
         fi
+        detect_system
         run_generation
         write_metadata
         echo ""
@@ -1021,6 +1079,7 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
             if [ -z "$SYSTEM" ]; then
               select_system
             fi
+            detect_system
             run_generation
             write_metadata
           fi
@@ -1217,7 +1276,7 @@ done
 # ------------------------------------------------------------------------------
 echo "🤖 Installing subagent templates..."
 mkdir -p .claude/agents
-for agent in verify-app.md build-validator.md staff-reviewer.md; do
+for agent in verify-app.md build-validator.md staff-reviewer.md context-refresher.md; do
   if [ ! -f ".claude/agents/$agent" ]; then
     cp "$TPL/agents/$agent" ".claude/agents/$agent"
   else
@@ -1562,6 +1621,7 @@ if [ "$AI_CLI" = "claude" ]; then
     if [ -z "$SYSTEM" ]; then
       select_system
     fi
+    detect_system
 
     run_generation
 
@@ -1603,7 +1663,7 @@ echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, conte
 [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
 [ -d specs ] && echo "   - specs/ (spec-driven workflow)"
 [ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, grill)"
-[ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer)"
+[ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer, context-refresher)"
 
 if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ] || [ "$WITH_PLAYWRIGHT" = "yes" ]; then
   echo ""
