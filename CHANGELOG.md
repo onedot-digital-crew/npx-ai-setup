@@ -10,6 +10,9 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-21
 
+- **Spec 011**: Bulk Spec Execution via Agents — adds `/spec-work-all` slash command that discovers all draft specs and executes them in parallel via subagents, with wave-based dependency ordering and a final summary report.
+
+
 - **feat**: Add `/challenge` command to `templates/commands/` — all target projects now get adversarial feature evaluation out of the box.
 
 - **feat**: Expand system skill sets with verified skills — Nuxt adds vue+vueuse, Shopify adds shopify-theme-dev, Next.js adds nextjs-app-router-patterns, Laravel adds eloquent-best-practices.

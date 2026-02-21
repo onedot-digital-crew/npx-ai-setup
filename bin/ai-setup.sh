@@ -65,6 +65,7 @@ TEMPLATE_MAP=(
   "templates/specs/README.md:specs/README.md"
   "templates/commands/spec.md:.claude/commands/spec.md"
   "templates/commands/spec-work.md:.claude/commands/spec-work.md"
+  "templates/commands/spec-work-all.md:.claude/commands/spec-work-all.md"
   "templates/commands/commit.md:.claude/commands/commit.md"
   "templates/commands/pr.md:.claude/commands/pr.md"
   "templates/commands/review.md:.claude/commands/review.md"

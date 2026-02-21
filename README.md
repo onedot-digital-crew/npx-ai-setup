@@ -109,12 +109,13 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Slash Commands (9 commands)
+### 2. Slash Commands (10 commands)
 
 | Command | Model | Description |
 |---------|-------|-------------|
 | `/spec "task"` | Opus (plan mode) | Create a structured spec — you approve before the file is written |
 | `/spec-work 001` | Sonnet 4.6 | Execute a spec step by step |
+| `/spec-work-all` | Sonnet 4.6 | Execute all draft specs in parallel via subagents |
 | `/commit` | Sonnet 4.6 | Stage changes + create descriptive commit (no push) |
 | `/pr` | Sonnet 4.6 | Prepare a PR — drafts title/body, you push and create manually |
 | `/review` | Opus (plan mode) | Review uncommitted changes — bugs, security, performance |
@@ -241,6 +242,7 @@ project/
 |   +-- commands/                # Slash commands
 |   |   +-- spec.md              # /spec — create specs (Opus)
 |   |   +-- spec-work.md         # /spec-work — execute specs (Sonnet)
+|   |   +-- spec-work-all.md     # /spec-work-all — bulk execute via subagents
 |   |   +-- commit.md            # /commit — stage + commit
 |   |   +-- pr.md                # /pr — prepare PR
 |   |   +-- review.md            # /review — code review (Opus)

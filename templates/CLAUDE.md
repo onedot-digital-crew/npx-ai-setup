@@ -71,6 +71,7 @@ Specs live in `specs/` -- structured task plans created before coding.
 1. `/spec "task"` (Opus in plan mode - creates detailed plan, you approve, spec file is created)
 2. Review and refine spec if needed
 3. `/spec-work NNN` (Sonnet executes the approved plan step-by-step)
-4. Completed specs move to `specs/completed/`
+4. `/spec-work-all` (Sonnet executes all draft specs in parallel via subagents)
+5. Completed specs move to `specs/completed/`
 
 See `specs/README.md` for details.
