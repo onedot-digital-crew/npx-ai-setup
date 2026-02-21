@@ -818,14 +818,28 @@ Rules:
         install_skill() {
           local sid=$1
           local skill_name="${sid##*@}"  # Extract skill name after @
-          
+          local owner_repo="${sid%@*}"
+          local owner="${owner_repo%/*}"
+          local repo="${owner_repo#*/}"
+
           # Check if already installed (local or global)
           if [ -d ".claude/skills/$skill_name" ] || [ -d "${HOME}/.claude/skills/$skill_name" ]; then
             printf "     ⏭️  %s (already installed)\n" "$sid"
             SKIPPED=$((SKIPPED + 1))
             return 0
           fi
-          
+
+          # Verify skill exists on skills.sh registry before attempting install
+          if command -v curl >/dev/null 2>&1; then
+            local status
+            status=$(curl -s -o /dev/null -w "%{http_code}" \
+              "https://skills.sh/$owner/$repo/$skill_name" 2>/dev/null)
+            if [ "$status" != "200" ]; then
+              printf "     ⚠️  %s (not in registry, skipping)\n" "$sid"
+              return 0
+            fi
+          fi
+
           printf "     ⏳ %s ..." "$sid"
           if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
             printf "\r     ✅ %s\n" "$sid"
@@ -900,8 +914,8 @@ Rules:
         ) ;;
       next)
         SYSTEM_SKILLS+=(
-          "wshobson/agents@nextjs-app-router-patterns"
-          "sickn33/antigravity-awesome-skills@nextjs-best-practices"
+          "vercel-labs/agent-skills@vercel-react-best-practices"
+          "jeffallan/claude-skills@nextjs-developer"
         ) ;;
       laravel)
         SYSTEM_SKILLS+=(

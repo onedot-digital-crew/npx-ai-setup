@@ -10,6 +10,8 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-21
 
+- **fix**: Add skills.sh registry pre-check in `install_skill()` — skills not found in registry are skipped with a warning instead of failing.
+- **fix**: Replace unverified Next.js skills with `vercel-labs/agent-skills@vercel-react-best-practices` and `jeffallan/claude-skills@nextjs-developer`.
 - **fix**: Anchor skill validation regex with `$` to reject invalid skill IDs containing colons (e.g. `react:components`).
 - **fix**: Replace invalid Next.js skill with verified registry skills (wshobson/agents@nextjs-app-router-patterns, sickn33/antigravity-awesome-skills@nextjs-best-practices).
 - **feat**: Add Next.js/React system option with auto-detection and skill routing; update Nuxt label to "Nuxt 4 / Vue".
