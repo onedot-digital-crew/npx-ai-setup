@@ -109,11 +109,11 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Slash Commands (10 commands)
+### 2. Slash Commands (9 commands)
 
 | Command | Model | Description |
 |---------|-------|-------------|
-| `/spec "task"` | Opus (plan mode) | Create a structured spec — you approve before the file is written |
+| `/spec "task"` | Opus (plan mode) | Challenge idea first (GO/SIMPLIFY/REJECT), then create structured spec |
 | `/spec-work 001` | Sonnet 4.6 | Execute a spec step by step |
 | `/spec-work-all` | Sonnet 4.6 | Execute all draft specs in parallel via subagents |
 | `/commit` | Sonnet 4.6 | Stage changes + create descriptive commit (no push) |
@@ -122,7 +122,6 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | `/test` | Sonnet 4.6 | Run tests + fix failures (up to 3 attempts) |
 | `/techdebt` | Sonnet 4.6 | End-of-session sweep — dead code, unused imports, duplicates |
 | `/grill` | Opus (plan mode) | Adversarial code review — blocks until all issues resolved |
-| `/challenge "idea"` | Sonnet 4.6 | Adversarial feature evaluation — GO / SIMPLIFY / REJECT verdict |
 
 ### 3. Subagent Templates (4 agents)
 
@@ -508,6 +507,14 @@ Roadmap:
 - [Concept](docs/CONCEPT.md) — Why this project exists, design philosophy, key ideas
 - [Architecture](docs/ARCHITECTURE.md) — How the system works end-to-end (setup flow, Auto-Init, hooks, skill curation)
 - [Design Decisions](docs/DESIGN-DECISIONS.md) — Key technical decisions with rationale
+
+---
+
+## Recommended Tools
+
+Tools that complement this setup but are installed independently:
+
+- [ccusage](https://github.com/ryoppippi/ccusage) — Analyze Claude Code token usage and costs from local session files. Run `npx ccusage` to see daily/monthly breakdowns, billing windows, and per-model cost analysis.
 
 ---
 

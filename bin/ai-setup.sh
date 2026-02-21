@@ -72,7 +72,6 @@ TEMPLATE_MAP=(
   "templates/commands/test.md:.claude/commands/test.md"
   "templates/commands/techdebt.md:.claude/commands/techdebt.md"
   "templates/commands/grill.md:.claude/commands/grill.md"
-  "templates/commands/challenge.md:.claude/commands/challenge.md"
   "templates/agents/verify-app.md:.claude/agents/verify-app.md"
   "templates/agents/build-validator.md:.claude/agents/build-validator.md"
   "templates/agents/staff-reviewer.md:.claude/agents/staff-reviewer.md"

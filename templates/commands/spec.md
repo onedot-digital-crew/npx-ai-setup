@@ -6,15 +6,64 @@ allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 
 Create a structured spec for the following task: $ARGUMENTS
 
-## Process
+## Phase 1 — Challenge the Idea
 
-1. **Determine spec number**: Scan `specs/` (including `specs/completed/`) for existing `NNN-*.md` files, find the highest number, and increment by 1. If no specs exist, start at `001`. Always use 3-digit zero-padded numbers (`001`, `002`, ..., `010`, ..., `099`, `100`).
+Before writing anything, critically evaluate this idea. Present your findings in the chat.
 
-2. **Analyze the task**: Read only the most relevant 2-3 source files to understand the change. Do NOT read the entire codebase.
+### 1a — Concept Fit
+Read `docs/CONCEPT.md`. Then answer:
+- Does this align with the project's core principles: **one command, zero config, template-based**?
+- Does it fit the "templates not generation" distinction?
+- Would this belong in the scaffolding layer, or is it scope creep?
 
-3. **Create the spec file**: Create `specs/NNN-short-description.md` using the structure below.
+Rate concept fit: **ALIGNED / BORDERLINE / MISALIGNED**
 
-4. **Present the spec** to the user for review and refinement.
+### 1b — Necessity
+Challenge it hard:
+- What problem does it solve? Is that problem real or hypothetical?
+- What happens if we don't build it?
+- Is this solving a problem users have reported, or one we imagined?
+
+### 1c — Overhead & Maintenance Cost
+- How much ongoing maintenance does this add?
+- Does it increase tool surface area (more flags, more config, more docs)?
+- Does it add complexity that slows down the "one command" promise?
+
+### 1d — Simpler Alternatives
+List 1-3 alternatives, including:
+- A simpler version (scope reduction)
+- A workaround that avoids building anything
+- **"Don't build it"** — explicitly if it applies
+
+Scan with Glob and Grep to check if similar functionality already exists.
+
+### 1e — Verdict
+
+Output the verdict clearly in the chat. Choose exactly one:
+
+**GO** — Concept fits, clearly needed, manageable complexity. Proceed to spec.
+
+**SIMPLIFY** — Merits exist but scope is too large. State the smaller version, then ask the user to confirm before proceeding to spec.
+
+**REJECT** — Misaligned, unnecessary, or unjustified overhead. State reason. Do NOT create a spec. Stop here.
+
+---
+
+## Phase 2 — Write the Spec
+
+Only proceed if verdict is GO or user confirmed a SIMPLIFY scope.
+
+### Step 1 — Determine spec number
+Scan `specs/` (including `specs/completed/`) for existing `NNN-*.md` files, find the highest number, increment by 1. Always use 3-digit zero-padded numbers (`001`, `002`, ..., `099`, `100`).
+
+### Step 2 — Analyze the task
+Read only the most relevant 2-3 source files. Do NOT read the entire codebase.
+
+### Step 3 — Create the spec file
+Create `specs/NNN-short-description.md` using the structure below.
+
+### Step 4 — Present the spec
+Show the spec to the user for review and refinement.
 
 ## Spec Template
 
