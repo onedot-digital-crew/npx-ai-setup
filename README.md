@@ -17,6 +17,8 @@ npx github:onedot-digital-crew/npx-ai-setup --system nuxt
 
 # Multiple systems (comma-separated)
 npx github:onedot-digital-crew/npx-ai-setup --system nuxt,storyblok
+
+# Available: auto, shopify, nuxt, next, laravel, shopware, storyblok
 ```
 
 During interactive setup, use **Space** to toggle multiple selections (e.g., Nuxt + Storyblok).
@@ -101,7 +103,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 
 ### 1. Project scaffolding (instant)
 
-- Copies `CLAUDE.md` with communication protocol and project documentation references
+- Copies `CLAUDE.md` with communication protocol, project documentation references, task complexity routing (simple/medium/complex with model guidance), and dual-condition verification gate
 - Sets up `.claude/settings.json` with granular bash permissions (no `Bash(*)`)
 - Installs hooks: auto-lint on edit, file protection (.env, package-lock.json), circuit breaker (detects edit loops)
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
@@ -190,13 +192,18 @@ Claude selects the top 5 most relevant skills based on install counts, maintaine
 Selected skills are installed with live status updates.
 
 **Phase 5 — System-specific Skills** (always installed for known systems)
-Default skills per system:
+Default skills per system (all verified on skills.sh):
 
-- **Shopify**: `sickn33/antigravity-awesome-skills@shopify-development`, `jeffallan/claude-skills@shopify-expert`
-- **Nuxt**: `antfu/skills@nuxt`, `onmax/nuxt-skills@nuxt`
-- **Laravel**: `jeffallan/claude-skills@laravel-specialist`
-- **Shopware**: `bartundmett/skills@shopware6-best-practices`
-- **Storyblok**: `bartundmett/skills@storyblok-best-practices`
+| System | Skills |
+|--------|--------|
+| **Shopify** | `sickn33/antigravity-awesome-skills@shopify-development`, `jeffallan/claude-skills@shopify-expert`, `henkisdabro/wookstar-claude-code-plugins@shopify-theme-dev` |
+| **Nuxt 4 / Vue** | `antfu/skills@nuxt`, `onmax/nuxt-skills@nuxt`, `onmax/nuxt-skills@vue`, `onmax/nuxt-skills@vueuse` |
+| **Next.js / React** | `vercel-labs/agent-skills@vercel-react-best-practices`, `jeffallan/claude-skills@nextjs-developer`, `wshobson/agents@nextjs-app-router-patterns` |
+| **Laravel** | `jeffallan/claude-skills@laravel-specialist`, `iserter/laravel-claude-agents@eloquent-best-practices` |
+| **Shopware** | `bartundmett/skills@shopware6-best-practices` |
+| **Storyblok** | `bartundmett/skills@storyblok-best-practices` |
+
+All skill IDs are pre-validated against the skills.sh registry before install — invalid skills are skipped with a warning instead of failing.
 
 **Fallback**: If Claude is unavailable or times out, top 3 per technology are installed without AI curation.
 
@@ -213,7 +220,7 @@ Default skills per system:
 Granular bash permissions instead of `Bash(*)`:
 
 - **Allowed**: `git add/commit/status/log/diff/tag/branch/checkout/stash`, `npm run/test/install`, `eslint`, `prettier`, `vitest`, `playwright`, `gh pr/issue`, `jq`, `curl`, `cat/ls/grep/...`
-- **Denied**: `git push`, `git reset --hard`, `rm -r`, `rm -rf`, `npm publish`, reading `.env`
+- **Denied**: `git push`, `git reset --hard`, `git clean`, `git checkout --`, `git restore`, `rm -r`, `rm -rf`, `npm publish`, reading `.env`
 
 For maximum autonomy: `claude --dangerously-skip-permissions`
 
@@ -240,11 +247,10 @@ project/
 |   |   +-- techdebt.md          # /techdebt — debt sweep
 |   |   +-- grill.md             # /grill — adversarial review (Opus)
 |   +-- agents/                  # Subagent templates
-|   |   +-- code-reviewer.md     # Confidence-scored code review
 |   |   +-- verify-app.md        # App functionality validation
 |   |   +-- build-validator.md   # Build success check
-|   |   +-- code-architect.md    # Architecture review
 |   |   +-- staff-reviewer.md    # Skeptical staff engineer
+|   |   +-- context-refresher.md # Regenerates .agents/context/ on [CONTEXT STALE]
 |   +-- hooks/
 |       +-- protect-files.sh     # Protects .env, package-lock.json, .git/
 |       +-- post-edit-lint.sh    # ESLint + Prettier after Edit
