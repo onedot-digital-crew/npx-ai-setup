@@ -482,6 +482,7 @@ Cover these categories where evidence exists: code style (formatting, naming), T
 Rules:
 - Edit CLAUDE.md directly. Replace both sections including any <!-- comments -->.
 - No umlauts. English only.
+- Keep CLAUDE.md content stable and static — it is a prompt cache layer. Do not add timestamps, random IDs, or session-specific data.
 
 $CONTEXT" >"$ERR_CM" 2>&1 &
   PID_CM=$!

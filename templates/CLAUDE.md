@@ -31,6 +31,16 @@ Your context will be compacted automatically — this is normal. Before compacti
 - Track remaining work in the spec or a todo list
 After fresh start: review git log, open specs, check test state.
 
+## Prompt Cache Strategy
+Claude caches prompts as a prefix — static content first, dynamic content last maximizes cache hits:
+1. **System prompt + tools** — globally cached across all sessions
+2. **CLAUDE.md** — cached per project (do not edit mid-session)
+3. **Session context** (`.agents/context/`) — cached per session
+4. **Conversation messages** — dynamic, appended each turn
+
+Do not edit CLAUDE.md or tool definitions mid-session — it breaks the cache for all subsequent turns.
+Pass dynamic updates (timestamps, file changes) via messages, not by editing static layers.
+
 ## Working Style
 Read relevant code before answering questions about it.
 Implement changes rather than only suggesting them.

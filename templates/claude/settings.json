@@ -1,4 +1,5 @@
 {
+  "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
   "permissions": {
     "allow": [
       "Read(src/**)",

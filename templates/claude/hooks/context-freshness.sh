@@ -2,6 +2,10 @@
 # context-freshness.sh — UserPromptSubmit hook
 # Warns when .agents/context/ files may be outdated (package.json or tsconfig changed)
 # Silent pass when up-to-date or state file missing (~10ms runtime, no API calls)
+#
+# Cache note: Warning is injected as stderr output (shown as a system message in Claude's turn),
+# NOT by editing CLAUDE.md. This preserves the prompt cache prefix — editing static layers
+# mid-session would invalidate the cache for all subsequent turns.
 
 STATE_FILE=".agents/context/.state"
 [ ! -f "$STATE_FILE" ] && exit 0
