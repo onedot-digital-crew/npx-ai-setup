@@ -810,7 +810,7 @@ Rules:
           SELECTED=$(echo "$SELECTED" \
             | sed 's/`//g' \
             | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
-            | grep -E '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+' \
+            | grep -E '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+$' \
             | head -5)
         fi
 
