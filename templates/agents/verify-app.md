@@ -2,7 +2,7 @@
 name: verify-app
 description: Validates application functionality after changes by running tests, builds, and edge case checks.
 tools: Read, Glob, Grep, Bash
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 You are a verification agent. Thoroughly validate application functionality after changes.

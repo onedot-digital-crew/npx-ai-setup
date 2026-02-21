@@ -8,6 +8,14 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 <!-- Entries are prepended below this line, newest first -->
 
+## 2026-02-21 — v1.1.0
+
+- **feat**: Merge `/challenge` into `/spec` — spec now challenges the idea first (GO/SIMPLIFY/REJECT verdict in chat) before writing the spec; `/challenge` command removed.
+- **feat**: Interactive checkbox selector for regeneration — replaces the y/N prompt with an arrow+space UI (same style as system selector); 4 options: CLAUDE.md, Context, Commands, Skills.
+- **feat**: Split regeneration Skills into Commands (internal slash commands/agents) and Skills (external skills.sh); Commands re-deploys templates from the package.
+- **fix**: Replace full model IDs (`claude-sonnet-4-6`) with short aliases (`sonnet`) in all command/agent frontmatter — fixes IDE validation errors.
+- **docs**: Add ccusage to README as recommended tool for session token usage analysis.
+
 ## 2026-02-21
 
 - **Spec 011**: Bulk Spec Execution via Agents — adds `/spec-work-all` slash command that discovers all draft specs and executes them in parallel via subagents, with wave-based dependency ordering and a final summary report.

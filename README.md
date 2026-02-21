@@ -174,6 +174,18 @@ These files are referenced by both `CLAUDE.md` and `.github/copilot-instructions
 npx github:onedot-digital-crew/npx-ai-setup --regenerate
 ```
 
+Or just run `npx @onedot/ai-setup` again — if already up to date, you'll get an interactive selector to choose what to regenerate:
+
+```
+  Select what to regenerate:
+  (Use ↑↓ arrows, Space to toggle, Enter to confirm)
+
+  ▸ [✓] CLAUDE.md     Commands & Critical Rules
+    [✓] Context       .agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)
+    [✓] Commands      Slash commands & agents (spec, commit, grill...)
+    [✓] Skills        External skills from skills.sh
+```
+
 ### 5. AI-curated Skills installation
 
 Skills are automatically detected, curated, and installed in 4 phases:
