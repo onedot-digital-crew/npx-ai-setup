@@ -438,47 +438,70 @@ wait_parallel() {
 # Sets REGEN_CLAUDE_MD, REGEN_CONTEXT, REGEN_SKILLS globals.
 # Returns 1 if the user selected nothing (skip).
 ask_regen_parts() {
-  # Interactive checkbox — all pre-selected, toggle with 1/2/3, Enter to confirm, q to skip
-  local sel_cm=1 sel_ctx=1 sel_skills=1
-  local c1 c2 c3 key
+  # Arrow keys + Space to toggle + Enter to confirm (same style as select_system)
+  local options=("CLAUDE.md" "Context" "Skills")
+  local descriptions=("Commands & Critical Rules" ".agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)" "Search & install relevant skills")
+  local count=3
+  local selected=0
+  local checked=(1 1 1)  # all pre-selected
+
+  echo ""
+  echo "  Select what to regenerate:"
+  echo "  (Use ↑↓ arrows, Space to toggle, Enter to confirm)"
+  echo ""
+
+  printf '\033[?25l'
+  trap 'printf "\033[?25h"' RETURN 2>/dev/null || true
+
+  for ((i=0; i<count; i++)); do
+    local checkbox="[ ]"
+    [ "${checked[$i]}" -eq 1 ] && checkbox="[✓]"
+    if [ $i -eq $selected ]; then
+      printf '  \033[7m ▸ %s %-12s %s \033[0m\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+    else
+      printf '    %s %-12s %s\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+    fi
+  done
 
   while true; do
-    [ "$sel_cm" = 1 ]     && c1="x" || c1=" "
-    [ "$sel_ctx" = 1 ]    && c2="x" || c2=" "
-    [ "$sel_skills" = 1 ] && c3="x" || c3=" "
-
-    echo ""
-    echo "   Select what to regenerate (1/2/3 to toggle, Enter to confirm, q to skip):"
-    echo "   [$c1] 1) CLAUDE.md  — Commands & Critical Rules"
-    echo "   [$c2] 2) Context    — .agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)"
-    echo "   [$c3] 3) Skills     — Search & install relevant skills"
-    echo ""
-    printf "   > "
-    read -r -n 1 -s key
-    echo ""
-
+    IFS= read -rsn1 key
     case "$key" in
-      1) [ "$sel_cm" = 1 ] && sel_cm=0 || sel_cm=1 ;;
-      2) [ "$sel_ctx" = 1 ] && sel_ctx=0 || sel_ctx=1 ;;
-      3) [ "$sel_skills" = 1 ] && sel_skills=0 || sel_skills=1 ;;
-      q|Q)
-        REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_SKILLS="no"
-        return 1
+      $'\x1b')
+        read -rsn2 seq
+        case "$seq" in
+          '[A') selected=$(( (selected - 1 + count) % count )) ;;
+          '[B') selected=$(( (selected + 1) % count )) ;;
+        esac
+        ;;
+      " ")
+        [ "${checked[$selected]}" -eq 1 ] && checked[$selected]=0 || checked[$selected]=1
         ;;
       "")
         break
         ;;
     esac
-    # Move cursor up 7 lines and clear to redraw
-    printf "\033[7A\033[J"
+
+    printf "\033[${count}A"
+    for ((i=0; i<count; i++)); do
+      local checkbox="[ ]"
+      [ "${checked[$i]}" -eq 1 ] && checkbox="[✓]"
+      if [ $i -eq $selected ]; then
+        printf '  \033[7m ▸ %s %-12s %s \033[0m\033[K\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+      else
+        printf '    %s %-12s %s\033[K\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+      fi
+    done
   done
 
+  printf '\033[?25h'
+
   REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_SKILLS="no"
-  [ "$sel_cm" = 1 ]     && REGEN_CLAUDE_MD="yes"
-  [ "$sel_ctx" = 1 ]    && REGEN_CONTEXT="yes"
-  [ "$sel_skills" = 1 ] && REGEN_SKILLS="yes"
+  [ "${checked[0]}" -eq 1 ] && REGEN_CLAUDE_MD="yes"
+  [ "${checked[1]}" -eq 1 ] && REGEN_CONTEXT="yes"
+  [ "${checked[2]}" -eq 1 ] && REGEN_SKILLS="yes"
 
   if [ "$REGEN_CLAUDE_MD" = "no" ] && [ "$REGEN_CONTEXT" = "no" ] && [ "$REGEN_SKILLS" = "no" ]; then
+    echo ""
     return 1
   fi
   return 0
