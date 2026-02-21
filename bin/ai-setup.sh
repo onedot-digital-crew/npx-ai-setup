@@ -480,7 +480,6 @@ Based on the eslint/prettier config below and the framework/system ($SYSTEM), wr
 Cover these categories where evidence exists: code style (formatting, naming), TypeScript (strict mode, type patterns), imports (path aliases, barrel files), framework-specific (SSR, routing, state), testing (commands, patterns). Omit categories where no evidence exists in the config — do not fabricate rules.
 
 Rules:
-- Do NOT read any files. Everything you need is in this prompt.
 - Edit CLAUDE.md directly. Replace both sections including any <!-- comments -->.
 - No umlauts. English only.
 
@@ -494,36 +493,13 @@ $CONTEXT" >"$ERR_CM" 2>&1 &
 
 Create exactly 3 files in .agents/context/ using the Write tool:
 
-## File 1: .agents/context/STACK.md
-Document the technology stack:
-- Runtime & language (with versions from the context below)
-- Framework (with version from package.json below)
-- Key dependencies (categorized: UI, state, data, testing, build)
-- Package manager
-- Build tooling
-- Avoid: Libraries or patterns NOT used in this project (e.g., if the project uses a custom apiClient, list 'Do not use axios/fetch directly')
-
-## File 2: .agents/context/ARCHITECTURE.md
-Document the architecture:
-- Project type (SPA, SSR, API, monorepo, library, etc.)
-- Directory structure overview (what each top-level dir contains)
-- Entry points (main files, route definitions)
-- Data flow (state management, API layer, data fetching pattern)
-- Key patterns (composition API vs options API, server components, etc.)
-
-## File 3: .agents/context/CONVENTIONS.md
-Document coding conventions found in the codebase:
-- Naming patterns (files, components, variables, CSS classes)
-- Import style (absolute vs relative, barrel files)
-- Component structure (script-template-style order, composition patterns)
-- Error handling patterns (try-catch style, error boundaries, API error handling, logging approach)
-- TypeScript usage (strict mode, type vs interface preference)
-- Testing patterns (test file location, naming convention, test framework, what is typically tested)
+- **.agents/context/STACK.md** — runtime, framework (with versions), key dependencies (categorized: UI, state, data, testing, build), package manager, build tooling, and libraries/patterns to avoid
+- **.agents/context/ARCHITECTURE.md** — project type, directory structure, entry points, data flow, key patterns
+- **.agents/context/CONVENTIONS.md** — naming patterns, import style, component structure, error handling, TypeScript usage, testing patterns
 
 Project system/framework: $SYSTEM
 
 Rules:
-- Do NOT read any files. Everything you need is in this prompt below.
 - Create all 3 files in one turn using the Write tool.
 - Base ALL content on the provided context. Do not invent details.
 - Keep each file concise: 30-60 lines max.
@@ -763,11 +739,7 @@ Rules:
 - Prefer skills with HIGHER install counts (more popular = better quality)
 - Avoid duplicates (e.g. not 3x vue-best-practices from different authors)
 - Prefer skills from well-known maintainers (antfu, vercel-labs, vuejs-ai, etc.)
-- Reply ONLY with skill IDs, one per line, absolutely no other text
-- Format: owner/repo@skill-name
-- Example response:
-antfu/skills@vue
-antfu/skills@nuxt" > "$CLAUDE_TMP" 2>/dev/null &
+- Reply ONLY with skill IDs, one per line, no other text. Format: owner/repo@skill-name" > "$CLAUDE_TMP" 2>/dev/null &
         CLAUDE_PID=$!
         CLAUDE_WAIT=0
         while kill -0 "$CLAUDE_PID" 2>/dev/null && [ "$CLAUDE_WAIT" -lt 60 ]; do

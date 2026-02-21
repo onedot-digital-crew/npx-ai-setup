@@ -12,24 +12,10 @@ Before multi-file changes or new features, read `.agents/context/`:
 - `CONVENTIONS.md` - Coding standards, naming patterns, error handling, and testing
 
 ## Commands
-<!-- Auto-Init will populate this section with package.json scripts -->
-<!-- Example after Auto-Init:
-- dev: Start development server
-- build: Production build
-- lint: Run ESLint with auto-fix
-- test: Run test suite
--->
+<!-- Auto-Init populates this -->
 
 ## Critical Rules
-<!-- Auto-Init will populate this section based on linting config -->
-<!-- Add project-specific rules manually:
-Example rules to consider:
-- Never commit .env files or secrets
-- Always use TypeScript strict mode
-- Prefer named exports over default exports
-- Follow existing naming conventions (check CONVENTIONS.md)
-- Run tests before committing (npm run test)
--->
+<!-- Auto-Init populates this -->
 
 ## Verification
 After completing work, verify before marking done:
