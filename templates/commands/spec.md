@@ -6,51 +6,69 @@ allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 
 Create a structured spec for the following task: $ARGUMENTS
 
-## Phase 1 — Challenge the Idea
+## Phase 1 — Challenge & Think Through
 
-Before writing anything, critically evaluate this idea. Present your findings in the chat.
+Before writing anything: challenge the idea hard, then think it completely through. Present findings in the chat.
 
 ### 1a — Load Skills
-If `.claude/skills/` exists, glob all skill directories and read each `prompt.md` (first 5 lines only). Identify which skills are relevant to this task — apply their guidance and constraints throughout the entire challenge and spec phases.
+If `.claude/skills/` exists, glob all skill directories and read each `prompt.md` (first 5 lines only). Apply their guidance throughout the entire process.
 
-### 1b — Concept Fit
-Read `docs/CONCEPT.md`. Then answer:
-- Does this align with the project's core principles: **one command, zero config, template-based**?
-- Does it fit the "templates not generation" distinction?
-- Would this belong in the scaffolding layer, or is it scope creep?
+### 1b — Clarify
+If the request is ambiguous or underspecified, ask 1-3 focused questions before proceeding. Wait for answers. Skip if the task is clear.
 
-Rate concept fit: **ALIGNED / BORDERLINE / MISALIGNED**
+### 1c — Concept Fit
+Read `docs/CONCEPT.md` if it exists. Answer:
+- Does this align with the project's core principles?
+- Is it in scope for this codebase/tool?
+- Would this belong in the core, or is it a plugin/workaround?
 
-### 1c — Necessity
-Challenge it hard:
-- What problem does it solve? Is that problem real or hypothetical?
-- What happens if we don't build it?
-- Is this solving a problem users have reported, or one we imagined?
+Rate: **ALIGNED / BORDERLINE / MISALIGNED**. If MISALIGNED → **REJECT** immediately.
 
-### 1d — Overhead & Maintenance Cost
-- How much ongoing maintenance does this add?
-- Does it increase tool surface area (more flags, more config, more docs)?
-- Does it add complexity that slows down the "one command" promise?
+### 1d — Necessity
+- What specific problem does this solve? Is it real or hypothetical?
+- What breaks or stays painful if we don't build it?
+- Who reported this problem — users, or us?
 
-### 1e — Simpler Alternatives
-List 1-3 alternatives, including:
-- A simpler version (scope reduction)
+### 1e — Think It Through
+This is the core of the challenge. Sketch the full implementation mentally before committing:
+
+**Implementation path:**
+- Which files/systems change? What exactly happens in each?
+- How does it integrate with existing code — what calls what?
+- What are the data flows or state changes?
+
+**Edge cases & failure modes:**
+- What inputs or states could break this?
+- What happens when it fails — is it recoverable?
+- What are the implicit dependencies or side effects?
+
+**Hidden complexity:**
+- What looks simple but isn't?
+- What will be hard to test or debug later?
+- What will be annoying to maintain in 6 months?
+
+### 1f — Overhead & Risk
+- Maintenance burden added?
+- Does it increase surface area (more config, more flags, more docs)?
+- What's the risk if the implementation is wrong?
+
+### 1g — Simpler Alternatives
+List 1-3 alternatives:
+- A smaller scope version
 - A workaround that avoids building anything
 - **"Don't build it"** — explicitly if it applies
 
-Scan with Glob and Grep to check if similar functionality already exists.
+Scan with Glob and Grep for similar existing functionality. Check installed skills for overlap.
 
-If any installed skill already covers this, note it as an alternative.
+### 1h — Verdict
 
-### 1f — Verdict
+Present a clear summary of the thinking above, then choose exactly one:
 
-Output the verdict clearly in the chat. Choose exactly one:
+**GO** — Needed, fits, complexity is understood. The implementation sketch from 1e becomes the basis for the spec steps.
 
-**GO** — Concept fits, clearly needed, manageable complexity. Proceed to spec.
+**SIMPLIFY** — Merits exist but scope is too large. State the reduced scope. Ask user to confirm before proceeding.
 
-**SIMPLIFY** — Merits exist but scope is too large. State the smaller version, then ask the user to confirm before proceeding to spec.
-
-**REJECT** — Misaligned, unnecessary, or unjustified overhead. State reason. Do NOT create a spec. Stop here.
+**REJECT** — Misaligned, unnecessary, or risk outweighs benefit. State reason. Stop here.
 
 ---
 
@@ -59,15 +77,15 @@ Output the verdict clearly in the chat. Choose exactly one:
 Only proceed if verdict is GO or user confirmed a SIMPLIFY scope.
 
 ### Step 1 — Determine spec number
-Scan `specs/` (including `specs/completed/`) for existing `NNN-*.md` files, find the highest number, increment by 1. Always use 3-digit zero-padded numbers (`001`, `002`, ..., `099`, `100`).
+Scan `specs/` (including `specs/completed/`) for existing `NNN-*.md` files, find the highest number, increment by 1. Use 3-digit zero-padded numbers.
 
 ### Step 2 — Analyze the task
-Read only the most relevant 2-3 source files. Do NOT read the entire codebase.
+Read the 2-3 most relevant source files. Use the implementation sketch from Phase 1e — do not re-analyze from scratch.
 
-If `.claude/skills/` exists, glob the skill directories and read their `prompt.md` files (titles/first line only). List any skills relevant to this task in the spec **Context** section so they're referenced during execution.
+List any relevant installed skills in the spec Context section.
 
 ### Step 3 — Create the spec file
-Create `specs/NNN-short-description.md` using the structure below.
+Translate the Phase 1e implementation sketch into spec steps. Steps should reflect actual implementation path, not generic placeholders.
 
 ### Step 4 — Present the spec
 Show the spec to the user for review and refinement.
@@ -83,7 +101,7 @@ Show the spec to the user for review and refinement.
 [One sentence]
 
 ## Context
-[2-3 sentences max. Why is this needed?]
+[2-3 sentences. Why needed, what approach was chosen, relevant skills if any.]
 
 ## Steps
 - [ ] Step 1: description
@@ -102,13 +120,10 @@ Show the spec to the user for review and refinement.
 ```
 
 ## Constraints & Rules
-- **Total spec: max 60 lines.** If you need more, split into multiple specs.
+- **Total spec: max 60 lines.** If more, split into multiple specs.
 - **Goal**: 1 sentence. **Context**: 2-3 sentences.
-- **Steps**: Flat checkbox list, max 8 items. NO nested sub-steps, NO sub-headings.
+- **Steps**: Flat checkbox list, max 8 items. No nested sub-steps.
 - **Acceptance Criteria**: max 5 items. **Out of Scope**: max 3 items.
-- **Files to Modify**: max 5 words per file. **Notes section**: omit unless truly necessary.
-- If a task has more than 8 steps, split it into 2 specs and note the dependency.
+- Steps must come from the Phase 1e implementation sketch — be specific, include file paths.
 - Use today's date. Filename: lowercase with hyphens.
-- Be specific in steps — include file paths where possible.
 - Always create `specs/` and `specs/completed/` if they don't exist.
-- Do NOT over-read the codebase. 2-3 files max for analysis.
