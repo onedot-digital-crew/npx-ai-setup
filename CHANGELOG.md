@@ -8,6 +8,20 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 <!-- Entries are prepended below this line, newest first -->
 
+## 2026-02-22 — v1.1.2
+
+- **feat**: `/spec` challenge phase deepened — now thinks through implementation (path, edge cases, failure modes, hidden complexity) before verdict, mirrors plan mode
+- **feat**: `/spec` challenge uses `AskUserQuestion` at decision points during analysis — interactive clarification like plan mode
+- **feat**: `/spec` and `/spec-work` auto-load relevant installed skills from `.claude/skills/` before analysis and execution
+- **feat**: `/bug` command — structured bug investigation workflow (reproduce → root cause → fix → verify)
+- **feat**: `update-check.sh` hook — notifies at session start when a new `@onedot/ai-setup` version is available (background npm check, 24h cache, <50ms)
+- **fix**: Circuit breaker auto-resets when user sends next message — no more manual `rm` required
+- **docs**: `specs/README.md` updated to document full current workflow including `/spec-work-all` and challenge-integrated `/spec`
+
+## 2026-02-22 — v1.1.1
+
+- **Spec 012**: /bug Command for Bug Investigation — added `/bug` slash command template with structured reproduce → root cause → fix → verify workflow, registered in TEMPLATE_MAP and install loop.
+
 ## 2026-02-21
 
 - **Spec 012**: /bug Command for Bug Investigation — added `/bug` slash command template with structured reproduce → root cause → fix → verify workflow, registered in TEMPLATE_MAP and install loop.
