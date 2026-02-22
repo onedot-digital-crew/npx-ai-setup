@@ -10,7 +10,10 @@ Create a structured spec for the following task: $ARGUMENTS
 
 Before writing anything, critically evaluate this idea. Present your findings in the chat.
 
-### 1a — Concept Fit
+### 1a — Load Skills
+If `.claude/skills/` exists, glob all skill directories and read each `prompt.md` (first 5 lines only). Identify which skills are relevant to this task — apply their guidance and constraints throughout the entire challenge and spec phases.
+
+### 1b — Concept Fit
 Read `docs/CONCEPT.md`. Then answer:
 - Does this align with the project's core principles: **one command, zero config, template-based**?
 - Does it fit the "templates not generation" distinction?
@@ -18,18 +21,18 @@ Read `docs/CONCEPT.md`. Then answer:
 
 Rate concept fit: **ALIGNED / BORDERLINE / MISALIGNED**
 
-### 1b — Necessity
+### 1c — Necessity
 Challenge it hard:
 - What problem does it solve? Is that problem real or hypothetical?
 - What happens if we don't build it?
 - Is this solving a problem users have reported, or one we imagined?
 
-### 1c — Overhead & Maintenance Cost
+### 1d — Overhead & Maintenance Cost
 - How much ongoing maintenance does this add?
 - Does it increase tool surface area (more flags, more config, more docs)?
 - Does it add complexity that slows down the "one command" promise?
 
-### 1d — Simpler Alternatives
+### 1e — Simpler Alternatives
 List 1-3 alternatives, including:
 - A simpler version (scope reduction)
 - A workaround that avoids building anything
@@ -37,9 +40,9 @@ List 1-3 alternatives, including:
 
 Scan with Glob and Grep to check if similar functionality already exists.
 
-Check `.claude/skills/` — if any installed skill already covers this, note it as an alternative.
+If any installed skill already covers this, note it as an alternative.
 
-### 1e — Verdict
+### 1f — Verdict
 
 Output the verdict clearly in the chat. Choose exactly one:
 
