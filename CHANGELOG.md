@@ -10,6 +10,10 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-22
 
+- **Spec 015**: Spec workflow branch and review improvements — `/spec-work` now prompts for branch creation before starting and offers auto-review with corrections after execution; `/spec-review` APPROVED verdict no longer suggests PR commands
+
+
+
 - **Spec 014**: Skills Discovery Section — added `## Skills Discovery` to `templates/CLAUDE.md` so Claude can search and install skills on demand using `npx skills find` and `npx skills add --agent claude-code --agent github-copilot`
 
 

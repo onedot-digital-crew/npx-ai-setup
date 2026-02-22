@@ -52,16 +52,7 @@ Present the review findings, then choose exactly one:
 **APPROVED** — All criteria met, code quality acceptable.
 1. Change spec status from `in-review` to `completed`
 2. Move the spec file: `specs/NNN-*.md` -> `specs/completed/NNN-*.md`
-3. If a branch exists, prepare PR details:
-   - Draft PR title: `spec(NNN): [Spec title]`
-   - Draft PR body with `## Summary` (2-3 bullets from the spec) and `## Spec` (link to spec)
-   - Show the user the commands:
-     ```
-     git push -u origin BRANCH
-     gh pr create --title "..." --body "..."
-     ```
-   - Do NOT push or create the PR — the user does this.
-4. Report: "Spec NNN approved and completed. PR ready to push."
+3. Report: "Spec NNN approved and completed."
 
 **CHANGES REQUESTED** — Issues found that need fixing.
 1. Add a `## Review Feedback` section at the end of the spec file with the specific issues

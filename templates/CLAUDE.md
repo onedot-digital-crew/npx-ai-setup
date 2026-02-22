@@ -79,9 +79,9 @@ Specs live in `specs/` -- structured task plans created before coding.
 **Workflow:**
 1. `/spec "task"` — Plan: Opus challenges the idea, creates spec if approved (status: `draft`)
 2. Review and refine spec if needed
-3. `/spec-work NNN` — Execute: Sonnet implements the spec step-by-step (status: `in-progress` → `in-review`)
+3. `/spec-work NNN` — Execute: Sonnet implements the spec step-by-step; prompts for branch creation and optional auto-review (status: `in-progress` → `in-review` or `completed`)
 4. `/spec-work-all` — Execute all: parallel agents in isolated Git worktrees, one branch per spec
-5. `/spec-review NNN` — Review: Opus reviews changes against acceptance criteria, creates PR on approval (status: `completed`)
+5. `/spec-review NNN` — Review: Opus reviews changes against acceptance criteria (status: `completed`)
 6. `/spec-board` — Overview: Kanban-style board showing all specs with status and step progress
 
 **Parallel execution (`/spec-work-all`):**
