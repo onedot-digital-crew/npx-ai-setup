@@ -52,33 +52,49 @@ done
 # UPDATE SYSTEM HELPERS
 # ==============================================================================
 
-# Template mapping: "source_in_package:target_in_project"
-TEMPLATE_MAP=(
-  "templates/CLAUDE.md:CLAUDE.md"
-  "templates/claude/settings.json:.claude/settings.json"
-  "templates/claude/hooks/protect-files.sh:.claude/hooks/protect-files.sh"
-  "templates/claude/hooks/post-edit-lint.sh:.claude/hooks/post-edit-lint.sh"
-  "templates/claude/hooks/circuit-breaker.sh:.claude/hooks/circuit-breaker.sh"
-  "templates/claude/hooks/context-freshness.sh:.claude/hooks/context-freshness.sh"
-  "templates/claude/hooks/update-check.sh:.claude/hooks/update-check.sh"
-  "templates/github/copilot-instructions.md:.github/copilot-instructions.md"
-  "templates/specs/TEMPLATE.md:specs/TEMPLATE.md"
-  "templates/specs/README.md:specs/README.md"
-  "templates/commands/spec.md:.claude/commands/spec.md"
-  "templates/commands/spec-work.md:.claude/commands/spec-work.md"
-  "templates/commands/spec-work-all.md:.claude/commands/spec-work-all.md"
-  "templates/commands/commit.md:.claude/commands/commit.md"
-  "templates/commands/pr.md:.claude/commands/pr.md"
-  "templates/commands/review.md:.claude/commands/review.md"
-  "templates/commands/test.md:.claude/commands/test.md"
-  "templates/commands/techdebt.md:.claude/commands/techdebt.md"
-  "templates/commands/bug.md:.claude/commands/bug.md"
-  "templates/commands/grill.md:.claude/commands/grill.md"
-  "templates/agents/verify-app.md:.claude/agents/verify-app.md"
-  "templates/agents/build-validator.md:.claude/agents/build-validator.md"
-  "templates/agents/staff-reviewer.md:.claude/agents/staff-reviewer.md"
-  "templates/agents/context-refresher.md:.claude/agents/context-refresher.md"
-)
+# Files with special handling excluded from generic TEMPLATE_MAP (e.g. mcp.json uses merge logic)
+TEMPLATE_EXCLUDES=("mcp.json")
+
+# Build TEMPLATE_MAP dynamically from templates/ directory.
+# Applies consistent prefix rules:
+#   claude/    → .claude/
+#   github/    → .github/
+#   commands/  → .claude/commands/
+#   agents/    → .claude/agents/
+#   specs/     → specs/
+#   (root)     → (root, e.g. CLAUDE.md)
+build_template_map() {
+  TEMPLATE_MAP=()
+  local tpl_dir="$SCRIPT_DIR/templates"
+
+  while IFS= read -r -d '' file; do
+    local rel="${file#$tpl_dir/}"
+    local filename="${rel##*/}"
+
+    # Skip excluded filenames
+    local excluded=false
+    for excl in "${TEMPLATE_EXCLUDES[@]}"; do
+      [ "$filename" = "$excl" ] && excluded=true && break
+    done
+    [ "$excluded" = "true" ] && continue
+
+    # Map source path to install target path
+    local target
+    case "$rel" in
+      claude/*)   target=".${rel}" ;;
+      github/*)   target=".${rel}" ;;
+      commands/*) target=".claude/${rel}" ;;
+      agents/*)   target=".claude/${rel}" ;;
+      specs/*)    target="${rel}" ;;
+      *)          target="${rel}" ;;
+    esac
+
+    TEMPLATE_MAP+=("templates/${rel}:${target}")
+  done < <(find "$tpl_dir" -type f -print0 | sort -z)
+}
+
+# Populate TEMPLATE_MAP at startup
+build_template_map
 
 # Shopify-specific templates (only added when system includes shopify)
 SHOPIFY_TEMPLATE_MAP=(
@@ -1454,14 +1470,15 @@ fi
 echo "🛡️  Creating hooks..."
 mkdir -p .claude/hooks
 
-for hook in protect-files.sh post-edit-lint.sh circuit-breaker.sh context-freshness.sh update-check.sh; do
-  if [ ! -f ".claude/hooks/$hook" ]; then
-    cp "$TPL/claude/hooks/$hook" ".claude/hooks/$hook"
-    chmod +x ".claude/hooks/$hook"
+while IFS= read -r -d '' _hook_path; do
+  _hook_name="${_hook_path##*/}"
+  if [ ! -f ".claude/hooks/$_hook_name" ]; then
+    cp "$_hook_path" ".claude/hooks/$_hook_name"
+    case "$_hook_name" in *.sh) chmod +x ".claude/hooks/$_hook_name" ;; esac
   else
-    echo "  .claude/hooks/$hook already exists, skipping."
+    echo "  .claude/hooks/$_hook_name already exists, skipping."
   fi
-done
+done < <(find "$TPL/claude/hooks" -maxdepth 1 -type f -print0 | sort -z)
 
 # ------------------------------------------------------------------------------
 # 5. COPILOT INSTRUCTIONS
@@ -1493,13 +1510,14 @@ mkdir -p specs/completed
 # ------------------------------------------------------------------------------
 echo "⚡ Installing slash commands..."
 mkdir -p .claude/commands
-for cmd in spec.md spec-work.md commit.md pr.md review.md test.md techdebt.md bug.md grill.md; do
-  if [ ! -f ".claude/commands/$cmd" ]; then
-    cp "$TPL/commands/$cmd" ".claude/commands/$cmd"
+while IFS= read -r -d '' _cmd_path; do
+  _cmd_name="${_cmd_path##*/}"
+  if [ ! -f ".claude/commands/$_cmd_name" ]; then
+    cp "$_cmd_path" ".claude/commands/$_cmd_name"
   else
-    echo "  .claude/commands/$cmd already exists, skipping."
+    echo "  .claude/commands/$_cmd_name already exists, skipping."
   fi
-done
+done < <(find "$TPL/commands" -maxdepth 1 -type f -print0 | sort -z)
 
 # Shopify-specific slash commands (when system includes shopify)
 if [[ "${SYSTEM:-}" == *shopify* ]]; then
@@ -1519,13 +1537,14 @@ fi
 # ------------------------------------------------------------------------------
 echo "🤖 Installing subagent templates..."
 mkdir -p .claude/agents
-for agent in verify-app.md build-validator.md staff-reviewer.md context-refresher.md; do
-  if [ ! -f ".claude/agents/$agent" ]; then
-    cp "$TPL/agents/$agent" ".claude/agents/$agent"
+while IFS= read -r -d '' _agent_path; do
+  _agent_name="${_agent_path##*/}"
+  if [ ! -f ".claude/agents/$_agent_name" ]; then
+    cp "$_agent_path" ".claude/agents/$_agent_name"
   else
-    echo "  .claude/agents/$agent already exists, skipping."
+    echo "  .claude/agents/$_agent_name already exists, skipping."
   fi
-done
+done < <(find "$TPL/agents" -maxdepth 1 -type f -print0 | sort -z)
 
 # ------------------------------------------------------------------------------
 # 6e. METADATA TRACKING

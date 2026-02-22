@@ -61,17 +61,33 @@ Read relevant code before answering questions about it.
 Implement changes rather than only suggesting them.
 Use subagents for parallel or isolated work. For simple tasks, work directly.
 
+## Skills Discovery
+When current capabilities are insufficient, search the skills.sh marketplace for additional agent skills:
+- Search: `npx -y skills@latest find "<keyword>"`
+- Install: `npx -y skills@latest add <owner/repo@skill-name> --agent claude-code --agent github-copilot -y`
+
+Check `.claude/skills/` first to avoid installing duplicates. Only install when genuinely needed for the task.
+
 ## Spec-Driven Development
 Specs live in `specs/` -- structured task plans created before coding.
 
 **When to suggest a spec:** Changes across 3+ files, new features, architectural changes, ambiguous requirements.
 **Skip specs for:** Single-file fixes, typos, config changes.
 
+**Spec status lifecycle:** `draft` → `in-progress` → `in-review` → `completed` (or `blocked` at any stage)
+
 **Workflow:**
-1. `/spec "task"` (Opus in plan mode - creates detailed plan, you approve, spec file is created)
+1. `/spec "task"` — Plan: Opus challenges the idea, creates spec if approved (status: `draft`)
 2. Review and refine spec if needed
-3. `/spec-work NNN` (Sonnet executes the approved plan step-by-step)
-4. `/spec-work-all` (Sonnet executes all draft specs in parallel via subagents)
-5. Completed specs move to `specs/completed/`
+3. `/spec-work NNN` — Execute: Sonnet implements the spec step-by-step (status: `in-progress` → `in-review`)
+4. `/spec-work-all` — Execute all: parallel agents in isolated Git worktrees, one branch per spec
+5. `/spec-review NNN` — Review: Opus reviews changes against acceptance criteria, creates PR on approval (status: `completed`)
+6. `/spec-board` — Overview: Kanban-style board showing all specs with status and step progress
+
+**Parallel execution (`/spec-work-all`):**
+- Creates a Git worktree per spec (`spec/NNN-title` branch)
+- Subagents work in isolation — no merge conflicts
+- Specs with dependencies run in sequential waves
+- After completion, each spec is ready for `/spec-review`
 
 See `specs/README.md` for details.

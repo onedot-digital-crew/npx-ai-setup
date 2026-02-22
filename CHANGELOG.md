@@ -8,6 +8,17 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 <!-- Entries are prepended below this line, newest first -->
 
+## 2026-02-22
+
+- **Spec 014**: Skills Discovery Section — added `## Skills Discovery` to `templates/CLAUDE.md` so Claude can search and install skills on demand using `npx skills find` and `npx skills add --agent claude-code --agent github-copilot`
+
+
+- **feat**: Mini-VibeKanban spec workflow — full status lifecycle (`draft` → `in-progress` → `in-review` → `completed` / `blocked`), `/spec-board` Kanban overview with step progress, `/spec-review NNN` Opus-powered review with PR drafting (APPROVED / CHANGES REQUESTED / REJECTED), `/spec-work-all` rewritten to use Git worktrees for isolated parallel execution (one branch per spec, no merge conflicts), `/spec-work` updated with status transitions and `--complete` legacy flag, Branch field added to spec template
+
+## 2026-02-22
+
+- **Spec 013**: Dynamic Template Map — replaced hardcoded TEMPLATE_MAP array and install loops with dynamic generation from `templates/` directory, ensuring all template changes (including previously missing `spec-work-all.md` and `hooks/README.md`) automatically propagate to consumer projects on update
+
 ## 2026-02-22 — v1.1.2
 
 - **feat**: `/spec` challenge phase deepened — now thinks through implementation (path, edge cases, failure modes, hidden complexity) before verdict, mirrors plan mode
