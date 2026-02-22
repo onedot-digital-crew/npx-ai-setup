@@ -3,43 +3,77 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-Apply Shopify Functions expertise to this task: $ARGUMENTS
+# Shopify Functions
 
-You are a Shopify Functions expert. Use this knowledge for the current task.
+## When to use this skill
+
+Use this skill when:
+
+- Creating custom discount logic
+- Customizing delivery options
+- Implementing payment method rules
+- Validating cart or checkout
+- Building order routing logic
+- Extending Shopify's backend behavior
 
 ## What are Shopify Functions?
 
-Serverless WebAssembly modules that extend Shopify's backend logic. They run on Shopify's infrastructure, execute in milliseconds, scale automatically, and are upgrade-safe.
+Functions are serverless WebAssembly modules that extend Shopify's backend logic. They:
 
-## Function Types
+- Run on Shopify's infrastructure
+- Execute in milliseconds
+- Scale automatically
+- Are upgrade-safe
 
-| API | Purpose |
-|-----|---------|
-| **Discounts** | Product, order, and shipping discounts |
-| **Delivery Customization** | Rename, reorder, hide shipping options |
-| **Payment Customization** | Filter, reorder payment methods |
-| **Cart & Checkout Validation** | Block checkout with errors |
-| **Order Routing** | Control fulfillment locations |
-| **Cart Transform** | Modify cart contents |
+### Function Types
+
+| API                            | Purpose                                |
+| ------------------------------ | -------------------------------------- |
+| **Discounts**                  | Product, order, and shipping discounts |
+| **Delivery Customization**     | Rename, reorder, hide shipping options |
+| **Payment Customization**      | Filter, reorder payment methods        |
+| **Cart & Checkout Validation** | Block checkout with errors             |
+| **Order Routing**              | Control fulfillment locations          |
+| **Cart Transform**             | Modify cart contents                   |
 
 ## Getting Started
 
+### 1. Create a Function
+
 ```bash
+# In an existing app
 shopify app generate extension
-# Select function type (Delivery customization, Product discount, etc.)
+
+# Select from function types:
+# - Delivery customization
+# - Product discount
+# - Order discount
+# - Cart & Checkout Validation
+# - etc.
 ```
 
-### Function Structure
+### 2. Choose a Language
+
+**Rust (Recommended)** - Best performance, handles large carts
+
+**JavaScript** - Easier to learn, good for simpler logic
+
+### 3. Function Structure
+
 ```
 extensions/
 └── my-discount/
-    ├── src/run.rs (or run.js)
+    ├── src/
+    │   └── run.rs (or run.js)
     ├── input.graphql
     ├── shopify.extension.toml
     └── Cargo.toml (for Rust)
 ```
 
-### Configuration
+## Function Anatomy
+
+### Configuration (shopify.extension.toml)
+
 ```toml
 api_version = "2025-01"
 
@@ -58,43 +92,224 @@ command = "cargo wasi build --release"
 path = "target/wasm32-wasi/release/volume-discount.wasm"
 ```
 
-### Input Query
+### Input Query (input.graphql)
+
 ```graphql
 query RunInput {
   cart {
     lines {
       id
       quantity
-      merchandise { ... on ProductVariant { id product { id title hasAnyTag(tags: ["discount-eligible"]) } } }
-      cost { amountPerQuantity { amount currencyCode } }
+      merchandise {
+        ... on ProductVariant {
+          id
+          product {
+            id
+            title
+            hasAnyTag(tags: ["discount-eligible"])
+          }
+        }
+      }
+      cost {
+        amountPerQuantity {
+          amount
+          currencyCode
+        }
+      }
     }
   }
-  discountNode { metafield(namespace: "volume-discount", key: "config") { value } }
+  discountNode {
+    metafield(namespace: "volume-discount", key: "config") {
+      value
+    }
+  }
 }
 ```
 
-## Product Discount (JavaScript)
+## Product Discount Function (Rust)
+
+```rust
+// src/run.rs
+use shopify_function::prelude::*;
+use shopify_function::Result;
+
+#[shopify_function_target(query_path = "src/run.graphql", schema_path = "schema.graphql")]
+fn run(input: input::ResponseData) -> Result<output::FunctionRunResult> {
+    let mut discounts = vec![];
+
+    // Parse configuration from metafield
+    let config: Config = input.discount_node.metafield
+        .as_ref()
+        .map(|m| serde_json::from_str(&m.value).unwrap())
+        .unwrap_or_default();
+
+    for line in input.cart.lines {
+        let quantity = line.quantity;
+
+        // Check if eligible for volume discount
+        if quantity >= config.minimum_quantity {
+            let merchandise = match &line.merchandise {
+                input::InputCartLinesMerchandise::ProductVariant(variant) => variant,
+                _ => continue,
+            };
+
+            // Check for eligible tag
+            if merchandise.product.has_any_tag {
+                discounts.push(output::Discount {
+                    targets: vec![output::Target::ProductVariant(
+                        output::ProductVariantTarget {
+                            id: merchandise.id.clone(),
+                            quantity: None,
+                        },
+                    )],
+                    value: output::Value::Percentage(output::Percentage {
+                        value: Decimal::from_str(&config.discount_percentage).unwrap(),
+                    }),
+                    message: Some(format!("{}% volume discount", config.discount_percentage)),
+                });
+            }
+        }
+    }
+
+    Ok(output::FunctionRunResult {
+        discounts,
+        discount_application_strategy: output::DiscountApplicationStrategy::FIRST,
+    })
+}
+
+#[derive(Default, serde::Deserialize)]
+struct Config {
+    minimum_quantity: i64,
+    discount_percentage: String,
+}
+```
+
+## Product Discount Function (JavaScript)
 
 ```javascript
+// src/run.js
+// @ts-check
+import { DiscountApplicationStrategy } from "../generated/api";
+
+/**
+ * @param {RunInput} input
+ * @returns {FunctionRunResult}
+ */
 export function run(input) {
-  const config = JSON.parse(input.discountNode.metafield?.value ?? '{"minimumQuantity": 5, "percentage": "10"}');
+  const config = JSON.parse(
+    input.discountNode.metafield?.value ??
+      '{"minimumQuantity": 5, "percentage": "10"}',
+  );
+
   const discounts = [];
 
   for (const line of input.cart.lines) {
     const variant = line.merchandise;
-    if (line.quantity >= config.minimumQuantity && variant.__typename === "ProductVariant" && variant.product.hasAnyTag) {
-      discounts.push({
-        targets: [{ productVariant: { id: variant.id } }],
-        value: { percentage: { value: config.percentage } },
-        message: `${config.percentage}% volume discount`,
-      });
+
+    // Check quantity threshold
+    if (line.quantity >= config.minimumQuantity) {
+      // Check for eligible products
+      if (
+        variant.__typename === "ProductVariant" &&
+        variant.product.hasAnyTag
+      ) {
+        discounts.push({
+          targets: [
+            {
+              productVariant: {
+                id: variant.id,
+              },
+            },
+          ],
+          value: {
+            percentage: {
+              value: config.percentage,
+            },
+          },
+          message: `${config.percentage}% volume discount`,
+        });
+      }
     }
   }
-  return { discounts, discountApplicationStrategy: DiscountApplicationStrategy.First };
+
+  return {
+    discounts,
+    discountApplicationStrategy: DiscountApplicationStrategy.First,
+  };
 }
 ```
 
-## Product Discount (Rust)
+## Delivery Customization
+
+```rust
+// Rename, hide, or reorder delivery options
+use shopify_function::prelude::*;
+use shopify_function::Result;
+
+#[shopify_function_target(query_path = "src/run.graphql", schema_path = "schema.graphql")]
+fn run(input: input::ResponseData) -> Result<output::FunctionRunResult> {
+    let mut operations = vec![];
+
+    for method in input.cart.delivery_groups[0].delivery_options.iter() {
+        // Hide express shipping for heavy orders
+        if method.title.contains("Express") && cart_weight_exceeds_limit(&input) {
+            operations.push(output::Operation::Hide(output::HideOperation {
+                delivery_option_handle: method.handle.clone(),
+            }));
+        }
+
+        // Rename delivery option
+        if method.title.contains("Standard") {
+            operations.push(output::Operation::Rename(output::RenameOperation {
+                delivery_option_handle: method.handle.clone(),
+                title: Some("Economy Shipping (5-7 days)".to_string()),
+            }));
+        }
+    }
+
+    Ok(output::FunctionRunResult { operations })
+}
+```
+
+## Payment Customization
+
+```javascript
+// src/run.js
+export function run(input) {
+  const cart = input.cart;
+  const operations = [];
+
+  // Calculate cart total
+  const total = cart.cost.totalAmount.amount;
+
+  // Hide COD for orders over $500
+  if (parseFloat(total) > 500) {
+    const codMethod = input.paymentMethods.find((method) =>
+      method.name.includes("Cash on Delivery"),
+    );
+
+    if (codMethod) {
+      operations.push({
+        hide: {
+          paymentMethodId: codMethod.id,
+        },
+      });
+    }
+  }
+
+  // Reorder payment methods
+  operations.push({
+    move: {
+      paymentMethodId: input.paymentMethods[0].id,
+      index: 2,
+    },
+  });
+
+  return { operations };
+}
+```
+
+## Cart & Checkout Validation
 
 ```rust
 use shopify_function::prelude::*;
@@ -102,48 +317,9 @@ use shopify_function::Result;
 
 #[shopify_function_target(query_path = "src/run.graphql", schema_path = "schema.graphql")]
 fn run(input: input::ResponseData) -> Result<output::FunctionRunResult> {
-    let mut discounts = vec![];
-    let config: Config = input.discount_node.metafield.as_ref()
-        .map(|m| serde_json::from_str(&m.value).unwrap()).unwrap_or_default();
-
-    for line in input.cart.lines {
-        if line.quantity >= config.minimum_quantity {
-            let merchandise = match &line.merchandise {
-                input::InputCartLinesMerchandise::ProductVariant(v) => v,
-                _ => continue,
-            };
-            if merchandise.product.has_any_tag {
-                discounts.push(output::Discount {
-                    targets: vec![output::Target::ProductVariant(output::ProductVariantTarget { id: merchandise.id.clone(), quantity: None })],
-                    value: output::Value::Percentage(output::Percentage { value: Decimal::from_str(&config.discount_percentage).unwrap() }),
-                    message: Some(format!("{}% volume discount", config.discount_percentage)),
-                });
-            }
-        }
-    }
-    Ok(output::FunctionRunResult { discounts, discount_application_strategy: output::DiscountApplicationStrategy::FIRST })
-}
-```
-
-## Payment Customization (JavaScript)
-
-```javascript
-export function run(input) {
-  const operations = [];
-  const total = parseFloat(input.cart.cost.totalAmount.amount);
-  if (total > 500) {
-    const cod = input.paymentMethods.find(m => m.name.includes("Cash on Delivery"));
-    if (cod) operations.push({ hide: { paymentMethodId: cod.id } });
-  }
-  return { operations };
-}
-```
-
-## Cart & Checkout Validation (Rust)
-
-```rust
-fn run(input: input::ResponseData) -> Result<output::FunctionRunResult> {
     let mut errors = vec![];
+
+    // Check minimum order value
     let total: f64 = input.cart.cost.total_amount.amount.parse().unwrap();
     if total < 25.0 {
         errors.push(output::FunctionError {
@@ -151,34 +327,201 @@ fn run(input: input::ResponseData) -> Result<output::FunctionRunResult> {
             target: output::Target::Cart,
         });
     }
+
+    // Check product availability by region
+    for line in &input.cart.lines {
+        if let input::InputCartLinesMerchandise::ProductVariant(variant) = &line.merchandise {
+            if is_restricted_product(&variant, &input.cart.buyer_identity) {
+                errors.push(output::FunctionError {
+                    localized_message: format!(
+                        "{} is not available in your region",
+                        variant.product.title
+                    ),
+                    target: output::Target::CartLine(output::CartLineTarget {
+                        id: line.id.clone(),
+                    }),
+                });
+            }
+        }
+    }
+
     Ok(output::FunctionRunResult { errors })
 }
 ```
 
-## Testing
+## Cart Transform
+
+Modify cart contents dynamically:
+
+```javascript
+// src/run.js
+export function run(input) {
+  const operations = [];
+
+  for (const line of input.cart.lines) {
+    const variant = line.merchandise;
+
+    // Add free gift for orders with specific products
+    if (variant.product.hasAnyTag && line.quantity >= 3) {
+      operations.push({
+        expand: {
+          cartLineId: line.id,
+          expandedCartItems: [
+            {
+              merchandiseId: variant.id,
+              quantity: line.quantity,
+            },
+            {
+              merchandiseId: "gid://shopify/ProductVariant/FREE_GIFT_ID",
+              quantity: 1,
+            },
+          ],
+        },
+      });
+    }
+  }
+
+  return { operations };
+}
+```
+
+## Testing Functions
+
+### Local Testing
 
 ```bash
+# Test with sample input
 shopify app function run --path extensions/my-function
+
+# Provide input via stdin
 cat input.json | shopify app function run --path extensions/my-function
 ```
 
-## CLI Commands
+### Sample Input JSON
 
-| Command | Description |
-|---------|-------------|
+```json
+{
+  "cart": {
+    "lines": [
+      {
+        "id": "gid://shopify/CartLine/1",
+        "quantity": 5,
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/123",
+          "product": {
+            "id": "gid://shopify/Product/456",
+            "title": "Test Product",
+            "hasAnyTag": true
+          }
+        },
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00",
+            "currencyCode": "USD"
+          }
+        }
+      }
+    ]
+  },
+  "discountNode": {
+    "metafield": {
+      "value": "{\"minimumQuantity\": 3, \"discountPercentage\": \"15\"}"
+    }
+  }
+}
+```
+
+## Deployment
+
+```bash
+# Deploy function with app
+shopify app deploy
+
+# Function will be available to configure in admin
+```
+
+## Configuration UI
+
+Create an admin UI to configure function settings:
+
+```jsx
+// app/routes/app.discount.jsx
+import { authenticate } from "../shopify.server";
+import { Form, TextField, Button, Card } from "@shopify/polaris";
+
+export async function action({ request }) {
+  const { admin } = await authenticate.admin(request);
+  const formData = await request.formData();
+
+  // Create discount with function
+  await admin.graphql(
+    `
+    mutation CreateDiscount($discount: DiscountAutomaticAppInput!) {
+      discountAutomaticAppCreate(automaticAppDiscount: $discount) {
+        automaticAppDiscount {
+          discountId
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `,
+    {
+      variables: {
+        discount: {
+          title: formData.get("title"),
+          functionId: "YOUR_FUNCTION_ID",
+          startsAt: new Date().toISOString(),
+          metafields: [
+            {
+              namespace: "volume-discount",
+              key: "config",
+              value: JSON.stringify({
+                minimumQuantity: parseInt(formData.get("minQty")),
+                discountPercentage: formData.get("percentage"),
+              }),
+              type: "json",
+            },
+          ],
+        },
+      },
+    },
+  );
+
+  return redirect("/app/discounts");
+}
+```
+
+## Performance Best Practices
+
+1. **Use Rust for large carts** - JavaScript can timeout
+2. **Minimize input query** - Only request needed data
+3. **Avoid complex loops** - Keep logic simple
+4. **Cache configuration** - Parse metafields once
+5. **Test with real data** - Test large cart scenarios
+
+## CLI Commands Reference
+
+| Command                          | Description     |
+| -------------------------------- | --------------- |
 | `shopify app generate extension` | Create function |
-| `shopify app function run` | Test locally |
-| `shopify app function typegen` | Generate types |
-| `shopify app deploy` | Deploy function |
-
-## Best Practices
-- Use Rust for large carts (JavaScript can timeout)
-- Minimize input query (only request needed data)
-- Keep logic simple, avoid complex loops
-- Parse metafield configuration once
-- Test with realistic cart data
+| `shopify app function run`       | Test locally    |
+| `shopify app function typegen`   | Generate types  |
+| `shopify app deploy`             | Deploy function |
 
 ## Resources
+
 - [Functions Overview](https://shopify.dev/docs/apps/build/functions)
+- [Functions API Reference](https://shopify.dev/docs/api/functions)
 - [Discount Functions](https://shopify.dev/docs/apps/build/discounts)
 - [Delivery Customization](https://shopify.dev/docs/apps/build/checkout/delivery-shipping)
+- [Payment Customization](https://shopify.dev/docs/apps/build/payments)
+- [JavaScript for Functions](https://shopify.dev/docs/apps/build/functions/programming-languages/javascript-for-functions)
+- [Rust for Functions](https://shopify.dev/docs/apps/build/functions/programming-languages/rust-for-functions)
+
+For checkout UI, see the [checkout-customization](../checkout-customization/SKILL.md) skill.
+
+
