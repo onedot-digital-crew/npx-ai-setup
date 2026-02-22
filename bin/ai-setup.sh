@@ -80,6 +80,18 @@ TEMPLATE_MAP=(
   "templates/agents/context-refresher.md:.claude/agents/context-refresher.md"
 )
 
+# Shopify-specific templates (only added when system includes shopify)
+SHOPIFY_TEMPLATE_MAP=(
+  "templates/commands/shopify/theme-dev.md:.claude/commands/shopify/theme-dev.md"
+  "templates/commands/shopify/liquid.md:.claude/commands/shopify/liquid.md"
+  "templates/commands/shopify/app-dev.md:.claude/commands/shopify/app-dev.md"
+  "templates/commands/shopify/graphql-api.md:.claude/commands/shopify/graphql-api.md"
+  "templates/commands/shopify/hydrogen.md:.claude/commands/shopify/hydrogen.md"
+  "templates/commands/shopify/checkout.md:.claude/commands/shopify/checkout.md"
+  "templates/commands/shopify/functions.md:.claude/commands/shopify/functions.md"
+  "templates/commands/shopify/cli-tools.md:.claude/commands/shopify/cli-tools.md"
+)
+
 # Get package version from package.json
 get_package_version() {
   jq -r '.version' "$SCRIPT_DIR/package.json" 2>/dev/null || echo "unknown"
@@ -136,6 +148,19 @@ write_metadata() {
       json=$(echo "$json" | jq --arg f "$target" --arg c "$cs" '.files[$f] = $c')
     fi
   done
+
+  # Include Shopify templates if system includes shopify
+  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+    for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+      local tpl="${mapping%%:*}"
+      local target="${mapping#*:}"
+      if [ -f "$target" ]; then
+        local cs
+        cs=$(compute_checksum "$target")
+        json=$(echo "$json" | jq --arg f "$target" --arg c "$cs" '.files[$f] = $c')
+      fi
+    done
+  fi
 
   echo "$json" > .ai-setup.json
 }
@@ -543,6 +568,18 @@ run_generation() {
         fi
       fi
     done
+    # Also deploy Shopify-specific commands if system includes shopify
+    if [[ "${SYSTEM:-}" == *shopify* ]]; then
+      for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+        local tpl="${mapping%%:*}"
+        local target="${mapping#*:}"
+        if [ -f "$SCRIPT_DIR/$tpl" ]; then
+          mkdir -p "$(dirname "$target")"
+          cp "$SCRIPT_DIR/$tpl" "$target"
+          cmd_updated=$((cmd_updated + 1))
+        fi
+      done
+    fi
     echo "  ✅ $cmd_updated command/agent files updated"
   fi
 
@@ -1024,6 +1061,14 @@ Rules:
           "sickn33/antigravity-awesome-skills@shopify-development"
           "jeffallan/claude-skills@shopify-expert"
           "henkisdabro/wookstar-claude-code-plugins@shopify-theme-dev"
+          "dragnoir/Shopify-agent-skills@theme-development"
+          "dragnoir/Shopify-agent-skills@liquid-templating"
+          "dragnoir/Shopify-agent-skills@app-development"
+          "dragnoir/Shopify-agent-skills@api-graphql"
+          "dragnoir/Shopify-agent-skills@headless-hydrogen"
+          "dragnoir/Shopify-agent-skills@checkout-customization"
+          "dragnoir/Shopify-agent-skills@shopify-functions"
+          "dragnoir/Shopify-agent-skills@cli-tools"
         ) ;;
       nuxt)
         SYSTEM_SKILLS+=(
@@ -1204,6 +1249,41 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
           UPD_UPDATED=$((UPD_UPDATED + 1))
         done
 
+        # Also update Shopify-specific templates if system includes shopify
+        if [[ "${SYSTEM:-}" == *shopify* ]]; then
+          for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+            tpl="${mapping%%:*}"
+            target="${mapping#*:}"
+            if [ ! -f "$target" ]; then
+              if [ -f "$SCRIPT_DIR/$tpl" ]; then
+                mkdir -p "$(dirname "$target")"
+                cp "$SCRIPT_DIR/$tpl" "$target"
+                echo "  ✨ $target (new)"
+                UPD_NEW=$((UPD_NEW + 1))
+              fi
+              continue
+            fi
+            tpl_cs=$(compute_checksum "$SCRIPT_DIR/$tpl")
+            cur_cs=$(compute_checksum "$target")
+            if [ "$tpl_cs" = "$cur_cs" ]; then
+              echo "  ⏭️  $target (unchanged)"
+              UPD_SKIPPED=$((UPD_SKIPPED + 1))
+              continue
+            fi
+            stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+            if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
+              bp=$(backup_file "$target")
+              cp "$SCRIPT_DIR/$tpl" "$target"
+              echo "  ⚠️  $target (user-modified — backed up to $bp)"
+              UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+            else
+              cp "$SCRIPT_DIR/$tpl" "$target"
+              echo "  ✅ $target (updated)"
+            fi
+            UPD_UPDATED=$((UPD_UPDATED + 1))
+          done
+        fi
+
         echo ""
         echo "📊 Update summary:"
         echo "   Updated:   $UPD_UPDATED"
@@ -1239,6 +1319,15 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         echo "🗑️  Removing managed files..."
 
         for mapping in "${TEMPLATE_MAP[@]}"; do
+          target="${mapping#*:}"
+          if [ -f "$target" ]; then
+            rm -f "$target"
+            echo "   Removed: $target"
+          fi
+        done
+
+        # Also remove Shopify-specific templates
+        for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
           target="${mapping#*:}"
           if [ -f "$target" ]; then
             rm -f "$target"
@@ -1411,6 +1500,19 @@ for cmd in spec.md spec-work.md commit.md pr.md review.md test.md techdebt.md bu
     echo "  .claude/commands/$cmd already exists, skipping."
   fi
 done
+
+# Shopify-specific slash commands (when system includes shopify)
+if [[ "${SYSTEM:-}" == *shopify* ]]; then
+  echo "  🛍️  Installing Shopify skill commands..."
+  mkdir -p .claude/commands/shopify
+  for cmd in theme-dev.md liquid.md app-dev.md graphql-api.md hydrogen.md checkout.md functions.md cli-tools.md; do
+    if [ ! -f ".claude/commands/shopify/$cmd" ]; then
+      cp "$TPL/commands/shopify/$cmd" ".claude/commands/shopify/$cmd"
+    else
+      echo "  .claude/commands/shopify/$cmd already exists, skipping."
+    fi
+  done
+fi
 
 # ------------------------------------------------------------------------------
 # 6d. SUBAGENT TEMPLATES
