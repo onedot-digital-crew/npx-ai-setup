@@ -23,6 +23,7 @@
       "Bash(git branch:*)",
       "Bash(git checkout:*)",
       "Bash(git stash:*)",
+      "Bash(git push -u origin claude/*)",
       "Bash(npm run *)",
       "Bash(npm test *)",
       "Bash(npm install *)",
@@ -39,8 +40,10 @@
       "Read(.env*)",
       "Bash(rm -r *)",
       "Bash(rm -rf *)",
-      "Bash(git push *)",
       "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(git checkout -- *)",
+      "Bash(git restore *)",
       "Bash(npm publish *)"
     ]
   },
@@ -80,6 +83,11 @@
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/context-freshness.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/update-check.sh",
+            "timeout": 5
           }
         ]
       }
@@ -95,5 +103,11 @@
         ]
       }
     ]
-  }
+  },
+  "enabledPlugins": {
+    "code-review@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost."
 }

@@ -96,7 +96,10 @@ Show the spec to the user for review and refinement.
 ```markdown
 # Spec: [Clear Title]
 
-> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft
+> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Branch**: —
+
+<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Branch is set automatically by /spec-work-all (worktree mode) or manually -->
 
 ## Goal
 [One sentence]

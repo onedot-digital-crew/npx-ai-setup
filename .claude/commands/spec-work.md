@@ -13,19 +13,21 @@ Execute the spec: $ARGUMENTS
 
 3. **Read project context**: Skim `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md` to follow project patterns and use correct libraries.
 
-4. **Execute each step** in order:
+4. **Load relevant skills**: If the spec's Context section mentions skills (e.g. "Relevant skills: foo, bar"), read `.claude/skills/<name>/prompt.md` for each. Apply their guidance throughout execution. Skip if `.claude/skills/` doesn't exist or no skills are listed.
+
+5. **Execute each step** in order:
    - Implement the change
    - After completing a step, edit the spec file to check it off: `- [ ]` -> `- [x]`
    - If a step is blocked or unclear, stop and ask the user
 
-5. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
+6. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
-5.5. **Update CHANGELOG.md**: Prepend an entry to `CHANGELOG.md` in the project root:
+6.5. **Update CHANGELOG.md**: Prepend an entry to `CHANGELOG.md` in the project root:
    - Find or create a `## YYYY-MM-DD` heading for today's date at the top of the entries section
    - Under it, add: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
    - Use the Edit tool to insert the entry after the `<!-- Entries are prepended below this line, newest first -->` comment
 
-6. **Complete the spec**:
+7. **Complete the spec**:
    - Change status from `draft` to `completed` in the spec header
    - Move the file: `specs/NNN-*.md` -> `specs/completed/NNN-*.md`
    - Report what was done

@@ -109,13 +109,15 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Slash Commands (9 commands)
+### 2. Slash Commands (12 commands)
 
 | Command | Model | Description |
 |---------|-------|-------------|
 | `/spec "task"` | Opus (plan mode) | Challenge idea first (GO/SIMPLIFY/REJECT), then create structured spec |
-| `/spec-work 001` | Sonnet 4.6 | Execute a spec step by step |
-| `/spec-work-all` | Sonnet 4.6 | Execute all draft specs in parallel via subagents |
+| `/spec-work 001` | Sonnet 4.6 | Execute a spec step by step (`draft` → `in-progress` → `in-review`) |
+| `/spec-work-all` | Sonnet 4.6 | Execute all draft specs in parallel via Git worktrees (isolated branches) |
+| `/spec-review 001` | Opus (plan mode) | Review spec changes against acceptance criteria, draft PR on approval |
+| `/spec-board` | Sonnet (plan mode) | Kanban-style overview of all specs with status + step progress |
 | `/commit` | Sonnet 4.6 | Stage changes + create descriptive commit (no push) |
 | `/pr` | Sonnet 4.6 | Prepare a PR — drafts title/body, you push and create manually |
 | `/review` | Opus (plan mode) | Review uncommitted changes — bugs, security, performance |
@@ -139,11 +141,19 @@ Subagents run as isolated agents for parallel or specialized work:
 
 ### 4. Spec-driven workflow
 
-Scaffolds a `specs/` directory with a template and workflow guide:
+Scaffolds a `specs/` directory with a Kanban-style lifecycle:
 
-- `specs/TEMPLATE.md` — 7-section spec template (Goal, Context, Steps, Acceptance Criteria, Files, Out of Scope, Notes)
-- `specs/README.md` — When to create specs, naming conventions, workflow guide
-- `specs/completed/` — Archive for finished specs
+```
+/spec "feature"        → draft (Backlog)
+/spec-board            → Kanban overview with step progress
+/spec-work NNN         → draft → in-progress → in-review
+/spec-work-all         → Parallel execution via Git worktrees (one branch per spec)
+/spec-review NNN       → Review against acceptance criteria → completed + PR draft
+```
+
+**Status lifecycle:** `draft` → `in-progress` → `in-review` → `completed` (or `blocked` at any stage)
+
+**Parallel execution** uses isolated Git worktrees — each spec gets its own branch (`spec/NNN-title`), agents work in parallel without merge conflicts. After completion, each spec is ready for `/spec-review`.
 
 **Hybrid automation**: Claude suggests creating a spec when a task touches 3+ files or involves new features. Simple fixes skip specs entirely.
 
@@ -254,7 +264,9 @@ project/
 |   +-- commands/                # Slash commands
 |   |   +-- spec.md              # /spec — create specs (Opus)
 |   |   +-- spec-work.md         # /spec-work — execute specs (Sonnet)
-|   |   +-- spec-work-all.md     # /spec-work-all — bulk execute via subagents
+|   |   +-- spec-work-all.md     # /spec-work-all — parallel execute via Git worktrees
+|   |   +-- spec-review.md       # /spec-review — review + PR draft (Opus)
+|   |   +-- spec-board.md        # /spec-board — Kanban overview (Sonnet)
 |   |   +-- commit.md            # /commit — stage + commit
 |   |   +-- pr.md                # /pr — prepare PR
 |   |   +-- review.md            # /review — code review (Opus)

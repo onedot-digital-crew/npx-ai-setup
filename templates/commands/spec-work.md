@@ -15,26 +15,29 @@ Execute the spec: $ARGUMENTS
 
 4. **Load relevant skills**: If the spec's Context section mentions skills (e.g. "Relevant skills: foo, bar"), read `.claude/skills/<name>/prompt.md` for each. Apply their guidance throughout execution. Skip if `.claude/skills/` doesn't exist or no skills are listed.
 
-5. **Execute each step** in order:
+5. **Start work**: Update the spec header — set `**Status**: in-progress`. If the spec has no `**Branch**` field, add `| **Branch**: —` to the header line.
+
+6. **Execute each step** in order:
    - Implement the change
    - After completing a step, edit the spec file to check it off: `- [ ]` -> `- [x]`
    - If a step is blocked or unclear, stop and ask the user
 
-6. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
+7. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
-6.5. **Update CHANGELOG.md**: Prepend an entry to `CHANGELOG.md` in the project root:
+8. **Update CHANGELOG.md**: Prepend an entry to `CHANGELOG.md` in the project root:
    - Find or create a `## YYYY-MM-DD` heading for today's date at the top of the entries section
    - Under it, add: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
    - Use the Edit tool to insert the entry after the `<!-- Entries are prepended below this line, newest first -->` comment
 
-7. **Complete the spec**:
-   - Change status from `draft` to `completed` in the spec header
-   - Move the file: `specs/NNN-*.md` -> `specs/completed/NNN-*.md`
-   - Report what was done
+9. **Mark ready for review**:
+   - Change status from `in-progress` to `in-review` in the spec header
+   - Report what was done and suggest: `Run /spec-review NNN to review and create a PR`
+   - Do NOT move the file to `specs/completed/` — that happens during review
 
 ## Rules
 - Follow the spec exactly. Do not add scope beyond what's listed.
 - If something is in "Out of Scope", do NOT implement it.
 - Check off each step in the spec file as you complete it (progress tracking).
-- If a step fails or is blocked, leave it unchecked and ask the user.
+- If a step fails or is blocked, leave it unchecked, set status to `blocked`, and ask the user.
 - Commit after logical groups of changes, not after every single step.
+- If called with `--complete` flag, skip the review step: set status directly to `completed` and move to `specs/completed/` (legacy behavior).

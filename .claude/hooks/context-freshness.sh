@@ -2,6 +2,10 @@
 # context-freshness.sh — UserPromptSubmit hook
 # Warns when .agents/context/ files may be outdated (package.json or tsconfig changed)
 # Silent pass when up-to-date or state file missing (~10ms runtime, no API calls)
+#
+# Cache note: Warning is injected as stderr output (shown as a system message in Claude's turn),
+# NOT by editing CLAUDE.md. This preserves the prompt cache prefix — editing static layers
+# mid-session would invalidate the cache for all subsequent turns.
 
 STATE_FILE=".agents/context/.state"
 [ ! -f "$STATE_FILE" ] && exit 0
@@ -31,7 +35,7 @@ if [ -n "$STORED_TSC" ] && [ -f "tsconfig.json" ]; then
 fi
 
 if [ -n "$CHANGED" ]; then
-  echo "Warning: Project context may be outdated ($CHANGED changed). Run: npx @onedot/ai-setup --regenerate" >&2
+  echo "[CONTEXT STALE] Project context outdated ($CHANGED changed). Invoke the context-refresher subagent before proceeding." >&2
 fi
 
 exit 0

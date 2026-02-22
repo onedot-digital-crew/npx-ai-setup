@@ -5,43 +5,94 @@ No small talk. Just do it.
 Confirmations one word (Done, Fixed). Show code changes as diff only.
 If you edit the same file 3+ times without progress, stop and ask for guidance.
 
-## Project
-- NPM package `@onedot/ai-setup` — scaffolding tool for AI-assisted development
-- Entry point: `bin/ai-setup.sh` (Bash, POSIX-compatible where possible)
-- Templates in `templates/` are copied 1:1 into target projects
-- Published via `npm publish`, executed via `npx @onedot/ai-setup`
-
-## Key Files
-- `bin/ai-setup.sh` — Main setup script (~1670 lines)
-- `templates/CLAUDE.md` — CLAUDE.md template for target projects
-- `templates/claude/settings.json` — Claude settings template
-- `templates/claude/hooks/` — Hook scripts (protect-files, circuit-breaker, post-edit-lint, context-freshness)
-- `templates/commands/` — Slash command templates (spec.md, spec-work.md)
-- `templates/specs/` — Spec workflow templates (TEMPLATE.md, README.md)
-- `README.md` — NPM package documentation
+## Project Context (read before complex tasks)
+Before multi-file changes or new features, read `.agents/context/`:
+- `STACK.md` - Technology stack, versions, key dependencies, and what to avoid
+- `ARCHITECTURE.md` - System architecture, directory structure, and data flow
+- `CONVENTIONS.md` - Coding standards, naming patterns, error handling, and testing
 
 ## Commands
-- No build step — pure shell script
-- `bash -n bin/ai-setup.sh` — Syntax validation
-- `npx . --regenerate` — Test regeneration locally
+- `npx @onedot/ai-setup` — run the setup tool (installs Claude Code config, hooks, skills)
+- `./bin/ai-setup.sh` — run directly from repo root
+- No npm scripts defined; all logic lives in the shell script
 
 ## Critical Rules
-- All template content MUST be in English (no German in generated files)
-- No umlauts in files (use ae, oe, ue)
-- Templates are copied 1:1 — they must work standalone in any target project
-- Shell script must work on macOS (bash 3.2) and Linux (bash 4+)
-- Use `cksum` not `md5` (POSIX compatibility)
-- Hook scripts must be lightweight (<50ms, no API calls)
-- Generation prompts run in target projects — keep token usage minimal
+
+### Shell Script Style
+- Use `bash` strictly; avoid bashisms that break on `sh`
+- Quote all variable expansions: `"$var"`, `"${var}"`, `"$@"`
+- Use `local` for all function-scoped variables
+- Check exit codes explicitly; prefer `|| return 1` over silent failures
+
+### File and Path Conventions
+- Templates live in `templates/` and are copied verbatim to the target project
+- Do not modify template files for project-specific content — use generation logic in `bin/ai-setup.sh`
+- All generated content must be in English; no umlauts or non-ASCII characters
+
+### Safety and Idempotency
+- All install steps must be idempotent — running twice must not corrupt state
+- Check for existing files before overwriting; prompt or skip, never silently clobber
+- Never `rm -rf` without an explicit user confirmation gate in the script
+
+## Task Complexity Routing
+Before starting, classify and state the task tier:
+
+- **Simple** (typos, single-file fixes, config tweaks): proceed directly
+- **Medium** (new feature, 2-3 files, component): use plan mode
+- **Complex** (architecture, refactor, new system): stop and tell the user to run
+  `/gsd:set-profile quality` or restart with `claude --model claude-opus-4-6`
+
+Never start a complex task without flagging the model requirement first.
+
+## Verification
+After completing work, verify before marking done:
+- Run tests if available (`/test`)
+- For UI changes: use browser tools or describe expected result
+- For API changes: make a test request
+- Check the build still passes
+
+Never mark work as completed without BOTH:
+1. Automated checks pass (tests green, linter clean, build succeeds)
+2. Explicit statement: "Verification complete: [what was checked and result]"
+
+## Context Management
+Your context will be compacted automatically — this is normal. Before compaction:
+- Commit current work or save state to HANDOFF.md
+- Track remaining work in the spec or a todo list
+After fresh start: review git log, open specs, check test state.
+
+If you see `[CONTEXT STALE]` in your context: invoke the `context-refresher` subagent before proceeding with the task. This regenerates `.agents/context/` to reflect the current project state.
+
+## Prompt Cache Strategy
+Claude caches prompts as a prefix — static content first, dynamic content last maximizes cache hits:
+1. **System prompt + tools** — globally cached across all sessions
+2. **CLAUDE.md** — cached per project (do not edit mid-session)
+3. **Session context** (`.agents/context/`) — cached per session
+4. **Conversation messages** — dynamic, appended each turn
+
+Do not edit CLAUDE.md or tool definitions mid-session — it breaks the cache for all subsequent turns.
+Pass dynamic updates (timestamps, file changes) via messages, not by editing static layers.
+
+## Working Style
+Read relevant code before answering questions about it.
+Implement changes rather than only suggesting them.
+Use subagents for parallel or isolated work. For simple tasks, work directly.
 
 ## Spec-Driven Development
-Specs live in `specs/` — structured task plans created before coding.
+Specs live in `specs/` -- structured task plans created before coding.
 
-**When to suggest a spec:** Changes across 3+ files, new features, template changes.
-**Skip specs for:** Single-file fixes, README updates.
+**When to suggest a spec:** Changes across 3+ files, new features, architectural changes, ambiguous requirements.
+**Skip specs for:** Single-file fixes, typos, config changes.
 
 **Workflow:**
-1. `/spec "task"` — create spec
-2. Review and refine
-3. `/spec-work NNN` — execute step by step
-4. Completed specs move to `specs/completed/`
+1. `/spec "task"` (Opus in plan mode - creates detailed plan, you approve, spec file is created)
+2. Review and refine spec if needed
+3. `/spec-work NNN` (Sonnet executes the approved plan step-by-step)
+4. `/spec-work-all` (Sonnet executes all draft specs in parallel via subagents)
+5. Completed specs move to `specs/completed/`
+
+See `specs/README.md` for details.
+
+## Documentation Lookup
+Always use Context7 MCP when you need library/API documentation, code generation,
+setup or configuration steps. Add "use context7" to prompts or it will be auto-invoked.

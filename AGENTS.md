@@ -42,7 +42,10 @@ project-root/
 │   │       └── README.md              # Hook documentation
 │   ├── commands/
 │   │   ├── spec.md              # /spec slash command (Opus, plan mode)
-│   │   └── spec-work.md         # /spec-work slash command (Sonnet, execute mode)
+│   │   ├── spec-work.md         # /spec-work slash command (Sonnet, execute mode)
+│   │   ├── spec-work-all.md     # /spec-work-all parallel execution via Git worktrees
+│   │   ├── spec-review.md       # /spec-review review + PR draft (Opus, plan mode)
+│   │   └── spec-board.md        # /spec-board Kanban overview (Sonnet, plan mode)
 │   ├── github/
 │   │   └── copilot-instructions.md    # Copilot context template
 │   ├── specs/
@@ -86,17 +89,35 @@ The main bash script handles:
 
 ### 3. Spec-Driven Development
 
-Two slash commands enable structured task planning:
+Five slash commands enable a Kanban-style spec workflow:
 
 **`/spec "task description"`** (templates/commands/spec.md):
 - Uses Claude Opus in plan mode
-- Creates `specs/NNN-description.md` with structured plan
+- Challenges the idea (GO/SIMPLIFY/REJECT), then creates `specs/NNN-description.md`
 - 60-line max spec size enforced
 
 **`/spec-work NNN`** (templates/commands/spec-work.md):
 - Uses Claude Sonnet in execute mode
-- Follows spec step-by-step
-- Auto-checks steps and moves completed specs to `specs/completed/`
+- Follows spec step-by-step, transitions status: `draft` → `in-progress` → `in-review`
+- Supports `--complete` flag for legacy behavior (skip review, move directly to completed)
+
+**`/spec-work-all`** (templates/commands/spec-work-all.md):
+- Uses Claude Sonnet with Task subagents
+- Creates isolated Git worktrees per spec (`spec/NNN-title` branch)
+- Parallel execution in waves with dependency detection
+- Each subagent works in its own worktree — no merge conflicts
+
+**`/spec-review NNN`** (templates/commands/spec-review.md):
+- Uses Claude Opus in plan mode
+- Reviews code changes against spec acceptance criteria
+- Verdict: APPROVED (→ completed + PR draft) / CHANGES REQUESTED (→ back to in-progress) / REJECTED (→ blocked)
+
+**`/spec-board`** (templates/commands/spec-board.md):
+- Uses Claude Sonnet in plan mode
+- Kanban-style overview: Backlog | In Progress | Review | Blocked | Done
+- Shows step-level progress (`[3/8]`) and branch info per spec
+
+**Status lifecycle:** `draft` → `in-progress` → `in-review` → `completed` (or `blocked` at any stage)
 
 ### 4. Auto-Init Process
 

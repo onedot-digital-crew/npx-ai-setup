@@ -3,12 +3,12 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
-Execute all draft specs in `specs/` using parallel subagents where possible.
+Execute all draft specs in `specs/` using parallel subagents in isolated Git worktrees.
 
 ## Process
 
 ### 1. Discover draft specs
-Scan `specs/` for all `NNN-*.md` files (excluding `specs/completed/`). Read each spec's Goal and Out of Scope to build a dependency map.
+Scan `specs/` for all `NNN-*.md` files (excluding `specs/completed/`). Only pick specs with `Status: draft`. Read each spec's Goal and Out of Scope to build a dependency map.
 
 ### 2. Dependency detection
 A spec is **dependent** on another if its "Out of Scope" section explicitly names another spec number (e.g. "Spec 010", "spec 009"). Dependent specs must run after the spec they reference.
@@ -17,34 +17,73 @@ Group specs into:
 - **Parallel group**: specs with no dependencies on each other
 - **Sequential queue**: specs that depend on a parallel spec (run after their dependency completes)
 
-### 3. Execute in waves
+### 3. Gitignore setup
+Ensure `.worktrees/` is in `.gitignore`. If not, append it:
+```bash
+grep -qxF '.worktrees/' .gitignore 2>/dev/null || echo '.worktrees/' >> .gitignore
+```
 
-**Wave 1 — parallel**: Launch one Task subagent per independent spec simultaneously. Each subagent receives:
-- The full spec content
-- The spec-work process below
+### 4. Execute in waves
 
-**Wave 2+ — sequential**: After each wave completes, launch the next wave of specs that are now unblocked.
+#### Wave setup — create worktrees
+For each spec in the current wave, before launching subagents:
 
-### 4. Spec-work process (each subagent follows this)
-1. Read the spec file fully
-2. Read `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md` if they exist
-3. Execute each step in order — check off `- [ ]` → `- [x]` in the spec file after each step
-4. Verify all acceptance criteria and mark them checked
-5. Prepend entry to `CHANGELOG.md`:
-   - Find/create `## YYYY-MM-DD` heading for today
-   - Add: `- **Spec NNN**: [Title] — [1-sentence summary]`
-   - Insert after `<!-- Entries are prepended below this line, newest first -->`
-6. Change spec status from `draft` to `completed`
-7. Move spec: `specs/NNN-*.md` → `specs/completed/NNN-*.md`
+1. Derive branch name: `spec/NNN-title` (lowercase, hyphens, from spec filename without `.md`)
+2. Create worktree: `git worktree add .worktrees/spec-NNN -b spec/NNN-title`
+   - If branch already exists: `git worktree add .worktrees/spec-NNN spec/NNN-title`
+3. Update spec header in the **main working directory** spec file:
+   - Set `**Status**: in-progress`
+   - Set `**Branch**: spec/NNN-title`
+
+#### Wave execution — parallel subagents
+Launch one Task subagent per spec simultaneously. Each subagent receives:
+
+**Prompt for each subagent:**
+```
+Execute this spec in the worktree at .worktrees/spec-NNN.
+
+IMPORTANT: All file operations (Read, Write, Edit, Bash) must target files inside
+.worktrees/spec-NNN/ — this is an isolated Git worktree with its own branch.
+The spec file itself lives in the main working directory at specs/NNN-*.md.
+
+Spec content:
+[full spec content here]
+
+Process:
+1. Read .agents/context/CONVENTIONS.md and .agents/context/STACK.md from the worktree if they exist
+2. Load relevant skills if referenced in the spec's Context section
+3. Execute each step in order — work inside .worktrees/spec-NNN/
+4. After completing each step, edit the spec file in the MAIN directory (specs/NNN-*.md)
+   to check it off: - [ ] → - [x]
+5. After all steps: verify acceptance criteria, mark them checked in the spec
+6. Stage and commit all changes in the worktree:
+   git add -A && git commit -m "spec(NNN): [spec title]"
+   Run this inside .worktrees/spec-NNN/
+7. Update spec status to in-review
+8. Prepend CHANGELOG entry:
+   - Find/create ## YYYY-MM-DD heading for today
+   - Add: - **Spec NNN**: [Title] — [1-sentence summary]
+   - Insert after <!-- Entries are prepended below this line, newest first -->
+```
+
+#### Wave cleanup — remove worktrees
+After each wave completes, for each spec:
+1. Remove the worktree: `git worktree remove .worktrees/spec-NNN --force`
+2. Verify the branch exists: `git branch --list spec/NNN-*`
+
+**Wave 2+**: After each wave completes, launch the next wave of specs that are now unblocked. Repeat setup → execution → cleanup for each wave.
 
 ### 5. Final summary
 After all waves complete, report:
-- ✅ Completed specs (with spec ID and title)
-- ❌ Failed specs (with spec ID and reason)
+- Completed specs (with spec ID, title, and branch name)
+- Failed specs (with spec ID and reason)
 - Total: N completed, M failed
+- Next step: `Run /spec-review NNN for each completed spec, or /spec-board for overview`
 
 ## Rules
 - Follow each spec exactly — no scope creep
 - If a step in a spec is blocked or unclear, mark it unchecked and continue remaining steps
-- Do NOT commit — leave committing to the user
+- Each subagent works ONLY in its own worktree — never modify files in the main working directory except the spec file and CHANGELOG.md
 - If `specs/` has no draft specs, report "No draft specs found" and stop
+- If `git worktree` fails (e.g. dirty working tree), report the error and skip that spec
+- Always clean up worktrees, even if the subagent fails
