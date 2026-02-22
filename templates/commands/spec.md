@@ -37,6 +37,8 @@ List 1-3 alternatives, including:
 
 Scan with Glob and Grep to check if similar functionality already exists.
 
+Check `.claude/skills/` — if any installed skill already covers this, note it as an alternative.
+
 ### 1e — Verdict
 
 Output the verdict clearly in the chat. Choose exactly one:
@@ -58,6 +60,8 @@ Scan `specs/` (including `specs/completed/`) for existing `NNN-*.md` files, find
 
 ### Step 2 — Analyze the task
 Read only the most relevant 2-3 source files. Do NOT read the entire codebase.
+
+If `.claude/skills/` exists, glob the skill directories and read their `prompt.md` files (titles/first line only). List any skills relevant to this task in the spec **Context** section so they're referenced during execution.
 
 ### Step 3 — Create the spec file
 Create `specs/NNN-short-description.md` using the structure below.
