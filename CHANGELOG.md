@@ -10,6 +10,10 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-23
 
+- **Spec 019**: Shopify templates moved to skills — relocated 8 Shopify knowledge templates from `templates/commands/shopify/` to `templates/skills/shopify-*/prompt.md`, updated all install/update/uninstall references to target `.claude/skills/`, removed redundant `dragnoir/Shopify-agent-skills` marketplace entries; version bumped to 1.1.4
+
+## 2026-02-23
+
 - **Spec 018**: Native worktree rewrite — replaced manual `git worktree add/remove` in spec-work-all with Claude Code's native `Task(isolation: "worktree")`; subagent now handles .env copy, dep install, and branch rename; version bumped to 1.1.3
 
 

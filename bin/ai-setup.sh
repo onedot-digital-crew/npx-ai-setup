@@ -85,6 +85,7 @@ build_template_map() {
       github/*)   target=".${rel}" ;;
       commands/*) target=".claude/${rel}" ;;
       agents/*)   target=".claude/${rel}" ;;
+      skills/*)   target=".claude/${rel}" ;;
       specs/*)    target="${rel}" ;;
       *)          target="${rel}" ;;
     esac
@@ -96,16 +97,16 @@ build_template_map() {
 # Populate TEMPLATE_MAP at startup
 build_template_map
 
-# Shopify-specific templates (only added when system includes shopify)
-SHOPIFY_TEMPLATE_MAP=(
-  "templates/commands/shopify/theme-dev.md:.claude/commands/shopify/theme-dev.md"
-  "templates/commands/shopify/liquid.md:.claude/commands/shopify/liquid.md"
-  "templates/commands/shopify/app-dev.md:.claude/commands/shopify/app-dev.md"
-  "templates/commands/shopify/graphql-api.md:.claude/commands/shopify/graphql-api.md"
-  "templates/commands/shopify/hydrogen.md:.claude/commands/shopify/hydrogen.md"
-  "templates/commands/shopify/checkout.md:.claude/commands/shopify/checkout.md"
-  "templates/commands/shopify/functions.md:.claude/commands/shopify/functions.md"
-  "templates/commands/shopify/cli-tools.md:.claude/commands/shopify/cli-tools.md"
+# Shopify-specific skills (only added when system includes shopify)
+SHOPIFY_SKILLS_MAP=(
+  "templates/skills/shopify-theme-dev/prompt.md:.claude/skills/shopify-theme-dev/prompt.md"
+  "templates/skills/shopify-liquid/prompt.md:.claude/skills/shopify-liquid/prompt.md"
+  "templates/skills/shopify-app-dev/prompt.md:.claude/skills/shopify-app-dev/prompt.md"
+  "templates/skills/shopify-graphql-api/prompt.md:.claude/skills/shopify-graphql-api/prompt.md"
+  "templates/skills/shopify-hydrogen/prompt.md:.claude/skills/shopify-hydrogen/prompt.md"
+  "templates/skills/shopify-checkout/prompt.md:.claude/skills/shopify-checkout/prompt.md"
+  "templates/skills/shopify-functions/prompt.md:.claude/skills/shopify-functions/prompt.md"
+  "templates/skills/shopify-cli-tools/prompt.md:.claude/skills/shopify-cli-tools/prompt.md"
 )
 
 # Get package version from package.json
@@ -165,9 +166,9 @@ write_metadata() {
     fi
   done
 
-  # Include Shopify templates if system includes shopify
+  # Include Shopify skills if system includes shopify
   if [[ "${SYSTEM:-}" == *shopify* ]]; then
-    for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
       local tpl="${mapping%%:*}"
       local target="${mapping#*:}"
       if [ -f "$target" ]; then
@@ -584,9 +585,9 @@ run_generation() {
         fi
       fi
     done
-    # Also deploy Shopify-specific commands if system includes shopify
+    # Also deploy Shopify-specific skills if system includes shopify
     if [[ "${SYSTEM:-}" == *shopify* ]]; then
-      for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+      for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
         local tpl="${mapping%%:*}"
         local target="${mapping#*:}"
         if [ -f "$SCRIPT_DIR/$tpl" ]; then
@@ -1077,14 +1078,6 @@ Rules:
           "sickn33/antigravity-awesome-skills@shopify-development"
           "jeffallan/claude-skills@shopify-expert"
           "henkisdabro/wookstar-claude-code-plugins@shopify-theme-dev"
-          "dragnoir/Shopify-agent-skills@theme-development"
-          "dragnoir/Shopify-agent-skills@liquid-templating"
-          "dragnoir/Shopify-agent-skills@app-development"
-          "dragnoir/Shopify-agent-skills@api-graphql"
-          "dragnoir/Shopify-agent-skills@headless-hydrogen"
-          "dragnoir/Shopify-agent-skills@checkout-customization"
-          "dragnoir/Shopify-agent-skills@shopify-functions"
-          "dragnoir/Shopify-agent-skills@cli-tools"
         ) ;;
       nuxt)
         SYSTEM_SKILLS+=(
@@ -1265,9 +1258,9 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
           UPD_UPDATED=$((UPD_UPDATED + 1))
         done
 
-        # Also update Shopify-specific templates if system includes shopify
+        # Also update Shopify-specific skills if system includes shopify
         if [[ "${SYSTEM:-}" == *shopify* ]]; then
-          for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+          for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
             tpl="${mapping%%:*}"
             target="${mapping#*:}"
             if [ ! -f "$target" ]; then
@@ -1342,8 +1335,8 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
           fi
         done
 
-        # Also remove Shopify-specific templates
-        for mapping in "${SHOPIFY_TEMPLATE_MAP[@]}"; do
+        # Also remove Shopify-specific skills
+        for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
           target="${mapping#*:}"
           if [ -f "$target" ]; then
             rm -f "$target"
@@ -1519,15 +1512,17 @@ while IFS= read -r -d '' _cmd_path; do
   fi
 done < <(find "$TPL/commands" -maxdepth 1 -type f -print0 | sort -z)
 
-# Shopify-specific slash commands (when system includes shopify)
+# Shopify-specific skills (when system includes shopify)
 if [[ "${SYSTEM:-}" == *shopify* ]]; then
-  echo "  🛍️  Installing Shopify skill commands..."
-  mkdir -p .claude/commands/shopify
-  for cmd in theme-dev.md liquid.md app-dev.md graphql-api.md hydrogen.md checkout.md functions.md cli-tools.md; do
-    if [ ! -f ".claude/commands/shopify/$cmd" ]; then
-      cp "$TPL/commands/shopify/$cmd" ".claude/commands/shopify/$cmd"
+  echo "  🛍️  Installing Shopify skills..."
+  for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
+    local_tpl="${mapping%%:*}"
+    local_target="${mapping#*:}"
+    mkdir -p "$(dirname "$local_target")"
+    if [ ! -f "$local_target" ]; then
+      cp "$TPL/${local_tpl#templates/}" "$local_target"
     else
-      echo "  .claude/commands/shopify/$cmd already exists, skipping."
+      echo "  $local_target already exists, skipping."
     fi
   done
 fi
