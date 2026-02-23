@@ -31,7 +31,27 @@ For each spec in the current wave, before launching subagents:
 1. Derive branch name: `spec/NNN-title` (lowercase, hyphens, from spec filename without `.md`)
 2. Create worktree: `git worktree add .worktrees/spec-NNN -b spec/NNN-title`
    - If branch already exists: `git worktree add .worktrees/spec-NNN spec/NNN-title`
-3. Update spec header in the **main working directory** spec file:
+3. **Copy .env files**: Copy all `.env*` files from repo root into the worktree, skipping `.env.example` and `.env.template`. If no `.env*` files exist, skip silently. Warn but continue on failure:
+   ```bash
+   for f in .env*; do
+     [[ -f "$f" ]] || continue   # skip if glob didn't match (no .env files)
+     [[ "$f" == ".env.example" || "$f" == ".env.template" ]] && continue
+     cp "$f" ".worktrees/spec-NNN/" 2>/dev/null || echo "  ⚠️  Could not copy $f to worktree — continuing"
+   done
+   ```
+4. **Install dependencies**: Detect lockfile in repo root and run install inside worktree. Skip if no lockfile found. Warn but continue on failure:
+   ```bash
+   if [ -f "bun.lockb" ]; then
+     (cd .worktrees/spec-NNN && bun install --frozen-lockfile 2>/dev/null) || echo "  ⚠️  bun install failed — continuing"
+   elif [ -f "package-lock.json" ]; then
+     (cd .worktrees/spec-NNN && npm ci 2>/dev/null) || echo "  ⚠️  npm ci failed — continuing"
+   elif [ -f "pnpm-lock.yaml" ]; then
+     (cd .worktrees/spec-NNN && pnpm install --frozen-lockfile 2>/dev/null) || echo "  ⚠️  pnpm install failed — continuing"
+   elif [ -f "yarn.lock" ]; then
+     (cd .worktrees/spec-NNN && yarn install --frozen-lockfile 2>/dev/null) || echo "  ⚠️  yarn install failed — continuing"
+   fi
+   ```
+5. Update spec header in the **main working directory** spec file:
    - Set `**Status**: in-progress`
    - Set `**Branch**: spec/NNN-title`
 
@@ -45,6 +65,9 @@ Execute this spec in the worktree at .worktrees/spec-NNN.
 IMPORTANT: All file operations (Read, Write, Edit, Bash) must target files inside
 .worktrees/spec-NNN/ — this is an isolated Git worktree with its own branch.
 The spec file itself lives in the main working directory at specs/NNN-*.md.
+
+Note: .env files have been copied and dependencies installed (if applicable) — the
+worktree is ready to use. Do not re-run installs unless a step explicitly requires it.
 
 Spec content:
 [full spec content here]
