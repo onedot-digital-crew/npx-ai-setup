@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
-Execute all draft specs in `specs/` using parallel subagents in isolated Git worktrees.
+Execute all draft specs in `specs/` using parallel subagents with native worktree isolation.
 
 ## Process
 
@@ -17,86 +17,68 @@ Group specs into:
 - **Parallel group**: specs with no dependencies on each other
 - **Sequential queue**: specs that depend on a parallel spec (run after their dependency completes)
 
-### 3. Gitignore setup
-Ensure `.worktrees/` is in `.gitignore`. If not, append it:
-```bash
-grep -qxF '.worktrees/' .gitignore 2>/dev/null || echo '.worktrees/' >> .gitignore
-```
+### 3. Execute in waves
 
-### 4. Execute in waves
-
-#### Wave setup — create worktrees
-For each spec in the current wave, before launching subagents:
+#### Wave setup — before launching subagents
+For each spec in the current wave:
 
 1. Derive branch name: `spec/NNN-title` (lowercase, hyphens, from spec filename without `.md`)
-2. Create worktree: `git worktree add .worktrees/spec-NNN -b spec/NNN-title`
-   - If branch already exists: `git worktree add .worktrees/spec-NNN spec/NNN-title`
-3. **Copy .env files**: Copy all `.env*` files from repo root into the worktree, skipping `.env.example` and `.env.template`. If no `.env*` files exist, skip silently. Warn but continue on failure:
-   ```bash
-   for f in .env*; do
-     [[ -f "$f" ]] || continue   # skip if glob didn't match (no .env files)
-     [[ "$f" == ".env.example" || "$f" == ".env.template" ]] && continue
-     cp "$f" ".worktrees/spec-NNN/" 2>/dev/null || echo "  ⚠️  Could not copy $f to worktree — continuing"
-   done
-   ```
-4. **Install dependencies**: Detect lockfile in repo root and run install inside worktree. Skip if no lockfile found. Warn but continue on failure:
-   ```bash
-   if [ -f "bun.lockb" ]; then
-     (cd .worktrees/spec-NNN && bun install --frozen-lockfile 2>/dev/null) || echo "  ⚠️  bun install failed — continuing"
-   elif [ -f "package-lock.json" ]; then
-     (cd .worktrees/spec-NNN && npm ci 2>/dev/null) || echo "  ⚠️  npm ci failed — continuing"
-   elif [ -f "pnpm-lock.yaml" ]; then
-     (cd .worktrees/spec-NNN && pnpm install --frozen-lockfile 2>/dev/null) || echo "  ⚠️  pnpm install failed — continuing"
-   elif [ -f "yarn.lock" ]; then
-     (cd .worktrees/spec-NNN && yarn install --frozen-lockfile 2>/dev/null) || echo "  ⚠️  yarn install failed — continuing"
-   fi
-   ```
-5. Update spec header in the **main working directory** spec file:
+2. Update spec header in the **main working directory** spec file:
    - Set `**Status**: in-progress`
    - Set `**Branch**: spec/NNN-title`
 
 #### Wave execution — parallel subagents
-Launch one Task subagent per spec simultaneously. Each subagent receives:
+Launch one Task subagent per spec simultaneously using `isolation: "worktree"`. Each subagent receives:
 
 **Prompt for each subagent:**
 ```
-Execute this spec in the worktree at .worktrees/spec-NNN.
+Execute this spec. You are running in an isolated Git worktree.
 
-IMPORTANT: All file operations (Read, Write, Edit, Bash) must target files inside
-.worktrees/spec-NNN/ — this is an isolated Git worktree with its own branch.
-The spec file itself lives in the main working directory at specs/NNN-*.md.
-
-Note: .env files have been copied and dependencies installed (if applicable) — the
-worktree is ready to use. Do not re-run installs unless a step explicitly requires it.
+Setup steps (do first, before implementing the spec):
+1. Rename the current branch to `spec/NNN-title`:
+   git branch -m spec/NNN-title
+2. Get the main repo path (the parent of this worktree):
+   MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
+3. Copy .env files from the main repo (skip .env.example and .env.template):
+   for f in "$MAIN_REPO"/.env*; do
+     [[ -f "$f" ]] || continue
+     base=$(basename "$f")
+     [[ "$base" == ".env.example" || "$base" == ".env.template" ]] && continue
+     cp "$f" . 2>/dev/null || echo "⚠️  Could not copy $base — continuing"
+   done
+4. Install dependencies if a lockfile exists (run from worktree root):
+   if [ -f "bun.lockb" ]; then bun install --frozen-lockfile 2>/dev/null || echo "⚠️  bun install failed"
+   elif [ -f "package-lock.json" ]; then npm ci 2>/dev/null || echo "⚠️  npm ci failed"
+   elif [ -f "pnpm-lock.yaml" ]; then pnpm install --frozen-lockfile 2>/dev/null || echo "⚠️  pnpm install failed"
+   elif [ -f "yarn.lock" ]; then yarn install --frozen-lockfile 2>/dev/null || echo "⚠️  yarn install failed"
+   fi
 
 Spec content:
 [full spec content here]
 
-Process:
-1. Read .agents/context/CONVENTIONS.md and .agents/context/STACK.md from the worktree if they exist
+Implementation steps:
+1. Read .agents/context/CONVENTIONS.md and .agents/context/STACK.md if they exist
 2. Load relevant skills if referenced in the spec's Context section
-3. Execute each step in order — work inside .worktrees/spec-NNN/
-4. After completing each step, edit the spec file in the MAIN directory (specs/NNN-*.md)
-   to check it off: - [ ] → - [x]
-5. After all steps: verify acceptance criteria, mark them checked in the spec
-6. Stage and commit all changes in the worktree:
+3. Execute each spec step in order
+4. Verify all acceptance criteria are met
+5. Stage and commit all changes:
    git add -A && git commit -m "spec(NNN): [spec title]"
-   Run this inside .worktrees/spec-NNN/
-7. Update spec status to in-review
-8. Prepend CHANGELOG entry:
-   - Find/create ## YYYY-MM-DD heading for today
-   - Add: - **Spec NNN**: [Title] — [1-sentence summary]
-   - Insert after <!-- Entries are prepended below this line, newest first -->
 ```
 
-#### Wave cleanup — remove worktrees
-After each wave completes, for each spec:
-1. Remove the worktree: `git worktree remove .worktrees/spec-NNN --force`
-2. Verify the branch exists: `git branch --list spec/NNN-*`
+#### Wave post-processing — after each subagent returns
+For each completed subagent, using the branch and worktree path from the Task result:
 
-**Wave 2+**: After each wave completes, launch the next wave of specs that are now unblocked. Repeat setup → execution → cleanup for each wave.
+1. Check all spec steps off in `specs/NNN-*.md`
+2. Mark all acceptance criteria as checked
+3. Set spec status to `in-review`
+4. Prepend CHANGELOG entry:
+   - Find/create `## YYYY-MM-DD` heading for today
+   - Add: `- **Spec NNN**: [Title] — [1-sentence summary]`
+   - Insert after `<!-- Entries are prepended below this line, newest first -->`
 
-### 5. Final summary
+**Wave 2+**: After each wave completes, launch the next wave of specs that are now unblocked.
+
+### 4. Final summary
 After all waves complete, report:
 - Completed specs (with spec ID, title, and branch name)
 - Failed specs (with spec ID and reason)
@@ -106,7 +88,5 @@ After all waves complete, report:
 ## Rules
 - Follow each spec exactly — no scope creep
 - If a step in a spec is blocked or unclear, mark it unchecked and continue remaining steps
-- Each subagent works ONLY in its own worktree — never modify files in the main working directory except the spec file and CHANGELOG.md
 - If `specs/` has no draft specs, report "No draft specs found" and stop
-- If `git worktree` fails (e.g. dirty working tree), report the error and skip that spec
-- Always clean up worktrees, even if the subagent fails
+- If a Task subagent fails, mark the spec as `blocked` and report the error

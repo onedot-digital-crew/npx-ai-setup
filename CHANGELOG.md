@@ -10,6 +10,11 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-23
 
+- **Spec 018**: Native worktree rewrite — replaced manual `git worktree add/remove` in spec-work-all with Claude Code's native `Task(isolation: "worktree")`; subagent now handles .env copy, dep install, and branch rename; version bumped to 1.1.3
+
+
+## 2026-02-23
+
 - **Spec 016**: Worktree env and deps — `spec-work-all` now auto-copies `.env*` files and runs dependency install (bun/npm/pnpm/yarn) into each worktree before launching agents; failures are warnings, not blockers
 
 

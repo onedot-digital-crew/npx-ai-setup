@@ -80,13 +80,13 @@ Specs live in `specs/` -- structured task plans created before coding.
 1. `/spec "task"` — Plan: Opus challenges the idea, creates spec if approved (status: `draft`)
 2. Review and refine spec if needed
 3. `/spec-work NNN` — Execute: Sonnet implements the spec step-by-step; prompts for branch creation and optional auto-review (status: `in-progress` → `in-review` or `completed`)
-4. `/spec-work-all` — Execute all: parallel agents in isolated Git worktrees, one branch per spec
+4. `/spec-work-all` — Execute all: parallel agents using native `isolation: "worktree"`, one branch per spec
 5. `/spec-review NNN` — Review: Opus reviews changes against acceptance criteria (status: `completed`)
 6. `/spec-board` — Overview: Kanban-style board showing all specs with status and step progress
 
 **Parallel execution (`/spec-work-all`):**
-- Creates a Git worktree per spec (`spec/NNN-title` branch)
-- Subagents work in isolation — no merge conflicts
+- Uses native `isolation: "worktree"` — Claude Code manages worktrees automatically
+- Each agent gets its own branch (`spec/NNN-title`) with no merge conflicts
 - Specs with dependencies run in sequential waves
 - After completion, each spec is ready for `/spec-review`
 
