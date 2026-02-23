@@ -10,6 +10,8 @@ Format: grouped by date, each entry includes spec ID, title, and a brief summary
 
 ## 2026-02-23
 
+- **Spec 020**: Granular template update selector — smart update now shows a 5-category checkbox UI (Hooks, Settings, Commands, Agents, Other) before processing templates, so users can update only the categories they want
+
 - **Spec 019**: Shopify templates moved to skills — relocated 8 Shopify knowledge templates from `templates/commands/shopify/` to `templates/skills/shopify-*/prompt.md`, updated all install/update/uninstall references to target `.claude/skills/`, removed redundant `dragnoir/Shopify-agent-skills` marketplace entries; version bumped to 1.1.4
 
 ## 2026-02-23

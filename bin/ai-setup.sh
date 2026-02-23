@@ -553,6 +553,101 @@ ask_regen_parts() {
 }
 
 # ==============================================================================
+# UPDATE PART SELECTOR
+# ==============================================================================
+# Sets UPD_HOOKS, UPD_SETTINGS, UPD_COMMANDS, UPD_AGENTS, UPD_OTHER globals.
+# Returns 1 if the user selected nothing (skip template update).
+ask_update_parts() {
+  local options=("Hooks" "Settings" "Commands" "Agents" "Other")
+  local descriptions=(".claude/hooks/ (protect-files, lint, circuit-breaker...)" ".claude/settings.json" ".claude/commands/ (spec, commit, grill, pr...)" ".claude/agents/ (verify-app, build-validator...)" "specs/, github/, CLAUDE.md template")
+  local count=5
+  local selected=0
+  local checked=(1 1 1 1 1)  # all pre-selected
+
+  echo ""
+  echo "  Select which categories to update:"
+  echo "  (Use ↑↓ arrows, Space to toggle, Enter to confirm)"
+  echo ""
+
+  printf '\033[?25l'
+  trap 'printf "\033[?25h"' RETURN 2>/dev/null || true
+
+  for ((i=0; i<count; i++)); do
+    local checkbox="[ ]"
+    [ "${checked[$i]}" -eq 1 ] && checkbox="[✓]"
+    if [ $i -eq $selected ]; then
+      printf '  \033[7m ▸ %s %-12s %s \033[0m\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+    else
+      printf '    %s %-12s %s\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+    fi
+  done
+
+  while true; do
+    IFS= read -rsn1 key
+    case "$key" in
+      $'\x1b')
+        read -rsn2 seq
+        case "$seq" in
+          '[A') selected=$(( (selected - 1 + count) % count )) ;;
+          '[B') selected=$(( (selected + 1) % count )) ;;
+        esac
+        ;;
+      " ")
+        [ "${checked[$selected]}" -eq 1 ] && checked[$selected]=0 || checked[$selected]=1
+        ;;
+      "")
+        break
+        ;;
+    esac
+
+    printf "\033[${count}A"
+    for ((i=0; i<count; i++)); do
+      local checkbox="[ ]"
+      [ "${checked[$i]}" -eq 1 ] && checkbox="[✓]"
+      if [ $i -eq $selected ]; then
+        printf '  \033[7m ▸ %s %-12s %s \033[0m\033[K\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+      else
+        printf '    %s %-12s %s\033[K\n' "$checkbox" "${options[$i]}" "${descriptions[$i]}"
+      fi
+    done
+  done
+
+  printf '\033[?25h'
+
+  UPD_HOOKS="no"; UPD_SETTINGS="no"; UPD_COMMANDS="no"; UPD_AGENTS="no"; UPD_OTHER="no"
+  [ "${checked[0]}" -eq 1 ] && UPD_HOOKS="yes"
+  [ "${checked[1]}" -eq 1 ] && UPD_SETTINGS="yes"
+  [ "${checked[2]}" -eq 1 ] && UPD_COMMANDS="yes"
+  [ "${checked[3]}" -eq 1 ] && UPD_AGENTS="yes"
+  [ "${checked[4]}" -eq 1 ] && UPD_OTHER="yes"
+
+  if [ "$UPD_HOOKS" = "no" ] && [ "$UPD_SETTINGS" = "no" ] && [ "$UPD_COMMANDS" = "no" ] && [ "$UPD_AGENTS" = "no" ] && [ "$UPD_OTHER" = "no" ]; then
+    echo ""
+    return 1
+  fi
+  return 0
+}
+
+# Returns 0 (true) if the given mapping's target path matches the selected update categories.
+# Returns 1 (false) if the category is deselected — caller should skip this file.
+# Defaults to "yes" for all categories when UPD_* flags are unset (fresh install / reinstall paths).
+should_update_template() {
+  local mapping="$1"
+  local target="${mapping#*:}"
+  if [[ "$target" == .claude/hooks/* ]]; then
+    [ "${UPD_HOOKS:-yes}" = "yes" ] && return 0 || return 1
+  elif [[ "$target" == .claude/settings* ]]; then
+    [ "${UPD_SETTINGS:-yes}" = "yes" ] && return 0 || return 1
+  elif [[ "$target" == .claude/commands/* ]]; then
+    [ "${UPD_COMMANDS:-yes}" = "yes" ] && return 0 || return 1
+  elif [[ "$target" == .claude/agents/* ]]; then
+    [ "${UPD_AGENTS:-yes}" = "yes" ] && return 0 || return 1
+  else
+    [ "${UPD_OTHER:-yes}" = "yes" ] && return 0 || return 1
+  fi
+}
+
+# ==============================================================================
 # GENERATION: Claude populates CLAUDE.md + generates project context + skills
 # ==============================================================================
 # Called by both normal setup (Section 9) and --regenerate mode.
@@ -1212,7 +1307,12 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         UPD_NEW=0
         UPD_BACKED_UP=0
 
+        # Ask which template categories to update
+        ask_update_parts || echo "  ⏭️  No categories selected — skipping template updates"
+        echo ""
+
         for mapping in "${TEMPLATE_MAP[@]}"; do
+          should_update_template "$mapping" || continue
           tpl="${mapping%%:*}"
           target="${mapping#*:}"
 
@@ -1261,6 +1361,7 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         # Also update Shopify-specific skills if system includes shopify
         if [[ "${SYSTEM:-}" == *shopify* ]]; then
           for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
+            should_update_template "$mapping" || continue
             tpl="${mapping%%:*}"
             target="${mapping#*:}"
             if [ ! -f "$target" ]; then
@@ -1299,6 +1400,13 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
         [ $UPD_SKIPPED -gt 0 ] && echo "   Unchanged: $UPD_SKIPPED"
         [ $UPD_BACKED_UP -gt 0 ] && echo "   Backed up: $UPD_BACKED_UP (see .ai-setup-backup/)"
+        _upd_cats=""
+        [ "${UPD_HOOKS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Hooks"
+        [ "${UPD_SETTINGS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Settings"
+        [ "${UPD_COMMANDS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Commands"
+        [ "${UPD_AGENTS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Agents"
+        [ "${UPD_OTHER:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Other"
+        [ -n "$_upd_cats" ] && echo "   Categories: $_upd_cats"
 
         # Update metadata
         write_metadata
