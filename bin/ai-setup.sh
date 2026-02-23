@@ -78,6 +78,9 @@ build_template_map() {
     done
     [ "$excluded" = "true" ] && continue
 
+    # Skip skills/ — handled explicitly by SHOPIFY_SKILLS_MAP with system check
+    [[ "$rel" == skills/* ]] && continue
+
     # Map source path to install target path
     local target
     case "$rel" in
@@ -85,7 +88,6 @@ build_template_map() {
       github/*)   target=".${rel}" ;;
       commands/*) target=".claude/${rel}" ;;
       agents/*)   target=".claude/${rel}" ;;
-      skills/*)   target=".claude/${rel}" ;;
       specs/*)    target="${rel}" ;;
       *)          target="${rel}" ;;
     esac
@@ -1411,9 +1413,12 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         # Update metadata
         write_metadata
 
-        # Offer regeneration
+        # Offer AI regeneration of CLAUDE.md and context files
         if command -v claude &>/dev/null; then
-          if ask_regen_parts; then
+          echo ""
+          read -p "  Regenerate CLAUDE.md and context files with Claude? [y/N] " REGEN_CHOICE
+          if [[ "$REGEN_CHOICE" =~ ^[Yy]$ ]]; then
+            REGEN_CLAUDE_MD="yes"; REGEN_CONTEXT="yes"; REGEN_COMMANDS="no"; REGEN_SKILLS="no"
             if [ -z "$SYSTEM" ]; then
               select_system
             fi
