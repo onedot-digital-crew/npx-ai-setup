@@ -109,7 +109,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 
-### 2. Slash Commands (12 commands)
+### 2. Slash Commands (13 commands)
 
 | Command | Model | Description |
 |---------|-------|-------------|
@@ -118,6 +118,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | `/spec-work-all` | Sonnet 4.6 | Execute all draft specs in parallel via Git worktrees (isolated branches) |
 | `/spec-review 001` | Opus (plan mode) | Review spec changes against acceptance criteria, draft PR on approval |
 | `/spec-board` | Sonnet (plan mode) | Kanban-style overview of all specs with status + step progress |
+| `/release` | Sonnet 4.6 | Bump version, format CHANGELOG under version heading, commit + git tag |
 | `/commit` | Sonnet 4.6 | Stage changes + create descriptive commit (no push) |
 | `/pr` | Sonnet 4.6 | Prepare a PR — drafts title/body, you push and create manually |
 | `/review` | Opus (plan mode) | Review uncommitted changes — bugs, security, performance |
@@ -267,6 +268,7 @@ project/
 |   |   +-- spec-work-all.md     # /spec-work-all — parallel execute via Git worktrees
 |   |   +-- spec-review.md       # /spec-review — review + PR draft (Opus)
 |   |   +-- spec-board.md        # /spec-board — Kanban overview (Sonnet)
+|   |   +-- release.md           # /release — bump version + git tag
 |   |   +-- commit.md            # /commit — stage + commit
 |   |   +-- pr.md                # /pr — prepare PR
 |   |   +-- review.md            # /review — code review (Opus)

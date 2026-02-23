@@ -29,10 +29,10 @@ Execute the spec: $ARGUMENTS
 
 8. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
-9. **Update CHANGELOG.md**: Prepend an entry to `CHANGELOG.md` in the project root:
-   - Find or create a `## YYYY-MM-DD` heading for today's date at the top of the entries section
-   - Under it, add: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
-   - Use the Edit tool to insert the entry after the `<!-- Entries are prepended below this line, newest first -->` comment
+9. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
+   - Find the `## [Unreleased]` heading (it's just below the `<!-- Entries are prepended below this line, newest first -->` comment)
+   - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
+   - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
 10. **Auto-review**: Ask the user whether to run an automatic review with corrections now.
     - If **no**: Set status to `in-review` in the spec header. Report what was done and suggest: `Run /spec-review NNN to review`.
