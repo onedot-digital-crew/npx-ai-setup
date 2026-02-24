@@ -10,6 +10,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 032**: Local skill templates for common frameworks — bundles tailwind, pinia, drizzle, tanstack, vitest as local templates so the slow npx skills.sh search is skipped and "no skills found" warnings are eliminated
+- **Spec 031**: Fix CLAUDE.md generation timeout — increases timeout from 120s to 180s and shows "timed out" message instead of misleading "check authentication" when exit code is 143
+- **Spec 030**: Add context file check and granular regeneration to update flow — smart update now detects missing `.agents/context/` files, warns the user, and uses `ask_regen_parts` for granular regeneration control instead of a binary y/N prompt
+
 ## [v1.1.6] — 2026-02-24
 
 - **Spec 029**: Add perf-reviewer and test-generator agent templates — two new universal agents for performance analysis (read-only, FAST/CONCERNS/SLOW verdict) and test generation (write-guarded to test directories only)

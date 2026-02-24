@@ -16,9 +16,28 @@ Setting up Claude Code for a new project involves many moving parts: writing CLA
 
 Most projects skip steps or copy config from old projects without updating it. The result is AI assistants that don't know the tech stack, have overly broad permissions (`Bash(*)`), no linting hooks, and no context files.
 
+## Who Is This For
+
+For any developer or agency team using Claude Code — from solo freelancers
+to multi-developer teams. No prior Claude Code expertise required.
+
+The goal is an agency-grade baseline: every project starts with the same
+proven setup, every developer on the team works with the same guardrails,
+and no session begins with "explain this codebase to me again."
+
 ## Why One Command?
 
 The goal is zero configuration for the consumer of the tool. A developer should be able to type one command and immediately have a working AI development environment. The setup adapts to the project automatically — it reads `package.json`, detects the tech stack, and generates context files specific to that codebase.
+
+## What Success Looks Like
+
+After setup, the daily workflow is spec-driven: write a structured spec,
+execute it step by step, review the result. New features, optimizations,
+and bug fixes all follow the same pattern.
+
+Success means Claude understands the project from session one, doesn't
+make avoidable mistakes, and the team burns tokens on actual work —
+not on setup, re-explanation, or recovering from AI errors.
 
 ## Templates, Not Generation
 

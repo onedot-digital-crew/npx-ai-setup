@@ -981,8 +981,40 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
         echo "$result"
       }
 
+      # Returns space-separated skill IDs curated from the skills.sh directory.
+      # Bash 3.2 safe (no declare -A). Update this list when new skills are published.
+      get_keyword_skills() {
+        local kw="$1"
+        case "$kw" in
+          vue)        echo "vuejs-ai/skills@vue-best-practices antfu/skills@vue" ;;
+          react)      echo "0xbigboss/claude-code@react-best-practices wshobson/agents@react-state-management" ;;
+          typescript) echo "wshobson/agents@typescript-advanced-types sickn33/antigravity-awesome-skills@typescript-expert" ;;
+          shadcn)     echo "google-labs-code/stitch-skills@shadcn-ui" ;;
+          playwright) echo "microsoft/playwright-cli@playwright-cli" ;;
+          prisma)     echo "sickn33/antigravity-awesome-skills@prisma-expert" ;;
+          supabase)   echo "supabase/agent-skills@supabase-postgres-best-practices" ;;
+          nestjs)     echo "kadajett/agent-nestjs-skills@nestjs-best-practices" ;;
+          svelte)     echo "ejirocodes/agent-skills@svelte5-best-practices" ;;
+          angular)    echo "analogjs/angular-skills@angular-component analogjs/angular-skills@angular-signals" ;;
+          nuxt-ui)    echo "nuxt/ui@nuxt-ui" ;;
+          vitest)     echo "antfu/skills@vitest" ;;
+          pinia)      echo "vuejs-ai/skills@vue-pinia-best-practices" ;;
+          tanstack)   echo "jezweb/claude-skills@tanstack-query" ;;
+          tailwind)   echo "wshobson/agents@tailwind-design-system" ;;
+          express)    echo "wshobson/agents@nodejs-backend-patterns" ;;
+          hono)       echo "elysiajs/skills@elysiajs" ;;
+          firebase)   echo "" ;;
+          *)          echo "" ;;
+        esac
+      }
+
       ALL_SKILLS=""
       for kw in "${KEYWORDS[@]}"; do
+        # Skip keywords with curated skills — installed directly via KEYWORD_SKILLS below
+        if [ -n "$(get_keyword_skills "$kw")" ]; then
+          printf "  ✅ %-20s (curated)\n" "$kw:"
+          continue
+        fi
         printf "  🔍 Searching: %s ..." "$kw"
         FOUND=$(search_skills "$kw")
 
@@ -1182,12 +1214,18 @@ Rules:
           "onmax/nuxt-skills@nuxt"
           "onmax/nuxt-skills@vue"
           "onmax/nuxt-skills@vueuse"
+          "vuejs-ai/skills@vue-best-practices"
+          "vuejs-ai/skills@vue-testing-best-practices"
+          "nuxt/ui@nuxt-ui"
         ) ;;
       next)
         SYSTEM_SKILLS+=(
           "vercel-labs/agent-skills@vercel-react-best-practices"
+          "vercel-labs/next-skills@next-best-practices"
+          "vercel-labs/next-skills@next-cache-components"
           "jeffallan/claude-skills@nextjs-developer"
           "wshobson/agents@nextjs-app-router-patterns"
+          "sickn33/antigravity-awesome-skills@nextjs-best-practices"
         ) ;;
       laravel)
         SYSTEM_SKILLS+=(
@@ -1205,6 +1243,18 @@ Rules:
     esac
   done
 
+  # Add curated keyword-based skills (from detected package.json dependencies)
+  if [ ${#KEYWORDS[@]} -gt 0 ]; then
+    for kw in "${KEYWORDS[@]}"; do
+      kw_skills=$(get_keyword_skills "$kw")
+      if [ -n "$kw_skills" ]; then
+        for sid in $kw_skills; do
+          SYSTEM_SKILLS+=("$sid")
+        done
+      fi
+    done
+  fi
+
   if [ ${#SYSTEM_SKILLS[@]} -gt 0 ]; then
     echo ""
     echo "  📦 Installing system-specific skills ($SYSTEM)..."
@@ -1212,6 +1262,40 @@ Rules:
     TIMEOUT_CMD=""
     command -v timeout &>/dev/null && TIMEOUT_CMD="timeout 30"
     command -v gtimeout &>/dev/null && TIMEOUT_CMD="gtimeout 30"
+
+    # Define install_skill here in case dynamic search was fully skipped
+    if ! declare -f install_skill > /dev/null 2>&1; then
+      SKIPPED=0
+      install_skill() {
+        local sid=$1
+        local skill_name="${sid##*@}"
+        local owner_repo="${sid%@*}"
+        local owner="${owner_repo%/*}"
+        local repo="${owner_repo#*/}"
+        if [ -d ".claude/skills/$skill_name" ] || [ -d "${HOME}/.claude/skills/$skill_name" ]; then
+          printf "     ⏭️  %s (already installed)\n" "$sid"
+          SKIPPED=$((SKIPPED + 1))
+          return 0
+        fi
+        if command -v curl >/dev/null 2>&1; then
+          local status
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://skills.sh/$owner/$repo/$skill_name" 2>/dev/null)
+          if [ "$status" != "200" ]; then
+            printf "     ⚠️  %s (not in registry, skipping)\n" "$sid"
+            return 0
+          fi
+        fi
+        printf "     ⏳ %s ..." "$sid"
+        if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
+          printf "\r     ✅ %s\n" "$sid"
+          return 0
+        else
+          printf "\r     ❌ %s (install failed)\n" "$sid"
+          return 1
+        fi
+      }
+    fi
 
     for skill_id in "${SYSTEM_SKILLS[@]}"; do
       install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
@@ -1413,18 +1497,29 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
         # Update metadata
         write_metadata
 
-        # Offer AI regeneration of CLAUDE.md and context files
+        # Check context files and offer AI regeneration
         if command -v claude &>/dev/null; then
           echo ""
-          read -p "  Regenerate CLAUDE.md and context files with Claude? [y/N] " REGEN_CHOICE
-          if [[ "$REGEN_CHOICE" =~ ^[Yy]$ ]]; then
-            REGEN_CLAUDE_MD="yes"; REGEN_CONTEXT="yes"; REGEN_COMMANDS="no"; REGEN_SKILLS="no"
+          # Count existing .agents/context/ files (Steps 1-2)
+          CTX_EXISTING=0
+          [ -f ".agents/context/STACK.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
+          [ -f ".agents/context/ARCHITECTURE.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
+          [ -f ".agents/context/CONVENTIONS.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
+          CTX_MISSING=$((3 - CTX_EXISTING))
+          if [ "$CTX_MISSING" -gt 0 ]; then
+            echo "  ⚠️  $CTX_MISSING of 3 context files missing in .agents/context/ — regeneration recommended"
+            echo ""
+          fi
+          # Use granular selector instead of binary y/N (Steps 3-4)
+          if ask_regen_parts; then
             if [ -z "$SYSTEM" ]; then
               select_system
             fi
             detect_system
             run_generation
             write_metadata
+            echo ""
+            echo "✅ Regeneration complete!"
           fi
         fi
 
