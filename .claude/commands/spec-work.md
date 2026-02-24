@@ -1,6 +1,6 @@
 ---
 model: sonnet
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, Task
 ---
 
 Execute the spec: $ARGUMENTS
@@ -34,7 +34,12 @@ Execute the spec: $ARGUMENTS
    - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
    - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
-10. **Auto-review**: Ask the user whether to run an automatic review with corrections now.
+10. **Verify implementation**: Spawn `verify-app` via Task tool with the prompt:
+    > "Verify that the implementation for spec NNN is correct. Check if the project has a test suite and run it. Check if there is a build command and run it. Report PASS or FAIL."
+    - If verify-app returns **FAIL**: set status to `in-review` in the spec header, report the verify-app output, and **stop**. Do NOT run code-reviewer. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
+    - If verify-app returns **PASS**: continue to the next step.
+
+11. **Auto-review**: Ask the user whether to run an automatic review with corrections now.
     - If **no**: Set status to `in-review` in the spec header. Report what was done and suggest: `Run /spec-review NNN to review`.
     - If **yes**: Perform a single review pass using the criteria from `/spec-review` (spec compliance, acceptance criteria, HIGH/MEDIUM code quality issues). For full review criteria see `/spec-review`.
       1. **Fix issues found**: Make corrections in the same files. Do NOT start a second review pass.
@@ -47,4 +52,4 @@ Execute the spec: $ARGUMENTS
 - Check off each step in the spec file as you complete it (progress tracking).
 - If a step fails or is blocked, leave it unchecked, set status to `blocked`, and ask the user.
 - Commit after logical groups of changes, not after every single step.
-- If called with `--complete` flag, skip the review step: set status directly to `completed` and move to `specs/completed/` (legacy behavior).
+- If called with `--complete` flag, skip the review step: set status directly to `completed` and move to `specs/completed/` (legacy behavior)
