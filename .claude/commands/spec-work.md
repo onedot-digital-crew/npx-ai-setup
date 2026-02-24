@@ -1,6 +1,6 @@
 ---
 model: sonnet
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, Task
 ---
 
 Execute the spec: $ARGUMENTS
@@ -34,13 +34,10 @@ Execute the spec: $ARGUMENTS
    - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
    - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
-10. **Auto-review**: Ask the user whether to run an automatic review with corrections now.
-    - If **no**: Set status to `in-review` in the spec header. Report what was done and suggest: `Run /spec-review NNN to review`.
-    - If **yes**: Perform a single review pass using the criteria from `/spec-review` (spec compliance, acceptance criteria, HIGH/MEDIUM code quality issues). For full review criteria see `/spec-review`.
-      1. **Fix issues found**: Make corrections in the same files. Do NOT start a second review pass.
-      2. **After corrections**:
-         - If everything passes: set status to `completed`, move spec file `specs/NNN-*.md` → `specs/completed/NNN-*.md`. Report: "Auto-review passed. Spec NNN completed."
-         - If unfixable issues remain: keep status as `in-review`, report the issues. Suggest: `Run /spec-review NNN to review manually.`
+10. **Auto-review**: Spawn the `code-reviewer` agent via Task tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
+    - The agent will return a verdict: PASS, CONCERNS, or FAIL.
+    - If verdict is **FAIL**: keep status as `in-review` in the spec header. Report the issues found. Suggest: `Run /spec-review NNN to review manually.`
+    - If verdict is **PASS** or **CONCERNS**: set status to `completed`, move spec file `specs/NNN-*.md` → `specs/completed/NNN-*.md`. Report: "Auto-review passed. Spec NNN completed."
 
 ## Rules
 - Follow the spec exactly — nothing outside the Steps and within scope.
