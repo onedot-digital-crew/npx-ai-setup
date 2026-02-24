@@ -1,6 +1,6 @@
 # Spec: Add code-reviewer Agent and Wire Into Spec Workflow
 
-> **Spec ID**: 026 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/026-code-reviewer-agent
+> **Spec ID**: 026 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/026-code-reviewer-agent
 
 <!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
 

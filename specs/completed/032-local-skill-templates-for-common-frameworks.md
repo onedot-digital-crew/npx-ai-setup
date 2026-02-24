@@ -1,6 +1,6 @@
 # Spec: Local skill templates for common frameworks
 
-> **Spec ID**: 032 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/032-local-skill-templates-for-common-frameworks
+> **Spec ID**: 032 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/032-local-skill-templates-for-common-frameworks
 
 ## Goal
 Bundle skill templates for tailwind, pinia, drizzle, tanstack, and vitest locally so the slow npx skills.sh search is skipped and "no skills found" warnings disappear.

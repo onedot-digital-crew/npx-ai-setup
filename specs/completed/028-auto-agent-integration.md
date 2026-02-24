@@ -1,6 +1,6 @@
 # Spec: Fully Automatic Agent Integration Into Workflow
 
-> **Spec ID**: 028 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/028-auto-agent-integration
+> **Spec ID**: 028 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/028-auto-agent-integration
 
 <!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
 

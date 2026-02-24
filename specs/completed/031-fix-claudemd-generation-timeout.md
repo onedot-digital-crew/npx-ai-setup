@@ -1,6 +1,6 @@
 # Spec: Fix CLAUDE.md generation timeout and error message
 
-> **Spec ID**: 031 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/031-fix-claudemd-generation-timeout
+> **Spec ID**: 031 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/031-fix-claudemd-generation-timeout
 
 ## Goal
 Increase the CLAUDE.md generation timeout from 120s to 180s and show a clear "timed out" message instead of "check authentication" when exit code is 143.
