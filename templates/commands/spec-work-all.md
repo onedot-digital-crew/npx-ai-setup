@@ -62,7 +62,7 @@ Implementation steps:
 3. Execute each spec step in order
 4. Verify all acceptance criteria are met
 5. Stage and commit all changes:
-   git add -A && git commit -m "spec(NNN): [spec title]"
+   git add -u && git commit -m "spec(NNN): [spec title]"
 ```
 
 #### Wave post-processing — after each subagent returns
@@ -71,10 +71,9 @@ For each completed subagent, using the branch and worktree path from the Task re
 1. Check all spec steps off in `specs/NNN-*.md`
 2. Mark all acceptance criteria as checked
 3. Set spec status to `in-review`
-4. Prepend CHANGELOG entry:
-   - Find/create `## YYYY-MM-DD` heading for today
+4. Prepend CHANGELOG entry under `## [Unreleased]`:
    - Add: `- **Spec NNN**: [Title] — [1-sentence summary]`
-   - Insert after `<!-- Entries are prepended below this line, newest first -->`
+   - Insert after the `## [Unreleased]` heading
 
 **Wave 2+**: After each wave completes, launch the next wave of specs that are now unblocked.
 

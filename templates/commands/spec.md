@@ -30,8 +30,8 @@ Rate: **ALIGNED / BORDERLINE / MISALIGNED**. If MISALIGNED → **REJECT** immedi
 - Who reported this problem — users, or us?
 
 ### 1e — Think It Through
-This is the core of the challenge. Sketch the full implementation mentally before committing.
-**Use `AskUserQuestion` whenever you hit a decision point or unresolved ambiguity** — don't assume, ask. Multiple rounds are fine.
+Sketch the full implementation mentally before writing the spec.
+**Use `AskUserQuestion` at any decision point** — don't assume, ask. Multiple rounds are fine.
 
 **Implementation path:**
 - Which files/systems change? What exactly happens in each?

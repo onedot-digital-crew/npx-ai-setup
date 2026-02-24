@@ -15,5 +15,8 @@
     "ai-setup",
     "onedot"
   ],
+  "scripts": {
+    "test": "bash tests/smoke.sh"
+  },
   "license": "MIT"
 }
