@@ -981,8 +981,35 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
         echo "$result"
       }
 
+      # Return local template path for a keyword, or empty string if none exists.
+      # Uses a case statement (bash 3.2 safe — no declare -A).
+      get_local_skill_template() {
+        local kw=$1
+        local tpl_path=""
+        case "$kw" in
+          tailwind) tpl_path="$SCRIPT_DIR/templates/skills/tailwind/prompt.md" ;;
+          pinia)    tpl_path="$SCRIPT_DIR/templates/skills/pinia/prompt.md"    ;;
+          drizzle)  tpl_path="$SCRIPT_DIR/templates/skills/drizzle/prompt.md"  ;;
+          tanstack) tpl_path="$SCRIPT_DIR/templates/skills/tanstack/prompt.md" ;;
+          vitest)   tpl_path="$SCRIPT_DIR/templates/skills/vitest/prompt.md"   ;;
+        esac
+        if [ -n "$tpl_path" ] && [ -f "$tpl_path" ]; then
+          echo "$tpl_path"
+        fi
+      }
+
       ALL_SKILLS=""
       for kw in "${KEYWORDS[@]}"; do
+        # Check for bundled local skill template first (skips slow npx search)
+        LOCAL_TPL=$(get_local_skill_template "$kw")
+        if [ -n "$LOCAL_TPL" ]; then
+          local_target=".claude/skills/$kw/prompt.md"
+          mkdir -p "$(dirname "$local_target")"
+          cp "$LOCAL_TPL" "$local_target"
+          printf "  📦 %-20s bundled (local template)%*s\n" "$kw:" 5 ""
+          continue
+        fi
+
         printf "  🔍 Searching: %s ..." "$kw"
         FOUND=$(search_skills "$kw")
 
