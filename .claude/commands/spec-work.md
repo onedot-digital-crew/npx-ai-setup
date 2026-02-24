@@ -1,6 +1,6 @@
 ---
 model: sonnet
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, AskUserQuestion
 ---
 
 Execute the spec: $ARGUMENTS
@@ -20,21 +20,26 @@ Execute the spec: $ARGUMENTS
 
 5. **Load relevant skills**: If the spec's Context section mentions skills, read `.claude/skills/<name>/prompt.md` for each and apply throughout execution. Skip if none listed.
 
-6. **Start work**: Update the spec header — set `**Status**: in-progress`.
+6. **Architectural review** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes, spawn the `code-architect` agent via Task tool, passing the full spec content as the prompt. Then:
+   - If the verdict is **REDESIGN**: stop immediately, report all concerns to the user, and do not proceed with implementation.
+   - If the verdict is **PROCEED WITH CHANGES**: report the concerns to the user, then continue with implementation.
+   - If the verdict is **PROCEED**: continue normally.
 
-7. **Execute each step** in order:
+7. **Start work**: Update the spec header — set `**Status**: in-progress`.
+
+8. **Execute each step** in order:
    - Implement the change
    - After completing a step, edit the spec file to check it off: `- [ ]` -> `- [x]`
    - If a step is blocked or unclear, stop and ask the user
 
-8. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
+9. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
-9. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
-   - Find the `## [Unreleased]` heading (it's just below the `<!-- Entries are prepended below this line, newest first -->` comment)
-   - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
-   - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
+10. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
+    - Find the `## [Unreleased]` heading (it's just below the `<!-- Entries are prepended below this line, newest first -->` comment)
+    - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
+    - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
-10. **Auto-review**: Ask the user whether to run an automatic review with corrections now.
+11. **Auto-review**: Ask the user whether to run an automatic review with corrections now.
     - If **no**: Set status to `in-review` in the spec header. Report what was done and suggest: `Run /spec-review NNN to review`.
     - If **yes**: Perform a single review pass using the criteria from `/spec-review` (spec compliance, acceptance criteria, HIGH/MEDIUM code quality issues). For full review criteria see `/spec-review`.
       1. **Fix issues found**: Make corrections in the same files. Do NOT start a second review pass.
