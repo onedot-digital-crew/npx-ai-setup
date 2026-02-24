@@ -91,6 +91,12 @@ Translate the Phase 1e implementation sketch into spec steps. Steps should refle
 ### Step 4 — Present the spec
 Show the spec to the user for review and refinement.
 
+### Step 5 — Branch
+Use `AskUserQuestion` to ask: "Branch fuer diese Spec erstellen?"
+- **Ja** — run `git checkout -b spec/NNN-<slug>` (slug = spec filename without number prefix)
+- **Nein** — skip, user bleibt auf aktuellem Branch
+- **Spaeter** — skip, user entscheidet selbst
+
 ## Spec Template
 
 ```markdown
