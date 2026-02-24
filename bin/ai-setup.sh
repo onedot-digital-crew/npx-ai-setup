@@ -834,7 +834,7 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
 
   # Wait for background processes
   WAIT_ARGS=()
-  [ -n "$PID_CM" ] && WAIT_ARGS+=("$PID_CM:CLAUDE.md:30:120")
+  [ -n "$PID_CM" ] && WAIT_ARGS+=("$PID_CM:CLAUDE.md:30:180")
   [ -n "$PID_CTX" ] && WAIT_ARGS+=("$PID_CTX:Project context:45:180")
   echo ""
   [ ${#WAIT_ARGS[@]} -gt 0 ] && wait_parallel "${WAIT_ARGS[@]}"
@@ -850,7 +850,11 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
       if [ -s "$ERR_CM" ]; then
         echo "  Output: $(tail -5 "$ERR_CM")"
       fi
-      echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
+      if [ "$EXIT_CM" -eq 143 ]; then
+        echo "  Fix: Generation timed out (>180s). Re-run: npx @onedot/ai-setup --regenerate"
+      else
+        echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
+      fi
     fi
   fi
 
