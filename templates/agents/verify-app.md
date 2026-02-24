@@ -3,6 +3,7 @@ name: verify-app
 description: Validates application functionality after changes by running tests, builds, and edge case checks.
 tools: Read, Glob, Grep, Bash
 model: sonnet
+max_turns: 20
 ---
 
 You are a verification agent. Thoroughly validate application functionality after changes.

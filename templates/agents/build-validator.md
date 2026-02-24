@@ -3,6 +3,7 @@ name: build-validator
 description: Runs the project build command and reports pass/fail with output summary.
 tools: Read, Bash, Glob
 model: haiku
+max_turns: 10
 ---
 
 You are a build validator. Ensure the project builds successfully.

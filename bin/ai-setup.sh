@@ -636,7 +636,7 @@ ask_update_parts() {
 should_update_template() {
   local mapping="$1"
   local target="${mapping#*:}"
-  if [[ "$target" == .claude/hooks/* ]]; then
+  if [[ "$target" == .claude/hooks/* ]] || [[ "$target" == .claude/rules/* ]]; then
     [ "${UPD_HOOKS:-yes}" = "yes" ] && return 0 || return 1
   elif [[ "$target" == .claude/settings* ]]; then
     [ "${UPD_SETTINGS:-yes}" = "yes" ] && return 0 || return 1
@@ -1585,6 +1585,21 @@ while IFS= read -r -d '' _hook_path; do
     echo "  .claude/hooks/$_hook_name already exists, skipping."
   fi
 done < <(find "$TPL/claude/hooks" -maxdepth 1 -type f -print0 | sort -z)
+
+# ------------------------------------------------------------------------------
+# 4b. RULES
+# ------------------------------------------------------------------------------
+echo "📐 Installing rules..."
+mkdir -p .claude/rules
+
+while IFS= read -r -d '' _rule_path; do
+  _rule_name="${_rule_path##*/}"
+  if [ ! -f ".claude/rules/$_rule_name" ]; then
+    cp "$_rule_path" ".claude/rules/$_rule_name"
+  else
+    echo "  .claude/rules/$_rule_name already exists, skipping."
+  fi
+done < <(find "$TPL/claude/rules" -maxdepth 1 -type f -print0 | sort -z)
 
 # ------------------------------------------------------------------------------
 # 5. COPILOT INSTRUCTIONS

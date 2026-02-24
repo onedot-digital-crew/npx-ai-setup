@@ -3,6 +3,7 @@ name: context-refresher
 description: Regenerates .agents/context/ files (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) when project config has changed.
 tools: Read, Write, Glob, Bash
 model: sonnet
+max_turns: 15
 ---
 
 You are a context generation agent. Your job is to analyze the project and write accurate context files to `.agents/context/`.
