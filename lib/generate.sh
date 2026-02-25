@@ -28,18 +28,22 @@ gather_shopware_context() {
   local custom_plugins="none"
   local custom_apps="none"
   if [ -d "custom/static-plugins" ]; then
-    custom_plugins=$(ls -1 custom/static-plugins/ 2>/dev/null || echo "none")
+    custom_plugins=$(ls -1 custom/static-plugins/ 2>/dev/null)
+    [ -z "$custom_plugins" ] && custom_plugins="none"
   elif [ -d "custom/plugins" ]; then
-    custom_plugins=$(ls -1 custom/plugins/ 2>/dev/null || echo "none")
+    custom_plugins=$(ls -1 custom/plugins/ 2>/dev/null)
+    [ -z "$custom_plugins" ] && custom_plugins="none"
   fi
   if [ -d "custom/apps" ]; then
-    custom_apps=$(ls -1 custom/apps/ 2>/dev/null || echo "none")
+    custom_apps=$(ls -1 custom/apps/ 2>/dev/null)
+    [ -z "$custom_apps" ] && custom_apps="none"
   fi
 
   # Check for deployment overrides (patched vendor packages)
   local deploy_overrides="none"
   if [ -d "deployment-overrides" ]; then
-    deploy_overrides=$(find deployment-overrides -maxdepth 3 -type d 2>/dev/null | head -20 || echo "none")
+    deploy_overrides=$(find deployment-overrides -maxdepth 3 -type d 2>/dev/null | head -20)
+    [ -z "$deploy_overrides" ] && deploy_overrides="none"
   fi
 
   CTX_SHOPWARE="--- composer.json ---
@@ -57,29 +61,72 @@ $SHOPWARE_TYPE"
 
   # System-specific instructions for context generation (Step 2)
   if [ "$SHOPWARE_TYPE" = "shop" ]; then
-    # Detect which custom subdirectory holds plugins
-    local custom_plugin_dir="custom/plugins"
-    [ -d "custom/static-plugins" ] && custom_plugin_dir="custom/static-plugins"
-
     SHOPWARE_INSTRUCTION="
-This is a Shopware 6 full shop installation. In ARCHITECTURE.md, include a 'Working Scope' section:
-- Allowed working directories: ${custom_plugin_dir}/, config/
+This is a Shopware 6 full shop installation.
+
+Shopware 6 directory structure:
+  bin/              - CLI (bin/console)
+  config/           - Symfony/Shopware config (packages/shopware.yaml, services.yaml)
+  custom/           - Plugins and apps
+    static-plugins/ - Developer-managed plugins, committed to Git (YOUR WORKING AREA)
+      MeinPlugin/
+        src/
+          MeinPlugin.php       - Plugin base class
+          Controller/
+          Service/
+          Entity/
+          Migration/           - DB migrations
+          Resources/
+            config/services.xml - Dependency Injection
+            config/routes.xml
+            views/             - Twig templates
+            public/            - Assets (JS, CSS)
+        composer.json
+    plugins/        - Plugins installed via Shopware Admin UI (DO NOT MODIFY)
+    apps/           - Shopware Apps (lightweight)
+  public/           - Web root (index.php, compiled assets)
+  src/              - Project-level PHP overrides (Controllers etc.)
+  var/              - Cache, logs, temporary files
+  vendor/           - Composer dependencies
+  deployment-overrides/ - Patched vendor files (DO NOT MODIFY)
+
+In ARCHITECTURE.md, include a 'Working Scope' section:
+- Allowed working directories: custom/static-plugins/, config/
 - READ-ONLY: vendor/, public/, var/, bin/, files/ (managed by Shopware/Composer)
+- NEVER TOUCH: custom/plugins/ (managed by Shopware Admin), deployment-overrides/ (managed by deployment pipeline)
 - List installed custom plugins and apps from custom/ and their paths
-- Note deployment-overrides/ if present (patched vendor packages)
 - Core Shopware code in vendor/shopware/ must NEVER be modified"
 
     SHOPWARE_RULE="
 Add a 'Shopware Shop' section under Critical Rules:
-- Only modify files in ${custom_plugin_dir}/ and config/
-- Never modify vendor/, public/, var/, or core Shopware files
+- Only modify files in custom/static-plugins/ and config/
+- Never modify custom/plugins/ (admin-managed), vendor/, public/, var/, deployment-overrides/, or core Shopware files
 - Use Shopware plugin hooks and decorators for customization
+- Plugin structure: src/ (PHP), Resources/config/ (DI, routes), Resources/views/ (Twig), Resources/public/ (assets)
 - Run bin/console commands for cache clear, plugin lifecycle"
   else
     SHOPWARE_INSTRUCTION="
-This is a standalone Shopware 6 plugin project. In ARCHITECTURE.md, include:
+This is a standalone Shopware 6 plugin project.
+
+Standard Shopware plugin structure:
+  src/
+    PluginName.php       - Plugin base class (extends Plugin)
+    Controller/          - Storefront/API controllers
+    Service/             - Business logic services
+    Entity/              - Custom entities (ORM)
+    Migration/           - Database migrations
+    Resources/
+      config/
+        services.xml     - Dependency Injection definitions
+        routes.xml       - Route definitions
+      views/             - Twig templates (storefront, admin)
+      public/            - Static assets (JS, CSS, images)
+  tests/                 - PHPUnit tests
+  composer.json          - Plugin metadata and dependencies
+
+In ARCHITECTURE.md, include:
 - Plugin namespace and bootstrap class location
-- Standard Shopware plugin directory conventions (src/, tests/, Resources/)
+- Standard Shopware plugin directory conventions as above
 - This plugin will be installed into a Shopware shop via composer"
   fi
 }
@@ -343,9 +390,9 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
   INSTALLED=0
   SKIPPED=0
 
+  KEYWORDS=()
   if [ -f package.json ]; then
     DEPS=$(jq -r '(.dependencies // {} | keys[]) , (.devDependencies // {} | keys[])' package.json 2>/dev/null | sort -u)
-    KEYWORDS=()
 
     for dep in $DEPS; do
       case "$dep" in
