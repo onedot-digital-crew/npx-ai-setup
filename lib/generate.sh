@@ -3,6 +3,87 @@
 # Requires: core.sh, process.sh, detect.sh, skills.sh
 # Requires: $SYSTEM, $TEMPLATE_MAP, $SHOPIFY_SKILLS_MAP, $REGEN_*
 
+# Gather Shopware-specific context for Claude prompts.
+# Sets: CTX_SHOPWARE, SHOPWARE_INSTRUCTION, SHOPWARE_RULE
+gather_shopware_context() {
+  CTX_SHOPWARE=""
+  SHOPWARE_INSTRUCTION=""
+  SHOPWARE_RULE=""
+
+  [ "$SYSTEM" != "shopware" ] && return 0
+
+  # Read composer.json
+  local composer_content
+  composer_content=$(cat composer.json 2>/dev/null || echo "")
+
+  # Extract Shopware plugins from composer require
+  local composer_plugins
+  composer_plugins=$(jq -r '
+    (.require // {}) + (.["require-dev"] // {}) | to_entries[]
+    | select(.key | startswith("store.shopware.com/") or startswith("swag/") or startswith("shopware/"))
+    | "\(.key): \(.value)"
+  ' composer.json 2>/dev/null || echo "none")
+
+  # Scan custom/ subdirectories for plugins and apps
+  local custom_plugins="none"
+  local custom_apps="none"
+  if [ -d "custom/static-plugins" ]; then
+    custom_plugins=$(ls -1 custom/static-plugins/ 2>/dev/null || echo "none")
+  elif [ -d "custom/plugins" ]; then
+    custom_plugins=$(ls -1 custom/plugins/ 2>/dev/null || echo "none")
+  fi
+  if [ -d "custom/apps" ]; then
+    custom_apps=$(ls -1 custom/apps/ 2>/dev/null || echo "none")
+  fi
+
+  # Check for deployment overrides (patched vendor packages)
+  local deploy_overrides="none"
+  if [ -d "deployment-overrides" ]; then
+    deploy_overrides=$(find deployment-overrides -maxdepth 3 -type d 2>/dev/null | head -20 || echo "none")
+  fi
+
+  CTX_SHOPWARE="--- composer.json ---
+$composer_content
+--- Shopware plugins (composer) ---
+$composer_plugins
+--- Custom plugins (filesystem) ---
+$custom_plugins
+--- Custom apps (filesystem) ---
+$custom_apps
+--- Deployment overrides ---
+$deploy_overrides
+--- Shopware project type ---
+$SHOPWARE_TYPE"
+
+  # System-specific instructions for context generation (Step 2)
+  if [ "$SHOPWARE_TYPE" = "shop" ]; then
+    # Detect which custom subdirectory holds plugins
+    local custom_plugin_dir="custom/plugins"
+    [ -d "custom/static-plugins" ] && custom_plugin_dir="custom/static-plugins"
+
+    SHOPWARE_INSTRUCTION="
+This is a Shopware 6 full shop installation. In ARCHITECTURE.md, include a 'Working Scope' section:
+- Allowed working directories: ${custom_plugin_dir}/, config/
+- READ-ONLY: vendor/, public/, var/, bin/, files/ (managed by Shopware/Composer)
+- List installed custom plugins and apps from custom/ and their paths
+- Note deployment-overrides/ if present (patched vendor packages)
+- Core Shopware code in vendor/shopware/ must NEVER be modified"
+
+    SHOPWARE_RULE="
+Add a 'Shopware Shop' section under Critical Rules:
+- Only modify files in ${custom_plugin_dir}/ and config/
+- Never modify vendor/, public/, var/, or core Shopware files
+- Use Shopware plugin hooks and decorators for customization
+- Run bin/console commands for cache clear, plugin lifecycle"
+  else
+    SHOPWARE_INSTRUCTION="
+This is a standalone Shopware 6 plugin project. In ARCHITECTURE.md, include:
+- Plugin namespace and bootstrap class location
+- Standard Shopware plugin directory conventions (src/, tests/, Resources/)
+- This plugin will be installed into a Shopware shop via composer"
+  fi
+}
+
 # Main generation orchestrator
 # Called by both normal setup (Auto-Init) and --regenerate mode.
 # Requires: $SYSTEM is set, claude CLI is available
@@ -50,6 +131,13 @@ run_generation() {
   fi
 
   echo "🚀 Generating project context (System: $SYSTEM)..."
+
+  # Detect Shopware sub-type and gather system-specific context
+  detect_shopware_type
+  if [ -n "$SHOPWARE_TYPE" ]; then
+    echo "  Shopware type: $SHOPWARE_TYPE"
+  fi
+  gather_shopware_context
 
   # Cache file list once (avoid running collect_project_files 3x)
   CACHED_FILES=$(collect_project_files 80)
@@ -134,13 +222,15 @@ Based on the package.json scripts below, document the most important ones (dev, 
 Based on the eslint/prettier config below and the framework/system ($SYSTEM), write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
 Cover these categories where evidence exists: code style (formatting, naming), TypeScript (strict mode, type patterns), imports (path aliases, barrel files), framework-specific (SSR, routing, state), testing (commands, patterns). Omit categories where no evidence exists in the config — do not fabricate rules.
 $TDD_INSTRUCTION
+$SHOPWARE_RULE
 
 Rules:
 - Edit CLAUDE.md directly. Replace both sections including any <!-- comments -->.
 - No umlauts. English only.
 - Keep CLAUDE.md content stable and static — it is a prompt cache layer. Do not add timestamps, random IDs, or session-specific data.
 
-$CONTEXT" >"$ERR_CM" 2>&1 &
+$CONTEXT
+$CTX_SHOPWARE" >"$ERR_CM" 2>&1 &
   PID_CM=$!
   fi
 
@@ -166,6 +256,7 @@ Rules:
 - Use markdown headers and bullet points.
 - If information is not available, write 'Not determined from available context.'
 - No umlauts. English only.
+$SHOPWARE_INSTRUCTION
 
 --- package.json ---
 $CTX_PKG
@@ -180,7 +271,8 @@ $CTX_CONFIGS
 --- README (first 50 lines) ---
 $CTX_README
 --- Sample source files ---
-$CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
+$CTX_SAMPLE
+$CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
   PID_CTX=$!
   fi
 
@@ -238,6 +330,10 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
     echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
     echo "DIR_HASH=$(echo "$CACHED_FILES" | cksum | cut -d' ' -f1,2)" >> "$STATE_FILE"
     echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
+    if [ "$SYSTEM" = "shopware" ] && [ -f composer.json ]; then
+      echo "COMPOSER_HASH=$(cksum composer.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
+      echo "SHOPWARE_TYPE=$SHOPWARE_TYPE" >> "$STATE_FILE"
+    fi
   fi
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
@@ -266,6 +362,11 @@ $CTX_SAMPLE" >"$ERR_CTX" 2>&1 &
         @shadcn/*|shadcn-ui) [[ ! " ${KEYWORDS[*]} " =~ " shadcn " ]] && KEYWORDS+=("shadcn") ;;
         @radix-ui/*) [[ ! " ${KEYWORDS[*]} " =~ " radix " ]] && KEYWORDS+=("radix") ;;
         @headlessui/*) [[ ! " ${KEYWORDS[*]} " =~ " headless-ui " ]] && KEYWORDS+=("headless-ui") ;;
+        reka-ui) [[ ! " ${KEYWORDS[*]} " =~ " reka-ui " ]] && KEYWORDS+=("reka-ui") ;;
+        primevue|@primevue/*) [[ ! " ${KEYWORDS[*]} " =~ " primevue " ]] && KEYWORDS+=("primevue") ;;
+        vuetify) [[ ! " ${KEYWORDS[*]} " =~ " vuetify " ]] && KEYWORDS+=("vuetify") ;;
+        element-plus) [[ ! " ${KEYWORDS[*]} " =~ " element-plus " ]] && KEYWORDS+=("element-plus") ;;
+        quasar|@quasar/*) [[ ! " ${KEYWORDS[*]} " =~ " quasar " ]] && KEYWORDS+=("quasar") ;;
         # Languages & runtimes
         typescript) [[ ! " ${KEYWORDS[*]} " =~ " typescript " ]] && KEYWORDS+=("typescript") ;;
         # Backend
@@ -468,8 +569,12 @@ Rules:
           "onmax/nuxt-skills@vueuse"
           "vuejs-ai/skills@vue-best-practices"
           "vuejs-ai/skills@vue-testing-best-practices"
-          "nuxt/ui@nuxt-ui"
-        ) ;;
+        )
+        # Only add nuxt-ui skill if project actually uses it
+        if [[ " ${KEYWORDS[*]} " =~ " nuxt-ui " ]]; then
+          SYSTEM_SKILLS+=("nuxt/ui@nuxt-ui")
+        fi
+        ;;
       next)
         SYSTEM_SKILLS+=(
           "vercel-labs/agent-skills@vercel-react-best-practices"

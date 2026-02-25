@@ -54,15 +54,20 @@ get_keyword_skills() {
     nestjs)     echo "kadajett/agent-nestjs-skills@nestjs-best-practices" ;;
     svelte)     echo "ejirocodes/agent-skills@svelte5-best-practices" ;;
     angular)    echo "analogjs/angular-skills@angular-component analogjs/angular-skills@angular-signals" ;;
-    nuxt-ui)    echo "nuxt/ui@nuxt-ui" ;;
+    nuxt-ui)    echo "" ;;  # handled conditionally in system skills (nuxt case)
     vitest)     echo "antfu/skills@vitest" ;;
     pinia)      echo "vuejs-ai/skills@vue-pinia-best-practices" ;;
     tanstack)   echo "jezweb/claude-skills@tanstack-query" ;;
     tailwind)   echo "wshobson/agents@tailwind-design-system" ;;
     express)    echo "wshobson/agents@nodejs-backend-patterns" ;;
     hono)       echo "elysiajs/skills@elysiajs" ;;
-    firebase)   echo "" ;;
-    *)          echo "" ;;
+    firebase)      echo "" ;;
+    reka-ui)       echo "" ;;
+    primevue)      echo "" ;;
+    vuetify)       echo "" ;;
+    element-plus)  echo "" ;;
+    quasar)        echo "" ;;
+    *)             echo "" ;;
   esac
 }
 

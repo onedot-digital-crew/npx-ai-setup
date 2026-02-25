@@ -26,6 +26,43 @@ detect_system() {
   fi
 }
 
+# Distinguish Shopware plugin project from full shop repository.
+# Sets SHOPWARE_TYPE to "plugin" or "shop".
+# Called from run_generation() after SYSTEM is set.
+detect_shopware_type() {
+  SHOPWARE_TYPE=""
+  [ "$SYSTEM" != "shopware" ] && return 0
+
+  # Shop indicator: custom/plugins or custom/static-plugins directory
+  if [ -d "custom/plugins" ] || [ -d "custom/static-plugins" ]; then
+    SHOPWARE_TYPE="shop"
+    return 0
+  fi
+
+  # Plugin indicator: composer.json type field
+  local ctype
+  ctype=$(jq -r '.type // ""' composer.json 2>/dev/null)
+  if [ "$ctype" = "shopware-platform-plugin" ] || [ "$ctype" = "shopware-bundle" ]; then
+    SHOPWARE_TYPE="plugin"
+    return 0
+  fi
+
+  # Plugin indicator: bootstrap PHP class in src/
+  if find src -maxdepth 2 \( -name "*Plugin.php" -o -name "*Bundle.php" \) 2>/dev/null | grep -q .; then
+    SHOPWARE_TYPE="plugin"
+    return 0
+  fi
+
+  # Plugin indicator: app-system manifest
+  if [ -f manifest.xml ]; then
+    SHOPWARE_TYPE="plugin"
+    return 0
+  fi
+
+  # Fallback: assume plugin (smaller scope, safer default)
+  SHOPWARE_TYPE="plugin"
+}
+
 # Returns 0 (true) if the given mapping's target path matches the selected update categories.
 # Returns 1 (false) if the category is deselected — caller should skip this file.
 # Defaults to "yes" for all categories when UPD_* flags are unset (fresh install / reinstall paths).
