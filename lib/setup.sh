@@ -138,9 +138,19 @@ install_copilot() {
 install_specs() {
   echo "📋 Setting up spec-driven workflow..."
   mkdir -p specs/completed
-  [ ! -f specs/TEMPLATE.md ] && cp "$TPL/specs/TEMPLATE.md" specs/TEMPLATE.md
-  [ ! -f specs/README.md ] && cp "$TPL/specs/README.md" specs/README.md
-  [ ! -f specs/completed/.gitkeep ] && touch specs/completed/.gitkeep
+  if [ ! -f specs/TEMPLATE.md ]; then
+    cp "$TPL/specs/TEMPLATE.md" specs/TEMPLATE.md
+  else
+    echo "  specs/TEMPLATE.md already exists, skipping."
+  fi
+  if [ ! -f specs/README.md ]; then
+    cp "$TPL/specs/README.md" specs/README.md
+  else
+    echo "  specs/README.md already exists, skipping."
+  fi
+  if [ ! -f specs/completed/.gitkeep ]; then
+    touch specs/completed/.gitkeep
+  fi
 }
 
 # Install slash commands
