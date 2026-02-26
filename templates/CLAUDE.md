@@ -17,6 +17,8 @@ Before multi-file changes or new features, read `.agents/context/`:
 ## Critical Rules
 <!-- Auto-Init populates this -->
 
+Never read or search inside build output directories (dist/, .output/, .nuxt/, .next/, build/, coverage/). These directories contain generated artifacts that waste tokens and pollute context.
+
 ## Task Complexity Routing
 Before starting, classify and state the task tier:
 

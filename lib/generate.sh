@@ -418,7 +418,7 @@ Create exactly 3 files in .agents/context/ using the Write tool:
 
 - **.agents/context/STACK.md** — runtime, framework (with versions), key dependencies (categorized: UI, state, data, testing, build), package manager, build tooling, and libraries/patterns to avoid
 - **.agents/context/ARCHITECTURE.md** — project type, directory structure, entry points, data flow, key patterns
-- **.agents/context/CONVENTIONS.md** — naming patterns, import style, component structure, error handling, TypeScript usage, testing patterns
+- **.agents/context/CONVENTIONS.md** — naming patterns, import style, component structure, error handling, TypeScript usage, testing patterns. Include a "## Definition of Done" section with project-appropriate quality gates derived from detected tools (e.g. linter: no lint errors, TypeScript: no explicit any/type errors, test runner: all tests green, formatter: code formatted). If a tool is not detected, omit its gate.
 
 Project system/framework: $SYSTEM
 

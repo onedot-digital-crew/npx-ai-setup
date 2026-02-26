@@ -36,6 +36,9 @@ For each changed file, read the full file to understand context around the chang
 - Verify each acceptance criterion. Are they genuinely met by the code?
 - Don't just trust checkboxes — verify against the actual diff.
 
+#### 5b2 — Definition of Done
+If `.agents/context/CONVENTIONS.md` exists and contains a `## Definition of Done` section, verify the code changes also satisfy those global quality gates (e.g. no lint errors, no explicit any, all tests green, code formatted). Report any gates that are not met as blocking issues.
+
 #### 5c — Code quality
 Spawn the `code-reviewer` agent via Task tool. Pass:
 - The full spec content (goal, steps, acceptance criteria, out of scope)
