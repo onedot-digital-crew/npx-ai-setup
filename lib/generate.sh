@@ -98,15 +98,47 @@ In ARCHITECTURE.md, include a 'Working Scope' section:
 - Core Shopware code in vendor/shopware/ must NEVER be modified"
 
     SHOPWARE_RULE="
-Add a 'Shopware Shop' section under Critical Rules:
+Add a 'Shopware 6' section under Critical Rules:
+- DAL-First: Always use EntityRepository -- never raw DBAL/SQL queries
+- Service-Container: Business logic belongs in Services, registered in
+  src/Resources/config/services.xml using Constructor Injection only
+- Migrations: SQL migrations go in src/Migration/ and must be idempotent
+- Criteria Performance: Add only required associations -- avoid over-fetching
+- Code Style: PSR-12, strict_types=1 declarations in every PHP file
+- Admin: Vue.js 3 + Shopware meteor-component-library for Admin extensions
+- Cache: Always run bin/console cache:clear after config/container changes
 - Only modify files in custom/static-plugins/ and config/
 - Never modify custom/plugins/ (admin-managed), vendor/, public/, var/, deployment-overrides/, or core Shopware files
 - Use Shopware plugin hooks and decorators for customization
 - Plugin structure: src/ (PHP), Resources/config/ (DI, routes), Resources/views/ (Twig), Resources/public/ (assets)
-- Run bin/console commands for cache clear, plugin lifecycle"
+- Run bin/console commands for cache clear, plugin lifecycle
+
+Also add a 'Tools' section to CLAUDE.md:
+- Shopware Admin MCP: Direct Claude access to Shopware Admin API and entity schemas.
+  Repository: https://github.com/shopware/shopware-admin-mcp
+  Add to .mcp.json with shopUrl, clientId, clientSecret for this project."
   else
+    SHOPWARE_RULE="
+Add a 'Shopware 6 Plugin' section under Critical Rules:
+- DAL-First: Always use EntityRepository -- never raw DBAL/SQL queries
+- Service-Container: Logic in Services, registered in src/Resources/config/services.xml
+  using Constructor Injection; never use service locator pattern
+- Migrations: SQL migrations in src/Migration/ -- must be idempotent (CREATE TABLE IF NOT EXISTS)
+- Subscribers: New event subscribers need both the PHP class AND the XML service tag
+  (shopware.event.subscriber) in services.xml
+- Controllers: Use Symfony routing attributes/annotations with correct RouteScope
+- Tests: Integration tests extend KernelTestBase; unit tests are plain PHPUnit
+- Criteria Performance: Minimize associations -- only add what the use-case requires
+- Code Style: PSR-12 standards, strict_types=1, typed properties
+
+Also add a 'Tools' section to CLAUDE.md:
+- Shopware Admin MCP: Direct Claude access to Shopware Admin API and entity schemas.
+  Repository: https://github.com/shopware/shopware-admin-mcp
+  Add to .mcp.json with shopUrl, clientId, clientSecret for the target shop."
+
     SHOPWARE_INSTRUCTION="
 This is a standalone Shopware 6 plugin project.
+Stack: Shopware 6.6+, Symfony 7.x, Vue.js 3, PHP 8.3+.
 
 Standard Shopware plugin structure:
   src/
@@ -115,6 +147,7 @@ Standard Shopware plugin structure:
     Service/             - Business logic services
     Entity/              - Custom entities (ORM)
     Migration/           - Database migrations
+    Subscriber/          - Event subscribers
     Resources/
       config/
         services.xml     - Dependency Injection definitions
@@ -125,10 +158,80 @@ Standard Shopware plugin structure:
   composer.json          - Plugin metadata and dependencies
 
 In ARCHITECTURE.md, include:
-- Plugin namespace and bootstrap class location
-- Standard Shopware plugin directory conventions as above
-- This plugin will be installed into a Shopware shop via composer"
+- Plugin namespace and bootstrap class location (src/*Plugin.php or src/*Bundle.php)
+- Standard directory conventions as above
+- Key patterns: DAL (EntityRepository for all DB access), Services (DI container),
+  Subscribers (event-driven hooks), Admin Extensions (Vue.js 3 components)
+- This plugin installs into a Shopware 6 shop via Composer"
   fi
+}
+
+setup_shopware_mcp() {
+  [ "$SYSTEM" != "shopware" ] && return 0
+
+  # Ensure .mcp.json exists
+  [ -f ".mcp.json" ] || echo '{"mcpServers":{}}' > .mcp.json
+
+  # Idempotency: skip if already configured
+  if jq -e '.mcpServers["shopware-admin-mcp"]' .mcp.json >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo ""
+  echo "Shopware Admin MCP"
+  echo "   Gives Claude direct access to the Shopware Admin API."
+
+  # Try to read APP_URL from .env early (needed for the integration link)
+  local ENV_URL=""
+  if [ -f ".env" ]; then
+    ENV_URL=$(grep -E '^APP_URL=' .env | cut -d= -f2- | tr -d '"' | tr -d "'")
+  fi
+
+  if [ -n "$ENV_URL" ]; then
+    echo "   Create an integration at: ${ENV_URL}/admin#/sw/integration/index"
+  fi
+
+  read -r -p "   Set up Shopware Admin MCP? [y/N]: " SETUP_MCP
+  if [ "$SETUP_MCP" != "y" ] && [ "$SETUP_MCP" != "Y" ]; then
+    echo "   Skipped."
+    return 0
+  fi
+  echo ""
+
+  if [ -n "$ENV_URL" ]; then
+    echo "   Found APP_URL in .env: $ENV_URL"
+    read -r -p "   Use this URL? [Y/n]: " USE_ENV
+    if [ -z "$USE_ENV" ] || [ "$USE_ENV" = "y" ] || [ "$USE_ENV" = "Y" ]; then
+      SW_URL="$ENV_URL"
+    else
+      read -r -p "   Shop URL (e.g. https://your-shop.com): " SW_URL
+    fi
+  else
+    read -r -p "   Shop URL (e.g. https://your-shop.com): " SW_URL
+  fi
+
+  read -r -p "   Client ID: " SW_ID
+  read -rs -p "   Client Secret: " SW_SECRET
+  echo ""
+
+  if [ -z "$SW_URL" ] || [ -z "$SW_ID" ] || [ -z "$SW_SECRET" ]; then
+    echo "   Skipped."
+    return 0
+  fi
+
+  local TMP_MCP
+  TMP_MCP=$(mktemp)
+  jq --arg url "$SW_URL" --arg id "$SW_ID" --arg sec "$SW_SECRET" \
+    '.mcpServers["shopware-admin-mcp"] = {
+      "command": "npx",
+      "args": ["-y", "@shopware-ag/admin-mcp"],
+      "env": {
+        "SHOPWARE_API_URL": $url,
+        "SHOPWARE_API_CLIENT_ID": $id,
+        "SHOPWARE_API_CLIENT_SECRET": $sec
+      }
+    }' .mcp.json > "$TMP_MCP" && mv "$TMP_MCP" .mcp.json
+  echo "   shopware-admin-mcp added to .mcp.json"
 }
 
 # Main generation orchestrator
@@ -185,6 +288,7 @@ run_generation() {
     echo "  Shopware type: $SHOPWARE_TYPE"
   fi
   gather_shopware_context
+  setup_shopware_mcp
 
   # Cache file list once (avoid running collect_project_files 3x)
   CACHED_FILES=$(collect_project_files 80)
