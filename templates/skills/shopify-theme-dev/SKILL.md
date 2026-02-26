@@ -1,4 +1,6 @@
 ---
+name: shopify-theme-dev
+description: Expert guidance for Shopify theme development including Dawn theme architecture, sections, blocks, section groups, metafields, and performance optimization
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

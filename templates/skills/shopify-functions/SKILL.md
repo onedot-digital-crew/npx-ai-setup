@@ -1,4 +1,6 @@
 ---
+name: shopify-functions
+description: Expert guidance for Shopify Functions including discounts, delivery customization, payment customization, cart validation, and WebAssembly deployment
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

@@ -1,6 +1,7 @@
 ---
 model: opus
 mode: plan
+argument-hint: "[task description]"
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 
@@ -11,7 +12,7 @@ Create a structured spec for the following task: $ARGUMENTS
 Before writing anything: challenge the idea hard, then think it completely through. Present findings in the chat.
 
 ### 1a — Load Skills
-If `.claude/skills/` exists, glob all skill directories and read each `prompt.md` (first 5 lines only). Apply their guidance throughout the entire process.
+If `.claude/skills/` exists, glob all skill directories and read each `SKILL.md` (first 5 lines only). Apply their guidance throughout the entire process.
 
 ### 1b — Clarify
 If the request is ambiguous or underspecified, ask 1-3 focused questions before proceeding. Wait for answers. Skip if the task is clear.

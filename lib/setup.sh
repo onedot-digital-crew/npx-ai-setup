@@ -172,9 +172,15 @@ install_shopify_skills() {
   if [[ "${SYSTEM:-}" == *shopify* ]]; then
     echo "  🛍️  Installing Shopify skills..."
     for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-      local_tpl="${mapping%%:*}"
-      local_target="${mapping#*:}"
-      mkdir -p "$(dirname "$local_target")"
+      local local_tpl="${mapping%%:*}"
+      local local_target="${mapping#*:}"
+      local skill_dir
+      skill_dir="$(dirname "$local_target")"
+      mkdir -p "$skill_dir"
+      # Backwards-compat: rename legacy prompt.md to SKILL.md if present
+      if [ -f "$skill_dir/prompt.md" ] && [ ! -f "$skill_dir/SKILL.md" ]; then
+        mv "$skill_dir/prompt.md" "$skill_dir/SKILL.md"
+      fi
       if [ ! -f "$local_target" ]; then
         cp "$TPL/${local_tpl#templates/}" "$local_target"
       else

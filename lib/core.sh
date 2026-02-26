@@ -51,14 +51,14 @@ build_template_map
 
 # Shopify-specific skills (only added when system includes shopify)
 SHOPIFY_SKILLS_MAP=(
-  "templates/skills/shopify-theme-dev/prompt.md:.claude/skills/shopify-theme-dev/prompt.md"
-  "templates/skills/shopify-liquid/prompt.md:.claude/skills/shopify-liquid/prompt.md"
-  "templates/skills/shopify-app-dev/prompt.md:.claude/skills/shopify-app-dev/prompt.md"
-  "templates/skills/shopify-graphql-api/prompt.md:.claude/skills/shopify-graphql-api/prompt.md"
-  "templates/skills/shopify-hydrogen/prompt.md:.claude/skills/shopify-hydrogen/prompt.md"
-  "templates/skills/shopify-checkout/prompt.md:.claude/skills/shopify-checkout/prompt.md"
-  "templates/skills/shopify-functions/prompt.md:.claude/skills/shopify-functions/prompt.md"
-  "templates/skills/shopify-cli-tools/prompt.md:.claude/skills/shopify-cli-tools/prompt.md"
+  "templates/skills/shopify-theme-dev/SKILL.md:.claude/skills/shopify-theme-dev/SKILL.md"
+  "templates/skills/shopify-liquid/SKILL.md:.claude/skills/shopify-liquid/SKILL.md"
+  "templates/skills/shopify-app-dev/SKILL.md:.claude/skills/shopify-app-dev/SKILL.md"
+  "templates/skills/shopify-graphql-api/SKILL.md:.claude/skills/shopify-graphql-api/SKILL.md"
+  "templates/skills/shopify-hydrogen/SKILL.md:.claude/skills/shopify-hydrogen/SKILL.md"
+  "templates/skills/shopify-checkout/SKILL.md:.claude/skills/shopify-checkout/SKILL.md"
+  "templates/skills/shopify-functions/SKILL.md:.claude/skills/shopify-functions/SKILL.md"
+  "templates/skills/shopify-cli-tools/SKILL.md:.claude/skills/shopify-cli-tools/SKILL.md"
 )
 
 VALID_SYSTEMS=(auto shopify nuxt next laravel shopware storyblok)

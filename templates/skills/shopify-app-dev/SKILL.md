@@ -1,4 +1,6 @@
 ---
+name: shopify-app-dev
+description: Expert guidance for Shopify app development including OAuth, embedded apps, Polaris UI, App Bridge, webhooks, billing API, and Remix-based app structure
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

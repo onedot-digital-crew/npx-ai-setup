@@ -1,5 +1,11 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
+  "respectGitignore": true,
+  "attribution": {
+    "coAuthoredBy": true,
+    "template": "Co-Authored-By: Claude <noreply@anthropic.com>"
+  },
   "permissions": {
     "allow": [
       "Read(src/**)",
@@ -99,7 +105,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "osascript -e 'display notification \"Claude Code is ready\" with title \"Claude Code\"'"
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/notify.sh"
           }
         ]
       }

@@ -1,4 +1,6 @@
 ---
+name: shopify-hydrogen
+description: Expert guidance for headless commerce with Shopify Hydrogen including Remix routing, Storefront API, cart management, caching strategies, and deployment
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
