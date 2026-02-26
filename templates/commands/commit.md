@@ -1,5 +1,6 @@
 ---
 model: sonnet
+disable-model-invocation: true
 allowed-tools: Read, Bash, Glob, Grep
 ---
 

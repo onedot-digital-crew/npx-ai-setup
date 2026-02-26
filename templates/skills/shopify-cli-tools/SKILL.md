@@ -1,4 +1,6 @@
 ---
+name: shopify-cli-tools
+description: Expert guidance for Shopify CLI including app and theme development commands, environment management, extension scaffolding, and deployment workflows
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

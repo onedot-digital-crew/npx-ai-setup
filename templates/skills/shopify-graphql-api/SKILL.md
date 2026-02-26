@@ -1,4 +1,6 @@
 ---
+name: shopify-graphql-api
+description: Expert guidance for Shopify Admin API and Storefront API GraphQL queries, mutations, pagination, metafields, webhooks, and rate limit handling
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

@@ -1,5 +1,6 @@
 ---
 model: sonnet
+argument-hint: "[bug description]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 

@@ -1,4 +1,6 @@
 ---
+name: shopify-checkout
+description: Expert guidance for Shopify checkout customization including Checkout UI extensions, thank-you page extensions, post-purchase extensions, and branding
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

@@ -1,4 +1,6 @@
 ---
+name: shopify-liquid
+description: Expert guidance for Shopify Liquid templating including objects, filters, tags, control flow, loops, snippets, sections, and forms
 model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---

@@ -18,7 +18,7 @@ Execute the spec: $ARGUMENTS
 
 4. **Read project context**: Skim `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md` to follow project patterns and use correct libraries.
 
-5. **Load relevant skills**: If the spec's Context section mentions skills, read `.claude/skills/<name>/prompt.md` for each and apply throughout execution. Skip if none listed.
+5. **Load relevant skills**: If the spec's Context section mentions skills, read `.claude/skills/<name>/SKILL.md` for each and apply throughout execution. Skip if none listed.
 
 6. **Architectural review** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes, spawn the `code-architect` agent via Task tool, passing the full spec content as the prompt. Then:
    - If the verdict is **REDESIGN**: stop immediately, report all concerns to the user, and do not proceed.
