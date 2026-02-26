@@ -8,3 +8,4 @@ node_modules/
 .agents/context/.state
 
 .idea
+.claude/worktrees/
