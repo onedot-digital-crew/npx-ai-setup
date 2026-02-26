@@ -45,6 +45,12 @@
     ],
     "deny": [
       "Read(.env*)",
+      "Read(dist/**)",
+      "Read(.output/**)",
+      "Read(.nuxt/**)",
+      "Read(coverage/**)",
+      "Read(.next/**)",
+      "Read(build/**)",
       "Bash(rm -r *)",
       "Bash(rm -rf *)",
       "Bash(git reset --hard *)",
