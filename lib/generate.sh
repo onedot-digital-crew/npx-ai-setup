@@ -113,10 +113,21 @@ Add a 'Shopware 6' section under Critical Rules:
 - Plugin structure: src/ (PHP), Resources/config/ (DI, routes), Resources/views/ (Twig), Resources/public/ (assets)
 - Run bin/console commands for cache clear, plugin lifecycle
 
-Also add a 'Tools' section to CLAUDE.md:
-- Shopware Admin MCP: Direct Claude access to Shopware Admin API and entity schemas.
-  Repository: https://github.com/shopware/shopware-admin-mcp
-  Add to .mcp.json with shopUrl, clientId, clientSecret for this project."
+Also add a 'MCP Servers' section to CLAUDE.md:
+## MCP Servers
+### shopware-admin-mcp
+Configured in .mcp.json -- provides direct access to the Shopware Admin API.
+
+Use it when you need to:
+- Inspect live entity data (products, orders, customers, categories, properties)
+- Look up field names, associations, or entity schemas before writing DAL code
+- Verify that a plugin's data changes actually persisted correctly
+- Create or update entities to set up test fixtures or seed data
+- Debug data issues without writing a one-off console command
+
+Do NOT use it for:
+- Code generation or file edits (use standard tools)
+- Tasks that only touch the local codebase with no data dependency"
   else
     SHOPWARE_RULE="
 Add a 'Shopware 6 Plugin' section under Critical Rules:
@@ -131,10 +142,21 @@ Add a 'Shopware 6 Plugin' section under Critical Rules:
 - Criteria Performance: Minimize associations -- only add what the use-case requires
 - Code Style: PSR-12 standards, strict_types=1, typed properties
 
-Also add a 'Tools' section to CLAUDE.md:
-- Shopware Admin MCP: Direct Claude access to Shopware Admin API and entity schemas.
-  Repository: https://github.com/shopware/shopware-admin-mcp
-  Add to .mcp.json with shopUrl, clientId, clientSecret for the target shop."
+Also add a 'MCP Servers' section to CLAUDE.md:
+## MCP Servers
+### shopware-admin-mcp
+Configured in .mcp.json -- provides direct access to the Shopware Admin API of the target shop.
+
+Use it when you need to:
+- Inspect live entity data (products, orders, customers, categories, properties)
+- Look up field names, associations, or entity schemas before writing DAL code
+- Verify that the plugin's data changes actually persisted correctly in the shop
+- Create or update entities to set up test fixtures or reproduce a bug
+- Debug data issues without writing a one-off console command
+
+Do NOT use it for:
+- Code generation or file edits (use standard tools)
+- Tasks that only touch the local plugin codebase with no data dependency"
 
     SHOPWARE_INSTRUCTION="
 This is a standalone Shopware 6 plugin project.
