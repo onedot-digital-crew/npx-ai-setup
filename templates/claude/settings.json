@@ -6,6 +6,17 @@
     "coAuthoredBy": true,
     "template": "Co-Authored-By: Claude <noreply@anthropic.com>"
   },
+  "sandbox": {
+    "enabled": true,
+    "allowedNetworkHosts": [
+      "github.com",
+      "api.github.com",
+      "npmjs.org",
+      "registry.npmjs.org",
+      "skills.sh",
+      "api.skills.sh"
+    ]
+  },
   "permissions": {
     "allow": [
       "Read(src/**)",

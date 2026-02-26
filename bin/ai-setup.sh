@@ -177,10 +177,14 @@ if [ "$AI_CLI" = "claude" ]; then
     echo ""
     echo "✅ Auto-Init complete!"
     if [ "$WITH_GSD" = "yes" ]; then
-      osascript -e 'display notification "Auto-Init complete. Run /gsd:map-codebase for deeper analysis" with title "AI Setup" sound name "Glass"' 2>/dev/null
+      _NOTIFY_MSG="Auto-Init complete. Run /gsd:map-codebase for deeper analysis"
     else
-      osascript -e 'display notification "Auto-Init complete!" with title "AI Setup" sound name "Glass"' 2>/dev/null
+      _NOTIFY_MSG="Auto-Init complete!"
     fi
+    case "$(uname -s)" in
+      Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"AI Setup\" sound name \"Glass\"" 2>/dev/null || true ;;
+      Linux) command -v notify-send >/dev/null 2>&1 && notify-send "AI Setup" "$_NOTIFY_MSG" 2>/dev/null || true ;;
+    esac
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
   echo "💡 GitHub Copilot detected (no claude CLI)."

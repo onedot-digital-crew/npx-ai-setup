@@ -35,3 +35,24 @@ Audit against code.claude.com/docs found our skills use the legacy `prompt.md` f
 - Migrating commands from `.claude/commands/` to `.claude/skills/` (both work, no urgency)
 - Adding `context: fork` to existing commands (requires per-command design)
 - Plugin system configuration (not enough adoption yet)
+
+## Review Feedback
+
+### Issues (from code-reviewer, verdict: FAIL)
+
+**[HIGH] Step 5 nicht implementiert — `sandbox` fehlt in settings.json**
+`"sandbox": {"enabled": true}` mit Network-Allowlist wurde nicht zu `templates/claude/settings.json` hinzugefuegt. Acceptance Criteria war faelschlicherweise als erledigt markiert.
+
+**[HIGH] Verbleibende `osascript`-Aufrufe in `bin/ai-setup.sh`**
+Zeilen 180 und 182 in `bin/ai-setup.sh` enthalten noch direkte `osascript`-Aufrufe (Auto-Init Notifications). Diese sollten die cross-platform `notify.sh` Logik nutzen oder zumindest einen `uname`-Check verwenden.
+
+**[MEDIUM] `notify.sh` ignoriert stdin-Payload**
+Claude Code uebergibt den Notification-Inhalt via stdin als JSON. `notify.sh` liest stdin nicht und zeigt immer den statischen String "Claude Code is ready". Sollte stdin parsen oder zumindest Message/Title als Argumente akzeptieren.
+
+**[MEDIUM] Scope Creep — `bin/ai-setup.sh` in 10 `lib/` Module aufgeteilt**
+2100+ Zeilen Refaktorierung war nicht Teil der Spec. Smoke-Tests bestehen, aber diese Aenderung erhoet Regressionsrisiko und sollte als eigene Spec behandelt werden.
+
+### Required Fixes (muss behoben werden)
+1. `sandbox` Block zu `templates/claude/settings.json` hinzufuegen
+2. `osascript` Aufrufe in `bin/ai-setup.sh` cross-platform machen
+3. `notify.sh` stdin-Payload lesen lassen

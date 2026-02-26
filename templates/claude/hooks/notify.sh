@@ -1,9 +1,21 @@
 #!/bin/bash
 # Cross-platform notification hook for Claude Code
 # Supports: macOS (osascript), Linux (notify-send), silent fallback
+# Claude Code passes notification data via stdin as JSON:
+# {"message": "Task complete", "title": "Claude Code", "level": "info"}
 
-TITLE="Claude Code"
-MESSAGE="Claude Code is ready"
+# Read stdin payload
+PAYLOAD=$(cat /dev/stdin 2>/dev/null || echo "{}")
+
+MSG=""
+TTL=""
+if command -v jq >/dev/null 2>&1; then
+  MSG=$(echo "$PAYLOAD" | jq -r '.message // empty' 2>/dev/null)
+  TTL=$(echo "$PAYLOAD" | jq -r '.title // empty' 2>/dev/null)
+fi
+
+TITLE="${TTL:-Claude Code}"
+MESSAGE="${MSG:-Claude Code is ready}"
 
 case "$(uname -s)" in
   Darwin)
