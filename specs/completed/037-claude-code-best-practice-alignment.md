@@ -1,6 +1,6 @@
 # Spec: Align with Official Claude Code Best Practices
 
-> **Spec ID**: 037 | **Created**: 2026-02-27 | **Status**: in-review | **Branch**: spec/037-claude-code-best-practice-alignment
+> **Spec ID**: 037 | **Created**: 2026-02-27 | **Status**: completed | **Branch**: spec/037-claude-code-best-practice-alignment
 
 ## Goal
 Close 8 gaps between our templates and official Claude Code standards: SKILL.md rename, enriched frontmatter, settings schema, sandbox, attribution, disable-model-invocation, and cross-platform notification hook.

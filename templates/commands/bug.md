@@ -1,7 +1,7 @@
 ---
 model: sonnet
 argument-hint: "[bug description]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
 Investigate and fix the following bug: $ARGUMENTS
@@ -23,9 +23,15 @@ Investigate and fix the following bug: $ARGUMENTS
 - If the fix touches more than 3 files, stop and suggest creating a spec instead
 
 ### 4. Verify
-- Run existing tests if available (`npm test`, `npx vitest`, etc.)
-- Manually verify the fix addresses the reported symptom
-- Check for regressions in adjacent code paths
+Spawn `verify-app` via Task tool:
+> "Verify the bug fix. Run the test suite if available. Run the build if available. Report PASS or FAIL."
+- If **FAIL**: report the output and stop. Do NOT proceed to review. Suggest: re-investigate the root cause.
+- If **PASS**: continue to Step 5.
+
+### 5. Review
+Spawn `code-reviewer` via Task tool. Pass the changed files and a one-line description of the fix.
+- Verdict **PASS** or **CONCERNS**: done, report fix as complete.
+- Verdict **FAIL**: flag for manual review, report the issues.
 
 ## Rules
 - Fix only what is broken. No scope creep.

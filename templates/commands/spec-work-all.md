@@ -63,7 +63,7 @@ Implementation steps:
 3. Execute each spec step in order
 4. Verify all acceptance criteria are met
 5. Stage and commit all changes:
-   git add -u && git commit -m "spec(NNN): [spec title]"
+   git add -A && git commit -m "spec(NNN): [spec title]"
 ```
 
 #### Wave post-processing — after each subagent returns

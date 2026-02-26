@@ -1,6 +1,6 @@
 # Spec: Global Definition of Done and Ignore Patterns
 
-> **Spec ID**: 038 | **Created**: 2026-02-27 | **Status**: in-review | **Branch**: spec/038-dod-and-ignore-patterns
+> **Spec ID**: 038 | **Created**: 2026-02-27 | **Status**: completed | **Branch**: spec/038-dod-and-ignore-patterns
 
 ## Goal
 Add auto-generated Definition of Done to CONVENTIONS.md and build-artifact ignore patterns to settings.json for higher baseline code quality and reduced token waste.
@@ -31,3 +31,20 @@ The /spec-review agent checks code only against spec-specific acceptance criteri
 - Native .claudeignore support (not available in Claude Code)
 - Per-spec DoD overrides
 - Token budget tracking or cost monitoring
+
+## Review Feedback
+
+### Issues (from code-reviewer, verdict: FAIL)
+
+**[HIGH] Critical Rule in `templates/CLAUDE.md` nicht persistent**
+Die neue Regel steht im `## Critical Rules`-Abschnitt, der bei jedem `run_generation`-Durchlauf vom LLM neu geschrieben wird. Die Regel wird bei der naechsten Regeneration ueberschrieben/entfernt. Fix: Die Regel muss ausserhalb des auto-populierten Bereichs platziert werden (z.B. in einem separaten `## Build Artifacts` Abschnitt nach Critical Rules, oder als Instruktion im Generation-Prompt, damit der LLM sie jedes Mal einbettet).
+
+**[MEDIUM] Sektionsnummerierung `5b2` in spec-review.md**
+Ungewoehnliche Nummerierung. Besser: `5b` umbenennen zu "Acceptance Criteria", neuen Step als `5c` einfuegen (DoD), bisheriges `5c` zu `5d`.
+
+**[MEDIUM] Hardcodierte Beispiel-Gates im Generation-Prompt**
+Beispiele wie "no explicit any" erscheinen immer im Prompt, auch wenn das Projekt kein TypeScript nutzt. Der Satz "If a tool is not detected, omit its gate" mildert das ab, koennte aber vom LLM ignoriert werden.
+
+### Required Fixes (muss behoben werden)
+1. Critical Rule aus dem auto-populierten Bereich verschieben (in Generation-Prompt oder separaten Abschnitt)
+2. Sektionsnummerierung in spec-review.md bereinigen (5b2 → 5c, 5c → 5d)
