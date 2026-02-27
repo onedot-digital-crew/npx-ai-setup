@@ -11,6 +11,14 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 ## [Unreleased]
 
 
+## [v1.2.1] — 2026-02-28
+
+- **Spec 047**: Settings + hooks + agent memory — SessionStart hook, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH, PostToolUse failure log, Stop quality gate, agent memory:project + isolation:worktree fields
+- **Spec 046**: Statusline global install — optional `~/.claude/statusline.sh` setup with color-coded context bar, model, cost, and git branch display
+- **Spec 045**: /grill enhancements — scope challenge step, A/B/C options format, "What already exists" + "NOT reviewed" sections, self-verification table
+- **Spec 044**: .claude/rules/ template expansion — testing.md, git.md, typescript.md (conditional), opusplan model, CLAUDE.md memory + tips sections
+- **Review fixes**: find precedence bug in TS detection, TS metadata tracking, statusline null-safety + jq guard, SessionStart matcher, idempotent statusline prompt
+
 ## [v1.2.0] — 2026-02-27
 
 - **Update UX**: per-file [y/N] prompt before overwriting user-modified files; Update files option available without version change

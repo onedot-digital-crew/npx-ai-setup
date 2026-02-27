@@ -141,6 +141,17 @@ write_metadata() {
     done
   fi
 
+  # Include TypeScript rules if installed
+  for mapping in "${TS_RULES_MAP[@]}"; do
+    local tpl="${mapping%%:*}"
+    local target="${mapping#*:}"
+    if [ -f "$target" ]; then
+      local cs
+      cs=$(compute_checksum "$target")
+      json=$(echo "$json" | jq --arg f "$target" --arg c "$cs" '.files[$f] = $c')
+    fi
+  done
+
   echo "$json" > .ai-setup.json
 }
 

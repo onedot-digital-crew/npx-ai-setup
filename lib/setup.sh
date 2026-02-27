@@ -125,7 +125,7 @@ install_rules() {
 
   # Conditional: install TypeScript rules only when TS files are detected
   local _ts_found
-  _ts_found=$(find . -name "*.ts" -o -name "*.tsx" 2>/dev/null | grep -v node_modules | head -1)
+  _ts_found=$(find . \( -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" 2>/dev/null | head -1)
   if [ -n "$_ts_found" ]; then
     echo "  TypeScript detected — installing typescript.md rules..."
     for _ts_mapping in "${TS_RULES_MAP[@]}"; do
@@ -276,7 +276,7 @@ install_statusline_global() {
     TMP=$(mktemp)
     jq --arg cmd "$HOME/.claude/statusline.sh" '.statusLine = {"command": $cmd}' "$HOME/.claude/settings.json" > "$TMP" && mv "$TMP" "$HOME/.claude/settings.json"
   else
-    printf '{"statusLine":{"command":"%s"}}\n' "$HOME/.claude/statusline.sh" > "$HOME/.claude/settings.json"
+    jq -n --arg cmd "$HOME/.claude/statusline.sh" '{"statusLine":{"command":$cmd}}' > "$HOME/.claude/settings.json"
   fi
   echo "  Statusline installed -> ~/.claude/statusline.sh"
 }
