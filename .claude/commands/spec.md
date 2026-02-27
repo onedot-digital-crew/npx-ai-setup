@@ -17,7 +17,7 @@ If `.claude/skills/` exists, glob all skill directories and read each `SKILL.md`
 If the request is ambiguous or underspecified, ask 1-3 focused questions before proceeding. Wait for answers. Skip if the task is clear.
 
 ### 1c — Concept Fit
-Read `docs/CONCEPT.md` if it exists. Answer:
+Read `.agents/context/CONCEPT.md` if it exists. Answer:
 - Does this align with the project's core principles?
 - Is it in scope for this codebase/tool?
 - Would this belong in the core, or is it a plugin/workaround?

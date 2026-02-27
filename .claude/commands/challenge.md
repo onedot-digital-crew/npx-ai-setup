@@ -11,7 +11,7 @@ Challenge and critically evaluate this feature idea before any implementation: *
 Summarize the proposed feature in 1-2 sentences in your own words to confirm understanding.
 
 ### Phase 2 — Concept Fit
-Read `docs/CONCEPT.md` now. Then answer:
+Read `.agents/context/CONCEPT.md` now. Then answer:
 - Does this align with the project's core principles: **one command, zero config, template-based**?
 - Does it fit the "templates not generation" distinction?
 - Would this belong in the scaffolding layer, or is it scope creep?
@@ -59,5 +59,5 @@ Choose exactly one:
 ## Rules
 - Be direct and skeptical. The default stance is skepticism, not encouragement.
 - Do NOT modify any files.
-- Cite specific lines from `docs/CONCEPT.md` when evaluating concept fit.
+- Cite specific lines from `.agents/context/CONCEPT.md` when evaluating concept fit.
 - The verdict must be unambiguous — no "it depends" conclusions.

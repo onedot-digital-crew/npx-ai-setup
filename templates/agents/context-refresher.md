@@ -29,9 +29,13 @@ echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> .ag
 5. **Generate repomix snapshot** (optional, best-effort): Run:
 ```bash
 _t=""; command -v timeout &>/dev/null && _t="timeout 120"; command -v gtimeout &>/dev/null && _t="gtimeout 120"
-$_t npx -y repomix --compress --style markdown \
-  --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
-  --output .agents/repomix-snapshot.md 2>/dev/null
+if [ -f "repomix.config.json" ]; then
+  $_t npx -y repomix 2>/dev/null
+else
+  $_t npx -y repomix --compress --style markdown \
+    --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
+    --output .agents/repomix-snapshot.md 2>/dev/null
+fi
 ```
 If this fails or times out, skip silently — the 3 context files are the primary output.
 

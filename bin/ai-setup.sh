@@ -152,6 +152,7 @@ install_agents
 echo "📋 Writing installation metadata..."
 write_metadata
 update_gitignore
+install_repomix_config
 generate_repomix_snapshot
 
 # Plugins & extensions

@@ -233,6 +233,15 @@ update_gitignore() {
   fi
 }
 
+# Install repomix.config.json for codebase snapshot configuration
+install_repomix_config() {
+  if [ ! -f repomix.config.json ]; then
+    cp "$TPL/repomix.config.json" repomix.config.json
+  else
+    echo "  repomix.config.json already exists, skipping."
+  fi
+}
+
 # Generate repomix codebase snapshot in background (once, if not already present)
 generate_repomix_snapshot() {
   if [ -f ".agents/repomix-snapshot.md" ]; then
@@ -245,9 +254,14 @@ generate_repomix_snapshot() {
   command -v timeout &>/dev/null && _repomix_timeout="timeout 120"
   command -v gtimeout &>/dev/null && _repomix_timeout="gtimeout 120"
 
-  $_repomix_timeout npx -y repomix --compress --style markdown \
-    --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
-    --output .agents/repomix-snapshot.md >/dev/null 2>&1 &
+  # Use repomix.config.json if present (user-customizable), otherwise fall back to defaults
+  if [ -f "repomix.config.json" ]; then
+    $_repomix_timeout npx -y repomix >/dev/null 2>&1 &
+  else
+    $_repomix_timeout npx -y repomix --compress --style markdown \
+      --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
+      --output .agents/repomix-snapshot.md >/dev/null 2>&1 &
+  fi
   REPOMIX_PID=$!
 
   SPIN='-\|/'

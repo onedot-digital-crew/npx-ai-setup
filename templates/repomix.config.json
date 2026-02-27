@@ -1,0 +1,26 @@
+{
+  "output": {
+    "filePath": ".agents/repomix-snapshot.md",
+    "style": "markdown",
+    "compress": true
+  },
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "node_modules",
+      "dist",
+      ".git",
+      ".next",
+      ".nuxt",
+      "coverage",
+      ".turbo",
+      "*.lock",
+      "*.lockb",
+      ".agents/repomix-snapshot.md"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}

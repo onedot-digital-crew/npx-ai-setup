@@ -130,4 +130,4 @@ Team sharing: marketplace plugins via `extraKnownMarketplaces` in `.claude/setti
 - [GSD workflow engine](https://github.com/get-shit-done-cc/get-shit-done-cc)
 - [Context7](https://github.com/upstash/context7)
 - [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
-- [Concept & Design Decisions](docs/CONCEPT.md)
+- [Concept & Design Decisions](.agents/context/CONCEPT.md)
