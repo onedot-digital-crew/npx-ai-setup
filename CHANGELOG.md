@@ -10,10 +10,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- **Spec 040**: README & CHANGELOG sync — update command/agent/hook counts and tables, compact verbose sections, extend /release to validate all counts
-- **Spec 039**: Claude-Mem as team standard — default Y for install, adds `<claude-mem-context>` placeholder to CLAUDE.md, documents as required plugin
-- **Spec 038**: Global Definition of Done — auto-generates DoD in CONVENTIONS.md, build-artifact deny rules in settings.json and CLAUDE.md, /spec-review validates against DoD
-- **Spec 037**: Claude Code best practice alignment — SKILL.md frontmatter, disable-model-invocation/argument-hint, enriched settings.json, cross-platform notify.sh
+- **Spec 040**: README & CHANGELOG sync — fix counts (15 cmds/8 agents/6 hooks), compact sections, /release validates all counts
+- **Spec 039**: Claude-Mem as team standard — default Y, `<claude-mem-context>` in CLAUDE.md, documents as required plugin
+- **Spec 038**: Global Definition of Done — DoD in CONVENTIONS.md, build-artifact rules, /spec-review DoD validation
+- **Spec 037**: Claude Code best practices — SKILL.md frontmatter, disable-model-invocation, enriched settings.json, notify.sh
 - **Spec 036**: Bash performance — parallel skills search/install, 8-job curl pool, parameter expansion (100+ second runtime reduction)
 - **Spec 035**: /analyze command — 3 parallel Explore agents produce architecture/hotspots/risks overview
 - **Spec 034**: /bug multi-agent verification — verify-app auto-runs after fix, code-reviewer after verification passes
