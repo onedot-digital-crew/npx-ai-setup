@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, Task
 ---
 
-Execute the spec: $ARGUMENTS
+Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to implement a single approved spec.
 
 ## Process
 

@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
-End-of-session technical debt sweep.
+Scans recently changed files for tech debt and fixes safe wins. Use at end of session to clean up before committing.
 
 ## Process
 

@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Bash, Glob, Grep
 ---
 
-Stage all changes and create a commit with a descriptive message.
+Stages changes and creates a conventional commit message. Use when work is ready and a well-scoped message is needed.
 
 ## Process
 
