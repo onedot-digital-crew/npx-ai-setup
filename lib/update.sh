@@ -196,6 +196,9 @@ run_smart_update() {
     fi
   fi
 
+  update_gitignore
+  generate_repomix_snapshot
+
   echo ""
   echo "✅ Update complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
 }

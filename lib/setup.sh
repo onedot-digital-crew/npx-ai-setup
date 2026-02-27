@@ -215,11 +215,13 @@ update_gitignore() {
       echo ".ai-setup.json" >> .gitignore
       echo ".ai-setup-backup/" >> .gitignore
       echo ".agents/context/.state" >> .gitignore
+      echo ".agents/repomix-snapshot.md" >> .gitignore
     else
       # Add new entries if missing from existing block
       grep -q "\.ai-setup\.json" .gitignore 2>/dev/null || echo ".ai-setup.json" >> .gitignore
       grep -q "\.ai-setup-backup" .gitignore 2>/dev/null || echo ".ai-setup-backup/" >> .gitignore
       grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
+      grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.md" >> .gitignore
     fi
   else
     echo "# Claude Code / AI Setup" > .gitignore
@@ -227,5 +229,43 @@ update_gitignore() {
     echo ".ai-setup.json" >> .gitignore
     echo ".ai-setup-backup/" >> .gitignore
     echo ".agents/context/.state" >> .gitignore
+    echo ".agents/repomix-snapshot.md" >> .gitignore
+  fi
+}
+
+# Generate repomix codebase snapshot in background (once, if not already present)
+generate_repomix_snapshot() {
+  if [ -f ".agents/repomix-snapshot.md" ]; then
+    return 0
+  fi
+  mkdir -p .agents
+  echo "📸 Generating codebase snapshot (repomix)..."
+
+  local _repomix_timeout=""
+  command -v timeout &>/dev/null && _repomix_timeout="timeout 120"
+  command -v gtimeout &>/dev/null && _repomix_timeout="gtimeout 120"
+
+  $_repomix_timeout npx -y repomix --compress --style markdown \
+    --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
+    --output .agents/repomix-snapshot.md >/dev/null 2>&1 &
+  REPOMIX_PID=$!
+
+  SPIN='-\|/'
+  i=0
+  while kill -0 $REPOMIX_PID 2>/dev/null; do
+    i=$(( (i+1) % 4 ))
+    printf "\r  ${SPIN:$i:1} Analyzing codebase..."
+    sleep 0.2
+  done
+
+  REPOMIX_EXIT=0
+  wait $REPOMIX_PID 2>/dev/null || REPOMIX_EXIT=$?
+
+  if [ $REPOMIX_EXIT -eq 0 ] && [ -f ".agents/repomix-snapshot.md" ]; then
+    LINES=$(wc -l < .agents/repomix-snapshot.md 2>/dev/null || echo "?")
+    printf "\r  ✅ Snapshot written to .agents/repomix-snapshot.md (%s lines)%*s\n" "$LINES" 10 ""
+  else
+    printf "\r  ⏭️  repomix unavailable, skipping snapshot%*s\n" 20 ""
+    rm -f .agents/repomix-snapshot.md
   fi
 }
