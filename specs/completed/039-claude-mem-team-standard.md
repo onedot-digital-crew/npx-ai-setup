@@ -1,6 +1,6 @@
 # Spec: Claude-Mem as Team Standard
 
-> **Spec ID**: 039 | **Created**: 2026-02-27 | **Status**: in-progress | **Branch**: spec/039-claude-mem-team-standard
+> **Spec ID**: 039 | **Created**: 2026-02-27 | **Status**: completed | **Branch**: spec/039-claude-mem-team-standard
 
 ## Goal
 Make claude-mem the default for every team member by changing opt-in to opt-out, adding folder context support to CLAUDE.md, and documenting the team expectation.

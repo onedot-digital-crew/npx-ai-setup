@@ -1,6 +1,6 @@
 # Spec: README & CHANGELOG Update + Release Validation
 
-> **Spec ID**: 040 | **Created**: 2026-02-27 | **Status**: draft
+> **Spec ID**: 040 | **Created**: 2026-02-27 | **Status**: in-progress | **Branch**: —
 
 ## Goal
 Bring README.md in sync with actual features, compact CHANGELOG entries, and extend /release to validate README counts automatically.
@@ -9,7 +9,7 @@ Bring README.md in sync with actual features, compact CHANGELOG entries, and ext
 README lists 13 commands (actual: 15), 4 agents (actual: 8), 3 hooks (actual: 6). CHANGELOG [Unreleased] has 9 verbose spec entries that need compacting. The /release command already checks command count — extend it to also validate agents and hooks counts so README never drifts again.
 
 ## Steps
-- [ ] Step 1: Update README.md commands section — change count to 15, add `/analyze` and `/context-full` to table
+- [x] Step 1: Update README.md commands section — change count to 15, add `/analyze` and `/context-full` to table
 - [ ] Step 2: Update README.md agents section — change count to 8, add code-reviewer, code-architect, perf-reviewer, test-generator to table
 - [ ] Step 3: Update README.md hooks section — change count to 6, add context-freshness, update-check, notify to table
 - [ ] Step 4: Update README.md file structure tree — add missing files (new agents, hooks, commands)
