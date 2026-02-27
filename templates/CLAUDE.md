@@ -1,14 +1,24 @@
 # CLAUDE.md
 
-## Required Plugins
+## Memory
 
-**claude-mem** — persistent memory across sessions (required for all team members).
+**Built-in Auto Memory** — Claude automatically saves notes to `~/.claude/projects/<hash>/memory/MEMORY.md`. No setup required. Claude writes to this file during sessions and reads it back at the start of each conversation to maintain continuity.
 
-If not installed: run these two commands in Claude Code:
+**claude-mem** (optional) — structured observation database with semantic search across sessions. Install if you want cross-session search and team-shared memory:
 ```
 /plugin marketplace add thedotmack/claude-mem
 /plugin install claude-mem
 ```
+
+## Tips
+
+- `ultrathink:` prefix — triggers extended reasoning without switching models.
+  Example: `ultrathink: refactor this auth module`
+- `! command` — run a bash command instantly without token overhead.
+  Example: `! git log --oneline -10`
+- `@path/to/file` — import file contents compactly into context.
+  Example: `@src/auth/index.ts`
+- One task per conversation — start a fresh session for unrelated work to prevent context bleed.
 
 ## Communication Protocol
 No small talk. Just do it.

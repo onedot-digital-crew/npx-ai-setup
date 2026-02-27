@@ -31,6 +31,9 @@ build_template_map() {
     # Skip skills/ — handled explicitly by SHOPIFY_SKILLS_MAP with system check
     [[ "$rel" == skills/* ]] && continue
 
+    # Skip typescript.md — handled conditionally by TS_RULES_MAP in install_rules()
+    [[ "$rel" == "claude/rules/typescript.md" ]] && continue
+
     # Map source path to install target path
     local target
     case "$rel" in
@@ -59,6 +62,11 @@ SHOPIFY_SKILLS_MAP=(
   "templates/skills/shopify-checkout/SKILL.md:.claude/skills/shopify-checkout/SKILL.md"
   "templates/skills/shopify-functions/SKILL.md:.claude/skills/shopify-functions/SKILL.md"
   "templates/skills/shopify-cli-tools/SKILL.md:.claude/skills/shopify-cli-tools/SKILL.md"
+)
+
+# TypeScript-specific rules (only added when *.ts or *.tsx files are detected)
+TS_RULES_MAP=(
+  "templates/claude/rules/typescript.md:.claude/rules/typescript.md"
 )
 
 VALID_SYSTEMS=(auto shopify nuxt next laravel shopware storyblok)

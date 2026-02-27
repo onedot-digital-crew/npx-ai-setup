@@ -122,6 +122,22 @@ install_rules() {
       echo "  .claude/rules/$_rule_name already exists, skipping."
     fi
   done < <(find "$TPL/claude/rules" -maxdepth 1 -type f -print0 | sort -z)
+
+  # Conditional: install TypeScript rules only when TS files are detected
+  local _ts_found
+  _ts_found=$(find . -name "*.ts" -o -name "*.tsx" 2>/dev/null | grep -v node_modules | head -1)
+  if [ -n "$_ts_found" ]; then
+    echo "  TypeScript detected — installing typescript.md rules..."
+    for _ts_mapping in "${TS_RULES_MAP[@]}"; do
+      local _ts_tpl="${_ts_mapping%%:*}"
+      local _ts_target="${_ts_mapping#*:}"
+      if [ ! -f "$_ts_target" ]; then
+        cp "$SCRIPT_DIR/$_ts_tpl" "$_ts_target"
+      else
+        echo "  $_ts_target already exists, skipping."
+      fi
+    done
+  fi
 }
 
 # Copy .github/copilot-instructions.md
@@ -216,12 +232,14 @@ update_gitignore() {
       echo ".ai-setup-backup/" >> .gitignore
       echo ".agents/context/.state" >> .gitignore
       echo ".agents/repomix-snapshot.md" >> .gitignore
+      echo "CLAUDE.local.md" >> .gitignore
     else
       # Add new entries if missing from existing block
       grep -q "\.ai-setup\.json" .gitignore 2>/dev/null || echo ".ai-setup.json" >> .gitignore
       grep -q "\.ai-setup-backup" .gitignore 2>/dev/null || echo ".ai-setup-backup/" >> .gitignore
       grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
       grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.md" >> .gitignore
+      grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
     fi
   else
     echo "# Claude Code / AI Setup" > .gitignore
@@ -230,6 +248,7 @@ update_gitignore() {
     echo ".ai-setup-backup/" >> .gitignore
     echo ".agents/context/.state" >> .gitignore
     echo ".agents/repomix-snapshot.md" >> .gitignore
+    echo "CLAUDE.local.md" >> .gitignore
   fi
 }
 
