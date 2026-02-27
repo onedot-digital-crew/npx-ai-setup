@@ -14,7 +14,15 @@
 set -e
 
 # Package root (one level above bin/)
-SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# Resolve symlinks so npx installs work correctly (macOS-compatible, no readlink -f)
+_SCRIPT="${BASH_SOURCE[0]}"
+while [ -L "$_SCRIPT" ]; do
+  _DIR="$(cd -P "$(dirname "$_SCRIPT")" && pwd)"
+  _SCRIPT="$(readlink "$_SCRIPT")"
+  [[ "$_SCRIPT" != /* ]] && _SCRIPT="$_DIR/$_SCRIPT"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$_SCRIPT")/.." && pwd)"
+unset _SCRIPT _DIR
 TPL="$SCRIPT_DIR/templates"
 
 # Parse flags
