@@ -88,7 +88,7 @@ install_claude_mem() {
     echo "   More info: https://claude-mem.ai"
     echo ""
     read -p "   Install Claude-Mem? (Y/n) " INSTALL_CMEM
-    [[ "$INSTALL_CMEM" =~ ^[Nn]$ ]] && WITH_CLAUDE_MEM="no" || WITH_CLAUDE_MEM="yes"
+    [[ "$INSTALL_CMEM" =~ ^[Nn] ]] && WITH_CLAUDE_MEM="no" || WITH_CLAUDE_MEM="yes"
   fi
 
   if [ "$WITH_CLAUDE_MEM" = "yes" ]; then
