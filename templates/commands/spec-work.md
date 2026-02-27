@@ -29,24 +29,34 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 
 7. **Start work**: Update the spec header — set `**Status**: in-progress`.
 
-8. **Execute each step** in order:
+8. **Output progress checklist**: Before executing, print a checklist of all steps found in the spec:
+   ```
+   Progress — Spec NNN
+   [ ] Step 1: <title>
+   [ ] Step 2: <title>
+   ...
+   ```
+   Check off each item (`[x]`) as you complete it so the user can follow along.
+
+9. **Execute each step** in order:
    - Implement the change
    - After completing a step, edit the spec file to check it off: `- [ ]` -> `- [x]`
+   - Update the printed progress checklist to reflect the completed step
    - If a step is blocked or unclear, stop and ask the user
 
-9. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
+10. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
-10. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
+11. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
     - Find the `## [Unreleased]` heading (it's just below the `<!-- Entries are prepended below this line, newest first -->` comment)
     - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
     - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
-11. **Verify implementation**: Spawn `verify-app` via Task tool with the prompt:
+12. **Verify implementation**: Spawn `verify-app` via Task tool with the prompt:
     > "Verify that the implementation for spec NNN is correct. Check if the project has a test suite and run it. Check if there is a build command and run it. Report PASS or FAIL."
     - If verify-app returns **FAIL**: set status to `in-review`, report the output, and **stop**. Do NOT run code-reviewer. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
     - If verify-app returns **PASS**: continue to the next step.
 
-12. **Auto-review**: Spawn the `code-reviewer` agent via Task tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
+13. **Auto-review**: Spawn the `code-reviewer` agent via Task tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
     - If verdict is **FAIL**: set status to `in-review`. Report the issues. Suggest: `Run /spec-review NNN to review manually.`
     - If verdict is **PASS** or **CONCERNS**: set status to `completed`, move spec file `specs/NNN-*.md` → `specs/completed/NNN-*.md`. Report: "Auto-review passed. Spec NNN completed."
 
@@ -55,4 +65,4 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 - Check off each step in the spec file as you complete it (progress tracking).
 - If a step fails or is blocked, leave it unchecked, set status to `blocked`, and ask the user.
 - Commit after logical groups of changes, not after every single step.
-- If called with `--complete` flag, skip steps 11-12: set status directly to `completed` and move to `specs/completed/` (legacy behavior).
+- If called with `--complete` flag, skip steps 12-13: set status directly to `completed` and move to `specs/completed/` (legacy behavior).
