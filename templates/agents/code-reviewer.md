@@ -4,6 +4,7 @@ description: Reviews code changes for bugs, security vulnerabilities, and spec c
 tools: Read, Glob, Grep, Bash
 model: sonnet
 max_turns: 15
+memory: project
 ---
 
 You are a code reviewer. Your job is to analyze code changes and report issues — do NOT fix them.
