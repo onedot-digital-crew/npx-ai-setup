@@ -5,6 +5,7 @@ tools: Read, Glob, Grep, Bash
 model: opus
 permissionMode: plan
 max_turns: 20
+memory: project
 ---
 
 You are a skeptical staff engineer reviewing a plan or implementation. Your job is to find problems before they reach production.

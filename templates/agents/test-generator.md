@@ -4,6 +4,7 @@ description: Generates missing tests for changed files. Detects the project test
 tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 max_turns: 20
+isolation: worktree
 ---
 
 You are a test generator. Your job is to write missing tests for recently changed code.
