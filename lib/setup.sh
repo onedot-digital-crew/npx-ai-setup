@@ -242,6 +242,26 @@ install_repomix_config() {
   fi
 }
 
+# Install statusline script to ~/.claude/statusline.sh and configure ~/.claude/settings.json
+install_statusline_global() {
+  # Idempotency: skip if statusLine is already configured
+  if [ -f "$HOME/.claude/settings.json" ] && jq -e '.statusLine' "$HOME/.claude/settings.json" >/dev/null 2>&1; then
+    return 0
+  fi
+  mkdir -p "$HOME/.claude"
+  cp "$SCRIPT_DIR/templates/statusline.sh" "$HOME/.claude/statusline.sh"
+  chmod +x "$HOME/.claude/statusline.sh"
+  # Merge statusLine into ~/.claude/settings.json
+  if [ -f "$HOME/.claude/settings.json" ]; then
+    local TMP
+    TMP=$(mktemp)
+    jq --arg cmd "$HOME/.claude/statusline.sh" '.statusLine = {"command": $cmd}' "$HOME/.claude/settings.json" > "$TMP" && mv "$TMP" "$HOME/.claude/settings.json"
+  else
+    printf '{"statusLine":{"command":"%s"}}\n' "$HOME/.claude/statusline.sh" > "$HOME/.claude/settings.json"
+  fi
+  echo "  Statusline installed -> ~/.claude/statusline.sh"
+}
+
 # Generate repomix codebase snapshot in background (once, if not already present)
 generate_repomix_snapshot() {
   if [ -f ".agents/repomix-snapshot.md" ]; then

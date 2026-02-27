@@ -167,6 +167,15 @@ install_context7
 install_playwright
 show_plugin_summary
 
+# Statusline (global, user-level — only in fresh install mode)
+echo ""
+echo "Statusline"
+echo "   ──────────────────────────────────────────────────────────"
+read -p "   Install statusline for Claude Code? (y/N) " INSTALL_STATUSLINE
+if [[ "$INSTALL_STATUSLINE" =~ ^[Yy]$ ]]; then
+  install_statusline_global
+fi
+
 # Auto-Init
 echo ""
 echo "✅ Setup complete!"
