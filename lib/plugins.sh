@@ -163,8 +163,8 @@ install_official_plugins() {
     [ -z "$SELECTED_PLUGINS" ] && SELECTED_PLUGINS="1,2,3,4"
 
     INSTALLED_PLUGINS=""
-    for idx in $(echo "$SELECTED_PLUGINS" | tr ',' ' '); do
-      idx=$(echo "$idx" | tr -d ' ')
+    for idx in ${SELECTED_PLUGINS//,/ }; do
+      idx="${idx// /}"
       [ -z "$idx" ] && continue
       PIDX=$((idx - 1))
       [ $PIDX -lt 0 ] || [ $PIDX -ge ${#OFFICIAL_PLUGINS[@]} ] && continue
@@ -313,7 +313,7 @@ show_installation_summary() {
   [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
   [ -d specs ] && echo "   - specs/ (spec-driven workflow)"
   [ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, bug, grill)"
-  [ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer, context-refresher)"
+  [ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer, context-refresher, code-reviewer, code-architect, perf-reviewer, test-generator)"
 
   if [ "$WITH_GSD" = "yes" ] || [ "$WITH_CLAUDE_MEM" = "yes" ] || [ "$WITH_PLUGINS" = "yes" ] || [ "$WITH_CONTEXT7" = "yes" ] || [ "$WITH_PLAYWRIGHT" = "yes" ]; then
     echo ""

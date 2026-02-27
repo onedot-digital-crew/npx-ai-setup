@@ -8,7 +8,11 @@ Reviews uncommitted changes and reports bugs, security issues, and improvements.
 
 ## Process
 
-1. Run `git diff` and `git diff --staged` to see all pending changes.
+1. Collect all changes:
+   - Run `git diff` (unstaged changes) and `git diff --staged` (staged changes).
+   - Determine the current branch: `git rev-parse --abbrev-ref HEAD`.
+   - If the branch is not `main` or `master`, also run `git diff main...HEAD` to capture branch commits not yet merged.
+   - Combine all output. If all three are empty, report "No changes found." and stop.
 2. For each changed file, read the full file to understand context around the changes.
 3. Analyze each change for:
    - **Bugs**: Logic errors, off-by-one, null/undefined, race conditions

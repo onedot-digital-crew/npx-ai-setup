@@ -571,30 +571,48 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
       echo "  Detected: ${KEYWORDS[*]}"
 
       ALL_SKILLS=""
+      SEARCH_TMPDIR=$(mktemp -d)
+      declare -a SEARCH_PIDS=()
+      declare -a SEARCH_KWS=()
+
       for kw in "${KEYWORDS[@]}"; do
         # Skip keywords with curated skills — installed directly via KEYWORD_SKILLS below
         if [ -n "$(get_keyword_skills "$kw")" ]; then
           printf "  ✅ %-20s (curated)\n" "$kw:"
           continue
         fi
-        printf "  🔍 Searching: %s ..." "$kw"
-        FOUND=$(search_skills "$kw")
-
-        # Retry once on failure
-        if [ -z "$FOUND" ]; then
-          printf " (retrying)"
-          sleep 1
+        printf "  🔍 Searching: %s ...\n" "$kw"
+        SEARCH_KWS+=("$kw")
+        (
           FOUND=$(search_skills "$kw")
-        fi
+          # Retry once on failure
+          if [ -z "$FOUND" ]; then
+            sleep 1
+            FOUND=$(search_skills "$kw")
+          fi
+          echo "$FOUND" > "$SEARCH_TMPDIR/$(printf '%s' "$kw" | tr -cd 'a-zA-Z0-9_-')"
+        ) &
+        SEARCH_PIDS+=($!)
+      done
 
+      # Wait for all parallel searches to complete
+      for pid in "${SEARCH_PIDS[@]}"; do
+        wait "$pid" 2>/dev/null || true
+      done
+
+      # Collect results in keyword order
+      for kw in "${SEARCH_KWS[@]}"; do
+        SAFE_KW=$(printf '%s' "$kw" | tr -cd 'a-zA-Z0-9_-')
+        FOUND=$(cat "$SEARCH_TMPDIR/$SAFE_KW" 2>/dev/null || true)
         if [ -n "$FOUND" ]; then
-          COUNT=$(echo "$FOUND" | wc -l | tr -d ' ')
-          printf "\r  ✅ %-20s %s skills found%*s\n" "$kw:" "$COUNT" 15 ""
+          COUNT=$(printf '%s\n' "$FOUND" | wc -l | tr -d ' ')
+          printf "  ✅ %-20s %s skills found\n" "$kw:" "$COUNT"
           ALL_SKILLS="${ALL_SKILLS}${FOUND}"$'\n'
         else
-          printf "\r  ⚠️  %-20s no skills found%*s\n" "$kw:" 20 ""
+          printf "  ⚠️  %-20s no skills found\n" "$kw:"
         fi
       done
+      rm -rf "$SEARCH_TMPDIR"
 
       # Remove duplicates
       ALL_SKILLS=$(echo "$ALL_SKILLS" | sort -u | sed '/^$/d')
@@ -613,11 +631,14 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
         INSTALLS_DIR=$(mktemp -d)
         while IFS= read -r sid; do
           if [ -n "$sid" ]; then
-            URL_PATH=$(echo "$sid" | sed 's/@/\//')
+            # Cap parallel curl jobs at 8 to avoid overwhelming the server
+            while (( $(jobs -r 2>/dev/null | wc -l) >= 8 )); do sleep 0.1; done
+            URL_PATH="${sid/@//}"
             (
               COUNT=$(curl -s --max-time 5 "https://skills.sh/$URL_PATH" 2>/dev/null \
                 | grep -oE '[0-9]+\.[0-9]+K|[0-9]+K' | head -1)
-              echo "${COUNT:-0}" > "$INSTALLS_DIR/$(echo "$sid" | tr '/' '_')"
+              SAFE_SID="${sid//\//_}"
+              echo "${COUNT:-0}" > "$INSTALLS_DIR/${SAFE_SID//@/_at_}"
             ) &
           fi
         done <<< "$ALL_SKILLS"
@@ -627,7 +648,8 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
         SKILLS_WITH_COUNTS=""
         while IFS= read -r sid; do
           if [ -n "$sid" ]; then
-            SAFE_NAME=$(echo "$sid" | tr '/' '_')
+            SAFE_NAME="${sid//\//_}"
+            SAFE_NAME="${SAFE_NAME//@/_at_}"
             COUNT=$(cat "$INSTALLS_DIR/$SAFE_NAME" 2>/dev/null || echo "0")
             SKILLS_WITH_COUNTS="${SKILLS_WITH_COUNTS}${sid} (${COUNT} weekly installs)"$'\n'
           fi
@@ -677,17 +699,42 @@ Rules:
         fi
 
         if [ -n "$SELECTED" ]; then
-          SELECTED_COUNT=$(echo "$SELECTED" | wc -l | tr -d ' ')
+          SELECTED_COUNT=$(printf '%s\n' "$SELECTED" | wc -l | tr -d ' ')
           echo "  ✨ $SELECTED_COUNT skills selected:"
           echo ""
 
-          # Phase 3: Install selected skills (30s timeout per install)
+          # Phase 3: Install selected skills in parallel (30s timeout per install)
+          INSTALL_TMPDIR=$(mktemp -d)
+          declare -a INSTALL_PIDS=()
+          declare -a INSTALL_IDS=()
           while IFS= read -r skill_id; do
-            skill_id=$(echo "$skill_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            # Trim whitespace via parameter expansion (no subshell)
+            skill_id="${skill_id#"${skill_id%%[! ]*}"}"
+            skill_id="${skill_id%"${skill_id##*[! ]}"}"
             if [ -n "$skill_id" ]; then
-              install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
+              INSTALL_IDS+=("$skill_id")
+              (
+                install_skill "$skill_id"
+                echo $? > "$INSTALL_TMPDIR/$(printf '%s' "$skill_id" | tr -cd 'a-zA-Z0-9_-').exit"
+              ) &
+              INSTALL_PIDS+=($!)
             fi
           done <<< "$SELECTED"
+
+          # Wait for all installs to finish
+          for pid in "${INSTALL_PIDS[@]}"; do
+            wait "$pid" 2>/dev/null || true
+          done
+
+          # Tally results
+          for sid in "${INSTALL_IDS[@]}"; do
+            SAFE_ID=$(printf '%s' "$sid" | tr -cd 'a-zA-Z0-9_-')
+            EXIT_CODE=$(cat "$INSTALL_TMPDIR/${SAFE_ID}.exit" 2>/dev/null || echo "1")
+            if [ "$EXIT_CODE" = "0" ]; then
+              INSTALLED=$((INSTALLED + 1))
+            fi
+          done
+          rm -rf "$INSTALL_TMPDIR"
           echo ""
           if [ $SKIPPED -gt 0 ]; then
             echo "  Total: $INSTALLED installed, $SKIPPED skipped (already present)"
@@ -701,7 +748,9 @@ Rules:
             SKILL_IDS=$(grep -iE "$kw" "$ALL_SKILLS_CACHE" 2>/dev/null | head -3)
             if [ -n "$SKILL_IDS" ]; then
               while IFS= read -r skill_id; do
-                skill_id=$(echo "$skill_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                # Trim whitespace via parameter expansion (no subshell)
+                skill_id="${skill_id#"${skill_id%%[! ]*}"}"
+                skill_id="${skill_id%"${skill_id##*[! ]}"}"
                 if [ -n "$skill_id" ]; then
                   install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
                 fi
@@ -789,9 +838,30 @@ Rules:
     echo ""
     echo "  📦 Installing system-specific skills ($SYSTEM)..."
 
+    # Install system skills in parallel; tally results after all complete
+    SYS_INSTALL_TMPDIR=$(mktemp -d)
+    declare -a SYS_PIDS=()
+
     for skill_id in "${SYSTEM_SKILLS[@]}"; do
-      install_skill "$skill_id" && INSTALLED=$((INSTALLED + 1))
+      (
+        install_skill "$skill_id"
+        echo $? > "$SYS_INSTALL_TMPDIR/$(printf '%s' "$skill_id" | tr -cd 'a-zA-Z0-9_-').exit"
+      ) &
+      SYS_PIDS+=($!)
     done
+
+    for pid in "${SYS_PIDS[@]}"; do
+      wait "$pid" 2>/dev/null || true
+    done
+
+    for skill_id in "${SYSTEM_SKILLS[@]}"; do
+      SAFE_ID=$(printf '%s' "$skill_id" | tr -cd 'a-zA-Z0-9_-')
+      EXIT_CODE=$(cat "$SYS_INSTALL_TMPDIR/${SAFE_ID}.exit" 2>/dev/null || echo "1")
+      if [ "$EXIT_CODE" = "0" ]; then
+        INSTALLED=$((INSTALLED + 1))
+      fi
+    done
+    rm -rf "$SYS_INSTALL_TMPDIR"
   fi
   fi # REGEN_SKILLS
 

@@ -194,7 +194,7 @@ ask_regen_parts() {
 # Returns 1 if the user selected nothing (skip template update).
 ask_update_parts() {
   local options=("Hooks" "Settings" "Commands" "Agents" "Other")
-  local descriptions=(".claude/hooks/ (protect-files, lint, circuit-breaker...)" ".claude/settings.json" ".claude/commands/ (spec, commit, grill, pr...)" ".claude/agents/ (verify-app, build-validator...)" "specs/, github/, CLAUDE.md template")
+  local descriptions=(".claude/hooks/ (protect-files, lint, circuit-breaker...)" ".claude/settings.json" ".claude/commands/ (spec, commit, grill, pr...)" ".claude/agents/ (verify-app, build-validator, code-reviewer, code-architect...)" "specs/, github/, CLAUDE.md template")
   local count=5
   local selected=0
   local checked=(1 1 1 1 1)  # all pre-selected
