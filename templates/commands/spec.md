@@ -1,6 +1,7 @@
 ---
 model: opus
 mode: plan
+argument-hint: "[task description]"
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 

@@ -1,5 +1,7 @@
 ---
 model: sonnet
+disable-model-invocation: true
+argument-hint: "[spec number]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, Task
 ---
 

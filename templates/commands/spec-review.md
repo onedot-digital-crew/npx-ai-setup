@@ -1,6 +1,7 @@
 ---
 model: opus
 mode: plan
+argument-hint: "[spec number]"
 allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Task
 ---
 
