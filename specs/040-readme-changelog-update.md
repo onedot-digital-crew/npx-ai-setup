@@ -10,12 +10,12 @@ README lists 13 commands (actual: 15), 4 agents (actual: 8), 3 hooks (actual: 6)
 
 ## Steps
 - [x] Step 1: Update README.md commands section — change count to 15, add `/analyze` and `/context-full` to table
-- [ ] Step 2: Update README.md agents section — change count to 8, add code-reviewer, code-architect, perf-reviewer, test-generator to table
-- [ ] Step 3: Update README.md hooks section — change count to 6, add context-freshness, update-check, notify to table
-- [ ] Step 4: Update README.md file structure tree — add missing files (new agents, hooks, commands)
+- [x] Step 2: Update README.md agents section — change count to 8, add code-reviewer, code-architect, perf-reviewer, test-generator to table
+- [x] Step 3: Update README.md hooks section — change count to 6, add context-freshness, update-check, notify to table
+- [x] Step 4: Update README.md file structure tree — add missing files (new agents, hooks, commands)
 - [ ] Step 5: Compact README overall — tighten verbose sections, remove redundancy, ensure nothing exceeds what's needed
-- [ ] Step 6: Compact CHANGELOG.md [Unreleased] entries — shorten each spec entry to one concise line
-- [ ] Step 7: Extend `templates/commands/release.md` Step 3 — validate agent count and hook count alongside command count
+- [x] Step 6: Compact CHANGELOG.md [Unreleased] entries — shorten each spec entry to one concise line
+- [x] Step 7: Extend `templates/commands/release.md` Step 3 — validate agent count and hook count alongside command count
 
 ## Acceptance Criteria
 - [ ] README command/agent/hook counts match actual template files

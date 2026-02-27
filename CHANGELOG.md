@@ -10,16 +10,17 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- **Spec 039**: Claude-Mem as team standard — changes install prompt default from N to Y, adds `<claude-mem-context>` placeholder to CLAUDE.md template, documents claude-mem as required plugin, upgrades skip to a warning
-- **Spec 038**: Global Definition of Done and ignore patterns — adds auto-generated DoD section to CONVENTIONS.md, adds build-artifact deny rules to settings.json, adds Critical Rule to CLAUDE.md, and extends /spec-review to validate against global DoD
-- **Spec 037**: Align with official Claude Code best practices — renames all skill templates from `prompt.md` to `SKILL.md` with `name`/`description` frontmatter, adds `disable-model-invocation` to destructive commands, adds `argument-hint` to parameterized commands, enriches `settings.json` with `$schema`/`respectGitignore`/`attribution`, and replaces macOS-only notification hook with cross-platform `notify.sh`
-- **Spec 036**: Bash performance optimizations — parallelizes skills keyword search and installation loops, adds 8-job curl pool cap, replaces echo|sed/tr subshells with parameter expansion for 100+ second runtime reduction
-- **Spec 035**: Add /analyze command — 3 parallel Explore agents (architecture, hotspots, risks) synthesize into a structured codebase overview report; auto-installed via existing templates/commands/ discovery
-- **Spec 034**: Multi-agent verification for /bug — automatically spawns verify-app after every fix and code-reviewer if verification passes, replacing manual "run tests" instructions
-- **Spec 033**: Integrate build-validator into /pr pipeline and extend /review to include branch commits — /pr now fails fast on broken builds before staff review; /review covers git diff main...HEAD on feature branches
-- **Spec 032**: Local skill templates for common frameworks — bundles tailwind, pinia, drizzle, tanstack, vitest as local templates so the slow npx skills.sh search is skipped and "no skills found" warnings are eliminated
-- **Spec 031**: Fix CLAUDE.md generation timeout — increases timeout from 120s to 180s and shows "timed out" message instead of misleading "check authentication" when exit code is 143
-- **Spec 030**: Add context file check and granular regeneration to update flow — smart update now detects missing `.agents/context/` files, warns the user, and uses `ask_regen_parts` for granular regeneration control instead of a binary y/N prompt
+- **Spec 040**: README & CHANGELOG sync — update command/agent/hook counts and tables, compact verbose sections, extend /release to validate all counts
+- **Spec 039**: Claude-Mem as team standard — default Y for install, adds `<claude-mem-context>` placeholder to CLAUDE.md, documents as required plugin
+- **Spec 038**: Global Definition of Done — auto-generates DoD in CONVENTIONS.md, build-artifact deny rules in settings.json and CLAUDE.md, /spec-review validates against DoD
+- **Spec 037**: Claude Code best practice alignment — SKILL.md frontmatter, disable-model-invocation/argument-hint, enriched settings.json, cross-platform notify.sh
+- **Spec 036**: Bash performance — parallel skills search/install, 8-job curl pool, parameter expansion (100+ second runtime reduction)
+- **Spec 035**: /analyze command — 3 parallel Explore agents produce architecture/hotspots/risks overview
+- **Spec 034**: /bug multi-agent verification — verify-app auto-runs after fix, code-reviewer after verification passes
+- **Spec 033**: /pr + /review improvements — build-validator in /pr pipeline, /review covers full branch diff
+- **Spec 032**: Local skill templates — bundles tailwind, pinia, drizzle, tanstack, vitest; skips slow skills.sh search
+- **Spec 031**: CLAUDE.md generation timeout fix — 120s→180s, correct "timed out" error message
+- **Spec 030**: Granular update regeneration — missing context detection, checkbox UI instead of binary prompt
 
 ## [v1.1.6] — 2026-02-24
 

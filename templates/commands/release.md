@@ -21,10 +21,11 @@ Cut a release: bump version, format CHANGELOG, commit, and tag.
      - **major** (1.1.4 → 2.0.0): breaking changes
    - Calculate the new version from the current one
 
-3. **Check README command count**
-   - Count files in `.claude/commands/` with `ls .claude/commands/*.md 2>/dev/null | wc -l`
-   - Check the number stated in `README.md` ("12 commands", "13 commands", etc.)
-   - If they differ, report the discrepancy and ask user to confirm proceeding anyway or fix first
+3. **Check README counts**
+   - Commands: `ls .claude/commands/*.md 2>/dev/null | wc -l` — compare to stated count in README ("15 commands", etc.)
+   - Agents: `ls .claude/agents/*.md 2>/dev/null | wc -l` — compare to stated count in README ("8 agents", etc.)
+   - Hooks: `ls .claude/hooks/*.sh 2>/dev/null | wc -l` — compare to stated count in README ("6 hooks", etc.)
+   - If any count differs, report all discrepancies and ask user to fix README before proceeding
 
 4. **Update package.json**
    - Replace `"version": "X.Y.Z"` with the new version

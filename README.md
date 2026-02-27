@@ -129,7 +129,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 | `/analyze` | Sonnet 4.6 | 3 parallel agents — architecture overview, hotspots, risks |
 | `/context-full` | Sonnet 4.6 | Full codebase snapshot via repomix for context loading |
 
-### 3. Subagent Templates (4 agents)
+### 3. Subagent Templates (8 agents)
 
 Subagents run as isolated agents for parallel or specialized work:
 
@@ -138,9 +138,11 @@ Subagents run as isolated agents for parallel or specialized work:
 | `verify-app` | Sonnet 4.6 | Validate functionality — tests, build, edge cases |
 | `build-validator` | Haiku | Quick build verification — pass/fail with output |
 | `staff-reviewer` | Opus (plan mode) | Skeptical staff engineer review of plans/implementations |
-| `context-refresher` | Sonnet 4.6 | Regenerate `.agents/context/` when project config changes |
-
-`context-refresher` is invoked automatically when the `context-freshness` hook detects stale context (`[CONTEXT STALE]` signal). Claude invokes it as a subagent before proceeding with the task.
+| `context-refresher` | Sonnet 4.6 | Regenerate `.agents/context/` on `[CONTEXT STALE]` signal |
+| `code-reviewer` | Sonnet 4.6 | Code review with HIGH/MEDIUM confidence — PASS/CONCERNS/FAIL verdict |
+| `code-architect` | Opus (plan mode) | Architectural assessment before implementation — PROCEED/REDESIGN verdict |
+| `perf-reviewer` | Sonnet 4.6 | Performance review — FAST/CONCERNS/SLOW verdict |
+| `test-generator` | Sonnet 4.6 | Generates missing tests for recently changed files |
 
 ### 4. Spec-driven workflow
 
@@ -202,24 +204,11 @@ Or just run `npx @onedot/ai-setup` again — if already up to date, you'll get a
 
 ### 5. AI-curated Skills installation
 
-Skills are automatically detected, curated, and installed in 4 phases:
+Reads `package.json`, searches [skills.sh](https://skills.sh) for matching skills, fetches install counts, and uses Claude Haiku to select the top 5 most relevant. All skill IDs are pre-validated — invalid skills are skipped with a warning. Fallback: top 3 per technology if Claude is unavailable.
 
-**Phase 1 — Detect & Search** (bash, 30s timeout per search)
-Reads `package.json` dependencies, maps them to technology keywords, and searches for available skills.
+Supported: Vue, Nuxt, React, Next.js, Svelte, Astro, Tailwind, TypeScript, Express, NestJS, Shopify, Angular, Prisma, Drizzle, Supabase, Firebase, Vitest, Playwright, Pinia, TanStack, Zustand and more.
 
-Supported technologies: Vue, Nuxt, Nuxt UI, React, Next.js, Svelte, Astro, Tailwind, Shadcn, Radix, Headless UI, TypeScript, Express, NestJS, Hono, Shopify, Angular, Prisma, Drizzle, Supabase, Firebase, Vitest, Playwright, Pinia, TanStack, Zustand
-
-**Phase 2 — Fetch Install Counts** (parallel curl, ~1s)
-Fetches weekly install counts from [skills.sh](https://skills.sh) for all found skills in parallel.
-
-**Phase 3 — AI Curation** (Claude Haiku, 1 turn, 60s timeout)
-Claude selects the top 5 most relevant skills based on install counts, maintainer reputation, and tech stack fit.
-
-**Phase 4 — Install** (bash, live output)
-Selected skills are installed with live status updates.
-
-**Phase 5 — System-specific Skills** (always installed for known systems)
-Default skills per system (all verified on skills.sh):
+**System-specific defaults** (always installed):
 
 | System | Skills |
 |--------|--------|
@@ -230,17 +219,17 @@ Default skills per system (all verified on skills.sh):
 | **Shopware** | `bartundmett/skills@shopware6-best-practices` |
 | **Storyblok** | `bartundmett/skills@storyblok-best-practices` |
 
-All skill IDs are pre-validated against the skills.sh registry before install — invalid skills are skipped with a warning instead of failing.
-
-**Fallback**: If Claude is unavailable or times out, top 3 per technology are installed without AI curation.
 
 ### 6. Hooks (active after setup)
 
-| Hook                   | Trigger           | What it does                                                     |
-| ---------------------- | ----------------- | ---------------------------------------------------------------- |
-| **protect-files.sh**   | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/`           |
-| **post-edit-lint.sh**  | After Edit/Write  | Auto-runs `eslint --fix` on .js/.ts/.jsx/.tsx, Prettier on .css/.html/.json/.md/.vue/.svelte |
-| **circuit-breaker.sh** | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min |
+| Hook                      | Trigger           | What it does                                                              |
+| ------------------------- | ----------------- | ------------------------------------------------------------------------- |
+| **protect-files.sh**      | Before Edit/Write | Blocks changes to `.env`, `package-lock.json`, `.git/`                    |
+| **post-edit-lint.sh**     | After Edit/Write  | Auto-runs `eslint --fix` on .js/.ts/.jsx/.tsx, Prettier on other web files |
+| **circuit-breaker.sh**    | Before Edit/Write | Warns at 5x edits, blocks at 8x edits to same file within 10 min         |
+| **context-freshness.sh**  | UserPromptSubmit  | Warns when `.agents/context/` may be outdated; triggers context-refresher  |
+| **update-check.sh**       | UserPromptSubmit  | Notifies when a new ai-setup version is available; resets circuit breaker  |
+| **notify.sh**             | Notification      | Cross-platform notifications (macOS/Linux) for Claude Code events          |
 
 ### 7. Permissions
 
@@ -264,7 +253,7 @@ project/
 |       +-- CONVENTIONS.md       # Coding conventions
 +-- .claude/
 |   +-- settings.json            # Permissions + Hooks + Plugin config
-|   +-- commands/                # Slash commands
+|   +-- commands/                # Slash commands (15)
 |   |   +-- spec.md              # /spec — create specs (Opus)
 |   |   +-- spec-work.md         # /spec-work — execute specs (Sonnet)
 |   |   +-- spec-work-all.md     # /spec-work-all — parallel execute via Git worktrees
@@ -278,17 +267,24 @@ project/
 |   |   +-- techdebt.md          # /techdebt — debt sweep
 |   |   +-- bug.md               # /bug — bug investigation (Sonnet)
 |   |   +-- grill.md             # /grill — adversarial review (Opus)
-|   +-- agents/                  # Subagent templates
+|   |   +-- analyze.md           # /analyze — parallel codebase overview
+|   |   +-- context-full.md      # /context-full — repomix snapshot
+|   +-- agents/                  # Subagent templates (8)
 |   |   +-- verify-app.md        # App functionality validation
 |   |   +-- build-validator.md   # Build success check
 |   |   +-- staff-reviewer.md    # Skeptical staff engineer
 |   |   +-- context-refresher.md # Regenerates .agents/context/ on [CONTEXT STALE]
+|   |   +-- code-reviewer.md     # Code review — PASS/CONCERNS/FAIL
+|   |   +-- code-architect.md    # Architectural assessment — PROCEED/REDESIGN
+|   |   +-- perf-reviewer.md     # Performance review — FAST/CONCERNS/SLOW
+|   |   +-- test-generator.md    # Generates missing tests
 |   +-- hooks/
 |       +-- protect-files.sh     # Protects .env, package-lock.json, .git/
 |       +-- post-edit-lint.sh    # ESLint + Prettier after Edit
 |       +-- circuit-breaker.sh   # Detects edit loops
 |       +-- context-freshness.sh # Stale context warning
-|       +-- update-check.sh     # ai-setup version update notification
+|       +-- update-check.sh      # ai-setup version update notification
+|       +-- notify.sh            # Cross-platform notifications
 +-- .github/
 |   +-- copilot-instructions.md
 +-- specs/                         # Spec-driven development
@@ -462,8 +458,6 @@ Adds to `.mcp.json`:
 
 [GSD (Get Shit Done)](https://github.com/get-shit-done-cc/get-shit-done-cc) is a workflow engine for structured AI development. It adds phase planning, codebase mapping, session management, and file-based state.
 
-### Install
-
 ```bash
 # During ai-setup
 npx github:onedot-digital-crew/npx-ai-setup --with-gsd
@@ -472,63 +466,23 @@ npx github:onedot-digital-crew/npx-ai-setup --with-gsd
 npx get-shit-done-cc@latest --claude --global
 ```
 
-### Core Workflow
-
-1. `/gsd:new-project` — Initialize project, tech stack, and roadmap
-2. `/gsd:discuss-phase N` — Clarify requirements before planning
-3. `/gsd:plan-phase N` — Create step-by-step plan
-4. `/gsd:execute-phase N` — Write code & commit atomically
-5. `/gsd:verify-work N` — User acceptance testing
-
-### Quick Mode
-
-`/gsd:quick "task"` — Fast fix for isolated, small tasks (CSS, typos, config).
-
-### GSD File Structure (when installed)
+### Commands
 
 ```
-.planning/                     # GSD State
-+-- PROJECT.md                 # Project context
-+-- ROADMAP.md                 # Phase structure
-+-- STATE.md                   # Project memory
-+-- codebase/                  # Created by /gsd:map-codebase
-    +-- ARCHITECTURE.md        # Deep architecture analysis
-    +-- STRUCTURE.md           # Directory breakdown
-    +-- CONVENTIONS.md         # Coding standards
-    +-- STACK.md               # Full tech stack
-    +-- INTEGRATIONS.md        # External services
-    +-- TESTING.md             # Test patterns
-    +-- CONCERNS.md            # Tech debt & issues
-
-~/.claude/                     # GSD Global
-+-- commands/gsd/              # 29 slash commands
-+-- agents/                    # GSD sub-agents
-+-- skills/gsd/                # GSD Companion Skill
-```
-
-### GSD Cheat Sheet
-
-```
-Core Loop:
-  /gsd:discuss-phase N      Clarify requirements before planning
-  /gsd:plan-phase N         Create step-by-step plan
-  /gsd:execute-phase N      Write code & commit atomically
-  /gsd:verify-work N        User acceptance testing
-
-Quick Tasks:
-  /gsd:quick "task"          Fast fix (typos, CSS, config)
-  /gsd:debug                Systematic debugging
-
-Session Management:
-  /gsd:pause-work           Save context for later
-  /gsd:resume-work          Restore previous session
-  /gsd:progress             Status & next action
-
-Roadmap:
-  /gsd:add-phase            Add phase to roadmap
-  /gsd:insert-phase         Insert urgent work (e.g. 3.1)
-  /gsd:add-todo             Capture idea as todo
-  /gsd:check-todos          Show open todos
+/gsd:new-project          Initialize project, tech stack, and roadmap
+/gsd:discuss-phase N      Clarify requirements before planning
+/gsd:plan-phase N         Create step-by-step plan
+/gsd:execute-phase N      Write code & commit atomically
+/gsd:verify-work N        User acceptance testing
+/gsd:quick "task"         Fast fix (typos, CSS, config)
+/gsd:debug                Systematic debugging
+/gsd:pause-work           Save context for later
+/gsd:resume-work          Restore previous session
+/gsd:progress             Status & next action
+/gsd:add-phase            Add phase to roadmap
+/gsd:insert-phase         Insert urgent work (e.g. 3.1)
+/gsd:add-todo             Capture idea as todo
+/gsd:check-todos          Show open todos
 ```
 
 ---
