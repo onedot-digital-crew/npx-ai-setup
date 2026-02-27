@@ -105,7 +105,7 @@ CLAUDE.md                      = Rules (Communication Protocol, Commands, Critic
 
 - Copies `CLAUDE.md` with communication protocol, project documentation references, task complexity routing (simple/medium/complex with model guidance), and dual-condition verification gate
 - Sets up `.claude/settings.json` with granular bash permissions (no `Bash(*)`)
-- Installs hooks: auto-lint on edit, file protection (.env, package-lock.json), circuit breaker (detects edit loops), update-check (notifies when a new ai-setup version is available)
+- Installs 6 hooks: auto-lint on edit, file protection (.env, package-lock.json), circuit breaker, context freshness check, update-check, cross-platform notifications
 - Adds `.github/copilot-instructions.md` for GitHub Copilot context
 - Cleans up legacy AI structures (.ai/, .skillkit/, old skills)
 

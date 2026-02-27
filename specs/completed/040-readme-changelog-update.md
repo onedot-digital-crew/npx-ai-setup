@@ -1,6 +1,6 @@
 # Spec: README & CHANGELOG Update + Release Validation
 
-> **Spec ID**: 040 | **Created**: 2026-02-27 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 040 | **Created**: 2026-02-27 | **Status**: completed | **Branch**: —
 
 ## Goal
 Bring README.md in sync with actual features, compact CHANGELOG entries, and extend /release to validate README counts automatically.
@@ -13,15 +13,15 @@ README lists 13 commands (actual: 15), 4 agents (actual: 8), 3 hooks (actual: 6)
 - [x] Step 2: Update README.md agents section — change count to 8, add code-reviewer, code-architect, perf-reviewer, test-generator to table
 - [x] Step 3: Update README.md hooks section — change count to 6, add context-freshness, update-check, notify to table
 - [x] Step 4: Update README.md file structure tree — add missing files (new agents, hooks, commands)
-- [ ] Step 5: Compact README overall — tighten verbose sections, remove redundancy, ensure nothing exceeds what's needed
+- [x] Step 5: Compact README overall — tighten verbose sections, remove redundancy, ensure nothing exceeds what's needed
 - [x] Step 6: Compact CHANGELOG.md [Unreleased] entries — shorten each spec entry to one concise line
 - [x] Step 7: Extend `templates/commands/release.md` Step 3 — validate agent count and hook count alongside command count
 
 ## Acceptance Criteria
-- [ ] README command/agent/hook counts match actual template files
-- [ ] CHANGELOG [Unreleased] entries are each one concise line
-- [ ] `/release` validates commands, agents, and hooks counts before proceeding
-- [ ] `npm test` passes (smoke tests)
+- [x] README command/agent/hook counts match actual template files
+- [x] CHANGELOG [Unreleased] entries are each one concise line
+- [x] `/release` validates commands, agents, and hooks counts before proceeding
+- [x] `npm test` passes (smoke tests)
 
 ## Files to Modify
 - `README.md` — update counts, tables, file structure, compact
