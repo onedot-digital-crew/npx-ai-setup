@@ -302,9 +302,8 @@ show_installation_summary() {
   echo ""
   echo "🎉 AI Setup complete! Your project is ready for AI-assisted development."
   echo ""
-  echo "================================================================"
-  echo "INSTALLATION SUMMARY"
-  echo "================================================================"
+  echo "📦 Installation Summary"
+  echo "   ──────────────────────────────────────────────────────────"
   echo ""
   echo "✅ Files created:"
   [ -f CLAUDE.md ] && echo "   - CLAUDE.md (project rules)"
@@ -354,9 +353,8 @@ show_installation_summary() {
 # Show next steps and cheat sheet
 show_next_steps() {
   echo ""
-  echo "================================================================"
-  echo "NEXT STEPS"
-  echo "================================================================"
+  echo "🎯 Next Steps"
+  echo "   ──────────────────────────────────────────────────────────"
   echo ""
   if [ "$WITH_GSD" = "yes" ]; then
     if [ "$AI_CLI" = "claude" ]; then
@@ -390,9 +388,8 @@ show_next_steps() {
 
   if [ "$WITH_GSD" = "yes" ]; then
     echo ""
-    echo "================================================================"
-    echo "GSD WORKFLOW CHEAT SHEET"
-    echo "================================================================"
+    echo "📋 GSD Workflow Cheat Sheet"
+    echo "   ──────────────────────────────────────────────────────────"
     echo ""
     echo "  Core Loop:"
     echo "  /gsd:discuss-phase N      Clarify requirements before planning"
@@ -417,9 +414,8 @@ show_next_steps() {
   fi
 
   echo ""
-  echo "================================================================"
-  echo "LINKS"
-  echo "================================================================"
+  echo "🔗 Links"
+  echo "   ──────────────────────────────────────────────────────────"
   echo ""
   echo "  Skills:   https://skills.sh/"
   [ "$WITH_GSD" = "yes" ] && echo "  GSD:      https://github.com/get-shit-done-cc/get-shit-done-cc"
@@ -427,5 +423,4 @@ show_next_steps() {
   echo "  Claude:   https://docs.anthropic.com/en/docs/claude-code"
   echo "  Hooks:    https://docs.anthropic.com/en/docs/claude-code/hooks"
   echo ""
-  echo "================================================================"
 }

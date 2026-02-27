@@ -1,6 +1,6 @@
 # Spec: Integrate Orphaned Agent Templates into Pipelines
 
-> **Spec ID**: 033 | **Created**: 2026-02-26 | **Status**: in-review | **Branch**: spec/033-integrate-orphaned-agents
+> **Spec ID**: 033 | **Created**: 2026-02-26 | **Status**: completed | **Branch**: spec/033-integrate-orphaned-agents
 
 ## Goal
 Wire build-validator into the PR pipeline and expand /review to cover branch commits.

@@ -1,6 +1,6 @@
 # Spec: /analyze Command with Parallel Codebase Exploration
 
-> **Spec ID**: 035 | **Created**: 2026-02-27 | **Status**: in-review | **Branch**: spec/035-analyze-command-parallel-exploration
+> **Spec ID**: 035 | **Created**: 2026-02-27 | **Status**: completed | **Branch**: spec/035-analyze-command-parallel-exploration
 
 ## Goal
 Add an /analyze command that uses 3 parallel Explore agents to produce a structured codebase overview in minutes instead of hours.

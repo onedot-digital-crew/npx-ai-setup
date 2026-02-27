@@ -74,6 +74,8 @@ For each completed subagent, using the branch and worktree path from the Task re
 4. Prepend CHANGELOG entry under `## [Unreleased]`:
    - Add: `- **Spec NNN**: [Title] — [1-sentence summary]`
    - Insert after the `## [Unreleased]` heading
+5. Remove the worktree (branch is preserved for `/spec-review`):
+   `git worktree remove --force <worktree-path-from-task-result>`
 
 **Wave 2+**: After each wave completes, launch the next wave of specs that are now unblocked.
 

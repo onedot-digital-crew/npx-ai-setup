@@ -206,6 +206,7 @@ install_agents() {
 
 # Update .gitignore with AI setup entries
 update_gitignore() {
+  echo "🚫 Updating .gitignore..."
   if [ -f .gitignore ]; then
     if ! grep -q "claude/settings.local" .gitignore 2>/dev/null; then
       echo "" >> .gitignore
