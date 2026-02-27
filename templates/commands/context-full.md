@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Bash, Read
 ---
 
-Generate a compressed full-codebase snapshot using repomix.
+Generates a compressed full-codebase snapshot via repomix. Use before large refactors or architecture reviews.
 
 ## Steps
 

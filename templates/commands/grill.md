@@ -4,7 +4,7 @@ mode: plan
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-Adversarial code review. Do NOT approve until every issue is resolved.
+Runs an adversarial code review blocking approval until all issues are resolved. Use before merging high-risk changes.
 
 ## Process
 

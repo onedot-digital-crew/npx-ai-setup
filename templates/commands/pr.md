@@ -4,7 +4,7 @@ disable-model-invocation: true
 allowed-tools: Read, Bash, Glob, Grep, Task
 ---
 
-Prepare a pull request for the current branch.
+Drafts a pull request with staff review and PR body. Use when a feature branch is ready to be submitted for review.
 
 ## Process
 

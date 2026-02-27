@@ -4,7 +4,7 @@ mode: plan
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-Review all uncommitted changes and suggest improvements.
+Reviews uncommitted changes and reports bugs, security issues, and improvements. Use before committing to catch issues.
 
 ## Process
 

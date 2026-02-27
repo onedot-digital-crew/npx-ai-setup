@@ -5,7 +5,7 @@ argument-hint: "[spec number]"
 allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Task
 ---
 
-Review a completed spec and its code changes: $ARGUMENTS
+Reviews spec $ARGUMENTS and its code changes against acceptance criteria. Use after spec-work to validate and close.
 
 ## Process
 

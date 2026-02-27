@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Glob, Grep, Bash, Task
 ---
 
-Produce a structured codebase overview using 3 parallel exploration agents.
+Produces a structured codebase overview via 3 parallel agents. Use when exploring or preparing for major changes.
 
 ## Process
 

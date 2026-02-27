@@ -4,7 +4,7 @@ argument-hint: "[bug description]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
-Investigate and fix the following bug: $ARGUMENTS
+Investigates and fixes bug: $ARGUMENTS. Use when a defect needs root-cause analysis and a minimal targeted fix.
 
 ## Process
 

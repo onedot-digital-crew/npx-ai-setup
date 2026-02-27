@@ -4,7 +4,7 @@ disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
-Cut a release: bump version, format CHANGELOG, commit, and tag.
+Bumps version, updates CHANGELOG, commits, and tags the release. Use when shipping a new version.
 
 ## Process
 

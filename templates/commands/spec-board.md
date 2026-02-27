@@ -4,7 +4,7 @@ mode: plan
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
-Show a Kanban-style board of all specs with status and progress.
+Displays a Kanban board of all specs with status and step progress. Use for an overview of the current spec pipeline.
 
 ## Process
 

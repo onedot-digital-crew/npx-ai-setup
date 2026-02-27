@@ -4,7 +4,7 @@ disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
-Execute all draft specs in `specs/` using parallel subagents with native worktree isolation.
+Executes all draft specs in parallel using isolated worktrees. Use to batch-implement multiple independent specs.
 
 ## Process
 

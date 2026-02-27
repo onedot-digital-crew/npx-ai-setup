@@ -5,7 +5,7 @@ argument-hint: "[task description]"
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 
-Create a structured spec for the following task: $ARGUMENTS
+Creates a structured spec for the task: $ARGUMENTS. Use before implementing any multi-file or architectural change.
 
 ## Phase 1 — Challenge & Think Through
 

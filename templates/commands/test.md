@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-Run the project's test suite and fix any failures.
+Runs the project test suite and fixes failures in source code. Use when tests are failing or before submitting changes.
 
 ## Process
 
