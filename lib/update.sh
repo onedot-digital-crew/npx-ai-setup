@@ -13,19 +13,37 @@ handle_version_check() {
     echo ""
     echo "✅ Already up to date (v${PACKAGE_VERSION})."
     echo ""
-    if command -v claude &>/dev/null; then
-      if ask_regen_parts; then
-        if [ -z "$SYSTEM" ]; then
-          select_system
+    echo "   1) Update files  — review template files, ask about user-modified ones"
+    echo "   2) Regenerate    — regenerate CLAUDE.md, context, commands, skills"
+    echo "   3) Skip          — exit without changes"
+    echo ""
+    read -p "   Choose [1/2/3]: " UPTODATE_CHOICE
+
+    case "$UPTODATE_CHOICE" in
+      1)
+        run_smart_update
+        exit 0
+        ;;
+      2)
+        if command -v claude &>/dev/null; then
+          if ask_regen_parts; then
+            if [ -z "$SYSTEM" ]; then
+              select_system
+            fi
+            detect_system
+            run_generation
+            write_metadata
+            echo ""
+            echo "✅ Regeneration complete!"
+          fi
         fi
-        detect_system
-        run_generation
-        write_metadata
-        echo ""
-        echo "✅ Regeneration complete!"
-      fi
-    fi
-    exit 0
+        exit 0
+        ;;
+      *)
+        echo "   Skipped. No changes made."
+        exit 0
+        ;;
+    esac
 
   elif [ -n "$INSTALLED_VERSION" ]; then
     # Different version — offer update options
