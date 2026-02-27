@@ -1,6 +1,6 @@
 ---
 model: sonnet
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
 ---
 
 End-of-session technical debt sweep.
