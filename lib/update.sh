@@ -21,7 +21,7 @@ handle_version_check() {
 
     case "$UPTODATE_CHOICE" in
       1)
-        run_smart_update
+        run_smart_update --skip-regen
         exit 0
         ;;
       2)
@@ -74,7 +74,10 @@ handle_version_check() {
 }
 
 # Smart update: checksum diffing, selective category update, backup user-modified files
+# Usage: run_smart_update [--skip-regen]
 run_smart_update() {
+  local skip_regen=0
+  [ "${1:-}" = "--skip-regen" ] && skip_regen=1
   echo ""
   echo "🔍 Analyzing templates..."
   echo ""
@@ -201,8 +204,8 @@ run_smart_update() {
   # Update metadata
   write_metadata
 
-  # Check context files and offer AI regeneration
-  if command -v claude &>/dev/null; then
+  # Check context files and offer AI regeneration (skipped when called from same-version menu)
+  if [ "$skip_regen" -eq 0 ] && command -v claude &>/dev/null; then
     echo ""
     # Count existing .agents/context/ files (Steps 1-2)
     CTX_EXISTING=0
