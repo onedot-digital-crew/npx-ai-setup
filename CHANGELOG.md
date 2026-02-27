@@ -13,6 +13,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [v1.2.0] — 2026-02-27
 
+- **Update UX**: per-file [y/N] prompt before overwriting user-modified files; Update files option available without version change
 - **Spec 043**: Self-Improvement Reflect System — new /reflect command detects session corrections and writes them as permanent CLAUDE.md/CONVENTIONS.md rules with user approval
 - **Spec 042**: Feedback Loop Patterns — techdebt.md now verifies changes via verify-app, spec-work.md has progress checklist, test.md has explicit attempt tracking
 - **Spec 041**: Skill Descriptions Best Practices — all 15 command descriptions now follow "what + when" format in third person, under 120 chars
