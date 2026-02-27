@@ -262,3 +262,19 @@ ask_update_parts() {
   fi
   return 0
 }
+
+# ==============================================================================
+# OVERWRITE CONFIRMATION
+# ==============================================================================
+# Prompts user to confirm overwriting a user-modified file.
+# Returns 0 if user confirms overwrite, 1 to keep user's version.
+ask_overwrite_modified() {
+  local file="$1"
+  printf "  ⚠️  %s (user-modified) — Overwrite with template? [y/N]: " "$file"
+  local answer
+  IFS= read -r answer </dev/tty
+  case "${answer,,}" in
+    y|yes) return 0 ;;
+    *)     return 1 ;;
+  esac
+}

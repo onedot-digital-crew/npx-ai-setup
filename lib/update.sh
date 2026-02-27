@@ -102,12 +102,18 @@ run_smart_update() {
     stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
 
     if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
-      # User modified — backup first
-      bp=$(backup_file "$target")
-      cp "$SCRIPT_DIR/$tpl" "$target"
-      [[ "$target" == *.sh ]] && chmod +x "$target"
-      echo "  ⚠️  $target (user-modified — backed up to $bp)"
-      UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+      # User modified — ask before overwriting
+      if ask_overwrite_modified "$target"; then
+        bp=$(backup_file "$target")
+        cp "$SCRIPT_DIR/$tpl" "$target"
+        [[ "$target" == *.sh ]] && chmod +x "$target"
+        echo "  ✅ $target (updated — backed up to $bp)"
+        UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+      else
+        echo "  ⏭️  $target (kept — user version preserved)"
+        UPD_SKIPPED=$((UPD_SKIPPED + 1))
+        continue
+      fi
     else
       # Not modified by user — silent update
       cp "$SCRIPT_DIR/$tpl" "$target"
@@ -141,10 +147,17 @@ run_smart_update() {
       fi
       stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
       if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
-        bp=$(backup_file "$target")
-        cp "$SCRIPT_DIR/$tpl" "$target"
-        echo "  ⚠️  $target (user-modified — backed up to $bp)"
-        UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+        # User modified — ask before overwriting
+        if ask_overwrite_modified "$target"; then
+          bp=$(backup_file "$target")
+          cp "$SCRIPT_DIR/$tpl" "$target"
+          echo "  ✅ $target (updated — backed up to $bp)"
+          UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+        else
+          echo "  ⏭️  $target (kept — user version preserved)"
+          UPD_SKIPPED=$((UPD_SKIPPED + 1))
+          continue
+        fi
       else
         cp "$SCRIPT_DIR/$tpl" "$target"
         echo "  ✅ $target (updated)"
