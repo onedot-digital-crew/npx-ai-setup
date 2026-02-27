@@ -144,6 +144,7 @@ install_agents
 echo "📋 Writing installation metadata..."
 write_metadata
 update_gitignore
+generate_repomix_snapshot
 
 # Plugins & extensions
 echo ""

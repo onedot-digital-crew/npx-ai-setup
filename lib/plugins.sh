@@ -87,8 +87,8 @@ install_claude_mem() {
     echo "   Every decision, bug fix, and architectural choice — remembered automatically."
     echo "   More info: https://claude-mem.ai"
     echo ""
-    read -p "   Install Claude-Mem? (y/N) " INSTALL_CMEM
-    [[ "$INSTALL_CMEM" =~ ^[Yy]$ ]] && WITH_CLAUDE_MEM="yes" || WITH_CLAUDE_MEM="no"
+    read -p "   Install Claude-Mem? (Y/n) " INSTALL_CMEM
+    [[ "$INSTALL_CMEM" =~ ^[Nn] ]] && WITH_CLAUDE_MEM="no" || WITH_CLAUDE_MEM="yes"
   fi
 
   if [ "$WITH_CLAUDE_MEM" = "yes" ]; then
@@ -127,7 +127,7 @@ install_claude_mem() {
       fi
     fi
   else
-    echo "⏭️  Claude-Mem skipped."
+    echo "⚠️  Claude-Mem skipped — team members will lack persistent memory. Re-run with --with-claude-mem to install."
   fi
 }
 

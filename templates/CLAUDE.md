@@ -1,5 +1,15 @@
 # CLAUDE.md
 
+## Required Plugins
+
+**claude-mem** — persistent memory across sessions (required for all team members).
+
+If not installed: run these two commands in Claude Code:
+```
+/plugin marketplace add thedotmack/claude-mem
+/plugin install claude-mem
+```
+
 ## Communication Protocol
 No small talk. Just do it.
 Confirmations one word (Done, Fixed). Show code changes as diff only.
@@ -95,3 +105,5 @@ Specs live in `specs/` -- structured task plans created before coding.
 - After completion, each spec is ready for `/spec-review`
 
 See `specs/README.md` for details.
+
+<claude-mem-context></claude-mem-context>

@@ -13,6 +13,15 @@ cleanup() { rm -rf "$TMP"; }
 trap cleanup EXIT
 
 echo "Downloading @onedot/ai-setup..."
-curl -fsSL "$ARCHIVE" | tar -xz -C "$TMP" --strip-components=1
+if ! curl -fsSL "$ARCHIVE" | tar -xz -C "$TMP" --strip-components=1; then
+  echo "❌ Download failed. Check your internet connection and that the repo is accessible."
+  echo "   URL: $ARCHIVE"
+  exit 1
+fi
 
-bash "$TMP/bin/ai-setup.sh" "$@"
+# Reopen stdin from terminal so interactive prompts work under curl | bash
+if [ -t 0 ]; then
+  bash "$TMP/bin/ai-setup.sh" "$@"
+else
+  bash "$TMP/bin/ai-setup.sh" "$@" < /dev/tty
+fi

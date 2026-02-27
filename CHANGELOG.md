@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 039**: Claude-Mem as team standard — changes install prompt default from N to Y, adds `<claude-mem-context>` placeholder to CLAUDE.md template, documents claude-mem as required plugin, upgrades skip to a warning
 - **Spec 038**: Global Definition of Done and ignore patterns — adds auto-generated DoD section to CONVENTIONS.md, adds build-artifact deny rules to settings.json, adds Critical Rule to CLAUDE.md, and extends /spec-review to validate against global DoD
 - **Spec 037**: Align with official Claude Code best practices — renames all skill templates from `prompt.md` to `SKILL.md` with `name`/`description` frontmatter, adds `disable-model-invocation` to destructive commands, adds `argument-hint` to parameterized commands, enriches `settings.json` with `$schema`/`respectGitignore`/`attribution`, and replaces macOS-only notification hook with cross-platform `notify.sh`
 - **Spec 036**: Bash performance optimizations — parallelizes skills keyword search and installation loops, adds 8-job curl pool cap, replaces echo|sed/tr subshells with parameter expansion for 100+ second runtime reduction

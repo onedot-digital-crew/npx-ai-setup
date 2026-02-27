@@ -26,8 +26,18 @@ echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)" > .agents/co
 echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> .agents/context/.state
 ```
 
+5. **Generate repomix snapshot** (optional, best-effort): Run:
+```bash
+_t=""; command -v timeout &>/dev/null && _t="timeout 120"; command -v gtimeout &>/dev/null && _t="gtimeout 120"
+$_t npx -y repomix --compress --style markdown \
+  --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
+  --output .agents/repomix-snapshot.md 2>/dev/null
+```
+If this fails or times out, skip silently — the 3 context files are the primary output.
+
 ## Rules
 - Keep each file under 80 lines — terse and factual, no padding.
 - Write only what you observed, not what you assumed.
 - Overwrite existing files completely — do not append.
 - Do NOT read `.env` files.
+- The repomix snapshot is optional — never block or fail because of it.
