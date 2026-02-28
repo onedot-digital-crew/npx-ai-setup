@@ -273,8 +273,8 @@ ask_overwrite_modified() {
   printf "  ⚠️  %s (user-modified) — Overwrite with template? [y/N]: " "$file"
   local answer
   IFS= read -r answer </dev/tty
-  case "${answer,,}" in
-    y|yes) return 0 ;;
-    *)     return 1 ;;
+  case "$answer" in
+    y|Y|yes|YES|Yes) return 0 ;;
+    *)               return 1 ;;
   esac
 }
