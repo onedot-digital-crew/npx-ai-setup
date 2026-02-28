@@ -17,60 +17,60 @@ Inspect `$ARGUMENTS`:
 - If it looks like a search query (no URL, short phrase): use WebSearch to find the most relevant article or discussion, then WebFetch the result.
 - Otherwise: treat the full argument text as pasted content and extract patterns directly by reading it carefully.
 
-Produce a numbered **Proposal Inventory** — every distinct pattern, feature, command, agent, rule, hook, or tool identified in the input. Format:
+Produce a numbered **Proposal Inventory** — every distinct pattern, feature, command, agent, rule, hook, or tool identified in the input. For each item, also note any specific implementation details, code snippets, or concrete approaches mentioned. Format:
 
 ```
 1. [Name]: [one-line description]
+   Implementation detail: [specific code, config, or approach if given]
 2. [Name]: [one-line description]
-...
+   Implementation detail: [...]
 ```
 
 If nothing can be extracted, report "No actionable Claude Code patterns found" and stop.
 
 ---
 
-## Phase 2 — Build Existing Inventory
+## Phase 2 — Build Existing Inventory (Shallow Pass)
 
 Scan the project to understand what we already have. Run all reads in parallel:
 
-1. Glob `templates/commands/*.md` — list all command filenames and read first 3 lines (frontmatter + description) of each
-2. Glob `templates/agents/*.md` — list all agent filenames and read first 3 lines of each
-3. Glob `templates/claude/rules/*.md` — list all rule filenames and read first 5 lines of each
-4. Read `templates/claude/settings.json` — note all top-level keys and notable field values
-5. Glob `.claude/commands/*.md` — list all project-local commands (these are maintenance tools, not distributed)
+1. Glob `templates/commands/*.md` — list all filenames
+2. Glob `templates/agents/*.md` — list all filenames
+3. Glob `templates/claude/rules/*.md` — list all filenames
+4. Glob `templates/claude/hooks/*.sh` — list all hook filenames
+5. Read `templates/claude/settings.json` — note hook types and field names (no need to read full content)
+6. Glob `.claude/commands/*.md` — list project-local commands
 
-Produce an **Existing Inventory** grouped by category:
-
-```
-Commands:    analyze, bug, commit, grill, pr, reflect, release, review, spec, spec-board,
-             spec-review, spec-work, spec-work-all, techdebt, test
-Agents:      build-validator, code-architect, code-reviewer, context-refresher, perf-reviewer,
-             staff-reviewer, test-generator, verify-app
-Rules:       general, git, testing, typescript
-Settings:    [key fields from settings.json]
-Local Cmds:  [.claude/commands/ list]
-```
+Produce a compact **Existing Inventory** by category (names only at this stage).
 
 ---
 
-## Phase 3 — Gap Analysis
+## Phase 3 — Gap Analysis with Deep Comparison
 
-For each item in the Proposal Inventory, classify it against the Existing Inventory:
+For each item in the Proposal Inventory:
+
+**Step 3a — Initial match**: Use Grep to search the `templates/` directory for the concept name, key terms, or related keywords. Identify the most likely existing equivalent.
+
+**Step 3b — Deep read for non-obvious cases**: If a potential match is found and it's not immediately clear whether it's REDUNDANT or could be improved:
+- Read the **full content** of the matching existing file(s)
+- Read any related files referenced in it (e.g., if a command delegates to an agent, read that agent too)
+- Compare the proposed implementation detail against our actual code line by line
+
+**Step 3c — Classify** using these categories:
 
 | Classification | Meaning |
 |---|---|
 | **NEW** | We have nothing equivalent — this fills a genuine gap |
-| **BETTER** | We have something similar but the proposed version is stronger, cleaner, or more complete |
-| **REDUNDANT** | We already have this — our version is equivalent or the difference is cosmetic |
-| **WORSE** | We have this and our version is stronger — the proposal would be a downgrade |
+| **PARTIAL** | We have this but the proposal has specific improvements we could adopt (list exactly what) |
+| **BETTER** | The proposal is stronger overall — our version should be replaced |
+| **REDUNDANT** | We have this fully — our version is equivalent or superior, nothing to borrow |
+| **WORSE** | We have this and our version is clearly stronger — the proposal would be a downgrade |
 
-Use Grep to search for keyword matches before classifying as NEW. Do not classify as NEW without searching first.
+**Critical rule**: Do NOT classify as REDUNDANT without reading the full file and comparing implementation details. Even similar-sounding features may differ in edge case handling, error recovery, scope, or specific code patterns.
 
 ---
 
 ## Phase 4 — Output: Findings Table
-
-Present a structured findings table:
 
 ```
 ## Evaluation Results
@@ -80,78 +80,68 @@ Present a structured findings table:
 
 ### Findings
 
-| # | Pattern | Classification | Existing Equivalent | Recommended Action |
-|---|---------|----------------|--------------------|--------------------|
-| 1 | [name]  | NEW            | —                  | Create spec        |
-| 2 | [name]  | BETTER         | templates/commands/spec.md | Modify via spec |
-| 3 | [name]  | REDUNDANT      | templates/agents/code-reviewer.md | Skip |
-| 4 | [name]  | WORSE          | templates/claude/rules/general.md | Skip |
+| # | Pattern | Class | Existing File | Detail |
+|---|---------|-------|---------------|--------|
+| 1 | name    | NEW   | —             | —      |
+| 2 | name    | PARTIAL | templates/commands/foo.md | Proposal adds: [specific line/approach missing from ours] |
+| 3 | name    | BETTER  | templates/agents/bar.md   | Proposal is stronger because: [specific reason] |
+| 4 | name    | REDUNDANT | templates/commands/baz.md | Our version covers this fully |
+| 5 | name    | WORSE   | templates/claude/rules/general.md | Our version handles: [what theirs misses] |
+```
 
+For **PARTIAL** and **BETTER** findings, the Detail column must be specific:
+- Quote or describe the exact code/approach from the proposal that we lack
+- Reference the exact line or section in our existing file where this could be added
+- Example: "Proposal adds `tsc --noEmit` after TS edits; our `post-edit-lint.sh:7` only runs ESLint"
+
+```
 ### Summary
+- NEW: N | PARTIAL: N | BETTER: N | REDUNDANT: N | WORSE: N
 
-- NEW findings: N
-- BETTER findings: N
-- REDUNDANT findings: N
-- WORSE findings: N
+### Overhead Assessment (NEW, PARTIAL, BETTER only)
 
-### Overhead Assessment
-
-For each NEW or BETTER finding, briefly state:
-- Maintenance burden: [low / medium / high]
-- Integration complexity: [low / medium / high]
-- User value: [low / medium / high]
+| # | Pattern | Maintenance | Integration | User Value | Adopt? |
+|---|---------|-------------|-------------|------------|--------|
+| 1 | name    | low         | low         | high       | YES    |
 
 ### Verdict
 
-[One paragraph: overall assessment of the evaluated content. Is it worth adopting partially, fully, or not at all? What is the highest-value action?]
+[One paragraph: overall assessment. Highlight the highest-value PARTIAL/BETTER/NEW findings.]
 ```
-
-**Rules for the table:**
-- Every item from Phase 1 must appear as a row
-- Existing Equivalent must name the actual file path (e.g., `templates/commands/grill.md`) or `—` for NEW
-- Recommended Action must be one of: `Create spec` / `Modify via spec` / `Replace via spec` / `Skip`
-- Never recommend directly modifying files — always route through specs
 
 ---
 
-## Phase 5 — Spec Recommendations
+## Phase 5 — Adoption Candidates
 
-List only the ADOPT-worthy findings (NEW or BETTER with high/medium user value):
+List all NEW, PARTIAL, and BETTER findings with medium/high user value:
 
 ```
 ## Adoption Candidates
 
-1. [Pattern name] — [one-line rationale]
-   Action: Create spec for `.claude/commands/[name].md`
+1. [Pattern] — [one-line rationale]
+   Class: NEW | Action: Create spec for `templates/commands/[name].md`
 
-2. [Pattern name] — [one-line rationale]
-   Action: Modify `templates/commands/[existing].md` via spec
+2. [Pattern] — [one-line rationale]
+   Class: PARTIAL | Specific improvement: [exact change to make]
+   Action: Modify `templates/claude/hooks/[file].sh` via spec — add [what]
+
+3. [Pattern] — [one-line rationale]
+   Class: BETTER | Action: Replace `templates/agents/[name].md` via spec
 ```
-
-If there are no adoption candidates, state: "No adoption candidates identified — no action recommended."
 
 ---
 
 ## Phase 6 — Spec Creation Gate
 
-If there are adoption candidates, use `AskUserQuestion` with the following options:
+Use `AskUserQuestion` with multiSelect: true. Options: one per adoption candidate, plus "Keine — spaeter entscheiden".
 
+If the user selects items: output pre-filled `/spec` commands with enough detail that the spec writer understands the exact change needed. For PARTIAL items, include the specific code or line to add.
+
+Example:
 ```
-Which findings should become specs now?
-```
+Run these commands to create specs:
 
-Options: one option per adoption candidate (e.g., "1 — [Pattern name]"), plus:
-- "All of the above"
-- "None — I will decide later"
-
-If the user selects one or more items: list the exact `/spec` commands they should run, pre-filled with a suggested task description. Do NOT create the specs — only recommend the commands.
-
-Example output:
-```
-Run the following to create specs:
-
-  /spec "Add [pattern name] command to templates/commands/"
-  /spec "Improve [existing command] with [specific improvement]"
+  /spec "Add tsc --noEmit to post-edit-lint.sh after .ts/.tsx edits — only when tsconfig.json exists in project root; insert after ESLint block at line 7"
 ```
 
 ---
@@ -159,7 +149,7 @@ Run the following to create specs:
 ## Rules
 
 - Read-only: never write, create, or modify any file
-- Never auto-create specs — only recommend `/spec` commands for the user to run
-- Scoped to Claude Code AI dev environment patterns only — do not evaluate general programming tools
-- Always search before classifying as NEW — use Grep with relevant keywords
-- If WebFetch fails, note the error and ask the user to paste the content directly
+- Never auto-create specs — only recommend `/spec` commands
+- Always read the full existing file before classifying as REDUNDANT
+- Scoped to Claude Code AI dev environment patterns only
+- If WebFetch fails, ask user to paste content directly
