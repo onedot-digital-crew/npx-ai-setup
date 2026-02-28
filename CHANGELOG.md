@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 049**: /evaluate command — project-local command for systematic evaluation of external ideas against existing template inventory
 
 ## [v1.2.1] — 2026-02-28
 
