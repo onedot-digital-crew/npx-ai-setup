@@ -6,12 +6,19 @@ allowed-tools: Read, Bash, Glob, Grep, Task
 
 Drafts a pull request with staff review and PR body. Use when a feature branch is ready to be submitted for review.
 
+## Context
+
+- Current status: `!git status`
+- Unstaged changes: `!git diff`
+- Commits ahead of main: `!git log --oneline main..HEAD`
+- Current branch: `!git branch --show-current`
+
 ## Process
 
 1. **Build validation**: Spawn `build-validator` via Task tool.
    - If build-validator returns **FAIL**: stop immediately and tell the user: "Fix the build before creating a PR." Show the build output. Do not proceed.
    - If build-validator returns **PASS**: continue.
-2. Run `git status`, `git diff`, and `git log --oneline main..HEAD` to understand all changes.
+2. Analyze the changes shown in Context above to understand all modifications on this branch.
 3. Stage and commit any remaining uncommitted changes (descriptive message, no `git add .`).
 4. **Staff review**: Spawn `staff-reviewer` via Task tool with the prompt:
    > "Review this branch for production readiness before PR creation. Branch: <branch-name>. Recent commits: <commits from git log --oneline main..HEAD>."
