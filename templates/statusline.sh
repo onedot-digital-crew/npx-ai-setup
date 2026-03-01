@@ -13,11 +13,22 @@ BRANCH=$(git branch --show-current 2>/dev/null || echo "")
 PCT=$(echo "$INPUT" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 COST=$(echo "$INPUT" | jq -r '.cost.total_cost_usd // 0')
 DURATION=$(echo "$INPUT" | jq -r '.cost.total_duration_ms // 0')
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // ""' | tr -cd 'a-zA-Z0-9_-')
+REMAINING_PCT=$(echo "$INPUT" | jq -r '100 - (.context_window.used_percentage // 0)' | awk '{printf "%d", ($1+0.5)}')
 
 # Ensure numeric values are valid (fallback to 0 on null/empty)
 case "$PCT" in ''|null|*[!0-9]*) PCT=0 ;; esac
+case "$REMAINING_PCT" in ''|null|*[!0-9]*) REMAINING_PCT=100 ;; esac
 case "$COST" in ''|null) COST=0 ;; esac
 case "$DURATION" in ''|null|*[!0-9]*) DURATION=0 ;; esac
+
+# Write bridge file for context-monitor hook
+if [ -n "$SESSION_ID" ]; then
+  EPOCH=$(date +%s)
+  printf '{"session_id":"%s","remaining_percentage":%s,"used_pct":%s,"timestamp":%s}\n' \
+    "$SESSION_ID" "$REMAINING_PCT" "$PCT" "$EPOCH" \
+    > "/tmp/claude-ctx-${SESSION_ID}.json" 2>/dev/null || true
+fi
 
 # Color coding for context bar
 if [ "$PCT" -ge 80 ]; then
