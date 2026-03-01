@@ -13,8 +13,8 @@ BRANCH=$(git branch --show-current 2>/dev/null || echo "")
 PCT=$(echo "$INPUT" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 COST=$(echo "$INPUT" | jq -r '.cost.total_cost_usd // 0')
 DURATION=$(echo "$INPUT" | jq -r '.cost.total_duration_ms // 0')
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // ""')
-REMAINING_PCT=$(echo "$INPUT" | jq -r '100 - (.context_window.used_percentage // 0)' | cut -d. -f1)
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // ""' | tr -cd 'a-zA-Z0-9_-')
+REMAINING_PCT=$(echo "$INPUT" | jq -r '100 - (.context_window.used_percentage // 0)' | awk '{printf "%d", ($1+0.5)}')
 
 # Ensure numeric values are valid (fallback to 0 on null/empty)
 case "$PCT" in ''|null|*[!0-9]*) PCT=0 ;; esac

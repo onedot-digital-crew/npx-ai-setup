@@ -13,6 +13,7 @@ command -v jq >/dev/null 2>&1 || exit 0
 INPUT=$(cat)
 
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // ""' 2>/dev/null)
+SESSION_ID=$(echo "$SESSION_ID" | tr -cd 'a-zA-Z0-9_-')
 [ -z "$SESSION_ID" ] && exit 0
 
 BRIDGE_FILE="/tmp/claude-ctx-${SESSION_ID}.json"
@@ -60,8 +61,8 @@ if [ "$SEVERITY" = "CRITICAL" ] && [ "$LAST_SEVERITY" = "WARNING" ]; then
   ESCALATED=true
 fi
 
-# Suppress if under debounce threshold (5 calls) and no escalation
-if [ "$COUNTER" -lt 5 ] && [ "$ESCALATED" = "false" ] && [ "$LAST_SEVERITY" = "$SEVERITY" ]; then
+# Suppress if under debounce threshold (5 calls between warnings) and no escalation
+if [ "$COUNTER" -lt 6 ] && [ "$ESCALATED" = "false" ] && [ "$LAST_SEVERITY" = "$SEVERITY" ]; then
   printf '%s\n%s\n' "$COUNTER" "$SEVERITY" > "$COUNTER_FILE" 2>/dev/null || true
   exit 0
 fi
@@ -76,7 +77,7 @@ else
   MESSAGE="WARNING: Context window at ${REMAINING}% remaining. Context compaction will fire at 30%. Consider committing current work and saving state to HANDOFF.md soon."
 fi
 
-# Output additionalContext JSON to stdout
-printf '{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"%s"}}\n' "$MESSAGE"
+# Output additionalContext JSON to stdout (via jq for safe escaping)
+jq -n --arg msg "$MESSAGE" '{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":$msg}}'
 
 exit 0
