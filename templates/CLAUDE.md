@@ -20,6 +20,18 @@
   Example: `@src/auth/index.ts`
 - One task per conversation — start a fresh session for unrelated work to prevent context bleed.
 
+## MCP Servers
+
+Each MCP server adds its tools to every request — only enable servers actively used in this project.
+
+```bash
+claude mcp list                 # show configured servers and status
+claude mcp disable <name>       # deactivate without removing from .mcp.json
+claude mcp enable <name>        # reactivate when needed
+```
+
+Example: install Playwright MCP for a frontend sprint, disable it when done.
+
 ## Communication Protocol
 No small talk. Just do it.
 Confirmations one word (Done, Fixed). Show code changes as diff only.
