@@ -167,6 +167,9 @@ install_context7
 install_playwright
 show_plugin_summary
 
+# OpenCode compatibility (generates opencode.json from .mcp.json)
+generate_opencode_config
+
 # Statusline (global, user-level — only in fresh install mode, skip if already configured)
 if ! jq -e '.statusLine' "$HOME/.claude/settings.json" >/dev/null 2>&1; then
   echo ""

@@ -1,0 +1,189 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-6",
+  "small_model": "anthropic/claude-haiku-4-5",
+  "instructions": [
+    "CLAUDE.md"
+  ],
+  "mcp": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    }
+  },
+  "agent": {
+    "build-validator": {
+      "description": "Runs the project build command and reports pass/fail with output summary.",
+      "mode": "subagent",
+      "model": "anthropic/claude-haiku-4-5",
+      "prompt": "{file:.claude/agents/build-validator.md}",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true
+      }
+    },
+    "code-architect": {
+      "description": "Reviews proposed architecture, specs, and design decisions for structural problems before implementation begins. Identifies over-engineering, missing abstractions, scalability risks, and integration issues.",
+      "mode": "subagent",
+      "model": "anthropic/claude-opus-4-6",
+      "prompt": "{file:.claude/agents/code-architect.md}",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true
+      }
+    },
+    "code-reviewer": {
+      "description": "Reviews code changes for bugs, security vulnerabilities, and spec compliance. Reports findings with HIGH/MEDIUM confidence and a PASS/CONCERNS/FAIL verdict.",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.claude/agents/code-reviewer.md}",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true
+      }
+    },
+    "context-refresher": {
+      "description": "Regenerates .agents/context/ files (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) when project config has changed.",
+      "mode": "subagent",
+      "model": "anthropic/claude-haiku-4-5",
+      "prompt": "{file:.claude/agents/context-refresher.md}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "perf-reviewer": {
+      "description": "Reviews code changes for performance issues. Reports findings with HIGH/MEDIUM confidence and a FAST/CONCERNS/SLOW verdict.",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.claude/agents/perf-reviewer.md}",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true
+      }
+    },
+    "staff-reviewer": {
+      "description": "Skeptical staff engineer review — challenges assumptions and finds production risks.",
+      "mode": "subagent",
+      "model": "anthropic/claude-opus-4-6",
+      "prompt": "{file:.claude/agents/staff-reviewer.md}",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true
+      }
+    },
+    "test-generator": {
+      "description": "Generates missing tests for changed files. Detects the project test framework and writes tests only into test directories.",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.claude/agents/test-generator.md}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "verify-app": {
+      "description": "Validates application functionality after changes by running tests, builds, and edge case checks.",
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-6",
+      "prompt": "{file:.claude/agents/verify-app.md}",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true
+      }
+    }
+  },
+  "command": {
+    "analyze": {
+      "description": "analyze",
+      "template": "{file:.claude/commands/analyze.md}\\n\\n$ARGUMENTS"
+    },
+    "bug": {
+      "description": "bug",
+      "template": "{file:.claude/commands/bug.md}\\n\\n$ARGUMENTS"
+    },
+    "challenge": {
+      "description": "challenge",
+      "template": "{file:.claude/commands/challenge.md}\\n\\n$ARGUMENTS"
+    },
+    "commit": {
+      "description": "commit",
+      "template": "{file:.claude/commands/commit.md}\\n\\n$ARGUMENTS"
+    },
+    "context-full": {
+      "description": "context full",
+      "template": "{file:.claude/commands/context-full.md}\\n\\n$ARGUMENTS"
+    },
+    "evaluate": {
+      "description": "evaluate",
+      "template": "{file:.claude/commands/evaluate.md}\\n\\n$ARGUMENTS"
+    },
+    "grill": {
+      "description": "grill",
+      "template": "{file:.claude/commands/grill.md}\\n\\n$ARGUMENTS"
+    },
+    "pr": {
+      "description": "pr",
+      "template": "{file:.claude/commands/pr.md}\\n\\n$ARGUMENTS"
+    },
+    "reflect": {
+      "description": "reflect",
+      "template": "{file:.claude/commands/reflect.md}\\n\\n$ARGUMENTS"
+    },
+    "release": {
+      "description": "release",
+      "template": "{file:.claude/commands/release.md}\\n\\n$ARGUMENTS"
+    },
+    "review": {
+      "description": "review",
+      "template": "{file:.claude/commands/review.md}\\n\\n$ARGUMENTS"
+    },
+    "spec-board": {
+      "description": "spec board",
+      "template": "{file:.claude/commands/spec-board.md}\\n\\n$ARGUMENTS"
+    },
+    "spec-review": {
+      "description": "spec review",
+      "template": "{file:.claude/commands/spec-review.md}\\n\\n$ARGUMENTS"
+    },
+    "spec-work-all": {
+      "description": "spec work all",
+      "template": "{file:.claude/commands/spec-work-all.md}\\n\\n$ARGUMENTS"
+    },
+    "spec-work": {
+      "description": "spec work",
+      "template": "{file:.claude/commands/spec-work.md}\\n\\n$ARGUMENTS"
+    },
+    "spec": {
+      "description": "spec",
+      "template": "{file:.claude/commands/spec.md}\\n\\n$ARGUMENTS"
+    },
+    "techdebt": {
+      "description": "techdebt",
+      "template": "{file:.claude/commands/techdebt.md}\\n\\n$ARGUMENTS"
+    },
+    "test": {
+      "description": "test",
+      "template": "{file:.claude/commands/test.md}\\n\\n$ARGUMENTS"
+    }
+  }
+}

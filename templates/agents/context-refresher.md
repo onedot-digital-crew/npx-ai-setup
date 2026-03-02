@@ -2,7 +2,7 @@
 name: context-refresher
 description: Regenerates .agents/context/ files (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) when project config has changed.
 tools: Read, Write, Glob, Bash
-model: sonnet
+model: haiku
 max_turns: 15
 ---
 

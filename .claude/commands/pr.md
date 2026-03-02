@@ -1,5 +1,5 @@
 ---
-model: sonnet
+model: haiku
 allowed-tools: Read, Bash, Glob, Grep, Task
 ---
 
