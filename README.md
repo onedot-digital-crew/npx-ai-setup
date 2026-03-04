@@ -67,11 +67,6 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 npx github:onedot-digital-crew/npx-ai-setup [flags]
 
 --system nuxt,storyblok   # Set framework (auto, shopify, nuxt, next, laravel, shopware, storyblok)
---with-gsd                # Install GSD workflow engine
---with-claude-mem         # Install Claude-Mem persistent memory plugin
---with-plugins            # Install official Claude Code plugins (code-review, feature-dev, ralph-wiggum)
---with-context7           # Add Context7 MCP server (.mcp.json)
---with-playwright         # Add Playwright MCP server (.mcp.json)
 --regenerate              # Re-run Auto-Init without reinstalling files
 ```
 
@@ -95,19 +90,33 @@ Run the same command again — the script auto-detects and offers:
 
 ---
 
-## Plugins & Extensions
+## Built-in Plugins & Extensions
 
-| Plugin | Flag | What it does |
-|--------|------|-------------|
-| **claude-mem** | `--with-claude-mem` | Persistent memory across sessions, MCP search tools |
-| **code-review** | `--with-plugins` | 4 parallel review agents — `/code-review` |
-| **feature-dev** | `--with-plugins` | 7-phase feature workflow — `/feature-dev` |
-| **ralph-wiggum** | `--with-plugins` | Iterative loop until task is done — `/ralph-loop` |
-| **Context7** | `--with-context7` | Up-to-date library docs in context — "use context7" |
-| **Playwright MCP** | `--with-playwright` | Browser automation for UI verification |
-| **GSD** | `--with-gsd` | Phase planning, codebase mapping, session management |
+All plugins and integrations are installed automatically — no flags needed.
+
+| Plugin | What it does |
+|--------|-------------|
+| **claude-mem** | Persistent memory across sessions, MCP search tools |
+| **code-review** | 4 parallel review agents — `/code-review` |
+| **feature-dev** | 7-phase feature workflow — `/feature-dev` |
+| **frontend-design** | Anti-generic design guidance for frontend projects |
+| **Context7** | Up-to-date library docs in context — "use context7" |
 
 Team sharing: marketplace plugins via `extraKnownMarketplaces` in `.claude/settings.json`, MCP servers via `.mcp.json` — both committed to git.
+
+---
+
+## Optional Extensions
+
+### GSD (Get Shit Done)
+
+Phase planning, codebase mapping, and session management. Install separately:
+
+```bash
+npx get-shit-done-cc@latest --claude --global
+```
+
+More info: [GSD workflow engine](https://github.com/get-shit-done-cc/get-shit-done-cc)
 
 ---
 
@@ -128,7 +137,6 @@ Team sharing: marketplace plugins via `extraKnownMarketplaces` in `.claude/setti
 
 - [Skills marketplace](https://skills.sh/)
 - [Claude-Mem](https://claude-mem.ai)
-- [GSD workflow engine](https://github.com/get-shit-done-cc/get-shit-done-cc)
 - [Context7](https://github.com/upstash/context7)
 - [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
 - [Concept & Design Decisions](.agents/context/CONCEPT.md)

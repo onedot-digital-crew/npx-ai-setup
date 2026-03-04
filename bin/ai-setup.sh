@@ -4,10 +4,7 @@
 # @onedot/ai-setup - AI infrastructure for projects
 # ==============================================================================
 # Installs Claude Code hooks, project context, and AI-curated skills
-# Usage: npx @onedot/ai-setup [--with-gsd] [--no-gsd] [--with-claude-mem] [--no-claude-mem]
-#        [--with-plugins] [--no-plugins] [--with-context7] [--no-context7]
-#        [--with-playwright] [--no-playwright] [--system <name>]
-#        npx @onedot/ai-setup --regenerate [--system <name>]
+# Usage: npx @onedot/ai-setup [--system <name>] [--regenerate]
 # Auto-detects updates: if .ai-setup.json exists with older version, offers update/reinstall
 # ==============================================================================
 
@@ -26,25 +23,10 @@ unset _SCRIPT _DIR
 TPL="$SCRIPT_DIR/templates"
 
 # Parse flags
-WITH_GSD=""
-WITH_CLAUDE_MEM=""
-WITH_PLUGINS=""
-WITH_CONTEXT7=""
-WITH_PLAYWRIGHT=""
 SYSTEM=""
 REGENERATE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --with-gsd) WITH_GSD="yes"; shift ;;
-    --no-gsd) WITH_GSD="no"; shift ;;
-    --with-claude-mem) WITH_CLAUDE_MEM="yes"; shift ;;
-    --no-claude-mem) WITH_CLAUDE_MEM="no"; shift ;;
-    --with-plugins) WITH_PLUGINS="yes"; shift ;;
-    --no-plugins) WITH_PLUGINS="no"; shift ;;
-    --with-context7) WITH_CONTEXT7="yes"; shift ;;
-    --no-context7) WITH_CONTEXT7="no"; shift ;;
-    --with-playwright) WITH_PLAYWRIGHT="yes"; shift ;;
-    --no-playwright) WITH_PLAYWRIGHT="no"; shift ;;
     --regenerate) REGENERATE="yes"; shift ;;
     --system)
       if [[ $# -lt 2 ]]; then
@@ -160,11 +142,9 @@ echo ""
 echo "🔌 Plugins & Extensions"
 echo "   ──────────────────────────────────────────────────────────"
 
-install_gsd
 install_claude_mem
 install_official_plugins
 install_context7
-install_playwright
 show_plugin_summary
 
 # OpenCode compatibility (generates opencode.json from .mcp.json)
@@ -199,11 +179,7 @@ if [ "$AI_CLI" = "claude" ]; then
 
     echo ""
     echo "✅ Auto-Init complete!"
-    if [ "$WITH_GSD" = "yes" ]; then
-      _NOTIFY_MSG="Auto-Init complete. Run /gsd:map-codebase for deeper analysis"
-    else
-      _NOTIFY_MSG="Auto-Init complete!"
-    fi
+    _NOTIFY_MSG="Auto-Init complete!"
     case "$(uname -s)" in
       Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"AI Setup\" sound name \"Glass\"" 2>/dev/null || true ;;
       Linux) command -v notify-send >/dev/null 2>&1 && notify-send "AI Setup" "$_NOTIFY_MSG" 2>/dev/null || true ;;
@@ -215,9 +191,6 @@ elif [ "$AI_CLI" = "copilot" ]; then
   echo ""
   echo "   1. Open VS Code / GitHub Copilot Chat"
   echo "   2. Ask Copilot to extend CLAUDE.md with Commands and Critical Rules"
-  if [ "$WITH_GSD" = "yes" ]; then
-    echo "   3. Run /gsd:map-codebase and /gsd:new-project"
-  fi
 else
   echo "⚠️  No AI CLI detected (neither claude nor gh copilot)."
   echo "   Install Claude Code: npm i -g @anthropic-ai/claude-code"
