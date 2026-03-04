@@ -8,7 +8,7 @@
 - Safety hooks that prevent common AI mistakes
 - Curated slash commands for the development workflow
 - AI-selected skills matched to your tech stack
-- Optional integrations (GSD, Context7, Playwright, persistent memory)
+- Built-in integrations (Context7, persistent memory, official plugins)
 
 ## The Problem
 
