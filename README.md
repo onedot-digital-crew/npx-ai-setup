@@ -124,6 +124,26 @@ Team sharing: marketplace plugins via `extraKnownMarketplaces` in `.claude/setti
 
 ---
 
+## Optional Extensions
+
+### GSD (Get Shit Done)
+
+Project management workflow engine — phase planning, codebase mapping, and session management for complex tasks.
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-gsd
+```
+
+### rtk (Reduce Token Kost)
+
+Token optimization toolkit — analyzes Claude Code sessions and suggests deny patterns, permission tuning, and context reduction strategies.
+
+```bash
+npx -y github:onedot-digital-crew/rtk
+```
+
+---
+
 ## Links
 
 - [Skills marketplace](https://skills.sh/)

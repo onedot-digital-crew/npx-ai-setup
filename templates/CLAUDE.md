@@ -19,6 +19,9 @@
 - `@path/to/file` — import file contents compactly into context.
   Example: `@src/auth/index.ts`
 - One task per conversation — start a fresh session for unrelated work to prevent context bleed.
+- `Esc Esc` — rewind or summarize the last response to recover tokens when context grows large.
+- `/rename` + `/resume` — rename the current session for easy retrieval, then resume it later with `/resume`.
+- Commit after each completed task — creates a checkpoint you can revert to if later changes go wrong.
 
 ## MCP Servers
 
@@ -29,8 +32,6 @@ claude mcp list                 # show configured servers and status
 claude mcp disable <name>       # deactivate without removing from .mcp.json
 claude mcp enable <name>        # reactivate when needed
 ```
-
-Example: install Playwright MCP for a frontend sprint, disable it when done.
 
 ## Communication Protocol
 No small talk. Just do it.
