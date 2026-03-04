@@ -33,6 +33,11 @@ Drafts a pull request with staff review and PR body. Use when a feature branch i
    ```
 7. Do NOT push or create the PR — the user does this manually.
 
+## Post-PR
+
+After presenting the PR commands to the user, suggest:
+> "Run `/reflect` to capture any learnings from this session before they leave context."
+
 ## Rules
 - Never push (`git push` is denied by settings).
 - Never push to main/master directly.

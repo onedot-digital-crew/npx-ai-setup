@@ -20,6 +20,11 @@ Stages changes and creates a conventional commit message. Use when work is ready
 3. Write a concise conventional commit message (1-2 sentences) focusing on **why**, not what.
 4. Commit. Do NOT push. Do NOT use `--no-verify`.
 
+## Post-Commit
+
+After a successful commit, suggest:
+> "Run `/reflect` to capture any learnings from this session before they leave context."
+
 ## Rules
 - Never stage `.env`, credentials, or large binaries.
 - Never push — only commit locally.
