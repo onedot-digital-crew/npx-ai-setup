@@ -133,6 +133,26 @@ More info: [GSD workflow engine](https://github.com/get-shit-done-cc/get-shit-do
 
 ---
 
+## Optional Extensions
+
+### GSD (Get Shit Done)
+
+Project management workflow engine — phase planning, codebase mapping, and session management for complex tasks.
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup --with-gsd
+```
+
+### rtk (Reduce Token Kost)
+
+Token optimization toolkit — analyzes Claude Code sessions and suggests deny patterns, permission tuning, and context reduction strategies.
+
+```bash
+npx -y github:onedot-digital-crew/rtk
+```
+
+---
+
 ## Links
 
 - [Skills marketplace](https://skills.sh/)
