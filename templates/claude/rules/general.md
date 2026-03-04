@@ -13,6 +13,13 @@ Before creating a new file, check if one already exists:
 Never assume import paths, function names, or API routes. Verify by reading the relevant file.
 When unsure about current state, run `git diff` to see what has actually changed this session.
 
+## Subagent Model Routing
+When spawning subagents via the Agent tool, always set the model parameter:
+- `model: haiku` — Explore agents, file search, codebase questions, simple research
+- `model: sonnet` — Implementation, code generation, test writing
+- `model: opus` — Architecture review, complex analysis, spec creation
+Never spawn Explore or search agents without `model: haiku`.
+
 ## Human Approval Gates
 Before finalizing any deliverable, present a summary and ask for confirmation.
 Never proceed to the next workflow phase without explicit user approval.

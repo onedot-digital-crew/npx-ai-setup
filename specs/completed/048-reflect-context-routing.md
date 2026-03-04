@@ -1,6 +1,6 @@
 # Spec: Extend /reflect with Context File Routing
 
-> **Spec ID**: 048 | **Created**: 2026-02-28 | **Status**: draft
+> **Spec ID**: 048 | **Created**: 2026-02-28 | **Status**: completed | **Branch**: spec/048-reflect-context-routing
 
 ## Goal
 Extend `/reflect` to route architectural discoveries and stack decisions into `.agents/context/` files, not just CLAUDE.md rules.
