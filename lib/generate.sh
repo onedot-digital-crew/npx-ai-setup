@@ -265,6 +265,7 @@ run_generation() {
   # cause silent exits with set -e (especially bash 3.2 on macOS).
   # This function has comprehensive error handling for all steps.
   set +e
+  local regen_failed=0
 
   # Default: regenerate everything unless flags were explicitly set by ask_regen_parts
   : "${REGEN_CLAUDE_MD:=yes}"
@@ -327,7 +328,9 @@ $(cat eslint.config.* .eslintrc* 2>/dev/null | head -100)
 --- Prettier Config ---
 $(cat .prettierrc* 2>/dev/null)
 --- CLAUDE.md (current) ---
-$(cat CLAUDE.md 2>/dev/null)"
+$(cat CLAUDE.md 2>/dev/null)
+--- AGENTS.md (current) ---
+$(cat AGENTS.md 2>/dev/null)"
 
   # Extended context for project context generation
   CTX_PKG=$(cat package.json 2>/dev/null || echo "No package.json")
@@ -355,8 +358,9 @@ $(head -50 "$f" 2>/dev/null)"
 
   # Temp files for error capture (cleaned up on exit/interrupt)
   ERR_CM=$(mktemp)
+  ERR_AM=$(mktemp)
   ERR_CTX=$(mktemp)
-  trap "rm -f '$ERR_CM' '$ERR_CTX'" RETURN
+  trap "rm -f '$ERR_CM' '$ERR_AM' '$ERR_CTX'" RETURN
 
   # Detect test framework for conditional TDD rule
   HAS_TESTS=""
@@ -379,10 +383,15 @@ If a test framework is present, add a 'TDD Workflow' subsection under Critical R
 - Never write implementation code without a test first"
   fi
 
-  # Step 1: Extend CLAUDE.md (sonnet, background)
+  # Step 1a: Extend CLAUDE.md (sonnet, background)
   PID_CM=""
+  PID_AM=""
   if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
+  if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
+    cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
+  fi
   CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+  AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
 
   claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
 
@@ -405,6 +414,35 @@ Rules:
 $CONTEXT
 $CTX_SHOPWARE" >"$ERR_CM" 2>&1 &
   PID_CM=$!
+
+  # Step 1b: Extend AGENTS.md (sonnet, background, parallel with CLAUDE.md)
+  claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
+
+Replace the ## Project Overview, ## Architecture Summary, ## Commands, and ## Critical Rules sections in AGENTS.md (remove any HTML comments in those sections).
+
+## Project Overview
+Write 4-6 concise bullet points: project purpose, main system/framework ($SYSTEM), runtime/language, key dependencies, and delivery/runtime context if available.
+
+## Architecture Summary
+Write 4-6 concise bullet points covering entry points, directory layout, data flow, and important boundaries.
+
+## Commands
+Based on package.json scripts, list the most important commands (dev, build, lint, test, etc.) with a short description.
+
+## Critical Rules
+Based on eslint/prettier and detected framework/system ($SYSTEM), write actionable engineering rules.
+Max 5 sections, 3-5 bullet points each.
+Cover categories only if evidence exists: formatting/naming, typing patterns, imports/module boundaries, framework conventions, testing.
+$TDD_INSTRUCTION
+
+Rules:
+- Edit AGENTS.md directly. Replace all four sections including any <!-- comments -->.
+- Keep content deterministic and static; do not add timestamps, random IDs, or session-specific data.
+- No umlauts. English only.
+
+$CONTEXT
+$CTX_SHOPWARE" >"$ERR_AM" 2>&1 &
+  PID_AM=$!
   fi
 
   # Step 2: Generate project context (sonnet, background, parallel with Step 1)
@@ -452,20 +490,38 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
   # Wait for background processes
   WAIT_ARGS=()
   [ -n "$PID_CM" ] && WAIT_ARGS+=("$PID_CM:CLAUDE.md:30:120")
+  [ -n "$PID_AM" ] && WAIT_ARGS+=("$PID_AM:AGENTS.md:30:120")
   [ -n "$PID_CTX" ] && WAIT_ARGS+=("$PID_CTX:Project context:45:180")
   echo ""
   [ ${#WAIT_ARGS[@]} -gt 0 ] && wait_parallel "${WAIT_ARGS[@]}"
 
-  # Verify Step 1: CLAUDE.md was actually modified
+  # Verify Step 1a: CLAUDE.md was actually modified
   if [ -n "$PID_CM" ]; then
     EXIT_CM=0
     wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
     CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
     if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
+      regen_failed=1
       echo ""
       echo "  ⚠️  CLAUDE.md was not updated (exit code $EXIT_CM)."
       if [ -s "$ERR_CM" ]; then
         echo "  Output: $(tail -5 "$ERR_CM")"
+      fi
+      echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
+    fi
+  fi
+
+  # Verify Step 1b: AGENTS.md was actually modified
+  if [ -n "$PID_AM" ]; then
+    EXIT_AM=0
+    wait "$PID_AM" 2>/dev/null || EXIT_AM=$?
+    AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
+    if [ "$EXIT_AM" -ne 0 ] || [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
+      regen_failed=1
+      echo ""
+      echo "  ⚠️  AGENTS.md was not updated (exit code $EXIT_AM)."
+      if [ -s "$ERR_AM" ]; then
+        echo "  Output: $(tail -5 "$ERR_AM")"
       fi
       echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
     fi
@@ -483,11 +539,13 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
     if [ "$CTX_COUNT" -eq 3 ]; then
       echo "  ✅ All 3 context files created in .agents/context/"
     elif [ "$CTX_COUNT" -gt 0 ]; then
+      regen_failed=1
       echo "  ⚠️  $CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
       if [ -s "$ERR_CTX" ]; then
         echo "  Output: $(tail -5 "$ERR_CTX")"
       fi
     else
+      regen_failed=1
       echo "  ⚠️  Context generation failed (exit code $EXIT_CTX)."
       if [ -s "$ERR_CTX" ]; then
         echo "  Output: $(tail -5 "$ERR_CTX")"
@@ -866,4 +924,8 @@ Rules:
   fi # REGEN_SKILLS
 
   set -e
+  if [ "$regen_failed" -ne 0 ]; then
+    return 1
+  fi
+  return 0
 }

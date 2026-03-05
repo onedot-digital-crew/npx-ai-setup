@@ -7,6 +7,7 @@
 handle_version_check() {
   INSTALLED_VERSION=$(get_installed_version)
   PACKAGE_VERSION=$(get_package_version)
+  local update_rc=0
 
   if [ -n "$INSTALLED_VERSION" ] && [ "$INSTALLED_VERSION" = "$PACKAGE_VERSION" ]; then
     # Same version — already up to date
@@ -14,30 +15,41 @@ handle_version_check() {
     echo "✅ Already up to date (v${PACKAGE_VERSION})."
     echo ""
     echo "   1) Update files  — review template files, ask about user-modified ones"
-    echo "   2) Regenerate    — regenerate CLAUDE.md, context, commands, skills"
+    echo "   2) Regenerate    — regenerate CLAUDE.md, AGENTS.md, context, commands, skills"
     echo "   3) Skip          — exit without changes"
     echo ""
     read -p "   Choose [1/2/3]: " UPTODATE_CHOICE
 
     case "$UPTODATE_CHOICE" in
       1)
-        run_smart_update --skip-regen
-        exit 0
+        update_rc=0
+        run_smart_update --skip-regen || update_rc=$?
+        exit "$update_rc"
         ;;
       2)
+        regen_ok=0
         if command -v claude &>/dev/null; then
           if ask_regen_parts; then
             if [ -z "$SYSTEM" ]; then
               select_system
             fi
             detect_system
-            run_generation
+            run_generation || regen_ok=$?
             write_metadata
             echo ""
-            echo "✅ Regeneration complete!"
+            if [ "$regen_ok" -eq 0 ]; then
+              echo "✅ Regeneration complete!"
+            else
+              echo "⚠️  Regeneration finished with warnings. Review output above."
+            fi
           fi
+        else
+          echo ""
+          echo "  ⚠️  Claude CLI not found. Regeneration requires Claude Code."
+          echo "  Install: npm i -g @anthropic-ai/claude-code"
+          regen_ok=1
         fi
-        exit 0
+        exit "$regen_ok"
         ;;
       *)
         echo "   Skipped. No changes made."
@@ -58,8 +70,9 @@ handle_version_check() {
 
     case "$UPDATE_CHOICE" in
       1)
-        run_smart_update
-        exit 0
+        update_rc=0
+        run_smart_update || update_rc=$?
+        exit "$update_rc"
         ;;
       2)
         run_clean_reinstall
@@ -77,6 +90,7 @@ handle_version_check() {
 # Usage: run_smart_update [--skip-regen]
 run_smart_update() {
   local skip_regen=0
+  local regen_failed=0
   [ "${1:-}" = "--skip-regen" ] && skip_regen=1
   echo ""
   echo "🔍 Analyzing templates..."
@@ -205,28 +219,40 @@ run_smart_update() {
   write_metadata
 
   # Check context files and offer AI regeneration (skipped when called from same-version menu)
-  if [ "$skip_regen" -eq 0 ] && command -v claude &>/dev/null; then
-    echo ""
-    # Count existing .agents/context/ files (Steps 1-2)
-    CTX_EXISTING=0
-    [ -f ".agents/context/STACK.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
-    [ -f ".agents/context/ARCHITECTURE.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
-    [ -f ".agents/context/CONVENTIONS.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
-    CTX_MISSING=$((3 - CTX_EXISTING))
-    if [ "$CTX_MISSING" -gt 0 ]; then
-      echo "  ⚠️  $CTX_MISSING of 3 context files missing in .agents/context/ — regeneration recommended"
+  if [ "$skip_regen" -eq 0 ]; then
+    if command -v claude &>/dev/null; then
       echo ""
-    fi
-    # Use granular selector instead of binary y/N (Steps 3-4)
-    if ask_regen_parts; then
-      if [ -z "$SYSTEM" ]; then
-        select_system
+      # Count existing .agents/context/ files (Steps 1-2)
+      CTX_EXISTING=0
+      [ -f ".agents/context/STACK.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
+      [ -f ".agents/context/ARCHITECTURE.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
+      [ -f ".agents/context/CONVENTIONS.md" ] && CTX_EXISTING=$((CTX_EXISTING + 1))
+      CTX_MISSING=$((3 - CTX_EXISTING))
+      if [ "$CTX_MISSING" -gt 0 ]; then
+        echo "  ⚠️  $CTX_MISSING of 3 context files missing in .agents/context/ — regeneration recommended"
+        echo ""
       fi
-      detect_system
-      run_generation
-      write_metadata
+      # Use granular selector instead of binary y/N (Steps 3-4)
+      if ask_regen_parts; then
+        if [ -z "$SYSTEM" ]; then
+          select_system
+        fi
+        detect_system
+        regen_ok=0
+        run_generation || regen_ok=$?
+        write_metadata
+        echo ""
+        if [ "$regen_ok" -eq 0 ]; then
+          echo "✅ Regeneration complete!"
+        else
+          regen_failed=1
+          echo "⚠️  Regeneration finished with warnings. Review output above."
+        fi
+      fi
+    else
       echo ""
-      echo "✅ Regeneration complete!"
+      echo "  ⚠️  Skipping regeneration (claude CLI not found)."
+      echo "  Install: npm i -g @anthropic-ai/claude-code"
     fi
   fi
 
@@ -234,7 +260,12 @@ run_smart_update() {
   generate_repomix_snapshot
 
   echo ""
-  echo "✅ Update complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+  if [ "$regen_failed" -eq 0 ]; then
+    echo "✅ Update complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+    return 0
+  fi
+  echo "⚠️  Update complete with warnings (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+  return 1
 }
 
 # Clean reinstall: remove all managed files, reset metadata

@@ -4,6 +4,20 @@
 
 PENDING_PLUGINS=""
 
+# Legacy compatibility shim.
+# GSD is intentionally optional and no longer auto-installed by ai-setup.
+install_gsd() {
+  echo "  🧩 GSD is optional (manual install): npx get-shit-done-cc@latest --claude --global"
+  return 0
+}
+
+# Legacy compatibility shim.
+# Playwright auto-install was removed; keep function for older callers/tests.
+install_playwright() {
+  echo "  🎭 Playwright auto-install is deprecated and skipped."
+  return 0
+}
+
 # Claude-Mem (Marketplace Plugin — persistent memory)
 install_claude_mem() {
   CLAUDE_MEM_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
@@ -142,6 +156,7 @@ show_installation_summary() {
   echo ""
   echo "✅ Files created:"
   [ -f CLAUDE.md ] && echo "   - CLAUDE.md (project rules)"
+  [ -f AGENTS.md ] && echo "   - AGENTS.md (universal passive agent context)"
   [ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
   [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
   echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, context-freshness, update-check)"
@@ -166,11 +181,15 @@ show_installation_summary() {
 
   if [ "$AI_CLI" = "claude" ] && [[ ! "${RUN_INIT:-N}" =~ ^[Nn]$ ]]; then
     echo ""
-    echo "✅ Auto-Init completed (System: ${SYSTEM:-not set}):"
-    echo "   - CLAUDE.md extended with Commands & Critical Rules"
-    [ -d .agents/context ] && echo "   - .agents/context/ (STACK.md, ARCHITECTURE.md, CONVENTIONS.md)"
-    if [ ${INSTALLED:-0} -gt 0 ]; then
-      echo "   - ${INSTALLED} skills installed"
+    if [ "${AUTO_INIT_OK:-yes}" = "yes" ]; then
+      echo "✅ Auto-Init completed (System: ${SYSTEM:-not set}):"
+      echo "   - CLAUDE.md + AGENTS.md extended with project-specific sections"
+      [ -d .agents/context ] && echo "   - .agents/context/ (STACK.md, ARCHITECTURE.md, CONVENTIONS.md)"
+      if [ ${INSTALLED:-0} -gt 0 ]; then
+        echo "   - ${INSTALLED} skills installed"
+      fi
+    else
+      echo "⚠️  Auto-Init finished with warnings — review output above."
     fi
   fi
 
@@ -185,7 +204,7 @@ show_next_steps() {
   echo "   ──────────────────────────────────────────────────────────"
   echo ""
   echo "Start a Claude Code session and begin working."
-  echo "Your project context and CLAUDE.md are ready."
+  echo "Your project context, CLAUDE.md, and AGENTS.md are ready."
   echo ""
   echo "Spec-driven workflow:"
   echo "  /spec \"task description\"    Create a structured spec before coding"

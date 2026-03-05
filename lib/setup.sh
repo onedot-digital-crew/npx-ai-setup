@@ -82,6 +82,17 @@ install_claude_md() {
   fi
 }
 
+# Copy AGENTS.md template
+install_agents_md() {
+  echo "📝 Writing AGENTS.md..."
+  if [ ! -f AGENTS.md ]; then
+    cp "$TPL/AGENTS.md" AGENTS.md
+    echo "  AGENTS.md created (template — customize as needed)."
+  else
+    echo "  AGENTS.md already exists, skipping."
+  fi
+}
+
 # Create .claude/settings.json
 install_settings() {
   echo "⚙️  Writing .claude/settings.json..."
@@ -249,6 +260,14 @@ update_gitignore() {
     echo ".agents/context/.state" >> .gitignore
     echo ".agents/repomix-snapshot.md" >> .gitignore
     echo "CLAUDE.local.md" >> .gitignore
+  fi
+
+  # AGENTS.md should be tracked like CLAUDE.md (never ignored)
+  if grep -Eq '^[[:space:]]*/?AGENTS\.md[[:space:]]*$' .gitignore 2>/dev/null; then
+    local tmp_gitignore
+    tmp_gitignore=$(mktemp)
+    awk '!/^[[:space:]]*\/?AGENTS\.md[[:space:]]*$/' .gitignore > "$tmp_gitignore" && mv "$tmp_gitignore" .gitignore
+    echo "  Removed AGENTS.md from .gitignore (must be committed)."
   fi
 }
 

@@ -15,6 +15,7 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | Layer | What |
 |-------|------|
 | **CLAUDE.md** | Communication protocol, task routing (simple/medium/complex), verification gate |
+| **AGENTS.md** | Universal passive context for Cursor, Windsurf, Cline, and AGENTS.md-compatible tools |
 | **Settings** | Granular bash permissions, opusplan model, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH |
 | **Hooks** | protect-files, auto-lint, circuit-breaker, context-freshness, update-check, notifications, SessionStart context reload, tool-failure log, Stop quality gate |
 | **Rules** | `.claude/rules/` — general, testing, git, typescript (conditional) |
@@ -77,7 +78,7 @@ npx github:onedot-digital-crew/npx-ai-setup [flags]
 Run the same command again — the script auto-detects and offers:
 
 - **Update files** — compare each template, ask before overwriting user-modified files
-- **Regenerate** — re-run Claude analysis (CLAUDE.md, context, commands, skills)
+- **Regenerate** — re-run Claude analysis (CLAUDE.md, AGENTS.md, context, commands, skills)
 - **Clean reinstall** — remove all managed files, fresh install
 
 ---

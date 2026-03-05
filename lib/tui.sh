@@ -119,7 +119,7 @@ select_system() {
 ask_regen_parts() {
   # Arrow keys + Space to toggle + Enter to confirm (same style as select_system)
   local options=("CLAUDE.md" "Context" "Commands" "Skills")
-  local descriptions=("Commands & Critical Rules" ".agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)" "Slash commands & agents (spec, commit, grill...)" "External skills from skills.sh")
+  local descriptions=("CLAUDE.md + AGENTS.md (commands, overview, rules)" ".agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)" "Slash commands & agents (spec, commit, grill...)" "External skills from skills.sh")
   local count=4
   local selected=0
   local checked=(1 1 1 1)  # all pre-selected
@@ -194,7 +194,7 @@ ask_regen_parts() {
 # Returns 1 if the user selected nothing (skip template update).
 ask_update_parts() {
   local options=("Hooks" "Settings" "Commands" "Agents" "Other")
-  local descriptions=(".claude/hooks/ (protect-files, lint, circuit-breaker...)" ".claude/settings.json" ".claude/commands/ (spec, commit, grill, pr...)" ".claude/agents/ (verify-app, build-validator, code-reviewer, code-architect...)" "specs/, github/, CLAUDE.md template")
+  local descriptions=(".claude/hooks/ (protect-files, lint, circuit-breaker...)" ".claude/settings.json" ".claude/commands/ (spec, commit, grill, pr...)" ".claude/agents/ (verify-app, build-validator, code-reviewer, code-architect...)" "specs/, github/, CLAUDE.md + AGENTS.md templates")
   local count=5
   local selected=0
   local checked=(1 1 1 1 1)  # all pre-selected

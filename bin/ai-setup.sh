@@ -97,14 +97,18 @@ if [ "$REGENERATE" = "yes" ]; then
   fi
   detect_system
 
-  run_generation
-
+  if run_generation; then
+    echo ""
+    echo "✅ Regeneration complete! (System: $SYSTEM)"
+    echo "   - CLAUDE.md + AGENTS.md updated"
+    [ -d .agents/context ] && echo "   - .agents/context/ regenerated"
+    [ ${INSTALLED:-0} -gt 0 ] && echo "   - $INSTALLED skills installed"
+    exit 0
+  fi
   echo ""
-  echo "✅ Regeneration complete! (System: $SYSTEM)"
-  echo "   - CLAUDE.md updated"
-  [ -d .agents/context ] && echo "   - .agents/context/ regenerated"
-  [ ${INSTALLED:-0} -gt 0 ] && echo "   - $INSTALLED skills installed"
-  exit 0
+  echo "⚠️  Regeneration finished with warnings (System: $SYSTEM)."
+  echo "   Review the warnings above and re-run after fixing the underlying issue."
+  exit 1
 fi
 
 # ==============================================================================
@@ -122,6 +126,7 @@ echo "🚀 Starting AI Setup (Claude Code + Skills)..."
 check_requirements
 cleanup_legacy
 install_claude_md
+install_agents_md
 install_settings
 install_hooks
 install_rules
@@ -175,11 +180,17 @@ if [ "$AI_CLI" = "claude" ]; then
     fi
     detect_system
 
-    run_generation
-
-    echo ""
-    echo "✅ Auto-Init complete!"
-    _NOTIFY_MSG="Auto-Init complete!"
+    AUTO_INIT_OK="no"
+    if run_generation; then
+      AUTO_INIT_OK="yes"
+      echo ""
+      echo "✅ Auto-Init complete!"
+      _NOTIFY_MSG="Auto-Init complete!"
+    else
+      echo ""
+      echo "⚠️  Auto-Init finished with warnings. Review output above."
+      _NOTIFY_MSG="Auto-Init finished with warnings"
+    fi
     case "$(uname -s)" in
       Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"AI Setup\" sound name \"Glass\"" 2>/dev/null || true ;;
       Linux) command -v notify-send >/dev/null 2>&1 && notify-send "AI Setup" "$_NOTIFY_MSG" 2>/dev/null || true ;;
@@ -190,7 +201,7 @@ elif [ "$AI_CLI" = "copilot" ]; then
   echo "   Manual steps required:"
   echo ""
   echo "   1. Open VS Code / GitHub Copilot Chat"
-  echo "   2. Ask Copilot to extend CLAUDE.md with Commands and Critical Rules"
+  echo "   2. Ask Copilot to extend CLAUDE.md and AGENTS.md with project-specific sections"
 else
   echo "⚠️  No AI CLI detected (neither claude nor gh copilot)."
   echo "   Install Claude Code: npm i -g @anthropic-ai/claude-code"

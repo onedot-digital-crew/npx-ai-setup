@@ -6,7 +6,7 @@
 |------|-------|---------|---------------|
 | `protect-files.sh` | PreToolUse | Blocks edits to `.env`, `package-lock.json`, `.git/` | Edit `PROTECTED` array |
 | `circuit-breaker.sh` | PreToolUse | Warns at 5 edits, blocks at 8 edits to same file in 10 min | Edit `WARN`/`BLOCK`/`WINDOW` vars |
-| `post-edit-lint.sh` | PostToolUse | ESLint on `.js`/`.ts`/`.jsx`/`.tsx`, Prettier on `.css`/`.html`/`.json`/`.md`/`.vue`/`.svelte` | Add extensions or change tools |
+| `post-edit-lint.sh` | PostToolUse | Optional file-scoped project `format` script (bun/npm), then fallback ESLint on `.js`/`.ts`/`.jsx`/`.tsx` and Prettier on `.css`/`.html`/`.json`/`.md`/`.vue`/`.svelte` | Add extensions or change tools |
 | `context-freshness.sh` | UserPromptSubmit | Warns when `.agents/context/` is stale | Runs silently unless project files changed |
 
 **Exit codes:** `0` = pass, `1` = fail with feedback, `2` = blocked
