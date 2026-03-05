@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  create:
   workflow_dispatch:
     inputs:
       tag:
@@ -16,6 +17,7 @@ permissions:
 
 jobs:
   release:
+    if: ${{ github.event_name != 'create' || (github.event.ref_type == 'tag' && startsWith(github.event.ref, 'v')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,6 +30,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ inputs.tag }}"
+          elif [ "${{ github.event_name }}" = "create" ]; then
+            TAG="${{ github.event.ref }}"
           else
             TAG="${GITHUB_REF_NAME}"
           fi

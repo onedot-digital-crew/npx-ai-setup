@@ -49,6 +49,7 @@ Bumps version, updates CHANGELOG, commits, and tags the release. Use when shippi
    - Tag: `git tag vX.Y.Z`
    - Report: "Tagged vX.Y.Z. Run `git push && git push --tags` when ready."
    - AI Setup installs `.github/workflows/release-from-changelog.yml` by default: pushing `vX.Y.Z` auto-creates/updates the GitHub Release body from the matching `CHANGELOG.md` section (`## [vX.Y.Z]`), so Slack release notifications include the changelog text.
+   - Fallback safety: if no push-triggered release run appears within ~60 seconds after pushing the tag, run `gh workflow run release-from-changelog.yml -f tag=vX.Y.Z`.
 
 ## Rules
 - Never push automatically — always leave push to the user

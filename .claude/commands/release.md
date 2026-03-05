@@ -48,6 +48,7 @@ Bumps version, updates CHANGELOG, commits, and tags the release. Use when shippi
    - Commit: `git commit -m "release: vX.Y.Z"`
    - Tag: `git tag vX.Y.Z`
    - Report: "Tagged vX.Y.Z. Run `git push && git push --tags` when ready."
+   - Fallback safety: if no push-triggered release run appears within ~60 seconds after pushing the tag, run `gh workflow run release-from-changelog.yml -f tag=vX.Y.Z`.
 
 ## Rules
 - Never push automatically — always leave push to the user

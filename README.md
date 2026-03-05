@@ -120,6 +120,7 @@ AI Setup installs `.github/workflows/release-from-changelog.yml` into target pro
 When you push a version tag like `v1.2.5`, it creates or updates the GitHub Release body from the matching `CHANGELOG.md` section:
 
 - Required heading format: `## [vX.Y.Z]`
+- Fallback if tag push is delayed: `gh workflow run release-from-changelog.yml -f tag=vX.Y.Z`
 - Slack GitHub App (`/github subscribe owner/repo releases`) will show this release body in channel notifications.
 
 ---
