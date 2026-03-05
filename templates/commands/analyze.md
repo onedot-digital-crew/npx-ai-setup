@@ -1,6 +1,6 @@
 ---
 model: sonnet
-allowed-tools: Read, Glob, Grep, Bash, Task
+allowed-tools: Read, Glob, Grep, Bash, Agent
 ---
 
 Produces a structured codebase overview via 3 parallel agents. Use when exploring or preparing for major changes.
@@ -9,7 +9,7 @@ Produces a structured codebase overview via 3 parallel agents. Use when explorin
 
 ### 1. Launch 3 agents simultaneously
 
-Spawn all three agents at the same time using the Task tool in parallel:
+Spawn all three agents at the same time using the Agent tool in parallel:
 
 **Agent 1 — Architecture**
 

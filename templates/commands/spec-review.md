@@ -2,7 +2,7 @@
 model: opus
 mode: plan
 argument-hint: "[spec number]"
-allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Task
+allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion, Agent
 ---
 
 Reviews spec $ARGUMENTS and its code changes against acceptance criteria. Use after spec-work to validate and close.
@@ -41,7 +41,7 @@ For each changed file, read the full file to understand context around the chang
 If `.agents/context/CONVENTIONS.md` exists and contains a `## Definition of Done` section, verify the code changes also satisfy those global quality gates (e.g. no lint errors, no explicit any, all tests green, code formatted). Report any gates that are not met as blocking issues.
 
 #### 5d — Code quality
-Spawn the `code-reviewer` agent via Task tool. Pass:
+Spawn the `code-reviewer` agent via Agent tool. Pass:
 - The full spec content (goal, steps, acceptance criteria, out of scope)
 - The branch name from the spec header (so the agent runs `git diff main...BRANCH`)
 

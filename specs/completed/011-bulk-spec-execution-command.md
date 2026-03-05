@@ -9,7 +9,7 @@ Add a `/spec-work-all` slash command that executes multiple specs in parallel or
 Currently `/spec-work NNN` processes one spec at a time with a single agent. When multiple independent specs exist, users must run them one-by-one. A bulk command using subagents would dramatically speed up spec completion for batches of unrelated specs.
 
 ## Steps
-- [x] Step 1: Create `templates/commands/spec-work-all.md` — slash command that lists all draft specs and dispatches each to a Task subagent
+- [x] Step 1: Create `templates/commands/spec-work-all.md` — slash command that lists all draft specs and dispatches each to an Agent subagent
 - [x] Step 2: Define parallelism strategy in the command: independent specs run in parallel, dependent specs run in sequence
 - [x] Step 3: Add dependency detection: if spec A's "Out of Scope" mentions spec B, treat them as sequential
 - [x] Step 4: Register `spec-work-all.md` in `bin/ai-setup.sh` template deployment (alongside spec-work.md)

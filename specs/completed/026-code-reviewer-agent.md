@@ -12,8 +12,8 @@ The installed agents (`build-validator`, `verify-app`, `staff-reviewer`) are nev
 
 ## Steps
 - [x] Step 1: Create `templates/agents/code-reviewer.md` — model: sonnet, max_turns: 15, read-only; accepts diff + optional spec context; reports bugs/security/quality at HIGH/MEDIUM confidence; returns PASS / CONCERNS / FAIL verdict
-- [x] Step 2: Update `templates/commands/spec-work.md` — add `Task` to `allowed-tools`; auto-review step always spawns `code-reviewer` (no "ask user" — mandatory)
-- [x] Step 3: Update `templates/commands/spec-review.md` — add `Task` to `allowed-tools`; step 5c (code quality) spawns `code-reviewer` agent with spec + branch diff
+- [x] Step 2: Update `templates/commands/spec-work.md` — add `Agent` to `allowed-tools`; auto-review step always spawns `code-reviewer` (no "ask user" — mandatory)
+- [x] Step 3: Update `templates/commands/spec-review.md` — add `Agent` to `allowed-tools`; step 5c (code quality) spawns `code-reviewer` agent with spec + branch diff
 - [x] Step 4: Sync both to `.claude/commands/spec-work.md` and `.claude/commands/spec-review.md`
 
 ## Acceptance Criteria
@@ -24,8 +24,8 @@ The installed agents (`build-validator`, `verify-app`, `staff-reviewer`) are nev
 
 ## Files to Modify
 - `templates/agents/code-reviewer.md` — new file
-- `templates/commands/spec-work.md` — add Task, delegate auto-review
-- `templates/commands/spec-review.md` — add Task, delegate code quality check
+- `templates/commands/spec-work.md` — add Agent, delegate auto-review
+- `templates/commands/spec-review.md` — add Agent, delegate code quality check
 - `.claude/commands/spec-work.md` — sync
 - `.claude/commands/spec-review.md` — sync
 

@@ -17,7 +17,7 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | **CLAUDE.md** | Communication protocol, task routing (simple/medium/complex), verification gate |
 | **AGENTS.md** | Universal passive context for Cursor, Windsurf, Cline, and AGENTS.md-compatible tools |
 | **Settings** | Granular bash permissions, opusplan model, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH |
-| **Hooks** | protect-files, auto-lint, circuit-breaker, context-freshness, update-check, notifications, SessionStart context reload, tool-failure log, Stop quality gate |
+| **Hooks** | protect-files, auto-lint, circuit-breaker, context-freshness, update-check, notifications, SessionStart context reload, PostToolUseFailure log, ConfigChange audit, TaskCompleted gate, Stop quality gate |
 | **Rules** | `.claude/rules/` — general, testing, git, typescript (conditional) |
 | **Commands** | 16 slash commands for spec-driven development, reviews, releases, debugging |
 | **Agents** | 8 subagent templates for parallel verification, review, and architectural assessment |

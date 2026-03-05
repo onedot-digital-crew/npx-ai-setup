@@ -12,7 +12,7 @@ Claude Code exposes `code-architect` as a native subagent type for design review
 
 ## Steps
 - [x] Step 1: Create `templates/agents/code-architect.md` — model: opus, max_turns: 15; reviews proposed architecture or spec for design problems before implementation begins
-- [x] Step 2: Update `templates/commands/spec-work.md` — add `Task` to `allowed-tools` (if not already added by 026); before executing steps, auto-spawn `code-architect` when spec file contains `**Complexity**: high` in its header
+- [x] Step 2: Update `templates/commands/spec-work.md` — add `Agent` to `allowed-tools` (if not already added by 026); before executing steps, auto-spawn `code-architect` when spec file contains `**Complexity**: high` in its header
 - [x] Step 3: Sync change to `.claude/commands/spec-work.md`
 
 ## Acceptance Criteria
@@ -28,4 +28,4 @@ Claude Code exposes `code-architect` as a native subagent type for design review
 ## Out of Scope
 - Changing `/spec` creation command
 - Changing complexity detection beyond a simple header field
-- Depends on: Spec 026 (Task tool already added to spec-work)
+- Depends on: Spec 026 (Agent tool already added to spec-work)

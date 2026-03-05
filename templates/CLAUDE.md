@@ -98,6 +98,18 @@ Read relevant code before answering questions about it.
 Implement changes rather than only suggesting them.
 Use subagents for parallel or isolated work. For simple tasks, work directly.
 
+## Parallel Orchestration
+Use subagents by default for focused delegated work.
+If teammates must coordinate directly, use experimental agent teams (enable only when needed):
+- Set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in local Claude settings or environment
+- Start with 3-5 teammates for independent tasks
+- Clean up the team after completion
+
+## Automation (Agent SDK CLI)
+For non-interactive runs, use `claude -p "<prompt>"`.
+For CI-safe output, use `--output-format json` and parse structured fields.
+Constrain execution with `--allowedTools` instead of broad permissions.
+
 ## Skills Discovery
 When current capabilities are insufficient, search the skills.sh marketplace for additional agent skills:
 - Search: `npx -y skills@latest find "<keyword>"`

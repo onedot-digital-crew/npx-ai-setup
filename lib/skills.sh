@@ -71,6 +71,21 @@ get_keyword_skills() {
   esac
 }
 
+# Install bundled local skill template as fallback when registry/network install is unavailable.
+# Returns 0 when fallback was installed, 1 when no local template exists.
+install_local_skill_template() {
+  local sid="$1"
+  local skill_name="${sid##*@}"
+  local local_template="$SCRIPT_DIR/templates/skills/$skill_name/SKILL.md"
+  local local_target_dir=".claude/skills/$skill_name"
+
+  [ -f "$local_template" ] || return 1
+  mkdir -p "$local_target_dir"
+  cp "$local_template" "$local_target_dir/SKILL.md"
+  printf "\r     ✅ %s (local template fallback)\n" "$sid"
+  return 0
+}
+
 # Install a single skill with duplicate detection and registry verification
 # Uses $TIMEOUT_CMD if available
 install_skill() {
@@ -93,6 +108,9 @@ install_skill() {
     status=$(curl -s -o /dev/null -w "%{http_code}" \
       "https://skills.sh/$owner/$repo/$skill_name" 2>/dev/null)
     if [ "$status" != "200" ]; then
+      if install_local_skill_template "$sid"; then
+        return 0
+      fi
       printf "     ⚠️  %s (not in registry, skipping)\n" "$sid"
       return 0
     fi
@@ -103,6 +121,9 @@ install_skill() {
     printf "\r     ✅ %s\n" "$sid"
     return 0
   else
+    if install_local_skill_template "$sid"; then
+      return 0
+    fi
     printf "\r     ❌ %s (install failed)\n" "$sid"
     return 1
   fi

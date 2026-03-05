@@ -194,6 +194,12 @@ setup_shopware_mcp() {
   # Ensure .mcp.json exists
   [ -f ".mcp.json" ] || echo '{"mcpServers":{}}' > .mcp.json
 
+  # Warn if an existing server stores credentials in a git-tracked file
+  if jq -e '(.mcpServers["shopware-admin-mcp"].env.SHOPWARE_API_CLIENT_ID? != null) or (.mcpServers["shopware-admin-mcp"].env.SHOPWARE_API_CLIENT_SECRET? != null)' .mcp.json >/dev/null 2>&1; then
+    echo "  ⚠️  shopware-admin-mcp credentials found in .mcp.json."
+    echo "     Move secrets to local shell env vars (do not commit credentials)."
+  fi
+
   # Idempotency: skip if already configured
   if jq -e '.mcpServers["shopware-admin-mcp"]' .mcp.json >/dev/null 2>&1; then
     return 0
@@ -226,34 +232,38 @@ setup_shopware_mcp() {
     if [ -z "$USE_ENV" ] || [ "$USE_ENV" = "y" ] || [ "$USE_ENV" = "Y" ]; then
       SW_URL="$ENV_URL"
     else
-      read -r -p "   Shop URL (e.g. https://your-shop.com): " SW_URL
+      read -r -p "   Shop URL (optional, e.g. https://your-shop.com): " SW_URL
     fi
   else
-    read -r -p "   Shop URL (e.g. https://your-shop.com): " SW_URL
-  fi
-
-  read -r -p "   Client ID: " SW_ID
-  read -rs -p "   Client Secret: " SW_SECRET
-  echo ""
-
-  if [ -z "$SW_URL" ] || [ -z "$SW_ID" ] || [ -z "$SW_SECRET" ]; then
-    echo "   Skipped."
-    return 0
+    read -r -p "   Shop URL (optional, e.g. https://your-shop.com): " SW_URL
   fi
 
   local TMP_MCP
   TMP_MCP=$(mktemp)
-  jq --arg url "$SW_URL" --arg id "$SW_ID" --arg sec "$SW_SECRET" \
-    '.mcpServers["shopware-admin-mcp"] = {
-      "command": "npx",
-      "args": ["-y", "@shopware-ag/admin-mcp"],
-      "env": {
-        "SHOPWARE_API_URL": $url,
-        "SHOPWARE_API_CLIENT_ID": $id,
-        "SHOPWARE_API_CLIENT_SECRET": $sec
-      }
-    }' .mcp.json > "$TMP_MCP" && mv "$TMP_MCP" .mcp.json
+  if [ -n "$SW_URL" ]; then
+    jq --arg url "$SW_URL" \
+      '.mcpServers["shopware-admin-mcp"] = {
+        "command": "npx",
+        "args": ["-y", "@shopware-ag/admin-mcp"],
+        "env": {
+          "SHOPWARE_API_URL": $url
+        }
+      }' .mcp.json > "$TMP_MCP" && mv "$TMP_MCP" .mcp.json
+  else
+    jq \
+      '.mcpServers["shopware-admin-mcp"] = {
+        "command": "npx",
+        "args": ["-y", "@shopware-ag/admin-mcp"]
+      }' .mcp.json > "$TMP_MCP" && mv "$TMP_MCP" .mcp.json
+  fi
+
   echo "   shopware-admin-mcp added to .mcp.json"
+  echo "   ℹ️  Set credentials locally before starting Claude Code:"
+  echo "      export SHOPWARE_API_CLIENT_ID=..."
+  echo "      export SHOPWARE_API_CLIENT_SECRET=..."
+  if [ -z "$SW_URL" ]; then
+    echo "      export SHOPWARE_API_URL=https://your-shop.com"
+  fi
 }
 
 # Main generation orchestrator
@@ -272,6 +282,10 @@ run_generation() {
   : "${REGEN_CONTEXT:=yes}"
   : "${REGEN_COMMANDS:=yes}"
   : "${REGEN_SKILLS:=yes}"
+  local regen_ai_context="no"
+  if [ "$REGEN_CLAUDE_MD" = "yes" ] || [ "$REGEN_CONTEXT" = "yes" ]; then
+    regen_ai_context="yes"
+  fi
 
   # Re-deploy slash commands & agents from package templates
   if [ "$REGEN_COMMANDS" = "yes" ]; then
@@ -303,21 +317,22 @@ run_generation() {
     echo "  ✅ $cmd_updated command/agent files updated"
   fi
 
-  echo "🚀 Generating project context (System: $SYSTEM)..."
+  if [ "$regen_ai_context" = "yes" ]; then
+    echo "🚀 Generating project context (System: $SYSTEM)..."
 
-  # Detect Shopware sub-type and gather system-specific context
-  detect_shopware_type
-  if [ -n "$SHOPWARE_TYPE" ]; then
-    echo "  Shopware type: $SHOPWARE_TYPE"
-  fi
-  gather_shopware_context
-  setup_shopware_mcp
+    # Detect Shopware sub-type and gather system-specific context
+    detect_shopware_type
+    if [ -n "$SHOPWARE_TYPE" ]; then
+      echo "  Shopware type: $SHOPWARE_TYPE"
+    fi
+    gather_shopware_context
+    setup_shopware_mcp
 
-  # Cache file list once (avoid running collect_project_files 3x)
-  CACHED_FILES=$(collect_project_files 80)
+    # Cache file list once (avoid running collect_project_files 3x)
+    CACHED_FILES=$(collect_project_files 80)
 
-  # Gather all context upfront
-  CONTEXT="--- package.json ---
+    # Gather all context upfront
+    CONTEXT="--- package.json ---
 $(cat package.json 2>/dev/null)
 --- package.json scripts ---
 $(jq -r '.scripts | to_entries[] | "- \(.key): \(.value)"' package.json 2>/dev/null)
@@ -332,68 +347,68 @@ $(cat CLAUDE.md 2>/dev/null)
 --- AGENTS.md (current) ---
 $(cat AGENTS.md 2>/dev/null)"
 
-  # Extended context for project context generation
-  CTX_PKG=$(cat package.json 2>/dev/null || echo "No package.json")
-  CTX_TSCONFIG=$(cat tsconfig.*.json 2>/dev/null; [ -f tsconfig.json ] && cat tsconfig.json 2>/dev/null || echo "No tsconfig")
-  CTX_TSCONFIG=$(echo "$CTX_TSCONFIG" | head -80)
-  CTX_DIRS=$(find . -maxdepth 3 -type d \
-    \( -name node_modules -o -name .git -o -name dist -o -name build \
-       -o -name .next -o -name vendor -o -name .nuxt -o -name .output \) -prune -o \
-    -type d -print 2>/dev/null | head -60)
-  CTX_FILES="$CACHED_FILES"
-  CTX_CONFIGS=$(ls -1 *.config.* .eslintrc* .prettierrc* tailwind.config.* \
-    vite.config.* nuxt.config.* next.config.* astro.config.* \
-    webpack.config.* rollup.config.* docker-compose* Dockerfile \
-    Makefile Cargo.toml go.mod requirements.txt pyproject.toml \
-    biome.json 2>/dev/null || echo "No config files found")
-  CTX_README=$(head -50 README.md 2>/dev/null || echo "No README")
+    # Extended context for project context generation
+    CTX_PKG=$(cat package.json 2>/dev/null || echo "No package.json")
+    CTX_TSCONFIG=$(cat tsconfig.*.json 2>/dev/null; [ -f tsconfig.json ] && cat tsconfig.json 2>/dev/null || echo "No tsconfig")
+    CTX_TSCONFIG=$(echo "$CTX_TSCONFIG" | head -80)
+    CTX_DIRS=$(find . -maxdepth 3 -type d \
+      \( -name node_modules -o -name .git -o -name dist -o -name build \
+         -o -name .next -o -name vendor -o -name .nuxt -o -name .output \) -prune -o \
+      -type d -print 2>/dev/null | head -60)
+    CTX_FILES="$CACHED_FILES"
+    CTX_CONFIGS=$(ls -1 *.config.* .eslintrc* .prettierrc* tailwind.config.* \
+      vite.config.* nuxt.config.* next.config.* astro.config.* \
+      webpack.config.* rollup.config.* docker-compose* Dockerfile \
+      Makefile Cargo.toml go.mod requirements.txt pyproject.toml \
+      biome.json 2>/dev/null || echo "No config files found")
+    CTX_README=$(head -50 README.md 2>/dev/null || echo "No README")
 
-  # Sample source files (generic: first 3 project files)
-  CTX_SAMPLE=""
-  for f in $(echo "$CACHED_FILES" | head -3); do
-    CTX_SAMPLE+="
+    # Sample source files (generic: first 3 project files)
+    CTX_SAMPLE=""
+    for f in $(echo "$CACHED_FILES" | head -3); do
+      CTX_SAMPLE+="
 --- $f (first 50 lines) ---
 $(head -50 "$f" 2>/dev/null)"
-  done
+    done
 
-  # Temp files for error capture (cleaned up on exit/interrupt)
-  ERR_CM=$(mktemp)
-  ERR_AM=$(mktemp)
-  ERR_CTX=$(mktemp)
-  trap "rm -f '$ERR_CM' '$ERR_AM' '$ERR_CTX'" RETURN
+    # Temp files for error capture (cleaned up on exit/interrupt)
+    ERR_CM=$(mktemp)
+    ERR_AM=$(mktemp)
+    ERR_CTX=$(mktemp)
+    trap "rm -f '$ERR_CM' '$ERR_AM' '$ERR_CTX'" RETURN
 
-  # Detect test framework for conditional TDD rule
-  HAS_TESTS=""
-  if cat package.json 2>/dev/null | grep -qE '"(jest|vitest|mocha|jasmine|ava)"'; then
-    HAS_TESTS="jest/vitest/mocha"
-  elif [ -f "pytest.ini" ] || [ -f "pyproject.toml" ] && grep -q "pytest" pyproject.toml 2>/dev/null; then
-    HAS_TESTS="pytest"
-  elif [ -f "requirements.txt" ] && grep -qi "pytest" requirements.txt 2>/dev/null; then
-    HAS_TESTS="pytest"
-  fi
+    # Detect test framework for conditional TDD rule
+    HAS_TESTS=""
+    if cat package.json 2>/dev/null | grep -qE '"(jest|vitest|mocha|jasmine|ava)"'; then
+      HAS_TESTS="jest/vitest/mocha"
+    elif [ -f "pytest.ini" ] || [ -f "pyproject.toml" ] && grep -q "pytest" pyproject.toml 2>/dev/null; then
+      HAS_TESTS="pytest"
+    elif [ -f "requirements.txt" ] && grep -qi "pytest" requirements.txt 2>/dev/null; then
+      HAS_TESTS="pytest"
+    fi
 
-  TDD_INSTRUCTION=""
-  if [ -n "$HAS_TESTS" ]; then
-    TDD_INSTRUCTION="
+    TDD_INSTRUCTION=""
+    if [ -n "$HAS_TESTS" ]; then
+      TDD_INSTRUCTION="
 ## TDD Workflow ($HAS_TESTS detected)
 If a test framework is present, add a 'TDD Workflow' subsection under Critical Rules:
 - Before implementing ANY logic, write a failing test first (Red)
 - Implement minimum code to make the test pass (Green)
 - Refactor if needed, keep tests green (Refactor)
 - Never write implementation code without a test first"
-  fi
+    fi
 
-  # Step 1a: Extend CLAUDE.md (sonnet, background)
-  PID_CM=""
-  PID_AM=""
-  if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
-  if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
-    cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
-  fi
-  CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
-  AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
+    # Step 1a: Extend CLAUDE.md (sonnet, background)
+    PID_CM=""
+    PID_AM=""
+    if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
+    if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
+      cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
+    fi
+    CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+    AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
 
-  claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
+    claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
 
 Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any HTML comments in those sections).
 
@@ -413,7 +428,7 @@ Rules:
 
 $CONTEXT
 $CTX_SHOPWARE" >"$ERR_CM" 2>&1 &
-  PID_CM=$!
+    PID_CM=$!
 
   # Step 1b: Extend AGENTS.md (sonnet, background, parallel with CLAUDE.md)
   claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
@@ -442,13 +457,13 @@ Rules:
 
 $CONTEXT
 $CTX_SHOPWARE" >"$ERR_AM" 2>&1 &
-  PID_AM=$!
-  fi
+    PID_AM=$!
+    fi
 
-  # Step 2: Generate project context (sonnet, background, parallel with Step 1)
-  PID_CTX=""
-  if [ "$REGEN_CONTEXT" = "yes" ]; then
-  mkdir -p .agents/context
+    # Step 2: Generate project context (sonnet, background, parallel with Step 1)
+    PID_CTX=""
+    if [ "$REGEN_CONTEXT" = "yes" ]; then
+    mkdir -p .agents/context
 
   claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 4 "IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
 
@@ -484,19 +499,19 @@ $CTX_README
 --- Sample source files ---
 $CTX_SAMPLE
 $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
-  PID_CTX=$!
-  fi
+    PID_CTX=$!
+    fi
 
-  # Wait for background processes
-  WAIT_ARGS=()
-  [ -n "$PID_CM" ] && WAIT_ARGS+=("$PID_CM:CLAUDE.md:30:120")
-  [ -n "$PID_AM" ] && WAIT_ARGS+=("$PID_AM:AGENTS.md:30:120")
-  [ -n "$PID_CTX" ] && WAIT_ARGS+=("$PID_CTX:Project context:45:180")
-  echo ""
-  [ ${#WAIT_ARGS[@]} -gt 0 ] && wait_parallel "${WAIT_ARGS[@]}"
+    # Wait for background processes
+    WAIT_ARGS=()
+    [ -n "$PID_CM" ] && WAIT_ARGS+=("$PID_CM:CLAUDE.md:30:120")
+    [ -n "$PID_AM" ] && WAIT_ARGS+=("$PID_AM:AGENTS.md:30:120")
+    [ -n "$PID_CTX" ] && WAIT_ARGS+=("$PID_CTX:Project context:45:180")
+    echo ""
+    [ ${#WAIT_ARGS[@]} -gt 0 ] && wait_parallel "${WAIT_ARGS[@]}"
 
-  # Verify Step 1a: CLAUDE.md was actually modified
-  if [ -n "$PID_CM" ]; then
+    # Verify Step 1a: CLAUDE.md was actually modified
+    if [ -n "$PID_CM" ]; then
     EXIT_CM=0
     wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
     CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
@@ -509,10 +524,10 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
       fi
       echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
     fi
-  fi
+    fi
 
-  # Verify Step 1b: AGENTS.md was actually modified
-  if [ -n "$PID_AM" ]; then
+    # Verify Step 1b: AGENTS.md was actually modified
+    if [ -n "$PID_AM" ]; then
     EXIT_AM=0
     wait "$PID_AM" 2>/dev/null || EXIT_AM=$?
     AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
@@ -525,10 +540,10 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
       fi
       echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
     fi
-  fi
+    fi
 
-  # Verify Step 2: context files were created
-  if [ -n "$PID_CTX" ]; then
+    # Verify Step 2: context files were created
+    if [ -n "$PID_CTX" ]; then
     EXIT_CTX=0
     wait "$PID_CTX" 2>/dev/null || EXIT_CTX=$?
     CTX_COUNT=0
@@ -552,19 +567,22 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
       fi
       echo "  Fix: Check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
     fi
-  fi
-
-  # Save state for freshness detection
-  STATE_FILE=".agents/context/.state"
-  if [ -d ".agents/context" ]; then
-    echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)" > "$STATE_FILE"
-    echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
-    echo "DIR_HASH=$(echo "$CACHED_FILES" | cksum | cut -d' ' -f1,2)" >> "$STATE_FILE"
-    echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
-    if [ "$SYSTEM" = "shopware" ] && [ -f composer.json ]; then
-      echo "COMPOSER_HASH=$(cksum composer.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
-      echo "SHOPWARE_TYPE=$SHOPWARE_TYPE" >> "$STATE_FILE"
     fi
+
+    # Save state for freshness detection
+    STATE_FILE=".agents/context/.state"
+    if [ -d ".agents/context" ]; then
+      echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)" > "$STATE_FILE"
+      echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
+      echo "DIR_HASH=$(echo "$CACHED_FILES" | cksum | cut -d' ' -f1,2)" >> "$STATE_FILE"
+      echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
+      if [ "$SYSTEM" = "shopware" ] && [ -f composer.json ]; then
+        echo "COMPOSER_HASH=$(cksum composer.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
+        echo "SHOPWARE_TYPE=$SHOPWARE_TYPE" >> "$STATE_FILE"
+      fi
+    fi
+  else
+    echo "⏭️  Skipping context generation (skills-only run)."
   fi
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
@@ -753,6 +771,7 @@ Rules:
             | sed 's/`//g' \
             | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
             | grep -E '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+$' \
+            | sort -u \
             | head -5)
         fi
 
@@ -893,6 +912,14 @@ Rules:
   fi
 
   if [ ${#SYSTEM_SKILLS[@]} -gt 0 ]; then
+    SYSTEM_SKILLS_UNIQ=()
+    while IFS= read -r sid; do
+      [ -n "$sid" ] && SYSTEM_SKILLS_UNIQ+=("$sid")
+    done <<EOF
+$(printf '%s\n' "${SYSTEM_SKILLS[@]}" | sed '/^$/d' | sort -u)
+EOF
+    SYSTEM_SKILLS=("${SYSTEM_SKILLS_UNIQ[@]}")
+
     echo ""
     echo "  📦 Installing system-specific skills ($SYSTEM)..."
 

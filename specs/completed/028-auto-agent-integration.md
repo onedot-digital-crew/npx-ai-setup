@@ -12,7 +12,7 @@ After 026 and 027, agents are available and `code-reviewer` runs automatically. 
 
 ## Steps
 - [x] Step 1: Update `templates/commands/spec-work.md` — after all steps complete, auto-spawn `verify-app` before `code-reviewer`; if verify-app returns FAIL, stop and report without running code-reviewer
-- [x] Step 2: Update `templates/commands/pr.md` — add `Task` to `allowed-tools`; spawn `staff-reviewer` automatically before drafting PR title/body; include reviewer verdict in PR output
+- [x] Step 2: Update `templates/commands/pr.md` — add `Agent` to `allowed-tools`; spawn `staff-reviewer` automatically before drafting PR title/body; include reviewer verdict in PR output
 - [x] Step 3: Sync both to `.claude/commands/spec-work.md` and `.claude/commands/pr.md`
 
 ## Acceptance Criteria
@@ -23,11 +23,11 @@ After 026 and 027, agents are available and `code-reviewer` runs automatically. 
 
 ## Files to Modify
 - `templates/commands/spec-work.md` — add verify-app spawn before code-reviewer
-- `templates/commands/pr.md` — add Task, spawn staff-reviewer
+- `templates/commands/pr.md` — add Agent, spawn staff-reviewer
 - `.claude/commands/spec-work.md` — sync
 - `.claude/commands/pr.md` — sync
 
 ## Out of Scope
 - Modifying `build-validator` (covered by verify-app)
 - Changing `spec-work-all` (uses worktrees — verify handled per-worktree)
-- Depends on: Spec 026 (Task already in spec-work allowed-tools)
+- Depends on: Spec 026 (Agent already in spec-work allowed-tools)

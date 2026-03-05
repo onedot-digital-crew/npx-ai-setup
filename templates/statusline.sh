@@ -8,8 +8,9 @@ command -v jq >/dev/null 2>&1 || { echo "Claude"; echo "jq required"; exit 0; }
 INPUT=$(cat)
 
 MODEL=$(echo "$INPUT" | jq -r '.model.display_name // "Claude"')
-DIR=$(basename "$PWD")
-BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+WORK_DIR=$(echo "$INPUT" | jq -r '.workspace.current_dir // .cwd // "."')
+PROJECT_DIR=$(echo "$INPUT" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // "."')
+DIR_NAME=$(basename "$WORK_DIR")
 PCT=$(echo "$INPUT" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 COST=$(echo "$INPUT" | jq -r '.cost.total_cost_usd // 0')
 DURATION=$(echo "$INPUT" | jq -r '.cost.total_duration_ms // 0')
@@ -21,6 +22,42 @@ case "$PCT" in ''|null|*[!0-9]*) PCT=0 ;; esac
 case "$REMAINING_PCT" in ''|null|*[!0-9]*) REMAINING_PCT=100 ;; esac
 case "$COST" in ''|null) COST=0 ;; esac
 case "$DURATION" in ''|null|*[!0-9]*) DURATION=0 ;; esac
+
+# Cache expensive git status calls (stable cache file per project path).
+BRANCH=""
+STAGED=0
+MODIFIED=0
+CACHE_ROOT="/tmp/claude-statusline-cache"
+mkdir -p "$CACHE_ROOT" 2>/dev/null || true
+DIR_KEY=$(printf '%s' "$PROJECT_DIR" | cksum | awk '{print $1}')
+CACHE_FILE="$CACHE_ROOT/git-${DIR_KEY}.txt"
+CACHE_MAX_AGE=5
+
+cache_is_stale() {
+  [ ! -f "$CACHE_FILE" ] && return 0
+  local now mtime
+  now=$(date +%s)
+  mtime=$(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE" 2>/dev/null || echo 0)
+  [ $((now - mtime)) -gt "$CACHE_MAX_AGE" ]
+}
+
+if cache_is_stale; then
+  if git -C "$WORK_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    BRANCH=$(git -C "$WORK_DIR" branch --show-current 2>/dev/null || echo "")
+    STAGED=$(git -C "$WORK_DIR" diff --cached --numstat 2>/dev/null | wc -l | tr -d ' ')
+    MODIFIED=$(git -C "$WORK_DIR" diff --numstat 2>/dev/null | wc -l | tr -d ' ')
+    printf '%s|%s|%s\n' "$BRANCH" "${STAGED:-0}" "${MODIFIED:-0}" > "$CACHE_FILE" 2>/dev/null || true
+  else
+    printf '||\n' > "$CACHE_FILE" 2>/dev/null || true
+  fi
+fi
+
+if [ -f "$CACHE_FILE" ]; then
+  IFS='|' read -r BRANCH STAGED MODIFIED < "$CACHE_FILE"
+fi
+
+case "$STAGED" in ''|null|*[!0-9]*) STAGED=0 ;; esac
+case "$MODIFIED" in ''|null|*[!0-9]*) MODIFIED=0 ;; esac
 
 # Write bridge file for context-monitor hook
 if [ -n "$SESSION_ID" ]; then
@@ -42,8 +79,8 @@ RESET="\033[0m"
 
 # Line 1: model + dir + branch
 BRANCH_PART=""
-[ -n "$BRANCH" ] && BRANCH_PART=" ($BRANCH)"
-echo -e "${MODEL} · ${DIR}${BRANCH_PART}"
+[ -n "$BRANCH" ] && BRANCH_PART=" (${BRANCH} +${STAGED} ~${MODIFIED})"
+echo -e "${MODEL} · ${DIR_NAME}${BRANCH_PART}"
 
 # Line 2: context bar + cost + duration
 MINS=$(( DURATION / 60000 ))

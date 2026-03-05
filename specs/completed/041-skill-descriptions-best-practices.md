@@ -46,7 +46,7 @@ Anthropic's skill best practices require descriptions that include both purpose 
 ## Review Feedback
 Frontmatter fields were stripped from 4 files during description rewrite:
 - `spec-work.md`: lost `disable-model-invocation: true` and `argument-hint: "[spec number]"`
-- `bug.md`: lost `argument-hint: "[bug description]"` and `Task` from allowed-tools
+- `bug.md`: lost `argument-hint: "[bug description]"` and `Agent` from allowed-tools
 - `spec.md`: lost `argument-hint: "[task description]"`
 - `spec-review.md`: lost `argument-hint: "[spec number]"`
 Fix: restore all original frontmatter fields — only the first body line (description) should change.

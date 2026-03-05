@@ -2,7 +2,7 @@
 model: sonnet
 disable-model-invocation: true
 argument-hint: "[spec number]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, Task
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, Agent
 ---
 
 Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to implement a single approved spec.
@@ -22,7 +22,7 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 
 5. **Load relevant skills**: If the spec's Context section mentions skills, read `.claude/skills/<name>/SKILL.md` for each and apply throughout execution. Skip if none listed.
 
-6. **Architectural review** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes, spawn the `code-architect` agent via Task tool, passing the full spec content as the prompt. Then:
+6. **Architectural review** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes, spawn the `code-architect` agent via Agent tool, passing the full spec content as the prompt. Then:
    - If the verdict is **REDESIGN**: stop immediately, report all concerns to the user, and do not proceed.
    - If the verdict is **PROCEED WITH CHANGES**: report the concerns to the user, then continue.
    - If the verdict is **PROCEED**: continue normally.
@@ -51,12 +51,12 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
     - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
-12. **Verify implementation**: Spawn `verify-app` via Task tool with the prompt:
+12. **Verify implementation**: Spawn `verify-app` via Agent tool with the prompt:
     > "Verify that the implementation for spec NNN is correct. Check if the project has a test suite and run it. Check if there is a build command and run it. Report PASS or FAIL."
     - If verify-app returns **FAIL**: set status to `in-review`, report the output, and **stop**. Do NOT run code-reviewer. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
     - If verify-app returns **PASS**: continue to the next step.
 
-13. **Auto-review**: Spawn the `code-reviewer` agent via Task tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
+13. **Auto-review**: Spawn the `code-reviewer` agent via Agent tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
     - If verdict is **FAIL**: set status to `in-review`. Report the issues. Suggest: `Run /spec-review NNN to review manually.`
     - If verdict is **PASS** or **CONCERNS**: set status to `completed`, move spec file `specs/NNN-*.md` → `specs/completed/NNN-*.md`. Report: "Auto-review passed. Spec NNN completed."
 

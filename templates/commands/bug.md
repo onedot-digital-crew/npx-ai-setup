@@ -1,7 +1,7 @@
 ---
 model: sonnet
 argument-hint: "[bug description]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 ---
 
 Investigates and fixes bug: $ARGUMENTS. Use when a defect needs root-cause analysis and a minimal targeted fix.
@@ -23,13 +23,13 @@ Investigates and fixes bug: $ARGUMENTS. Use when a defect needs root-cause analy
 - If the fix touches more than 3 files, stop and suggest creating a spec instead
 
 ### 4. Verify
-Spawn `verify-app` via Task tool:
+Spawn `verify-app` via Agent tool:
 > "Verify the bug fix. Run the test suite if available. Run the build if available. Report PASS or FAIL."
 - If **FAIL**: report the output and stop. Do NOT proceed to review. Suggest: re-investigate the root cause.
 - If **PASS**: continue to Step 5.
 
 ### 5. Review
-Spawn `code-reviewer` via Task tool. Pass the changed files and a one-line description of the fix.
+Spawn `code-reviewer` via Agent tool. Pass the changed files and a one-line description of the fix.
 - Verdict **PASS** or **CONCERNS**: done, report fix as complete.
 - Verdict **FAIL**: flag for manual review, report the issues.
 

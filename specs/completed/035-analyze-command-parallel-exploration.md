@@ -9,7 +9,7 @@ Add an /analyze command that uses 3 parallel Explore agents to produce a structu
 Projects have no fast way to get a full codebase overview. feature-dev shows the pattern: launch parallel specialized agents (architecture, hotspots, risks) simultaneously and synthesize results. Our /analyze command delivers this as a reusable, generic command installed in every project. Replaces the manual "explain this codebase" session-start pattern.
 
 ## Steps
-- [x] Step 1: Create `templates/commands/analyze.md` with model: sonnet, allowed-tools including Task
+- [x] Step 1: Create `templates/commands/analyze.md` with model: sonnet, allowed-tools including Agent
 - [x] Step 2: Agent 1 focus: Architecture — entry points, data flow, module boundaries, key abstractions (reads `.agents/context/ARCHITECTURE.md` first if exists, then explores)
 - [x] Step 3: Agent 2 focus: Hotspots — most-changed files (`git log --format="%f" | sort | uniq -c | sort -rn | head -20`), largest files, complex areas
 - [x] Step 4: Agent 3 focus: Risks — TODOs/FIXMEs/HACKs, dead code patterns, missing error handling, inconsistent naming

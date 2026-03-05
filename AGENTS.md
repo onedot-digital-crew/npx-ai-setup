@@ -69,7 +69,7 @@ The main bash script handles:
 - **Plugin installation**: Claude-Mem, official plugins, Context7 MCP
 
 **Command-line flags:**
-- `--system <name>` - Target system (auto, shopify, nuxt, laravel, shopware, storyblok)
+- `--system <name>` - Target system (auto, shopify, nuxt, next, laravel, shopware, storyblok)
 - `--with-gsd` / `--no-gsd` - GSD workflow engine
 - `--with-claude-mem` / `--no-claude-mem` - Persistent memory
 - `--with-plugins` / `--no-plugins` - Official Claude plugins
@@ -102,7 +102,7 @@ Five slash commands enable a Kanban-style spec workflow:
 - Supports `--complete` flag for legacy behavior (skip review, move directly to completed)
 
 **`/spec-work-all`** (templates/commands/spec-work-all.md):
-- Uses Claude Sonnet with Task subagents
+- Uses Claude Sonnet with Agent subagents
 - Creates isolated Git worktrees per spec (`spec/NNN-title` branch)
 - Parallel execution in waves with dependency detection
 - Each subagent works in its own worktree — no merge conflicts
@@ -163,6 +163,7 @@ Haiku curation → install top 5 → system-specific defaults
 **System-specific default skills:**
 - **Shopify**: `sickn33/antigravity-awesome-skills@shopify-development`
 - **Nuxt**: `antfu/skills@nuxt`, `onmax/nuxt-skills@nuxt`
+- **Next.js**: `vercel-labs/agent-skills@vercel-react-best-practices`
 - **Laravel**: `jeffallan/claude-skills@laravel-specialist`
 - **Shopware**: `bartundmett/skills@shopware6-best-practices`
 - **Storyblok**: `bartundmett/skills@storyblok-best-practices`

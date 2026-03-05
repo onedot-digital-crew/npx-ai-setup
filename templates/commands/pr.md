@@ -1,7 +1,7 @@
 ---
 model: haiku
 disable-model-invocation: true
-allowed-tools: Read, Bash, Glob, Grep, Task
+allowed-tools: Read, Bash, Glob, Grep, Agent
 ---
 
 Drafts a pull request with staff review and PR body. Use when a feature branch is ready to be submitted for review.
@@ -15,12 +15,12 @@ Drafts a pull request with staff review and PR body. Use when a feature branch i
 
 ## Process
 
-1. **Build validation**: Spawn `build-validator` via Task tool.
+1. **Build validation**: Spawn `build-validator` via Agent tool.
    - If build-validator returns **FAIL**: stop immediately and tell the user: "Fix the build before creating a PR." Show the build output. Do not proceed.
    - If build-validator returns **PASS**: continue.
 2. Analyze the changes shown in Context above to understand all modifications on this branch.
 3. Stage and commit any remaining uncommitted changes (descriptive message, no `git add .`).
-4. **Staff review**: Spawn `staff-reviewer` via Task tool with the prompt:
+4. **Staff review**: Spawn `staff-reviewer` via Agent tool with the prompt:
    > "Review this branch for production readiness before PR creation. Branch: <branch-name>. Recent commits: <commits from git log --oneline main..HEAD>."
    - If staff-reviewer returns **APPROVE**: continue drafting PR normally; note "Staff review: APPROVED" in the output.
    - If staff-reviewer returns **APPROVE WITH CONCERNS**: continue drafting PR; include the concerns under `## Staff Review Concerns` in the PR body.

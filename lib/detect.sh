@@ -7,11 +7,22 @@
 detect_system() {
   [ "$SYSTEM" != "auto" ] && return 0
 
-  if find . -maxdepth 4 -name "theme.liquid" -not -path "*/node_modules/*" 2>/dev/null | grep -q .; then
+  if find . -maxdepth 4 -name "theme.liquid" -not -path "*/node_modules/*" 2>/dev/null | grep -q . \
+    || [ -f "shopify.app.toml" ] \
+    || [ -f "shopify.web.toml" ] \
+    || find . -maxdepth 5 -name "shopify.extension.toml" -not -path "*/node_modules/*" 2>/dev/null | grep -q . \
+    || { [ -f package.json ] && grep -Eq '"@shopify/(shopify-api|shopify-app-remix|app-bridge|app-bridge-react|polaris)"' package.json 2>/dev/null; }; then
     SYSTEM="shopify"
   elif [ -f composer.json ] && [ -f artisan ]; then
     SYSTEM="laravel"
-  elif [ -f composer.json ] && [ -d vendor/shopware ]; then
+  elif [ -f composer.json ] && {
+    [ -d vendor/shopware ] ||
+    grep -Eq '"type"[[:space:]]*:[[:space:]]*"shopware-(platform-plugin|bundle)"' composer.json 2>/dev/null ||
+    grep -Eq '"shopware/(core|storefront|administration|elasticsearch|recovery|platform)"' composer.json 2>/dev/null ||
+    grep -Eq '"store\.shopware\.com/' composer.json 2>/dev/null ||
+    [ -f manifest.xml ] ||
+    { [ -d src ] && find src -maxdepth 2 \( -name "*Plugin.php" -o -name "*Bundle.php" \) 2>/dev/null | grep -q .; }
+  }; then
     SYSTEM="shopware"
   elif [ -f package.json ] && grep -q '"nuxt"' package.json 2>/dev/null; then
     SYSTEM="nuxt"

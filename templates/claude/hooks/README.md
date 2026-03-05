@@ -7,6 +7,9 @@
 | `protect-files.sh` | PreToolUse | Blocks edits to `.env`, `package-lock.json`, `.git/` | Edit `PROTECTED` array |
 | `circuit-breaker.sh` | PreToolUse | Warns at 5 edits, blocks at 8 edits to same file in 10 min | Edit `WARN`/`BLOCK`/`WINDOW` vars |
 | `post-edit-lint.sh` | PostToolUse | Optional file-scoped project `format` script (bun/npm), then fallback ESLint on `.js`/`.ts`/`.jsx`/`.tsx` and Prettier on `.css`/`.html`/`.json`/`.md`/`.vue`/`.svelte` | Add extensions or change tools |
+| `post-tool-failure-log.sh` | PostToolUseFailure | Appends failed tool calls to `.claude/tool-failures.log` | Change log format/truncation |
+| `config-change-audit.sh` | ConfigChange | Audits config changes and blocks unsafe settings (`disableAllHooks`, `Bash(*)`) | Extend blocked settings checks |
+| `task-completed-gate.sh` | TaskCompleted | Blocks closing tasks with TODO/TBD/WIP markers or unresolved merge conflict markers | Adjust validation patterns |
 | `context-freshness.sh` | UserPromptSubmit | Warns when `.agents/context/` is stale | Runs silently unless project files changed |
 
 **Exit codes:** `0` = pass, `1` = fail with feedback, `2` = blocked

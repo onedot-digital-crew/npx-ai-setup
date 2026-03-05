@@ -406,9 +406,9 @@ install_statusline_global() {
   if [ -f "$HOME/.claude/settings.json" ]; then
     local TMP
     TMP=$(mktemp)
-    jq --arg cmd "$HOME/.claude/statusline.sh" '.statusLine = {"command": $cmd}' "$HOME/.claude/settings.json" > "$TMP" && mv "$TMP" "$HOME/.claude/settings.json"
+    jq --arg cmd "$HOME/.claude/statusline.sh" '.statusLine = {"type":"command","command":$cmd,"padding":2}' "$HOME/.claude/settings.json" > "$TMP" && mv "$TMP" "$HOME/.claude/settings.json"
   else
-    jq -n --arg cmd "$HOME/.claude/statusline.sh" '{"statusLine":{"command":$cmd}}' > "$HOME/.claude/settings.json"
+    jq -n --arg cmd "$HOME/.claude/statusline.sh" '{"statusLine":{"type":"command","command":$cmd,"padding":2}}' > "$HOME/.claude/settings.json"
   fi
   echo "  Statusline installed -> ~/.claude/statusline.sh"
 }
