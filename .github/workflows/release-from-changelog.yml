@@ -1,0 +1,86 @@
+name: Release From Changelog
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.2.5)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if [ -z "$TAG" ]; then
+            echo "Tag could not be resolved."
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Using tag: $TAG"
+
+      - name: Extract changelog section
+        run: |
+          TAG="${{ steps.vars.outputs.tag }}"
+          HEADING="## [$TAG]"
+
+          if [ ! -f CHANGELOG.md ]; then
+            echo "CHANGELOG.md not found."
+            exit 1
+          fi
+
+          if ! grep -Fq "$HEADING" CHANGELOG.md; then
+            echo "No changelog section found for $TAG (expected heading: $HEADING)."
+            exit 1
+          fi
+
+          awk -v heading="$HEADING" '
+            {
+              if (in_section && $0 ~ "^## \\[" && index($0, heading) != 1) exit
+              if (index($0, heading) == 1) in_section=1
+              if (in_section) print
+            }
+          ' CHANGELOG.md > release_notes.md
+
+          if [ ! -s release_notes.md ]; then
+            echo "Extracted release notes are empty for $TAG."
+            exit 1
+          fi
+
+          echo "Release notes extracted:"
+          sed -n '1,120p' release_notes.md
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.vars.outputs.tag }}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file release_notes.md
+            echo "Updated release $TAG"
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file release_notes.md
+            echo "Created release $TAG"
+          fi

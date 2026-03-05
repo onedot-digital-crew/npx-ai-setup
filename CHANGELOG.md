@@ -8,6 +8,22 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 <!-- Entries are prepended below this line, newest first -->
 
+## [Unreleased]
+
+
+## [v1.2.5] — 2026-03-05
+
+- **Spec 054**: Bang-Syntax Context Injection — `## Context` sections with `!git` commands in commit, review, pr commands eliminate 2-3 tool-call round-trips for context gathering
+- **Spec 053**: Context Monitor Hook — PostToolUse hook warns agent at <=35% (WARNING) and <=25% (CRITICAL) remaining context via statusline bridge file and `additionalContext` injection
+- **Spec 052**: Agent Delegation Rules — new `rules/agents.md` template with trigger/scope/model guidance for all 8 agents and anti-patterns to prevent over-delegation
+- **Spec 051**: PreCompact Hook — prompt-type hook in `settings.json` that auto-instructs Claude to commit or write HANDOFF.md before context compaction
+- **Spec 050**: Post-Edit Hooks — `post-edit-lint.sh` extended with `tsc --noEmit` type-check (TS files, blocking) and `console.log` warning (non-blocking stderr)
+- **Spec 049**: /evaluate command — project-local command for systematic evaluation of external ideas against existing template inventory
+- **Slack-ready releases**: Added `release-from-changelog.yml` workflow to create/update GitHub releases from `CHANGELOG.md` on pushed `v*` tags
+- **Template rollout**: Added workflow template under `templates/github/workflows/` so generated projects get the same release-note automation by default
+- **Installer hardening**: `install_copilot()` now installs all files under `templates/github/` recursively, not only `copilot-instructions.md`
+- **Release docs/command updates**: README and `/release` command now document the automatic changelog-to-Slack release flow
+
 ## [v1.2.4] — 2026-03-04
 
 - **Mandatory plugins**: Context7, claude-mem, and all official plugins (code-review, feature-dev, frontend-design) now install automatically without prompts
@@ -26,17 +42,6 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 ## [v1.2.2] — 2026-03-01
 
 - **MCP Health Hook**: `mcp-health.sh` SessionStart hook — validates `.mcp.json` JSON syntax, required fields per server type (`url` for http/sse, `command` for stdio), and base command availability via `command -v`; silent on success, warnings to stderr
-
-## [Unreleased]
-- **Spec 054**: Bang-Syntax Context Injection — `## Context` sections with `!git` commands in commit, review, pr commands eliminate 2-3 tool-call round-trips for context gathering
-- **Spec 053**: Context Monitor Hook — PostToolUse hook warns agent at <=35% (WARNING) and <=25% (CRITICAL) remaining context via statusline bridge file and `additionalContext` injection
-- **Spec 052**: Agent Delegation Rules — new `rules/agents.md` template with trigger/scope/model guidance for all 8 agents and anti-patterns to prevent over-delegation
-- **Spec 051**: PreCompact Hook — prompt-type hook in `settings.json` that auto-instructs Claude to commit or write HANDOFF.md before context compaction
-- **Spec 050**: Post-Edit Hooks — `post-edit-lint.sh` extended with `tsc --noEmit` type-check (TS files, blocking) and `console.log` warning (non-blocking stderr)
-
-## [Unreleased]
-
-- **Spec 049**: /evaluate command — project-local command for systematic evaluation of external ideas against existing template inventory
 
 ## [v1.2.1] — 2026-02-28
 

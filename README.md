@@ -22,6 +22,7 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | **Commands** | 16 slash commands for spec-driven development, reviews, releases, debugging |
 | **Agents** | 8 subagent templates for parallel verification, review, and architectural assessment |
 | **Context** | `.agents/context/` — STACK.md, ARCHITECTURE.md, CONVENTIONS.md (auto-generated) |
+| **GitHub** | `.github/copilot-instructions.md` + `.github/workflows/release-from-changelog.yml` |
 | **Skills** | AI-curated Claude Code skills matched to your stack via skills.sh |
 
 ---
@@ -80,6 +81,16 @@ Run the same command again — the script auto-detects and offers:
 - **Update files** — compare each template, ask before overwriting user-modified files
 - **Regenerate** — re-run Claude analysis (CLAUDE.md, AGENTS.md, context, commands, skills)
 - **Clean reinstall** — remove all managed files, fresh install
+
+---
+
+## GitHub Releases (Slack-ready)
+
+AI Setup installs `.github/workflows/release-from-changelog.yml` into target projects.
+When you push a version tag like `v1.2.5`, it creates or updates the GitHub Release body from the matching `CHANGELOG.md` section:
+
+- Required heading format: `## [vX.Y.Z]`
+- Slack GitHub App (`/github subscribe owner/repo releases`) will show this release body in channel notifications.
 
 ---
 

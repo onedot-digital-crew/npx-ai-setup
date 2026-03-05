@@ -151,14 +151,19 @@ install_rules() {
   fi
 }
 
-# Copy .github/copilot-instructions.md
+# Install all GitHub templates (copilot instructions + workflows)
 install_copilot() {
   mkdir -p .github
-  if [ ! -f .github/copilot-instructions.md ]; then
-    cp "$TPL/github/copilot-instructions.md" .github/copilot-instructions.md
-  else
-    echo "  .github/copilot-instructions.md already exists, skipping."
-  fi
+  while IFS= read -r -d '' _gh_path; do
+    local _rel="${_gh_path#$TPL/github/}"
+    local _target=".github/$_rel"
+    mkdir -p "$(dirname "$_target")"
+    if [ ! -f "$_target" ]; then
+      cp "$_gh_path" "$_target"
+    else
+      echo "  ${_target} already exists, skipping."
+    fi
+  done < <(find "$TPL/github" -type f -print0 | sort -z)
 }
 
 # Create specs/ directory structure
