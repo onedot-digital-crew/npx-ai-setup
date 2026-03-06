@@ -127,6 +127,8 @@ install_rules() {
 
   while IFS= read -r -d '' _rule_path; do
     _rule_name="${_rule_path##*/}"
+    # Skip typescript.md — handled conditionally below via TS_RULES_MAP
+    [ "$_rule_name" = "typescript.md" ] && continue
     if [ ! -f ".claude/rules/$_rule_name" ]; then
       cp "$_rule_path" ".claude/rules/$_rule_name"
     else
@@ -318,6 +320,7 @@ repair_canonical_skill_links() {
 
   [ "$repaired" -gt 0 ] && echo "  ✅ Repaired $repaired looping skill link(s)"
   [ "$removed" -gt 0 ] && echo "  ℹ️  Removed $removed broken skill link(s)"
+  return 0
 }
 
 # Keep .claude/skills as canonical and expose .agents/skills as symlink alias.
@@ -394,8 +397,8 @@ ensure_skills_alias() {
     merge_skills_dir_into_canonical "$alias" "$canonical" "$backup_dir" moved conflicts
   fi
 
-  [ "$moved" -gt 0 ] && echo "  ✅ Migrated $moved skill item(s) into $canonical"
-  [ "$conflicts" -gt 0 ] && echo "  ⚠️  $conflicts conflicting item(s) backed up to $backup_dir"
+  [ "$moved" -gt 0 ] && echo "  ✅ Migrated $moved skill item(s) into $canonical" || true
+  [ "$conflicts" -gt 0 ] && echo "  ⚠️  $conflicts conflicting item(s) backed up to $backup_dir" || true
 
   if [ -d "$alias" ]; then
     rm -rf "$alias" 2>/dev/null || true
