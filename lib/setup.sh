@@ -269,6 +269,57 @@ merge_skills_dir_into_canonical() {
   done < <(find "$source_dir" -mindepth 1 -maxdepth 1 -print0)
 }
 
+# Repair looping skill symlinks inside canonical dir, e.g.
+# .claude/skills/nuxt -> ../../.agents/skills/nuxt while .agents/skills links back.
+# Restores from ~/.agents/skills or ~/.claude/skills when available.
+repair_canonical_skill_links() {
+  local canonical_dir="$1"
+  local canonical_abs="$2"
+  local repaired=0
+  local removed=0
+  local link
+  local name
+  local target_rel
+  local target_abs
+  local src
+
+  [ -d "$canonical_dir" ] || return 0
+
+  while IFS= read -r -d '' link; do
+    name="${link##*/}"
+    target_rel=$(readlink "$link" 2>/dev/null || echo "")
+    target_abs=$(cd "$(dirname "$link")" 2>/dev/null && cd "$target_rel" 2>/dev/null && pwd -P)
+
+    case "$target_rel" in
+      *".agents/skills/$name"|*".claude/skills/$name")
+        rm -f "$link" 2>/dev/null || true
+        src=""
+        [ -d "$HOME/.agents/skills/$name" ] && src="$HOME/.agents/skills/$name"
+        [ -z "$src" ] && [ -d "$HOME/.claude/skills/$name" ] && src="$HOME/.claude/skills/$name"
+        if [ -n "$src" ]; then
+          cp -R "$src" "$canonical_dir/$name" 2>/dev/null || mkdir -p "$canonical_dir/$name"
+          repaired=$((repaired + 1))
+          echo "  🛠️  Repaired skill link loop: $name (restored from $(basename "$(dirname "$src")"))"
+        else
+          removed=$((removed + 1))
+          echo "  ⚠️  Removed looping skill link: $name (reinstall if needed)"
+        fi
+        ;;
+      *)
+        # Self-referential absolute resolution also indicates a loop.
+        if [ -n "$target_abs" ] && [ "$target_abs" = "$canonical_abs/$name" ]; then
+          rm -f "$link" 2>/dev/null || true
+          removed=$((removed + 1))
+          echo "  ⚠️  Removed self-referential skill link: $name"
+        fi
+        ;;
+    esac
+  done < <(find "$canonical_dir" -mindepth 1 -maxdepth 1 -type l -print0)
+
+  [ "$repaired" -gt 0 ] && echo "  ✅ Repaired $repaired looping skill link(s)"
+  [ "$removed" -gt 0 ] && echo "  ℹ️  Removed $removed broken skill link(s)"
+}
+
 # Keep .claude/skills as canonical and expose .agents/skills as symlink alias.
 # Falls back gracefully when symlinks are not available.
 ensure_skills_alias() {
@@ -322,6 +373,7 @@ ensure_skills_alias() {
   fi
 
   canonical_abs=$(cd "$canonical" 2>/dev/null && pwd -P)
+  repair_canonical_skill_links "$canonical" "$canonical_abs"
 
   if [ -L "$alias" ]; then
     alias_target=$(readlink "$alias" 2>/dev/null || echo "")

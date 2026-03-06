@@ -74,6 +74,7 @@ CHECKS=(
   "setup.sh:install_hooks"
   "setup.sh:install_commands"
   "setup.sh:install_agents"
+  "setup.sh:repair_canonical_skill_links"
   "setup.sh:ensure_skills_alias"
   "setup.sh:setup_repo_group_context"
   "setup.sh:update_gitignore"
@@ -155,6 +156,18 @@ if grep -q 'ensure_skills_alias' lib/update.sh 2>/dev/null; then
   pass "lib/update.sh calls ensure_skills_alias during smart update"
 else
   fail "lib/update.sh missing ensure_skills_alias call"
+fi
+
+if grep -q 'repair_canonical_skill_links' lib/setup.sh 2>/dev/null; then
+  pass "lib/setup.sh contains looping skill-link repair helper"
+else
+  fail "lib/setup.sh missing looping skill-link repair helper"
+fi
+
+if grep -Eq 'repair_canonical_skill_links .*\$canonical.*\$canonical_abs' lib/setup.sh 2>/dev/null; then
+  pass "ensure_skills_alias invokes looping skill-link repair"
+else
+  fail "ensure_skills_alias missing looping skill-link repair call"
 fi
 
 # Summary
