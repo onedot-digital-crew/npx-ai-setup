@@ -7,7 +7,7 @@ PENDING_PLUGINS=""
 # Legacy compatibility shim.
 # GSD is intentionally optional and no longer auto-installed by ai-setup.
 install_gsd() {
-  echo "  🧩 GSD is optional (manual install): npx get-shit-done-cc@latest --claude --global"
+  echo "  🧩 GSD integration removed from default setup."
   return 0
 }
 

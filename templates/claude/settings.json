@@ -10,7 +10,7 @@
     "template": "Co-Authored-By: Claude <noreply@anthropic.com>"
   },
   "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "30",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",
     "ENABLE_TOOL_SEARCH": "true"
   },
   "sandbox": {

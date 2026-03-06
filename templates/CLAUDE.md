@@ -59,8 +59,8 @@ Before starting, classify and state the task tier:
 
 - **Simple** (typos, single-file fixes, config tweaks): proceed directly
 - **Medium** (new feature, 2-3 files, component): use plan mode
-- **Complex** (architecture, refactor, new system): stop and tell the user to run
-  `/gsd:set-profile quality` or restart with `claude --model claude-opus-4-6`
+- **Complex** (architecture, refactor, new system): stop and ask for explicit
+  quality mode confirmation (for example `claude --model claude-opus-4-6`)
 
 Never start a complex task without flagging the model requirement first.
 

@@ -279,12 +279,48 @@ ensure_skills_alias() {
   local ts
   local backup_dir
   local canonical_abs
+  local project_abs
+  local canonical_target
+  local canonical_target_abs
   local alias_target
   local alias_abs
 
-  mkdir -p "$canonical" .agents
+  mkdir -p .claude .agents
   ts=$(date +"%Y%m%d_%H%M%S")
   backup_dir=".ai-setup-backup/skills-migration-$ts"
+  project_abs=$(pwd -P 2>/dev/null || pwd)
+
+  # Canonical path must be a real directory (not a symlink), otherwise loops can occur.
+  if [ -L "$canonical" ]; then
+    canonical_target=$(readlink "$canonical" 2>/dev/null || echo "")
+    canonical_target_abs=$(cd "$(dirname "$canonical")" 2>/dev/null && cd "$canonical_target" 2>/dev/null && pwd -P)
+    echo "  ♻️  Converting legacy symlink $canonical -> ${canonical_target:-<unresolved>} to canonical directory"
+    rm -f "$canonical" 2>/dev/null || true
+    mkdir -p "$canonical"
+
+    # Only migrate automatically from in-project targets (e.g. .agents/skills).
+    if [ -n "$canonical_target_abs" ] && [ -d "$canonical_target_abs" ]; then
+      case "$canonical_target_abs" in
+        "$project_abs"/*)
+          merge_skills_dir_into_canonical "$canonical_target_abs" "$canonical" "$backup_dir" moved conflicts
+          ;;
+        *)
+          echo "  ℹ️  Skipping auto-migration from external target: $canonical_target_abs"
+          ;;
+      esac
+    fi
+  fi
+
+  # Guard against unexpected file at canonical path.
+  if [ ! -d "$canonical" ]; then
+    if [ -e "$canonical" ]; then
+      mkdir -p "$backup_dir"
+      mv "$canonical" "$backup_dir/skills-canonical-path-$ts" 2>/dev/null || rm -f "$canonical" 2>/dev/null || true
+      conflicts=$((conflicts + 1))
+    fi
+    mkdir -p "$canonical"
+  fi
+
   canonical_abs=$(cd "$canonical" 2>/dev/null && pwd -P)
 
   if [ -L "$alias" ]; then
@@ -573,24 +609,26 @@ install_repomix_config() {
   fi
 }
 
-# Install statusline script to ~/.claude/statusline.sh and configure ~/.claude/settings.json
-install_statusline_global() {
+# Install statusline script into project (.claude/statusline.sh) and configure
+# project settings (.claude/settings.json).
+install_statusline_project() {
   # Idempotency: skip if statusLine is already configured
-  if [ -f "$HOME/.claude/settings.json" ] && jq -e '.statusLine' "$HOME/.claude/settings.json" >/dev/null 2>&1; then
+  if [ -f ".claude/settings.json" ] && jq -e '.statusLine' ".claude/settings.json" >/dev/null 2>&1; then
     return 0
   fi
-  mkdir -p "$HOME/.claude"
-  cp "$SCRIPT_DIR/templates/statusline.sh" "$HOME/.claude/statusline.sh"
-  chmod +x "$HOME/.claude/statusline.sh"
-  # Merge statusLine into ~/.claude/settings.json
-  if [ -f "$HOME/.claude/settings.json" ]; then
+  mkdir -p ".claude"
+  cp "$SCRIPT_DIR/templates/statusline.sh" ".claude/statusline.sh"
+  chmod +x ".claude/statusline.sh"
+  # Merge statusLine into .claude/settings.json
+  local status_cmd='"${CLAUDE_PROJECT_DIR:-.}"/.claude/statusline.sh'
+  if [ -f ".claude/settings.json" ]; then
     local TMP
     TMP=$(mktemp)
-    jq --arg cmd "$HOME/.claude/statusline.sh" '.statusLine = {"type":"command","command":$cmd,"padding":2}' "$HOME/.claude/settings.json" > "$TMP" && mv "$TMP" "$HOME/.claude/settings.json"
+    jq --arg cmd "$status_cmd" '.statusLine = {"type":"command","command":$cmd,"padding":2}' ".claude/settings.json" > "$TMP" && mv "$TMP" ".claude/settings.json"
   else
-    jq -n --arg cmd "$HOME/.claude/statusline.sh" '{"statusLine":{"type":"command","command":$cmd,"padding":2}}' > "$HOME/.claude/settings.json"
+    jq -n --arg cmd "$status_cmd" '{"statusLine":{"type":"command","command":$cmd,"padding":2}}' > ".claude/settings.json"
   fi
-  echo "  Statusline installed -> ~/.claude/statusline.sh"
+  echo "  Statusline installed -> .claude/statusline.sh"
 }
 
 # Generate repomix codebase snapshot in background (once, if not already present)

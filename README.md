@@ -200,16 +200,6 @@ Team sharing: marketplace plugins via `extraKnownMarketplaces` in `.claude/setti
 
 ## Optional Extensions
 
-### GSD (Get Shit Done)
-
-Phase planning, codebase mapping, and session management. Install separately:
-
-```bash
-npx get-shit-done-cc@latest --claude --global
-```
-
-More info: [GSD workflow engine](https://github.com/get-shit-done-cc/get-shit-done-cc)
-
 ### rtk (Reduce Token Cost)
 
 CLI proxy that compresses command outputs before they hit the context window. 60-90% token reduction on git, grep, test outputs.

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Claude Code statusline script
 # Receives JSON via stdin, outputs two lines to stdout
-# Usage: echo '{"model":{"display_name":"Sonnet"},...}' | ~/.claude/statusline.sh
+# Usage: echo '{"model":{"display_name":"Sonnet"},...}' | ./.claude/statusline.sh
 
 command -v jq >/dev/null 2>&1 || { echo "Claude"; echo "jq required"; exit 0; }
 
