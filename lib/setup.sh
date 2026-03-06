@@ -236,6 +236,90 @@ install_agents() {
   done < <(find "$TPL/agents" -maxdepth 1 -type f -print0 | sort -z)
 }
 
+# Merge top-level skill items from $1 into $2.
+# Non-conflicting items are moved, conflicts are moved to backup dir and counted.
+merge_skills_dir_into_canonical() {
+  local source_dir="$1"
+  local canonical_dir="$2"
+  local backup_dir="$3"
+  local moved_ref="$4"
+  local conflicts_ref="$5"
+  local item
+  local name
+  local target
+
+  [ -d "$source_dir" ] || return 0
+
+  while IFS= read -r -d '' item; do
+    name="${item##*/}"
+    target="$canonical_dir/$name"
+    if [ ! -e "$target" ]; then
+      if mv "$item" "$target" 2>/dev/null; then
+        eval "$moved_ref=\$(( $moved_ref + 1 ))"
+      else
+        mkdir -p "$backup_dir"
+        mv "$item" "$backup_dir/$name" 2>/dev/null || true
+        eval "$conflicts_ref=\$(( $conflicts_ref + 1 ))"
+      fi
+    else
+      mkdir -p "$backup_dir"
+      mv "$item" "$backup_dir/$name" 2>/dev/null || true
+      eval "$conflicts_ref=\$(( $conflicts_ref + 1 ))"
+    fi
+  done < <(find "$source_dir" -mindepth 1 -maxdepth 1 -print0)
+}
+
+# Keep .claude/skills as canonical and expose .agents/skills as symlink alias.
+# Falls back gracefully when symlinks are not available.
+ensure_skills_alias() {
+  local canonical=".claude/skills"
+  local alias=".agents/skills"
+  local moved=0
+  local conflicts=0
+  local ts
+  local backup_dir
+  local canonical_abs
+  local alias_target
+  local alias_abs
+
+  mkdir -p "$canonical" .agents
+  ts=$(date +"%Y%m%d_%H%M%S")
+  backup_dir=".ai-setup-backup/skills-migration-$ts"
+  canonical_abs=$(cd "$canonical" 2>/dev/null && pwd -P)
+
+  if [ -L "$alias" ]; then
+    alias_target=$(readlink "$alias" 2>/dev/null || echo "")
+    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$alias_target" 2>/dev/null && pwd -P)
+    if [ -n "$alias_abs" ] && [ -n "$canonical_abs" ] && [ "$alias_abs" = "$canonical_abs" ]; then
+      return 0
+    fi
+    echo "  ♻️  Repointing legacy symlink $alias -> $alias_target to canonical $canonical"
+    if [ -n "$alias_abs" ] && [ -d "$alias_abs" ]; then
+      merge_skills_dir_into_canonical "$alias_abs" "$canonical" "$backup_dir" moved conflicts
+    fi
+    rm -f "$alias" 2>/dev/null || true
+  fi
+
+  # Migrate legacy non-symlink layout (.agents/skills as real directory).
+  if [ -d "$alias" ] && [ -n "$(ls -A "$alias" 2>/dev/null)" ]; then
+    echo "  ♻️  Migrating legacy skills layout ($alias -> $canonical)..."
+    merge_skills_dir_into_canonical "$alias" "$canonical" "$backup_dir" moved conflicts
+  fi
+
+  [ "$moved" -gt 0 ] && echo "  ✅ Migrated $moved skill item(s) into $canonical"
+  [ "$conflicts" -gt 0 ] && echo "  ⚠️  $conflicts conflicting item(s) backed up to $backup_dir"
+
+  if [ -d "$alias" ]; then
+    rm -rf "$alias" 2>/dev/null || true
+  fi
+
+  if ln -s ../.claude/skills "$alias" 2>/dev/null; then
+    echo "  🔗 Linked $alias -> ../.claude/skills"
+  else
+    echo "  ℹ️  Symlink not available on this system. Using $canonical only."
+  fi
+}
+
 # Heuristic module detection from repository name.
 _detect_repo_module() {
   local _name

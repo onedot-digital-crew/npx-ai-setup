@@ -84,6 +84,10 @@ should_update_template() {
     [ "${UPD_HOOKS:-yes}" = "yes" ] && return 0 || return 1
   elif [[ "$target" == .claude/settings* ]]; then
     [ "${UPD_SETTINGS:-yes}" = "yes" ] && return 0 || return 1
+  elif [[ "$target" == "CLAUDE.md" ]]; then
+    [ "${UPD_CLAUDE_MD:-yes}" = "yes" ] && return 0 || return 1
+  elif [[ "$target" == "AGENTS.md" ]]; then
+    [ "${UPD_AGENTS_MD:-yes}" = "yes" ] && return 0 || return 1
   elif [[ "$target" == .claude/commands/* ]]; then
     [ "${UPD_COMMANDS:-yes}" = "yes" ] && return 0 || return 1
   elif [[ "$target" == .claude/agents/* ]]; then

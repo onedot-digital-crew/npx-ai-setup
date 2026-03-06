@@ -123,8 +123,12 @@ Recommended flow in existing repositories:
 3. For modified files, review each prompt:
    - `y` = update file (your previous version is backed up to `.ai-setup-backup/`)
    - `N` = keep your local customization
-4. If prompted, enable **Multi-Repo Context** to generate `.agents/context/repo-group.json` (works without naming convention).
-5. Optional: run **Regenerate** if your stack/architecture changed.
+4. Legacy skills layout is auto-normalized:
+   - canonical path: `.claude/skills/`
+   - alias path: `.agents/skills -> ../.claude/skills`
+   - conflicting legacy items are backed up to `.ai-setup-backup/skills-migration-*`
+5. If prompted, enable **Multi-Repo Context** to generate `.agents/context/repo-group.json` (works without naming convention).
+6. Optional: run **Regenerate** if your stack/architecture changed.
 
 ---
 

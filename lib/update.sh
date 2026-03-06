@@ -77,7 +77,7 @@ handle_version_check() {
     echo "✅ Already up to date (v${PACKAGE_VERSION})."
     echo ""
     echo "   1) Update files  — review template files, ask about user-modified ones"
-    echo "   2) Regenerate    — regenerate CLAUDE.md, AGENTS.md, context, commands, skills"
+    echo "   2) Regenerate    — choose exactly what to regenerate (docs/context/commands/agents/skills)"
     echo "   3) Skip          — exit without changes"
     echo ""
     read -p "   Choose [1/2/3]: " UPTODATE_CHOICE
@@ -157,6 +157,11 @@ run_smart_update() {
   echo ""
   echo "🔍 Analyzing templates..."
   echo ""
+
+  # Normalize legacy skills layout in existing projects.
+  if command -v ensure_skills_alias >/dev/null 2>&1; then
+    ensure_skills_alias
+  fi
 
   UPD_UPDATED=0
   UPD_SKIPPED=0
@@ -272,6 +277,8 @@ run_smart_update() {
   _upd_cats=""
   [ "${UPD_HOOKS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Hooks"
   [ "${UPD_SETTINGS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Settings"
+  [ "${UPD_CLAUDE_MD:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }CLAUDE.md"
+  [ "${UPD_AGENTS_MD:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }AGENTS.md"
   [ "${UPD_COMMANDS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Commands"
   [ "${UPD_AGENTS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Agents"
   [ "${UPD_OTHER:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Other"

@@ -279,22 +279,31 @@ run_generation() {
 
   # Default: regenerate everything unless flags were explicitly set by ask_regen_parts
   : "${REGEN_CLAUDE_MD:=yes}"
+  : "${REGEN_AGENTS_MD:=${REGEN_CLAUDE_MD}}"
   : "${REGEN_CONTEXT:=yes}"
   : "${REGEN_COMMANDS:=yes}"
+  : "${REGEN_AGENTS:=${REGEN_COMMANDS}}"
   : "${REGEN_SKILLS:=yes}"
+
+  # Keep a single canonical skills directory and expose it under .agents/skills as alias.
+  if command -v ensure_skills_alias >/dev/null 2>&1; then
+    ensure_skills_alias
+  fi
+
   local regen_ai_context="no"
-  if [ "$REGEN_CLAUDE_MD" = "yes" ] || [ "$REGEN_CONTEXT" = "yes" ]; then
+  if [ "$REGEN_CLAUDE_MD" = "yes" ] || [ "$REGEN_AGENTS_MD" = "yes" ] || [ "$REGEN_CONTEXT" = "yes" ]; then
     regen_ai_context="yes"
   fi
 
-  # Re-deploy slash commands & agents from package templates
-  if [ "$REGEN_COMMANDS" = "yes" ]; then
-    echo "📋 Updating slash commands & agents..."
+  # Re-deploy slash commands and/or agent templates from package templates.
+  if [ "$REGEN_COMMANDS" = "yes" ] || [ "$REGEN_AGENTS" = "yes" ]; then
+    echo "📋 Updating command and agent templates..."
     local cmd_updated=0
     for mapping in "${TEMPLATE_MAP[@]}"; do
       local tpl="${mapping%%:*}"
       local target="${mapping#*:}"
-      if [[ "$tpl" == templates/commands/* ]] || [[ "$tpl" == templates/agents/* ]]; then
+      if { [[ "$tpl" == templates/commands/* ]] && [ "$REGEN_COMMANDS" = "yes" ]; } \
+        || { [[ "$tpl" == templates/agents/* ]] && [ "$REGEN_AGENTS" = "yes" ]; }; then
         if [ -f "$SCRIPT_DIR/$tpl" ]; then
           mkdir -p "$(dirname "$target")"
           cp "$SCRIPT_DIR/$tpl" "$target"
@@ -302,19 +311,7 @@ run_generation() {
         fi
       fi
     done
-    # Also deploy Shopify-specific skills if system includes shopify
-    if [[ "${SYSTEM:-}" == *shopify* ]]; then
-      for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-        local tpl="${mapping%%:*}"
-        local target="${mapping#*:}"
-        if [ -f "$SCRIPT_DIR/$tpl" ]; then
-          mkdir -p "$(dirname "$target")"
-          cp "$SCRIPT_DIR/$tpl" "$target"
-          cmd_updated=$((cmd_updated + 1))
-        fi
-      done
-    fi
-    echo "  ✅ $cmd_updated command/agent files updated"
+    echo "  ✅ $cmd_updated file(s) updated"
   fi
 
   if [ "$regen_ai_context" = "yes" ]; then
@@ -401,14 +398,16 @@ If a test framework is present, add a 'TDD Workflow' subsection under Critical R
     # Step 1a: Extend CLAUDE.md (sonnet, background)
     PID_CM=""
     PID_AM=""
-    if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
-    if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
-      cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
-    fi
-    CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
-    AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
+    CLAUDE_MD_BEFORE=""
+    AGENTS_MD_BEFORE=""
 
-    claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
+    if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
+      if [ ! -f CLAUDE.md ] && [ -f "$SCRIPT_DIR/templates/CLAUDE.md" ]; then
+        cp "$SCRIPT_DIR/templates/CLAUDE.md" CLAUDE.md
+      fi
+      CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
 
 Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any HTML comments in those sections).
 
@@ -428,10 +427,17 @@ Rules:
 
 $CONTEXT
 $CTX_SHOPWARE" >"$ERR_CM" 2>&1 &
-    PID_CM=$!
+      PID_CM=$!
+    fi
 
-  # Step 1b: Extend AGENTS.md (sonnet, background, parallel with CLAUDE.md)
-  claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
+    # Step 1b: Extend AGENTS.md (sonnet, background, parallel with CLAUDE.md)
+    if [ "$REGEN_AGENTS_MD" = "yes" ]; then
+      if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
+        cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
+      fi
+      AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
+
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
 
 Replace the ## Project Overview, ## Architecture Summary, ## Commands, and ## Critical Rules sections in AGENTS.md (remove any HTML comments in those sections).
 
@@ -457,7 +463,7 @@ Rules:
 
 $CONTEXT
 $CTX_SHOPWARE" >"$ERR_AM" 2>&1 &
-    PID_AM=$!
+      PID_AM=$!
     fi
 
     # Step 2: Generate project context (sonnet, background, parallel with Step 1)
@@ -582,11 +588,23 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
       fi
     fi
   else
-    echo "⏭️  Skipping context generation (skills-only run)."
+    echo "⏭️  Skipping AI context generation (not selected)."
   fi
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
   if [ "$REGEN_SKILLS" = "yes" ]; then
+  # Ensure bundled Shopify skills are present when relevant.
+  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
+      local tpl="${mapping%%:*}"
+      local target="${mapping#*:}"
+      if [ -f "$SCRIPT_DIR/$tpl" ]; then
+        mkdir -p "$(dirname "$target")"
+        cp "$SCRIPT_DIR/$tpl" "$target"
+      fi
+    done
+  fi
+
   echo ""
   echo "🔌 Searching and installing skills..."
   INSTALLED=0

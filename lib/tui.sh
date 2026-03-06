@@ -114,15 +114,16 @@ select_system() {
 # ==============================================================================
 # REGENERATION PART SELECTOR
 # ==============================================================================
-# Sets REGEN_CLAUDE_MD, REGEN_CONTEXT, REGEN_COMMANDS, REGEN_SKILLS globals.
+# Sets REGEN_CLAUDE_MD, REGEN_AGENTS_MD, REGEN_CONTEXT, REGEN_COMMANDS,
+# REGEN_AGENTS, REGEN_SKILLS globals.
 # Returns 1 if the user selected nothing (skip).
 ask_regen_parts() {
   # Arrow keys + Space to toggle + Enter to confirm (same style as select_system)
-  local options=("CLAUDE.md" "Context" "Commands" "Skills")
-  local descriptions=("CLAUDE.md + AGENTS.md (commands, overview, rules)" ".agents/context/ (STACK, ARCHITECTURE, CONVENTIONS)" "Slash commands & agents (spec, commit, grill...)" "External skills from skills.sh")
-  local count=4
+  local options=("CLAUDE.md" "AGENTS.md" "Context" "Commands" "Agents" "Skills")
+  local descriptions=("Main instructions + project guardrails" "Agent workflow + role guidelines" ".agents/context/{STACK,ARCHITECTURE,CONVENTIONS}" ".claude/commands/ slash commands" ".claude/agents/ subagent templates" "External + bundled skills (.claude/skills)")
+  local count=6
   local selected=0
-  local checked=(1 1 1 1)  # all pre-selected
+  local checked=(1 1 1 1 1 1)  # all pre-selected
 
   echo ""
   echo "  Select what to regenerate:"
@@ -174,13 +175,15 @@ ask_regen_parts() {
 
   printf '\033[?25h'
 
-  REGEN_CLAUDE_MD="no"; REGEN_CONTEXT="no"; REGEN_COMMANDS="no"; REGEN_SKILLS="no"
+  REGEN_CLAUDE_MD="no"; REGEN_AGENTS_MD="no"; REGEN_CONTEXT="no"; REGEN_COMMANDS="no"; REGEN_AGENTS="no"; REGEN_SKILLS="no"
   [ "${checked[0]}" -eq 1 ] && REGEN_CLAUDE_MD="yes"
-  [ "${checked[1]}" -eq 1 ] && REGEN_CONTEXT="yes"
-  [ "${checked[2]}" -eq 1 ] && REGEN_COMMANDS="yes"
-  [ "${checked[3]}" -eq 1 ] && REGEN_SKILLS="yes"
+  [ "${checked[1]}" -eq 1 ] && REGEN_AGENTS_MD="yes"
+  [ "${checked[2]}" -eq 1 ] && REGEN_CONTEXT="yes"
+  [ "${checked[3]}" -eq 1 ] && REGEN_COMMANDS="yes"
+  [ "${checked[4]}" -eq 1 ] && REGEN_AGENTS="yes"
+  [ "${checked[5]}" -eq 1 ] && REGEN_SKILLS="yes"
 
-  if [ "$REGEN_CLAUDE_MD" = "no" ] && [ "$REGEN_CONTEXT" = "no" ] && [ "$REGEN_COMMANDS" = "no" ] && [ "$REGEN_SKILLS" = "no" ]; then
+  if [ "$REGEN_CLAUDE_MD" = "no" ] && [ "$REGEN_AGENTS_MD" = "no" ] && [ "$REGEN_CONTEXT" = "no" ] && [ "$REGEN_COMMANDS" = "no" ] && [ "$REGEN_AGENTS" = "no" ] && [ "$REGEN_SKILLS" = "no" ]; then
     echo ""
     return 1
   fi
@@ -190,14 +193,15 @@ ask_regen_parts() {
 # ==============================================================================
 # UPDATE PART SELECTOR
 # ==============================================================================
-# Sets UPD_HOOKS, UPD_SETTINGS, UPD_COMMANDS, UPD_AGENTS, UPD_OTHER globals.
+# Sets UPD_HOOKS, UPD_SETTINGS, UPD_CLAUDE_MD, UPD_AGENTS_MD, UPD_COMMANDS,
+# UPD_AGENTS, UPD_OTHER globals.
 # Returns 1 if the user selected nothing (skip template update).
 ask_update_parts() {
-  local options=("Hooks" "Settings" "Commands" "Agents" "Other")
-  local descriptions=(".claude/hooks/ (protect-files, lint, circuit-breaker...)" ".claude/settings.json" ".claude/commands/ (spec, commit, grill, pr...)" ".claude/agents/ (verify-app, build-validator, code-reviewer, code-architect...)" "specs/, github/, CLAUDE.md + AGENTS.md templates")
-  local count=5
+  local options=("Hooks" "Settings" "CLAUDE.md" "AGENTS.md" "Commands" "Agents" "Other")
+  local descriptions=(".claude/hooks + .claude/rules" ".claude/settings.json (permissions, hooks, env)" "Root CLAUDE.md template" "Root AGENTS.md template" ".claude/commands/ (spec, review, commit...)" ".claude/agents/ (reviewers, planners, validators...)" "specs/, .github/, misc templates")
+  local count=7
   local selected=0
-  local checked=(1 1 1 1 1)  # all pre-selected
+  local checked=(1 1 1 1 1 1 1)  # all pre-selected
 
   echo ""
   echo "  Select which categories to update:"
@@ -249,14 +253,16 @@ ask_update_parts() {
 
   printf '\033[?25h'
 
-  UPD_HOOKS="no"; UPD_SETTINGS="no"; UPD_COMMANDS="no"; UPD_AGENTS="no"; UPD_OTHER="no"
+  UPD_HOOKS="no"; UPD_SETTINGS="no"; UPD_CLAUDE_MD="no"; UPD_AGENTS_MD="no"; UPD_COMMANDS="no"; UPD_AGENTS="no"; UPD_OTHER="no"
   [ "${checked[0]}" -eq 1 ] && UPD_HOOKS="yes"
   [ "${checked[1]}" -eq 1 ] && UPD_SETTINGS="yes"
-  [ "${checked[2]}" -eq 1 ] && UPD_COMMANDS="yes"
-  [ "${checked[3]}" -eq 1 ] && UPD_AGENTS="yes"
-  [ "${checked[4]}" -eq 1 ] && UPD_OTHER="yes"
+  [ "${checked[2]}" -eq 1 ] && UPD_CLAUDE_MD="yes"
+  [ "${checked[3]}" -eq 1 ] && UPD_AGENTS_MD="yes"
+  [ "${checked[4]}" -eq 1 ] && UPD_COMMANDS="yes"
+  [ "${checked[5]}" -eq 1 ] && UPD_AGENTS="yes"
+  [ "${checked[6]}" -eq 1 ] && UPD_OTHER="yes"
 
-  if [ "$UPD_HOOKS" = "no" ] && [ "$UPD_SETTINGS" = "no" ] && [ "$UPD_COMMANDS" = "no" ] && [ "$UPD_AGENTS" = "no" ] && [ "$UPD_OTHER" = "no" ]; then
+  if [ "$UPD_HOOKS" = "no" ] && [ "$UPD_SETTINGS" = "no" ] && [ "$UPD_CLAUDE_MD" = "no" ] && [ "$UPD_AGENTS_MD" = "no" ] && [ "$UPD_COMMANDS" = "no" ] && [ "$UPD_AGENTS" = "no" ] && [ "$UPD_OTHER" = "no" ]; then
     echo ""
     return 1
   fi

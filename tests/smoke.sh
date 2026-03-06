@@ -74,6 +74,7 @@ CHECKS=(
   "setup.sh:install_hooks"
   "setup.sh:install_commands"
   "setup.sh:install_agents"
+  "setup.sh:ensure_skills_alias"
   "setup.sh:setup_repo_group_context"
   "setup.sh:update_gitignore"
   "plugins.sh:install_gsd"
@@ -139,6 +140,21 @@ if awk '/"UserPromptSubmit"[[:space:]]*:[[:space:]]*\[/,/^[[:space:]]*\],?$/' te
   pass "templates/claude/settings.json wires update-check.sh on UserPromptSubmit"
 else
   fail "templates/claude/settings.json missing UserPromptSubmit update-check.sh hook"
+fi
+
+# Step 7: Verify skills alias migration is wired in both setup and update paths
+echo ""
+echo "--- Skills alias migration wiring ---"
+if grep -q 'ensure_skills_alias' bin/ai-setup.sh 2>/dev/null; then
+  pass "bin/ai-setup.sh calls ensure_skills_alias on install"
+else
+  fail "bin/ai-setup.sh missing ensure_skills_alias call"
+fi
+
+if grep -q 'ensure_skills_alias' lib/update.sh 2>/dev/null; then
+  pass "lib/update.sh calls ensure_skills_alias during smart update"
+else
+  fail "lib/update.sh missing ensure_skills_alias call"
 fi
 
 # Summary

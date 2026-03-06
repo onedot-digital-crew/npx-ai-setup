@@ -135,6 +135,7 @@ install_hooks
 install_rules
 install_copilot
 mkdir -p .agents
+ensure_skills_alias
 install_specs
 install_commands
 install_shopify_skills
