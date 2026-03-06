@@ -69,7 +69,15 @@ if [ -f "$SETUP_META" ]; then
     if [ -f "$UPDATE_CACHE" ]; then
       LATEST_AI_SETUP=$(tr -d '[:space:]' < "$UPDATE_CACHE" | sed 's/^v//')
       if [ -n "$LATEST_AI_SETUP" ] && [ "$LATEST_AI_SETUP" != "$INSTALLED_AI_SETUP" ]; then
-        UPDATE_BADGE=" | ai-setup v${INSTALLED_AI_SETUP} -> v${LATEST_AI_SETUP}"
+        # Semver compare: only show badge if registry version is strictly newer
+        _upd_gt=0
+        IFS=. read -ra _upd_a <<< "$LATEST_AI_SETUP"
+        IFS=. read -ra _upd_b <<< "$INSTALLED_AI_SETUP"
+        for _upd_i in 0 1 2; do
+          [ "${_upd_a[$_upd_i]:-0}" -gt "${_upd_b[$_upd_i]:-0}" ] 2>/dev/null && _upd_gt=1 && break
+          [ "${_upd_a[$_upd_i]:-0}" -lt "${_upd_b[$_upd_i]:-0}" ] 2>/dev/null && break
+        done
+        [ "$_upd_gt" -eq 1 ] && UPDATE_BADGE=" | ai-setup v${INSTALLED_AI_SETUP} -> v${LATEST_AI_SETUP}"
       fi
     fi
   fi
