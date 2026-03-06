@@ -27,7 +27,15 @@ if [ -f "$CACHE" ]; then
   if [ "$AGE" -lt 86400 ]; then
     LATEST=$(tr -d '[:space:]' < "$CACHE" | sed 's/^v//')
     if [ -n "$LATEST" ] && [ "$LATEST" != "$INSTALLED" ]; then
-      echo "ai-setup v${LATEST} available (you have v${INSTALLED}). Run: npx github:onedot-digital-crew/npx-ai-setup"
+      # Semver compare: only notify if registry version is strictly newer
+      _gt=0
+      IFS=. read -ra _a <<< "$LATEST"
+      IFS=. read -ra _b <<< "$INSTALLED"
+      for _i in 0 1 2; do
+        [ "${_a[$_i]:-0}" -gt "${_b[$_i]:-0}" ] 2>/dev/null && _gt=1 && break
+        [ "${_a[$_i]:-0}" -lt "${_b[$_i]:-0}" ] 2>/dev/null && break
+      done
+      [ "$_gt" -eq 1 ] && echo "ai-setup v${LATEST} available (you have v${INSTALLED}). Run: npx github:onedot-digital-crew/npx-ai-setup"
     fi
     exit 0
   fi

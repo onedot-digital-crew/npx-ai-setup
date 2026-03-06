@@ -69,6 +69,19 @@ TS_RULES_MAP=(
   "templates/claude/rules/typescript.md:.claude/rules/typescript.md"
 )
 
+# Return 0 if $1 > $2 in semver (major.minor.patch, ignores pre-release)
+_semver_gt() {
+  local -a a b
+  IFS=. read -ra a <<< "$1"
+  IFS=. read -ra b <<< "$2"
+  for i in 0 1 2; do
+    local ai=${a[$i]:-0} bi=${b[$i]:-0}
+    [ "$ai" -gt "$bi" ] 2>/dev/null && return 0
+    [ "$ai" -lt "$bi" ] 2>/dev/null && return 1
+  done
+  return 1  # equal
+}
+
 VALID_SYSTEMS=(auto shopify nuxt next laravel shopware storyblok)
 
 # Get package version from package.json

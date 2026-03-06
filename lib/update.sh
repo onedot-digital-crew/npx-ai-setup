@@ -34,8 +34,10 @@ show_cli_update_notice() {
     fi
     if [ -n "$timeout_cmd" ]; then
       latest=$($timeout_cmd npm view @onedot/ai-setup version 2>/dev/null | head -n1 | tr -d '[:space:]')
-      [ -n "$latest" ] && printf '%s\n' "$latest" > "$cache"
+    else
+      latest=$(npm view @onedot/ai-setup version 2>/dev/null | head -n1 | tr -d '[:space:]')
     fi
+    [ -n "$latest" ] && printf '%s\n' "$latest" > "$cache"
   fi
 
   # GitHub fallback for environments using github: installs without npm publish.
@@ -56,7 +58,8 @@ show_cli_update_notice() {
   fi
 
   [ -n "$latest" ] || return 0
-  if [ "$latest" != "$current" ]; then
+  # Only show notice when registry version is strictly newer (semver compare)
+  if [ "$latest" != "$current" ] && _semver_gt "$latest" "$current"; then
     echo ""
     echo "ℹ️  New version available: @onedot/ai-setup v${latest} (current: v${current})"
     echo "   Update command: npx github:onedot-digital-crew/npx-ai-setup"
@@ -92,6 +95,10 @@ handle_version_check() {
         regen_ok=0
         if command -v claude &>/dev/null; then
           if ask_regen_parts; then
+            if [ -z "$SYSTEM" ] && [ -f .ai-setup.json ]; then
+              SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+              [ -n "$SYSTEM" ] && echo "  🔍 Restored system from previous run: $SYSTEM"
+            fi
             if [ -z "$SYSTEM" ]; then
               select_system
             fi
@@ -157,6 +164,12 @@ run_smart_update() {
   echo ""
   echo "🔍 Analyzing templates..."
   echo ""
+
+  # Restore SYSTEM from metadata if not set via --system flag
+  if [ -z "$SYSTEM" ] && [ -f .ai-setup.json ]; then
+    SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+    [ -n "$SYSTEM" ] && echo "  🔍 Restored system from previous run: $SYSTEM"
+  fi
 
   # Normalize legacy skills layout in existing projects.
   if command -v ensure_skills_alias >/dev/null 2>&1; then
@@ -329,11 +342,13 @@ run_smart_update() {
   generate_repomix_snapshot
 
   echo ""
+  local _version_info="v${PACKAGE_VERSION}"
+  [ "$INSTALLED_VERSION" != "$PACKAGE_VERSION" ] && _version_info="v${INSTALLED_VERSION} → v${PACKAGE_VERSION}"
   if [ "$regen_failed" -eq 0 ]; then
-    echo "✅ Update complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+    echo "✅ Update complete! (${_version_info})"
     return 0
   fi
-  echo "⚠️  Update complete with warnings (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+  echo "⚠️  Update complete with warnings (${_version_info})"
   return 1
 }
 
