@@ -110,6 +110,22 @@ Run the same command again — the script auto-detects and offers:
 - **Regenerate** — re-run Claude analysis (CLAUDE.md, AGENTS.md, context, commands, skills)
 - **Clean reinstall** — remove all managed files, fresh install
 
+### Update existing projects in ~60s
+
+```bash
+npx github:onedot-digital-crew/npx-ai-setup
+```
+
+Recommended flow in existing repositories:
+
+1. Choose **Update** (not Reinstall).
+2. In category selection, keep at least **Hooks** and **Settings** enabled.
+3. For modified files, review each prompt:
+   - `y` = update file (your previous version is backed up to `.ai-setup-backup/`)
+   - `N` = keep your local customization
+4. If prompted, enable **Multi-Repo Context** to generate `.agents/context/repo-group.json` (works without naming convention).
+5. Optional: run **Regenerate** if your stack/architecture changed.
+
 ---
 
 ## Testing
