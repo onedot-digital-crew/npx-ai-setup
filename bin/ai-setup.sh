@@ -71,6 +71,9 @@ if [ -n "$SYSTEM" ]; then
   fi
 fi
 
+# Lightweight registry check (cached) to hint when a newer ai-setup is available.
+show_cli_update_notice
+
 # ==============================================================================
 # REGENERATE MODE (--regenerate flag)
 # ==============================================================================

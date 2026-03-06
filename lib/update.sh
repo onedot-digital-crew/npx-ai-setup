@@ -2,6 +2,68 @@
 # Update/reinstall logic: version detection, smart update, clean reinstall
 # Requires: core.sh, detect.sh, tui.sh, generate.sh
 
+# Show a lightweight CLI notice when a newer ai-setup version exists.
+# Uses a cached npm registry lookup to avoid slowing normal runs.
+show_cli_update_notice() {
+  local current latest cache age ttl
+  current=$(get_package_version)
+  [ -n "$current" ] || return 0
+  [ "$current" = "unknown" ] && return 0
+
+  cache="/tmp/ai-setup-cli-latest-version.txt"
+  ttl=21600 # 6h cache
+  latest=""
+
+  if [ -f "$cache" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
+      age=$(( $(date +%s) - $(stat -f %m "$cache" 2>/dev/null || echo 0) ))
+    else
+      age=$(( $(date +%s) - $(stat -c %Y "$cache" 2>/dev/null || echo 0) ))
+    fi
+    if [ "$age" -lt "$ttl" ]; then
+      latest=$(tr -d '[:space:]' < "$cache")
+    fi
+  fi
+
+  if [ -z "$latest" ] && command -v npm >/dev/null 2>&1; then
+    local timeout_cmd=""
+    if command -v timeout >/dev/null 2>&1; then
+      timeout_cmd="timeout 3"
+    elif command -v gtimeout >/dev/null 2>&1; then
+      timeout_cmd="gtimeout 3"
+    fi
+    if [ -n "$timeout_cmd" ]; then
+      latest=$($timeout_cmd npm view @onedot/ai-setup version 2>/dev/null | head -n1 | tr -d '[:space:]')
+      [ -n "$latest" ] && printf '%s\n' "$latest" > "$cache"
+    fi
+  fi
+
+  # GitHub fallback for environments using github: installs without npm publish.
+  if [ -z "$latest" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    latest=$(curl -fsSL --max-time 4 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/releases/latest" 2>/dev/null \
+      | jq -r '.tag_name // empty' \
+      | head -n1 \
+      | tr -d '[:space:]' \
+      | sed 's/^v//')
+    if [ -z "$latest" ]; then
+      latest=$(curl -fsSL --max-time 4 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/tags?per_page=1" 2>/dev/null \
+        | jq -r '.[0].name // empty' \
+        | head -n1 \
+        | tr -d '[:space:]' \
+        | sed 's/^v//')
+    fi
+    [ -n "$latest" ] && printf '%s\n' "$latest" > "$cache"
+  fi
+
+  [ -n "$latest" ] || return 0
+  if [ "$latest" != "$current" ]; then
+    echo ""
+    echo "ℹ️  New version available: @onedot/ai-setup v${latest} (current: v${current})"
+    echo "   Update command: npx github:onedot-digital-crew/npx-ai-setup"
+    echo ""
+  fi
+}
+
 # Handle version check and route to update, reinstall, or exit
 # Called when .ai-setup.json exists. May exit the script.
 handle_version_check() {

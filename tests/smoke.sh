@@ -65,6 +65,7 @@ CHECKS=(
   "skills.sh:get_keyword_skills"
   "skills.sh:install_skill"
   "generate.sh:run_generation"
+  "update.sh:show_cli_update_notice"
   "update.sh:handle_version_check"
   "update.sh:run_smart_update"
   "update.sh:run_clean_reinstall"
@@ -110,6 +111,21 @@ if grep -q '"lib/"' package.json 2>/dev/null; then
   pass "package.json includes lib/ in files"
 else
   fail "package.json missing lib/ in files"
+fi
+
+# Step 6: Verify update-check hook is wired for startup and prompt submit
+echo ""
+echo "--- Hook wiring checks ---"
+if awk '/"SessionStart"[[:space:]]*:[[:space:]]*\[/,/^[[:space:]]*\],?$/' templates/claude/settings.json | grep -q 'update-check.sh'; then
+  pass "templates/claude/settings.json wires update-check.sh on SessionStart"
+else
+  fail "templates/claude/settings.json missing SessionStart update-check.sh hook"
+fi
+
+if awk '/"UserPromptSubmit"[[:space:]]*:[[:space:]]*\[/,/^[[:space:]]*\],?$/' templates/claude/settings.json | grep -q 'update-check.sh'; then
+  pass "templates/claude/settings.json wires update-check.sh on UserPromptSubmit"
+else
+  fail "templates/claude/settings.json missing UserPromptSubmit update-check.sh hook"
 fi
 
 # Summary

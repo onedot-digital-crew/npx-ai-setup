@@ -10,6 +10,7 @@
 | `post-tool-failure-log.sh` | PostToolUseFailure | Appends failed tool calls to `.claude/tool-failures.log` | Change log format/truncation |
 | `config-change-audit.sh` | ConfigChange | Audits config changes and blocks unsafe settings (`disableAllHooks`, `Bash(*)`) | Extend blocked settings checks |
 | `task-completed-gate.sh` | TaskCompleted | Blocks closing tasks with TODO/TBD/WIP markers or unresolved merge conflict markers | Adjust validation patterns |
+| `update-check.sh` | SessionStart + UserPromptSubmit | Checks for newer `ai-setup` versions (cached, non-blocking) and resets circuit-breaker log | Adjust cache TTL/source strategy |
 | `context-freshness.sh` | UserPromptSubmit | Warns when `.agents/context/` is stale | Runs silently unless project files changed |
 
 **Exit codes:** `0` = pass, `1` = fail with feedback, `2` = blocked

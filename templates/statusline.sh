@@ -27,6 +27,7 @@ case "$DURATION" in ''|null|*[!0-9]*) DURATION=0 ;; esac
 BRANCH=""
 STAGED=0
 MODIFIED=0
+UPDATE_BADGE=""
 CACHE_ROOT="/tmp/claude-statusline-cache"
 mkdir -p "$CACHE_ROOT" 2>/dev/null || true
 DIR_KEY=$(printf '%s' "$PROJECT_DIR" | cksum | awk '{print $1}')
@@ -59,6 +60,21 @@ fi
 case "$STAGED" in ''|null|*[!0-9]*) STAGED=0 ;; esac
 case "$MODIFIED" in ''|null|*[!0-9]*) MODIFIED=0 ;; esac
 
+# ai-setup update badge (reads cached update-check result; no network call here).
+SETUP_META="$PROJECT_DIR/.ai-setup.json"
+if [ -f "$SETUP_META" ]; then
+  INSTALLED_AI_SETUP=$(jq -r '.version // empty' "$SETUP_META" 2>/dev/null | sed 's/^v//' | tr -d '[:space:]')
+  if [ -n "$INSTALLED_AI_SETUP" ]; then
+    UPDATE_CACHE="/tmp/ai-setup-update-$(printf '%s' "$PROJECT_DIR" | cksum | awk '{print $1}').txt"
+    if [ -f "$UPDATE_CACHE" ]; then
+      LATEST_AI_SETUP=$(tr -d '[:space:]' < "$UPDATE_CACHE" | sed 's/^v//')
+      if [ -n "$LATEST_AI_SETUP" ] && [ "$LATEST_AI_SETUP" != "$INSTALLED_AI_SETUP" ]; then
+        UPDATE_BADGE=" | ai-setup v${INSTALLED_AI_SETUP} -> v${LATEST_AI_SETUP}"
+      fi
+    fi
+  fi
+fi
+
 # Write bridge file for context-monitor hook
 if [ -n "$SESSION_ID" ]; then
   EPOCH=$(date +%s)
@@ -80,7 +96,7 @@ RESET="\033[0m"
 # Line 1: model + dir + branch
 BRANCH_PART=""
 [ -n "$BRANCH" ] && BRANCH_PART=" (${BRANCH} +${STAGED} ~${MODIFIED})"
-echo -e "${MODEL} · ${DIR_NAME}${BRANCH_PART}"
+echo -e "${MODEL} · ${DIR_NAME}${BRANCH_PART}${UPDATE_BADGE}"
 
 # Line 2: context bar + cost + duration
 MINS=$(( DURATION / 60000 ))
