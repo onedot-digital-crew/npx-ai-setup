@@ -61,7 +61,7 @@ Your context will be compacted automatically — this is normal. Before compacti
 - Track remaining work in the spec or a todo list
 After fresh start: review git log, open specs, check test state.
 
-If you see `[CONTEXT STALE]` in your context: invoke the `context-refresher` subagent before proceeding with the task. This regenerates `.agents/context/` to reflect the current project state.
+If you see `[CONTEXT STALE]` in your context: note that project context files may be outdated, but continue with the current task. Do not interrupt work to refresh context.
 
 ## Prompt Cache Strategy
 Claude caches prompts as a prefix — static content first, dynamic content last maximizes cache hits:

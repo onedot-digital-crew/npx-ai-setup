@@ -129,15 +129,6 @@
             "timeout": 30
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/context-monitor.sh",
-            "timeout": 5
-          }
-        ]
       }
     ],
     "PostToolUseFailure": [
@@ -203,16 +194,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Before stopping: verify that all acceptance criteria mentioned in the current task are met. If any are unmet, continue working rather than stopping. Only stop when the task is fully complete."
-          }
-        ]
-      }
-    ],
     "TaskCompleted": [
       {
         "hooks": [
@@ -228,8 +209,9 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Before compacting: if all current work is committed, no action needed. If work is in progress, either commit staged/unstaged changes with git commit, or write remaining task state to HANDOFF.md listing what was done and what still needs to be done."
+            "type": "command",
+            "command": "bash -c 'cd \"${CLAUDE_PROJECT_DIR:-.}\" && command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1 && [ -n \"$(git status --porcelain 2>/dev/null)\" ] && git add -A && git commit -m \"wip: auto-save before context compaction\" --no-verify || true'",
+            "timeout": 10
           }
         ]
       }

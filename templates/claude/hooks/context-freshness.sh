@@ -35,7 +35,7 @@ if [ -n "$STORED_TSC" ] && [ -f "tsconfig.json" ]; then
 fi
 
 if [ -n "$CHANGED" ]; then
-  echo "[CONTEXT STALE] Project context outdated ($CHANGED changed). Invoke the context-refresher subagent before proceeding." >&2
+  echo "[CONTEXT STALE] Project context may be outdated ($CHANGED changed since last setup)." >&2
 fi
 
 exit 0
