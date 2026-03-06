@@ -24,10 +24,8 @@ if [[ "$FILE_PATH" == *.js || "$FILE_PATH" == *.ts || "$FILE_PATH" == *.jsx || "
   else
     OUTPUT=$(npx eslint "$FILE_PATH" --fix 2>&1)
   fi
-  # Never exit non-zero — lint errors must not trigger Claude fix-loops
-  if [ $? -ne 0 ]; then
-    echo "$OUTPUT" | head -10 >&2
-  fi
+  # Silent: lint errors must not be shown to Claude (triggers fix-loops)
+
 fi
 
 # Prettier for other supported files (css, html, json, md, yaml, vue, svelte)
