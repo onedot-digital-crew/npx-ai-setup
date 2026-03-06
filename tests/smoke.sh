@@ -76,6 +76,7 @@ CHECKS=(
   "setup.sh:update_gitignore"
   "plugins.sh:install_gsd"
   "plugins.sh:install_claude_mem"
+  "plugins.sh:install_coderabbit_plugin"
   "plugins.sh:install_context7"
   "plugins.sh:install_playwright"
   "plugins.sh:show_installation_summary"

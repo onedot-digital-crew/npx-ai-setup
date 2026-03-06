@@ -140,6 +140,7 @@ All plugins and integrations are installed automatically — no flags needed.
 | Plugin | What it does |
 |--------|-------------|
 | **claude-mem** | Persistent memory across sessions, MCP search tools |
+| **claude-plugin@coderabbitai** | CodeRabbit PR review companion plugin for Claude Code |
 | **code-review** | 4 parallel review agents — `/code-review` |
 | **feature-dev** | 7-phase feature workflow — `/feature-dev` |
 | **frontend-design** | Anti-generic design guidance for frontend projects |
@@ -192,6 +193,7 @@ More info: [rtk-ai/rtk](https://github.com/rtk-ai/rtk)
 
 - [Skills marketplace](https://skills.sh/)
 - [Claude-Mem](https://claude-mem.ai)
+- [CodeRabbit Claude Plugin](https://github.com/coderabbitai/claude-plugin)
 - [Context7](https://github.com/upstash/context7)
 - [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
 - [Concept & Design Decisions](.agents/context/CONCEPT.md)

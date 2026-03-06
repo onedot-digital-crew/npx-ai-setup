@@ -148,6 +148,7 @@ echo "🔌 Plugins & Extensions"
 echo "   ──────────────────────────────────────────────────────────"
 
 install_claude_mem
+install_coderabbit_plugin
 install_official_plugins
 install_context7
 show_plugin_summary
