@@ -62,6 +62,8 @@ SHOPIFY_SKILLS_MAP=(
   "templates/skills/shopify-checkout/SKILL.md:.claude/skills/shopify-checkout/SKILL.md"
   "templates/skills/shopify-functions/SKILL.md:.claude/skills/shopify-functions/SKILL.md"
   "templates/skills/shopify-cli-tools/SKILL.md:.claude/skills/shopify-cli-tools/SKILL.md"
+  "templates/skills/shopify-new-section/SKILL.md:.claude/skills/shopify-new-section/SKILL.md"
+  "templates/skills/shopify-new-block/SKILL.md:.claude/skills/shopify-new-block/SKILL.md"
 )
 
 # TypeScript-specific rules (only added when *.ts or *.tsx files are detected)

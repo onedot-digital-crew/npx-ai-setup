@@ -28,6 +28,15 @@ if [[ "$FILE_PATH" == *.js || "$FILE_PATH" == *.ts || "$FILE_PATH" == *.jsx || "
 
 fi
 
+# Validate JSON syntax for Shopify schema/config files
+if [[ "$FILE_PATH" == */config/*.json || "$FILE_PATH" == */templates/*.json || "$FILE_PATH" == */locales/*.json ]]; then
+  if command -v jq >/dev/null 2>&1; then
+    if ! jq . "$FILE_PATH" >/dev/null 2>&1; then
+      echo "JSON syntax error in $FILE_PATH" >&2
+    fi
+  fi
+fi
+
 # Prettier for other supported files (css, html, json, md, yaml, vue, svelte)
 if [[ "$FILE_PATH" == *.css || "$FILE_PATH" == *.html || "$FILE_PATH" == *.json || "$FILE_PATH" == *.md || "$FILE_PATH" == *.yaml || "$FILE_PATH" == *.yml || "$FILE_PATH" == *.vue || "$FILE_PATH" == *.svelte ]]; then
   if [ -x "node_modules/.bin/prettier" ]; then

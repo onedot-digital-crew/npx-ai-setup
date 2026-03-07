@@ -11,4 +11,14 @@ for pattern in "${PROTECTED[@]}"; do
   fi
 done
 
+# Block direct edits to assets/ in Vite-based projects (build output)
+if [[ "$FILE_PATH" == */assets/* ]]; then
+  for cfg in vite.config.js vite.config.ts vite.config.mjs vite.config.mts; do
+    if [ -f "$cfg" ]; then
+      echo "Blocked: $FILE_PATH is in assets/ (build output — edit src/ instead)" >&2
+      exit 2
+    fi
+  done
+fi
+
 exit 0
