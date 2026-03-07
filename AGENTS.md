@@ -87,7 +87,11 @@ The main bash script handles:
 - Warns at 5 edits within 10 minutes
 - Blocks at 8 edits within 10 minutes
 
-### 3. Spec-Driven Development
+### 3. Spec-Driven Development (Local Claude Commands)
+
+> **Note:** These are Claude Code slash commands (`.claude/commands/*.md`), not Skills.
+> Skills live in `.claude/skills/` and appear in `<available_skills>`.
+> Commands are invoked via `/command-name` in Claude Code and are not auto-listed by AI tools.
 
 Five slash commands enable a Kanban-style spec workflow:
 
@@ -118,6 +122,16 @@ Five slash commands enable a Kanban-style spec workflow:
 - Shows step-level progress (`[3/8]`) and branch info per spec
 
 **Status lifecycle:** `draft` → `in-progress` → `in-review` → `completed` (or `blocked` at any stage)
+
+**Available local commands (`.claude/commands/`):**
+
+| Command | File | Mode | Description |
+|---------|------|------|-------------|
+| `/spec "task"` | spec.md | plan (Opus) | Challenge idea → create spec file |
+| `/spec-work NNN` | spec-work.md | execute (Sonnet) | Execute spec step-by-step |
+| `/spec-work-all` | spec-work-all.md | execute (Sonnet) | Execute all draft specs in parallel |
+| `/spec-review NNN` | spec-review.md | plan (Opus) | Review spec → APPROVED / CHANGES REQUESTED / REJECTED |
+| `/spec-board` | spec-board.md | plan (Sonnet) | Kanban overview with step-level progress |
 
 ### 4. Auto-Init Process
 
