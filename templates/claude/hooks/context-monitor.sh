@@ -72,9 +72,9 @@ printf '%s\n%s\n' "0" "$SEVERITY" > "$COUNTER_FILE" 2>/dev/null || true
 
 # Build message
 if [ "$SEVERITY" = "CRITICAL" ]; then
-  MESSAGE="CRITICAL: Context window at ${REMAINING}% remaining. Compaction is imminent. Commit current work, save state to HANDOFF.md, and wrap up immediately before context is truncated."
+  MESSAGE="CRITICAL: Context window at ${REMAINING}% remaining. Compaction is imminent. Consider saving state to HANDOFF.md. Wrapping up should begin before context is truncated."
 else
-  MESSAGE="WARNING: Context window at ${REMAINING}% remaining. Context compaction will fire at 30%. Consider committing current work and saving state to HANDOFF.md soon."
+  MESSAGE="WARNING: Context window at ${REMAINING}% remaining. Context compaction will fire at 30%. Consider saving state to HANDOFF.md soon."
 fi
 
 # Output additionalContext JSON to stdout (via jq for safe escaping)

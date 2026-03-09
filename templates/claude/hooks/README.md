@@ -1,20 +1,13 @@
 # Hook Configuration Guide
 
-## Active Hooks
+See `AGENTS.md` for the full active-hook inventory and customization overview.
+Hook scripts use these exit codes: `0` = pass, `1` = fail with feedback, `2` = blocked
 
-| Hook | Event | Purpose | Customization |
-|------|-------|---------|---------------|
-| `protect-files.sh` | PreToolUse | Blocks edits to `.env`, `package-lock.json`, `.git/` | Edit `PROTECTED` array |
-| `circuit-breaker.sh` | PreToolUse | Warns at 5 edits, blocks at 8 edits to same file in 10 min | Edit `WARN`/`BLOCK`/`WINDOW` vars |
-| `post-edit-lint.sh` | PostToolUse | Optional file-scoped project `format` script (bun/npm), then fallback ESLint on `.js`/`.ts`/`.jsx`/`.tsx` and Prettier on `.css`/`.html`/`.json`/`.md`/`.vue`/`.svelte` | Add extensions or change tools |
-| `post-tool-failure-log.sh` | PostToolUseFailure | Appends failed tool calls to `.claude/tool-failures.log` | Change log format/truncation |
-| `config-change-audit.sh` | ConfigChange | Audits config changes and blocks unsafe settings (`disableAllHooks`, `Bash(*)`) | Extend blocked settings checks |
-| `task-completed-gate.sh` | TaskCompleted | Blocks closing tasks with TODO/TBD/WIP markers or unresolved merge conflict markers | Adjust validation patterns |
-| `update-check.sh` | SessionStart + UserPromptSubmit | Checks for newer `ai-setup` versions (cached, non-blocking) and resets circuit-breaker log | Adjust cache TTL/source strategy |
-| `cross-repo-context.sh` | SessionStart | Loads sibling repo context via `.agents/context/repo-group.json` (preferred, any framework) or fallback `sw-<module>-<project>` discovery | Adjust map format, naming fallback, summary sources |
-| `context-freshness.sh` | UserPromptSubmit | Warns when `.agents/context/` is stale | Runs silently unless project files changed |
+## Dead-Loop Prevention Notes
 
-**Exit codes:** `0` = pass, `1` = fail with feedback, `2` = blocked
+- `circuit-breaker.sh` warning output is intentionally strict even on `exit 0`, so the model is told not to keep editing the same file before the hard block triggers.
+- `context-monitor.sh` uses advisory wording only. It should suggest saving state and wrapping up, but it must not issue imperative workflow commands that can trigger unnecessary tool calls.
+- `post-edit-lint.sh` suppresses normal formatter/linter output to avoid fix-loop prompts from non-fatal lint noise.
 
 ## Debugging
 

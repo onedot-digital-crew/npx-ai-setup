@@ -1,6 +1,6 @@
 # Spec: AGENTS.md Template and Auto-Init Generation
 
-> **Spec ID**: 057 | **Created**: 2026-03-05 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 057 | **Created**: 2026-03-05 | **Status**: completed | **Branch**: —
 
 ## Goal
 Generate an AGENTS.md file for target projects — universal passive AI context for Cursor, Windsurf, Cline, and other AGENTS.md-compatible tools.

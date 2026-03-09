@@ -237,6 +237,61 @@ install_agents() {
     _agent_name="${_agent_path##*/}"
     _install_or_update_file "$_agent_path" ".claude/agents/$_agent_name"
   done < <(find "$TPL/agents" -maxdepth 1 -type f -print0 | sort -z)
+  _inject_agent_skills
+}
+
+# Inject skills: field into agent YAML headers based on detected system.
+# Runs after agent templates are copied. Idempotent — skips if skills: already present.
+_inject_agent_skills() {
+  # Insert a skills block before the closing --- in an agent's YAML frontmatter.
+  # Usage: _inject_skill "agent-name.md" "skill1" "skill2" ...
+  _inject_skill() {
+    local agent_file=".claude/agents/$1"
+    shift
+    [ -f "$agent_file" ] || return 0
+    grep -q '^skills:' "$agent_file" && return 0
+
+    local skills_block="skills:"
+    for s in "$@"; do
+      skills_block="$skills_block
+  - $s"
+    done
+
+    # Build new file: insert skills block before closing ---
+    local in_front=false
+    local done_inject=false
+    local tmpfile
+    tmpfile=$(mktemp)
+    while IFS= read -r line; do
+      if [ "$done_inject" = "true" ]; then
+        printf '%s\n' "$line" >> "$tmpfile"
+      elif [ "$in_front" = "false" ] && [ "$line" = "---" ]; then
+        in_front=true
+        printf '%s\n' "$line" >> "$tmpfile"
+      elif [ "$in_front" = "true" ] && [ "$line" = "---" ]; then
+        printf '%s\n' "$skills_block" >> "$tmpfile"
+        printf '%s\n' "$line" >> "$tmpfile"
+        done_inject=true
+      else
+        printf '%s\n' "$line" >> "$tmpfile"
+      fi
+    done < "$agent_file"
+    mv "$tmpfile" "$agent_file"
+  }
+
+  if [ "$SYSTEM" = "shopify" ]; then
+    _inject_skill "liquid-linter.md" "shopify-liquid" "shopify-theme-dev"
+    _inject_skill "code-reviewer.md" "shopify-theme-dev"
+  fi
+
+  if [ "$SYSTEM" = "shopware" ]; then
+    _inject_skill "code-reviewer.md" "shopware6-best-practices"
+  fi
+
+  # vitest skill for test-generator (any system, if vitest is installed)
+  if [ -d ".claude/skills/vitest" ]; then
+    _inject_skill "test-generator.md" "vitest"
+  fi
 }
 
 # Merge top-level skill items from $1 into $2.

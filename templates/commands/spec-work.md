@@ -53,8 +53,17 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 
 12. **Verify implementation**: Spawn `verify-app` via Agent tool with the prompt:
     > "Verify that the implementation for spec NNN is correct. Check if the project has a test suite and run it. Check if there is a build command and run it. Report PASS or FAIL."
-    - If verify-app returns **FAIL**: set status to `in-review`, report the output, and **stop**. Do NOT run code-reviewer. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
     - If verify-app returns **PASS**: continue to the next step.
+    - If verify-app returns **FAIL**: trigger the **Haiku Investigator** (exactly once — never in a loop):
+
+    > **Haiku Investigator** — spawn a sub-agent with these constraints:
+    > - Model: haiku | Allowed tools: Read, Glob, Grep, Bash (read-only: `cat`, `ls`, `grep`, `find`) | **Forbidden: Write, Edit**
+    > - Prompt: "Diagnose this build/test failure. Read the error output and relevant source files. Identify the root cause. Output: (1) root cause in one sentence, (2) the specific line(s) to fix, (3) exact fix to apply. Do NOT edit any files."
+    > - Pass the full verify-app error output to the investigator.
+    
+    Apply the investigator's suggested fix as a **single targeted edit**, then run verify-app once more.
+    - If the second verify-app returns **PASS**: continue normally.
+    - If the second verify-app returns **FAIL**: set status to `in-review`, report the investigator's diagnosis and remaining error, **stop**. Do NOT proceed to step 13 (code-reviewer). Do NOT run the investigator again. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
 
 13. **Auto-review**: Spawn the `code-reviewer` agent via Agent tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
     - If verdict is **FAIL**: set status to `in-review`. Report the issues. Suggest: `Run /spec-review NNN to review manually.`

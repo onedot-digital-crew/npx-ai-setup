@@ -10,6 +10,11 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 069**: Agent rules file and skill injection — new `rules/agents.md` with delegation table and anti-patterns; installer now injects `skills:` into agent YAML headers based on detected system (Shopify, Shopware, vitest).
+- **Spec backlog cleanup**: consolidated 11 backlog specs down to 0; deleted 10 obsolete/redundant specs, merged 4 into #069, documented rejected ideas in BACKLOG.md.
+- **Spec 060**: Template Token Optimization — compressed large command templates, deduplicated hook docs, and reduced the modified template set by about 12% without changing behavior.
+- **Spec 059**: Deadloop Prevention Hardening — hardened circuit-breaker warning text, softened context-monitor wording, and documented output-suppression deadloop guards in hook docs.
+
 ## [v1.2.7] — 2026-03-06
 
 - **Release automation hardening**: `release-from-changelog` now supports `create` tag events as a fallback for delayed push events; release docs/command include a manual workflow trigger backup.

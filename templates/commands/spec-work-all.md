@@ -30,12 +30,10 @@ For each spec in the current wave:
 
 #### Wave execution — parallel subagents
 Launch one Agent subagent per spec simultaneously using `isolation: "worktree"`. Each subagent receives:
-
 **Prompt for each subagent:**
 ```
 Execute this spec. You are running in an isolated Git worktree.
-
-Setup steps (do first, before implementing the spec):
+Do first:
 1. Rename the current branch to `spec/NNN-title`:
    git branch -m spec/NNN-title
 2. Get the main repo path (the parent of this worktree):
@@ -53,17 +51,9 @@ Setup steps (do first, before implementing the spec):
    elif [ -f "pnpm-lock.yaml" ]; then pnpm install --frozen-lockfile 2>/dev/null || echo "⚠️  pnpm install failed"
    elif [ -f "yarn.lock" ]; then yarn install --frozen-lockfile 2>/dev/null || echo "⚠️  yarn install failed"
    fi
-
+Then follow the `/spec-work` process for this spec inside the worktree: read context, load referenced skills, execute each step in order, verify acceptance criteria, then commit with `git add -A && git commit -m "spec(NNN): [spec title]"`.
 Spec content:
 [full spec content here]
-
-Implementation steps:
-1. Read .agents/context/CONVENTIONS.md and .agents/context/STACK.md if they exist
-2. Load relevant skills if referenced in the spec's Context section
-3. Execute each spec step in order
-4. Verify all acceptance criteria are met
-5. Stage and commit all changes:
-   git add -A && git commit -m "spec(NNN): [spec title]"
 ```
 
 #### Wave post-processing — after each subagent returns

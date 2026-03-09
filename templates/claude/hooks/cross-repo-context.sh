@@ -8,16 +8,6 @@
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 REPO_NAME="$(basename "$PROJECT_DIR")"
 
-resolve_path() {
-  local base="$1"
-  local target="$2"
-  if [[ "$target" = /* ]]; then
-    printf '%s\n' "$target"
-    return 0
-  fi
-  (cd "$base" 2>/dev/null && cd "$target" 2>/dev/null && pwd) || return 1
-}
-
 repo_summary() {
   local repo="$1"
   local module="$2"
@@ -29,7 +19,6 @@ repo_summary() {
       [ -n "$summary" ] && break
     fi
   done
-
   if [ -z "$summary" ]; then
     case "$module" in
       theme) summary="base storefront theme repository" ;;
@@ -42,7 +31,6 @@ repo_summary() {
       *) summary="related project repository" ;;
     esac
   fi
-
   printf '%s' "$summary" | tr '\r\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-180
 }
 
@@ -60,12 +48,17 @@ emit_repo_line() {
     [ -n "$dirty" ] && state="dirty"
     branch_info="branch=${branch:-unknown},${state}"
   fi
-
   local marker=""
   [ "$name" = "$REPO_NAME" ] && marker=" (current)"
-
   printf -- "- %s%s [%s, %s]\n" "$name" "$marker" "${module:-unknown}" "$branch_info"
   printf "  context: %s\n" "$(repo_summary "$repo" "$module")"
+}
+
+emit_repo() {
+  local repo="$1"
+  local name="${2:-$(basename "$repo")}"
+  local module="${3:-unknown}"
+  emit_repo_line "$repo" "$name" "$module"
 }
 
 # 1) Explicit repo-group map (recommended, works for any naming convention).
@@ -76,27 +69,24 @@ if [ -f "$GROUP_FILE" ] && command -v jq >/dev/null 2>&1; then
   case "$ENTRY_COUNT" in
     ''|null|*[!0-9]*) ENTRY_COUNT=0 ;;
   esac
-
   if [ "$ENTRY_COUNT" -gt 0 ]; then
     printed=0
     echo "=== Cross-Repo Context (group: ${GROUP_NAME}) ==="
     while IFS= read -r entry; do
       rel_path="$(printf '%s' "$entry" | jq -r '.path // empty')"
       [ -n "$rel_path" ] || continue
-      abs_path="$(resolve_path "$PROJECT_DIR" "$rel_path" || true)"
+      if [[ "$rel_path" = /* ]]; then
+        abs_path="$rel_path"
+      else
+        abs_path="$(cd "$PROJECT_DIR" 2>/dev/null && cd "$rel_path" 2>/dev/null && pwd)" || continue
+      fi
       [ -n "$abs_path" ] || continue
       [ -d "$abs_path" ] || continue
-
       name="$(printf '%s' "$entry" | jq -r '.name // empty')"
       module="$(printf '%s' "$entry" | jq -r '.module // empty')"
-
-      [ -n "$name" ] || name="$(basename "$abs_path")"
-      [ -n "$module" ] || module="unknown"
-
-      emit_repo_line "$abs_path" "$name" "$module"
+      emit_repo "$abs_path" "$name" "$module"
       printed=$((printed + 1))
     done < <(jq -c '.repos[]?' "$GROUP_FILE" 2>/dev/null)
-
     [ "$printed" -gt 1 ] && exit 0
     # If map exists but resolves to <=1 repo, silently continue to fallback.
   fi
@@ -126,7 +116,7 @@ for repo in "${repos[@]}"; do
   if [[ "$name" =~ ^sw-([a-z0-9-]+)-([a-z0-9]+)$ ]]; then
     module="${BASH_REMATCH[1]}"
   fi
-  emit_repo_line "$repo" "$name" "$module"
+  emit_repo "$repo" "$name" "$module"
 done
 
 exit 0

@@ -49,11 +49,7 @@ For each signal found, classify where it belongs:
 
 ### 3. Draft proposed additions
 
-Read all target files first to check for existing content and prevent duplicates:
-- Read `CLAUDE.md` to see current Critical Rules and Commands sections
-- Read `.agents/context/CONVENTIONS.md` to see current conventions
-- Read `.agents/context/ARCHITECTURE.md` to see current architecture notes
-- Read `.agents/context/STACK.md` to see current stack decisions
+Read `CLAUDE.md`, `.agents/context/CONVENTIONS.md`, `.agents/context/ARCHITECTURE.md`, and `.agents/context/STACK.md` first to avoid duplicates.
 
 For each signal, draft a rule or fact addition:
 - Maximum 1-2 lines per entry
@@ -65,12 +61,9 @@ For each signal, draft a rule or fact addition:
 If no actionable signals were found in this session, report that clearly and stop.
 
 ### 4. Show proposed changes for approval
-
 Use AskUserQuestion to present the proposed additions and ask for approval before writing anything.
-
-Format the proposal as a diff preview showing exactly what will be appended to each file. Show all four possible targets (only those with proposed changes):
-
-Example question:
+Format the proposal as a diff preview showing exactly what will be appended to each file.
+Example:
 ```
 Proposed additions from this session:
 
@@ -80,13 +73,7 @@ File: .agents/context/CONVENTIONS.md
 File: CLAUDE.md (Critical Rules)
 + Never modify template files directly — use generation logic instead
 
-File: .agents/context/ARCHITECTURE.md
-+ API routes pass through auth middleware before reaching handlers
-+ The event bus in src/events/ decouples service communication
-
-File: .agents/context/STACK.md
-+ Requires Redis 7+ running locally for session storage
-+ Uses vitest (not jest) for unit tests
+Apply the same format for `.agents/context/ARCHITECTURE.md` and `.agents/context/STACK.md` when needed.
 
 Apply these changes?
 Options: [Apply all] [Skip all] [Edit manually]

@@ -33,21 +33,12 @@ Rate: **ALIGNED / BORDERLINE / MISALIGNED**. If MISALIGNED → **REJECT** immedi
 ### 1e — Think It Through
 Sketch the full implementation mentally before writing the spec.
 **Use `AskUserQuestion` at any decision point** — don't assume, ask. Multiple rounds are fine.
-
-**Implementation path:**
-- Which files/systems change? What exactly happens in each?
-- How does it integrate with existing code — what calls what?
-- What are the data flows or state changes?
-
-**Edge cases & failure modes:**
-- What inputs or states could break this?
-- What happens when it fails — is it recoverable?
-- What are the implicit dependencies or side effects?
-
-**Hidden complexity:**
-- What looks simple but isn't?
-- What will be hard to test or debug later?
-- What will be annoying to maintain in 6 months?
+Checklist:
+- Files/systems touched; exact change in each
+- Integration path; what calls what; data/state flow
+- Edge cases; failure behavior; recoverability
+- Hidden complexity; hard-to-test/debug parts; 6-month maintenance pain
+- Implicit dependencies and side effects
 
 ### 1f — Overhead & Risk
 - Maintenance burden added?
@@ -59,17 +50,12 @@ List 1-3 alternatives:
 - A smaller scope version
 - A workaround that avoids building anything
 - **"Don't build it"** — explicitly if it applies
-
 Scan with Glob and Grep for similar existing functionality. Check installed skills for overlap.
 
 ### 1h — Verdict
-
 Present a clear summary of the thinking above, then choose exactly one:
-
 **GO** — Needed, fits, complexity is understood. The implementation sketch from 1e becomes the basis for the spec steps.
-
 **SIMPLIFY** — Merits exist but scope is too large. State the reduced scope. Ask user to confirm before proceeding.
-
 **REJECT** — Misaligned, unnecessary, or risk outweighs benefit. State reason. Stop here.
 
 ---

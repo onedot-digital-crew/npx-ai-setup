@@ -38,13 +38,14 @@ project-root/
 │   │   └── hooks/               # Hook scripts
 │   │       ├── protect-files.sh       # Prevents edits to .env, package-lock.json
 │   │       ├── post-edit-lint.sh      # Auto-runs eslint --fix
-│   │       ├── circuit-breaker.sh     # Detects edit loops (warns at 5x, blocks at 8x)
+│   │       ├── circuit-breaker.sh     # Detects edit loops (warns at 5x, blocks at 8x, dead-loop protection)
 │   │       └── README.md              # Hook documentation
 │   ├── commands/
 │   │   ├── spec.md              # /spec slash command (Opus, plan mode)
 │   │   ├── spec-work.md         # /spec-work slash command (Sonnet, execute mode)
 │   │   ├── spec-work-all.md     # /spec-work-all parallel execution via Git worktrees
-│   │   ├── spec-review.md       # /spec-review review + PR draft (Opus, plan mode)
+│   │   ├── spec-validate.md      # /spec-validate pre-execution quality gate (Sonnet, plan mode)
+│   │   ├── spec-review.md       # /spec-review review + quality scoring (Opus, plan mode)
 │   │   └── spec-board.md        # /spec-board Kanban overview (Sonnet, plan mode)
 │   ├── github/
 │   │   └── copilot-instructions.md    # Copilot context template
@@ -93,16 +94,23 @@ The main bash script handles:
 > Skills live in `.claude/skills/` and appear in `<available_skills>`.
 > Commands are invoked via `/command-name` in Claude Code and are not auto-listed by AI tools.
 
-Five slash commands enable a Kanban-style spec workflow:
+Six slash commands enable a Kanban-style spec workflow:
 
 **`/spec "task description"`** (templates/commands/spec.md):
 - Uses Claude Opus in plan mode
 - Challenges the idea (GO/SIMPLIFY/REJECT), then creates `specs/NNN-description.md`
 - 60-line max spec size enforced
 
+**`/spec-validate NNN`** (templates/commands/spec-validate.md):
+- Uses Claude Sonnet in plan mode (read-only — never modifies files)
+- Scores spec against 10 planning metrics (Goal Clarity, Step Decomposition, Coverage, etc.)
+- PASS (avg ≥ 80, no metric < 65) / FAIL with actionable improvement suggestions
+- Advisory gate — does not block `/spec-work`, but weak specs ship weak code
+
 **`/spec-work NNN`** (templates/commands/spec-work.md):
 - Uses Claude Sonnet in execute mode
 - Follows spec step-by-step, transitions status: `draft` → `in-progress` → `in-review`
+- On build/test failure: spawns read-only Haiku Investigator for diagnosis, then exactly 1 retry (no loops)
 - Supports `--complete` flag for legacy behavior (skip review, move directly to completed)
 
 **`/spec-work-all`** (templates/commands/spec-work-all.md):
@@ -114,7 +122,8 @@ Five slash commands enable a Kanban-style spec workflow:
 **`/spec-review NNN`** (templates/commands/spec-review.md):
 - Uses Claude Opus in plan mode
 - Reviews code changes against spec acceptance criteria
-- Verdict: APPROVED (→ completed + PR draft) / CHANGES REQUESTED (→ back to in-progress) / REJECTED (→ blocked)
+- 10-metric quality scoring (Spec Compliance, Test Coverage, Security, etc.)
+- Verdict: APPROVED (avg ≥ 85, min ≥ 70) / CHANGES REQUESTED / REJECTED (< 60 avg or critical issue)
 
 **`/spec-board`** (templates/commands/spec-board.md):
 - Uses Claude Sonnet in plan mode
@@ -128,9 +137,10 @@ Five slash commands enable a Kanban-style spec workflow:
 | Command | File | Mode | Description |
 |---------|------|------|-------------|
 | `/spec "task"` | spec.md | plan (Opus) | Challenge idea → create spec file |
-| `/spec-work NNN` | spec-work.md | execute (Sonnet) | Execute spec step-by-step |
+| `/spec-validate NNN` | spec-validate.md | plan (Sonnet) | Pre-execution quality gate (10 metrics, 80 avg / 65 min) |
+| `/spec-work NNN` | spec-work.md | execute (Sonnet) | Execute spec step-by-step + Haiku diagnosis |
 | `/spec-work-all` | spec-work-all.md | execute (Sonnet) | Execute all draft specs in parallel |
-| `/spec-review NNN` | spec-review.md | plan (Opus) | Review spec → APPROVED / CHANGES REQUESTED / REJECTED |
+| `/spec-review NNN` | spec-review.md | plan (Opus) | Review + quality scoring → APPROVED / CHANGES / REJECTED |
 | `/spec-board` | spec-board.md | plan (Sonnet) | Kanban overview with step-level progress |
 
 ### 4. Auto-Init Process

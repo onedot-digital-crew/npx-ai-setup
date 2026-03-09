@@ -1,4 +1,8 @@
 #!/bin/bash
+# Dead-loop prevention:
+# Keep formatter/linter output suppressed unless there is a genuine syntax issue that
+# must reach the model. Exposing normal lint output here can trigger repetitive
+# self-correction loops on the same file.
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
 
@@ -24,7 +28,7 @@ if [[ "$FILE_PATH" == *.js || "$FILE_PATH" == *.ts || "$FILE_PATH" == *.jsx || "
   else
     OUTPUT=$(npx eslint "$FILE_PATH" --fix 2>&1)
   fi
-  # Silent: lint errors must not be shown to Claude (triggers fix-loops)
+  # Silent by design: lint output must not be shown to Claude.
 
 fi
 

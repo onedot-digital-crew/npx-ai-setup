@@ -46,8 +46,7 @@ curl -fsSL --max-time 5 "https://raw.githubusercontent.com/onedot-digital-crew/n
 Extract entries between installed and latest version. If no CHANGELOG.md exists, skip this step.
 
 ### Step 5: Show update summary and confirm
-
-Display:
+Show:
 ```
 ## ai-setup Update Available
 
@@ -57,18 +56,9 @@ Display:
 ### What's New
 (changelog entries if available)
 
-The updater will:
-- Review template files and ask about user-modified ones
-- Optionally regenerate AI context (CLAUDE.md, AGENTS.md, .agents/context/)
-- Back up any files you've customized
+Will review customized templates, optionally regenerate AI context, and back up modified files.
 ```
-
-Use AskUserQuestion:
-- Question: "Proceed with update?"
-- Options:
-  - "Yes, update now"
-  - "No, cancel"
-
+Use AskUserQuestion: "Proceed with update?" Options: "Yes, update now" / "No, cancel"
 If user cancels, stop.
 
 ### Step 6: Run update
@@ -77,7 +67,7 @@ If user cancels, stop.
 npx github:onedot-digital-crew/npx-ai-setup
 ```
 
-This launches the interactive update flow (the script auto-detects `.ai-setup.json` and offers update options).
+This launches the interactive update flow.
 
 ### Step 7: Clear update cache
 
@@ -86,9 +76,7 @@ rm -f /tmp/ai-setup-update-*.txt /tmp/ai-setup-cli-latest-version.txt
 ```
 
 ### Step 8: Display result
-
 ```
 ai-setup updated: vX.Y.Z -> vA.B.C
-
 Restart Claude Code to pick up new hooks and settings.
 ```

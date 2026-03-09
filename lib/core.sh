@@ -170,6 +170,29 @@ write_metadata() {
   echo "$json" > .ai-setup.json
 }
 
+# Returns 0 when the target path is still managed by the current installer config.
+# Includes conditional maps that may or may not apply in the current project.
+is_current_managed_target() {
+  local target="$1"
+  local mapping
+
+  for mapping in "${TEMPLATE_MAP[@]}"; do
+    [ "${mapping#*:}" = "$target" ] && return 0
+  done
+
+  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
+      [ "${mapping#*:}" = "$target" ] && return 0
+    done
+  fi
+
+  for mapping in "${TS_RULES_MAP[@]}"; do
+    [ "${mapping#*:}" = "$target" ] && return 0
+  done
+
+  return 1
+}
+
 # Backup a file to .ai-setup-backup/ with timestamp
 backup_file() {
   local file="$1"

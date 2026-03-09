@@ -180,6 +180,8 @@ run_smart_update() {
   UPD_SKIPPED=0
   UPD_NEW=0
   UPD_BACKED_UP=0
+  UPD_REMOVED=0
+  UPD_REMOVED_BACKED_UP=0
 
   # Ask which template categories to update
   ask_update_parts || echo "  ⏭️  No categories selected — skipping template updates"
@@ -281,12 +283,16 @@ run_smart_update() {
     done
   fi
 
+  cleanup_obsolete_managed_files
+
   echo ""
   echo "📊 Update summary:"
   echo "   Updated:   $UPD_UPDATED"
   [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
+  [ $UPD_REMOVED -gt 0 ] && echo "   Removed:   $UPD_REMOVED"
   [ $UPD_SKIPPED -gt 0 ] && echo "   Unchanged: $UPD_SKIPPED"
   [ $UPD_BACKED_UP -gt 0 ] && echo "   Backed up: $UPD_BACKED_UP (see .ai-setup-backup/)"
+  [ $UPD_REMOVED_BACKED_UP -gt 0 ] && echo "   Backed up before removal: $UPD_REMOVED_BACKED_UP"
   _upd_cats=""
   [ "${UPD_HOOKS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Hooks"
   [ "${UPD_SETTINGS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Settings"
@@ -357,6 +363,8 @@ run_clean_reinstall() {
   echo ""
   echo "🗑️  Removing managed files..."
 
+  cleanup_obsolete_managed_files reinstall
+
   for mapping in "${TEMPLATE_MAP[@]}"; do
     target="${mapping#*:}"
     if [ -f "$target" ]; then
@@ -380,4 +388,50 @@ run_clean_reinstall() {
   echo "   Clean slate ready. Running fresh install..."
   echo ""
   # Caller continues to normal setup
+}
+
+# Remove files that were managed by an older ai-setup version but are no longer
+# part of the current template maps. Smart update backs up user-modified files
+# first; reinstall removes all historical managed files outright.
+cleanup_obsolete_managed_files() {
+  local mode="${1:-smart}"
+  local target stored_cs cur_cs bp
+  local -a old_targets=()
+
+  [ -f .ai-setup.json ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+  jq -e . .ai-setup.json >/dev/null 2>&1 || return 0
+
+  while IFS= read -r target; do
+    [ -n "$target" ] && old_targets+=("$target")
+  done < <(jq -r '.files | keys[]?' .ai-setup.json 2>/dev/null)
+
+  [ "${#old_targets[@]}" -gt 0 ] || return 0
+
+  for target in "${old_targets[@]}"; do
+    is_current_managed_target "$target" && continue
+    should_update_template "_:$target" || continue
+    [ -f "$target" ] || continue
+
+    if [ "$mode" = "reinstall" ]; then
+      rm -f "$target"
+      echo "   Removed obsolete: $target"
+      continue
+    fi
+
+    stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+    cur_cs=$(compute_checksum "$target")
+
+    if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
+      bp=$(backup_file "$target")
+      rm -f "$target"
+      echo "  🧹 $target (obsolete — backed up to $bp, then removed)"
+      UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
+      UPD_REMOVED_BACKED_UP=$((UPD_REMOVED_BACKED_UP + 1))
+    else
+      rm -f "$target"
+      echo "  🧹 $target (obsolete — removed)"
+    fi
+    UPD_REMOVED=$((UPD_REMOVED + 1))
+  done
 }
