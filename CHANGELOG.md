@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+## [v1.2.8] — 2026-03-09
+
 - **Agent skill injection**: installer now injects `skills:` into agent YAML headers based on detected system — Shopify agents get `shopify-liquid`/`shopify-theme-dev`, Shopware agents get `shopware6-best-practices`, and `test-generator` gets `vitest` when available. Idempotent; skips if already present.
 - **Agent delegation rules**: new `templates/claude/rules/agents.md` with trigger-condition table for all 9 agents, scope limits, and anti-patterns to prevent over-delegation.
 - **Spec backlog cleanup**: pruned 11 backlog specs to 0 — deleted 10 obsolete/redundant specs, consolidated 4 documentation specs into #069, added `BACKLOG.md` with rejected ideas and evaluation items.
