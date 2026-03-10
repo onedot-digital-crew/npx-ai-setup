@@ -20,7 +20,9 @@ If these files are missing or stale, regenerate with:
 <!-- Auto-Init populates this -->
 
 ## Commands
-<!-- Auto-Init populates this -->
+- Primary project commands still come from `package.json` scripts and `.claude/commands/`.
+- In Claude Code or other clients with project command support, the spec workflow may be exposed as `/spec`, `/spec-board`, `/spec-review`, `/spec-validate`, `/spec-work`, and `/spec-work-all`.
+- In Codex, these are not native client `/` commands. Use the matching skills via `.codex/skills` with `$spec`, `$spec-board`, `$spec-review`, `$spec-validate`, `$spec-work`, and `$spec-work-all`, or invoke them in natural language.
 
 ## Code Style Guidelines
 - Follow existing lint and formatter config; do not introduce conflicting style rules.

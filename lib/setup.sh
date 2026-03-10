@@ -235,6 +235,18 @@ install_shopify_skills() {
   fi
 }
 
+install_spec_skills() {
+  echo "  📚 Installing spec workflow skills..."
+  for mapping in "${SPEC_SKILLS_MAP[@]}"; do
+    local local_tpl="${mapping%%:*}"
+    local local_target="${mapping#*:}"
+    local skill_dir
+    skill_dir="$(dirname "$local_target")"
+    mkdir -p "$skill_dir"
+    _install_or_update_file "$TPL/${local_tpl#templates/}" "$local_target"
+  done
+}
+
 # Install subagent templates
 install_agents() {
   echo "🤖 Installing subagent templates..."
@@ -774,18 +786,18 @@ install_repomix_config() {
   fi
 }
 
-# Install statusline script into project (.claude/statusline.sh) and configure
-# project settings (.claude/settings.json).
+# Install claude-powerline statusline into project settings.json.
 install_statusline_project() {
   # Idempotency: skip if statusLine is already configured
   if [ -f ".claude/settings.json" ] && jq -e '.statusLine' ".claude/settings.json" >/dev/null 2>&1; then
     return 0
   fi
   mkdir -p ".claude"
-  cp "$SCRIPT_DIR/templates/statusline.sh" ".claude/statusline.sh"
-  chmod +x ".claude/statusline.sh"
-  # Merge statusLine into .claude/settings.json
-  local status_cmd='"${CLAUDE_PROJECT_DIR:-.}"/.claude/statusline.sh'
+  # Copy default powerline config (skip if already present)
+  if [ ! -f ".claude/claude-powerline.json" ] && [ -f "$SCRIPT_DIR/templates/.claude-powerline.json" ]; then
+    cp "$SCRIPT_DIR/templates/.claude-powerline.json" ".claude/claude-powerline.json"
+  fi
+  local status_cmd="npx -y @owloops/claude-powerline@latest --style=powerline --theme=dark"
   if [ -f ".claude/settings.json" ]; then
     local TMP
     TMP=$(mktemp)
@@ -793,7 +805,25 @@ install_statusline_project() {
   else
     jq -n --arg cmd "$status_cmd" '{"statusLine":{"type":"command","command":$cmd,"padding":2}}' > ".claude/settings.json"
   fi
-  echo "  Statusline installed -> .claude/statusline.sh"
+  echo "  Statusline installed -> claude-powerline (@owloops/claude-powerline)"
+}
+
+# Install spec workflow skills (spec-work, spec-create, spec-board) from templates/skills/.
+# Skips silently if template skills are not present in this package.
+install_spec_skills() {
+  local skills_src="$SCRIPT_DIR/templates/skills"
+  [ -d "$skills_src" ] || return 0
+  mkdir -p .claude/skills
+  local installed=0
+  while IFS= read -r -d '' skill_dir; do
+    local skill_name="${skill_dir##*/}"
+    local target=".claude/skills/$skill_name"
+    [ -d "$target" ] && continue
+    cp -R "$skill_dir" "$target"
+    installed=$((installed + 1))
+  done < <(find "$skills_src" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  [ "$installed" -gt 0 ] && echo "  📦 Installed $installed spec skill(s) -> .claude/skills/"
+  return 0
 }
 
 # Generate repomix codebase snapshot in background (once, if not already present)

@@ -177,6 +177,7 @@ run_smart_update() {
   fi
   command -v ensure_codex_skills_alias >/dev/null 2>&1 && ensure_codex_skills_alias
   command -v ensure_opencode_skills_alias >/dev/null 2>&1 && ensure_opencode_skills_alias
+  command -v install_spec_skills >/dev/null 2>&1 && install_spec_skills
 
   UPD_UPDATED=0
   UPD_SKIPPED=0

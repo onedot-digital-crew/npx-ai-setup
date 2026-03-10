@@ -73,6 +73,7 @@ CHECKS=(
   "setup.sh:cleanup_legacy"
   "setup.sh:install_hooks"
   "setup.sh:install_commands"
+  "setup.sh:install_spec_skills"
   "setup.sh:install_agents"
   "setup.sh:repair_canonical_skill_links"
   "setup.sh:ensure_skills_alias"
@@ -158,6 +159,12 @@ if grep -q 'ensure_skills_alias' lib/update.sh 2>/dev/null; then
   pass "lib/update.sh calls ensure_skills_alias during smart update"
 else
   fail "lib/update.sh missing ensure_skills_alias call"
+fi
+
+if grep -q 'install_spec_skills' lib/update.sh 2>/dev/null; then
+  pass "lib/update.sh installs spec workflow skills during smart update"
+else
+  fail "lib/update.sh missing install_spec_skills call"
 fi
 
 if grep -q 'repair_canonical_skill_links' lib/setup.sh 2>/dev/null; then

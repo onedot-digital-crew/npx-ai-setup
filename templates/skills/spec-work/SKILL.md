@@ -17,31 +17,25 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
 
 4. **Update status**: Set `**Status**: in-progress` in the spec header.
 
-5. **Print a progress checklist** of all steps before starting:
-   ```
-   Progress — Spec NNN
-   [ ] Step 1: <title>
-   [ ] Step 2: <title>
-   ```
+5. **Print a progress checklist** of all steps before starting.
 
 6. **Resume check**: Scan for already-checked steps (`- [x]`). If found, skip them and continue from the first unchecked step.
 
 7. **Execute each step** in order:
    - Implement the change
-   - Check it off in the spec: `- [ ]` → `- [x]`
-   - Commit: `git add -A && git commit -m "spec(NNN): step N — <title>"`
+   - Check it off in the spec
+   - Commit with `git commit -m "spec(NNN): step N — <title>"`
    - If blocked, stop and ask
 
 8. **Verify acceptance criteria** — check each one off in the spec.
 
-9. **Update CHANGELOG.md** — add entry under `## [Unreleased]`:
-   `- **Spec NNN**: [title] — [one-sentence summary]`
+9. **Update CHANGELOG.md** — add an entry under `## [Unreleased]`.
 
-10. **Run tests/build** if available (`bash tests/smoke.sh` or equivalent). Report PASS or FAIL.
+10. **Run tests/build** if available. Report PASS or FAIL.
 
-11. **Set status to `completed`**, move file: `specs/NNN-*.md` → `specs/completed/NNN-*.md`.
+11. **Set status to `completed`**, move file to `specs/completed/`.
 
 ## Rules
-- Commit after every step — enables crash resilience
+- Commit after every step
 - Never skip the status update and file move at the end
 - If a step fails, set status to `blocked` and stop

@@ -66,6 +66,18 @@ SHOPIFY_SKILLS_MAP=(
   "templates/skills/shopify-new-block/SKILL.md:.claude/skills/shopify-new-block/SKILL.md"
 )
 
+# Workflow skills shipped to every project so Codex can map slash-style spec prompts
+# to the existing spec workflow through .codex/skills -> .claude/skills.
+SPEC_SKILLS_MAP=(
+  "templates/skills/spec/SKILL.md:.claude/skills/spec/SKILL.md"
+  "templates/skills/spec-board/SKILL.md:.claude/skills/spec-board/SKILL.md"
+  "templates/skills/spec-create/SKILL.md:.claude/skills/spec-create/SKILL.md"
+  "templates/skills/spec-review/SKILL.md:.claude/skills/spec-review/SKILL.md"
+  "templates/skills/spec-validate/SKILL.md:.claude/skills/spec-validate/SKILL.md"
+  "templates/skills/spec-work/SKILL.md:.claude/skills/spec-work/SKILL.md"
+  "templates/skills/spec-work-all/SKILL.md:.claude/skills/spec-work-all/SKILL.md"
+)
+
 # TypeScript-specific rules (only added when *.ts or *.tsx files are detected)
 TS_RULES_MAP=(
   "templates/claude/rules/typescript.md:.claude/rules/typescript.md"

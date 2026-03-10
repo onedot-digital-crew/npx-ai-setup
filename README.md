@@ -57,6 +57,8 @@ During `ai-setup`, you can create this file via an interactive prompt (`Multi-Re
 
 ## Slash Commands
 
+Native project slash commands are available in Claude Code and compatible clients. In Codex, custom project `/...` commands are not currently supported; use the same spec workflow via `$spec`, `$spec-work`, `$spec-review`, `$spec-board`, `$spec-validate`, and `$spec-work-all`, or ask in natural language.
+
 | Command | Model | Description |
 |---------|-------|-------------|
 | `/spec "task"` | Opus | Challenge idea first, then create structured spec |

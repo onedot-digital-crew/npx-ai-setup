@@ -266,6 +266,15 @@ setup_shopware_mcp() {
   fi
 }
 
+# Count generated context files in .agents/context/.
+count_generated_context_files() {
+  local count=0
+  [ -f .agents/context/STACK.md ] && count=$((count + 1))
+  [ -f .agents/context/ARCHITECTURE.md ] && count=$((count + 1))
+  [ -f .agents/context/CONVENTIONS.md ] && count=$((count + 1))
+  echo "$count"
+}
+
 # Main generation orchestrator
 # Called by both normal setup (Auto-Init) and --regenerate mode.
 # Requires: $SYSTEM is set, claude CLI is available
@@ -400,14 +409,8 @@ If a test framework is present, add a 'TDD Workflow' subsection under Critical R
     PID_AM=""
     CLAUDE_MD_BEFORE=""
     AGENTS_MD_BEFORE=""
-
-    if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
-      if [ ! -f CLAUDE.md ] && [ -f "$SCRIPT_DIR/templates/CLAUDE.md" ]; then
-        cp "$SCRIPT_DIR/templates/CLAUDE.md" CLAUDE.md
-      fi
-      CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
-
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
+    CLAUDE_MD_PROMPT=$(cat <<EOF
+IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
 
 Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any HTML comments in those sections).
 
@@ -426,18 +429,11 @@ Rules:
 - Keep CLAUDE.md content stable and static — it is a prompt cache layer. Do not add timestamps, random IDs, or session-specific data.
 
 $CONTEXT
-$CTX_SHOPWARE" >"$ERR_CM" 2>&1 &
-      PID_CM=$!
-    fi
-
-    # Step 1b: Extend AGENTS.md (sonnet, background, parallel with CLAUDE.md)
-    if [ "$REGEN_AGENTS_MD" = "yes" ]; then
-      if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
-        cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
-      fi
-      AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
-
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 3 "IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
+$CTX_SHOPWARE
+EOF
+)
+    AGENTS_MD_PROMPT=$(cat <<EOF
+IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
 
 Replace the ## Project Overview, ## Architecture Summary, ## Commands, and ## Critical Rules sections in AGENTS.md (remove any HTML comments in those sections).
 
@@ -449,6 +445,8 @@ Write 4-6 concise bullet points covering entry points, directory layout, data fl
 
 ## Commands
 Based on package.json scripts, list the most important commands (dev, build, lint, test, etc.) with a short description.
+If the project includes spec workflow commands or skills, also include `/spec`, `/spec-board`, `/spec-review`, `/spec-validate`, `/spec-work`, and `/spec-work-all`.
+For Codex-compatible projects, do not claim custom `/spec*` client commands. Instead add one bullet noting that Codex uses the corresponding skills via `.codex/skills` with `$spec*` or natural language, while `/spec*` remains client-dependent.
 
 ## Critical Rules
 Based on eslint/prettier and detected framework/system ($SYSTEM), write actionable engineering rules.
@@ -462,16 +460,11 @@ Rules:
 - No umlauts. English only.
 
 $CONTEXT
-$CTX_SHOPWARE" >"$ERR_AM" 2>&1 &
-      PID_AM=$!
-    fi
-
-    # Step 2: Generate project context (sonnet, background, parallel with Step 1)
-    PID_CTX=""
-    if [ "$REGEN_CONTEXT" = "yes" ]; then
-    mkdir -p .agents/context
-
-  claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 4 "IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
+$CTX_SHOPWARE
+EOF
+)
+    CONTEXT_PROMPT=$(cat <<EOF
+IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
 
 Create exactly 3 files in .agents/context/ using the Write tool:
 
@@ -504,7 +497,37 @@ $CTX_CONFIGS
 $CTX_README
 --- Sample source files ---
 $CTX_SAMPLE
-$CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
+$CTX_SHOPWARE
+EOF
+)
+
+    if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
+      if [ ! -f CLAUDE.md ] && [ -f "$SCRIPT_DIR/templates/CLAUDE.md" ]; then
+        cp "$SCRIPT_DIR/templates/CLAUDE.md" CLAUDE.md
+      fi
+      CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 5 "$CLAUDE_MD_PROMPT" >"$ERR_CM" 2>&1 &
+      PID_CM=$!
+    fi
+
+    # Step 1b: Extend AGENTS.md (sonnet, background, parallel with CLAUDE.md)
+    if [ "$REGEN_AGENTS_MD" = "yes" ]; then
+      if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
+        cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
+      fi
+      AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
+
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 5 "$AGENTS_MD_PROMPT" >"$ERR_AM" 2>&1 &
+      PID_AM=$!
+    fi
+
+    # Step 2: Generate project context (sonnet, background, parallel with Step 1)
+    PID_CTX=""
+    if [ "$REGEN_CONTEXT" = "yes" ]; then
+    mkdir -p .agents/context
+
+  claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 8 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1 &
     PID_CTX=$!
     fi
 
@@ -521,6 +544,15 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
     EXIT_CM=0
     wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
     CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+    if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
+      echo "  ↻ CLAUDE.md unchanged after initial generation, retrying with --max-turns 6..."
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$CLAUDE_MD_PROMPT" >"$ERR_CM" 2>&1
+      EXIT_CM=$?
+      CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+      if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" != "$CLAUDE_MD_AFTER" ]; then
+        echo "  ✅ CLAUDE.md updated after retry"
+      fi
+    fi
     if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
       regen_failed=1
       echo ""
@@ -537,6 +569,15 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
     EXIT_AM=0
     wait "$PID_AM" 2>/dev/null || EXIT_AM=$?
     AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
+    if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
+      echo "  ↻ AGENTS.md unchanged after initial generation, retrying with --max-turns 6..."
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$AGENTS_MD_PROMPT" >"$ERR_AM" 2>&1
+      EXIT_AM=$?
+      AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
+      if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" != "$AGENTS_MD_AFTER" ]; then
+        echo "  ✅ AGENTS.md updated after retry"
+      fi
+    fi
     if [ "$EXIT_AM" -ne 0 ] || [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
       regen_failed=1
       echo ""
@@ -552,10 +593,17 @@ $CTX_SHOPWARE" >"$ERR_CTX" 2>&1 &
     if [ -n "$PID_CTX" ]; then
     EXIT_CTX=0
     wait "$PID_CTX" 2>/dev/null || EXIT_CTX=$?
-    CTX_COUNT=0
-    [ -f .agents/context/STACK.md ] && CTX_COUNT=$((CTX_COUNT + 1))
-    [ -f .agents/context/ARCHITECTURE.md ] && CTX_COUNT=$((CTX_COUNT + 1))
-    [ -f .agents/context/CONVENTIONS.md ] && CTX_COUNT=$((CTX_COUNT + 1))
+    CTX_COUNT=$(count_generated_context_files)
+
+    if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -lt 3 ]; then
+      echo "  ↻ Context generation created $CTX_COUNT of 3 files, retrying with --max-turns 12..."
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 12 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1
+      EXIT_CTX=$?
+      CTX_COUNT=$(count_generated_context_files)
+      if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -eq 3 ]; then
+        echo "  ✅ All 3 context files created after retry"
+      fi
+    fi
 
     if [ "$CTX_COUNT" -eq 3 ]; then
       echo "  ✅ All 3 context files created in .agents/context/"

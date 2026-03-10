@@ -25,32 +25,12 @@ Creates a spec file in `specs/NNN-title.md` for an approved task before coding b
    - Hidden complexity?
 
 5. **Write the spec file** `specs/NNN-title.md` using this template:
-
-```markdown
-# Spec: [Title]
-
-> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Branch**: —
-
-## Goal
-[One sentence: what this achieves and why]
-
-## Context
-[Why now, relevant background, related files/systems]
-
-## Steps
-- [ ] Step 1: [Specific, actionable, one file/system per step]
-- [ ] Step 2: ...
-
-## Acceptance Criteria
-- [ ] [Observable, testable outcome]
-- [ ] ...
-
-## Files to Modify
-- `path/to/file.sh` — what changes
-
-## Out of Scope
-- [What this spec deliberately does NOT do]
-```
+   - Goal
+   - Context
+   - Steps
+   - Acceptance Criteria
+   - Files to Modify
+   - Out of Scope
 
 ## Rules
 - Steps must be atomic — one file or system per step

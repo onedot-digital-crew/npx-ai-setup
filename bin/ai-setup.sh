@@ -141,6 +141,7 @@ ensure_opencode_skills_alias
 install_specs
 install_workflow_guide
 install_commands
+install_spec_skills
 install_shopify_skills
 install_agents
 setup_repo_group_context
