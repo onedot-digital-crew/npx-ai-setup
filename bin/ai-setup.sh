@@ -136,6 +136,8 @@ install_rules
 install_copilot
 mkdir -p .agents
 ensure_skills_alias
+ensure_codex_skills_alias
+ensure_opencode_skills_alias
 install_specs
 install_workflow_guide
 install_commands
