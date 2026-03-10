@@ -23,3 +23,8 @@ Never spawn Explore or search agents without `model: haiku`.
 ## Human Approval Gates
 Before finalizing any deliverable, present a summary and ask for confirmation.
 Never proceed to the next workflow phase without explicit user approval.
+
+## Web Fetching
+Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — it strips navigation and clutter, saving ~80% tokens.
+Alternative: prepend `https://markdown.new/` to any URL for instant markdown conversion without a CLI.
+Use WebFetch only when defuddle is unavailable or the page requires JavaScript rendering.
