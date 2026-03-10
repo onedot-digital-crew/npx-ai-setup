@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 074**: Multi-Tool Skills Symlinks — skills installed in `.claude/skills/` are now automatically linked to `.codex/skills` and `.opencode/skills` when the respective CLIs are installed, enabling all three tools to share the same skill library without duplication.
+
 ### Developer Workflow Guide (Spec 071)
 New developers know exactly what to do right after setup — no documentation digging required. Every install now drops `.claude/WORKFLOW-GUIDE.md` with a Quick Start, the full spec workflow, all 20 slash commands with examples, a subagent and hook overview, and a troubleshooting section.
 *Technical: `templates/claude/WORKFLOW-GUIDE.md` → `_install_or_update_file` → `.claude/WORKFLOW-GUIDE.md`; checksum logic preserves user edits; not referenced in CLAUDE.md (zero token cost); tip in `templates/CLAUDE.md` points developers to the file.*

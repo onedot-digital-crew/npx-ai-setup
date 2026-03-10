@@ -477,13 +477,16 @@ ensure_skills_alias() {
 ensure_codex_skills_alias() {
   command -v codex >/dev/null 2>&1 || return 0
   local alias=".codex/skills"
+  local canonical_abs
+  canonical_abs=$(cd .claude/skills 2>/dev/null && pwd -P)
   mkdir -p .codex
   if [ -L "$alias" ]; then
-    local alias_target
-    alias_target=$(readlink "$alias" 2>/dev/null || echo "")
-    [ "$alias_target" = "../.claude/skills" ] && return 0
-    rm -f "$alias" 2>/dev/null || true
+    local alias_abs
+    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$(readlink "$alias")" 2>/dev/null && pwd -P)
+    [ -n "$alias_abs" ] && [ "$alias_abs" = "$canonical_abs" ] && return 0
+    rm -f "$alias" 2>/dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
   elif [ -e "$alias" ]; then
+    echo "  ⏭️  $alias already exists as a non-symlink — skipping (Codex)"
     return 0
   fi
   if ln -s ../.claude/skills "$alias" 2>/dev/null; then
@@ -495,13 +498,16 @@ ensure_codex_skills_alias() {
 ensure_opencode_skills_alias() {
   command -v opencode >/dev/null 2>&1 || return 0
   local alias=".opencode/skills"
+  local canonical_abs
+  canonical_abs=$(cd .claude/skills 2>/dev/null && pwd -P)
   mkdir -p .opencode
   if [ -L "$alias" ]; then
-    local alias_target
-    alias_target=$(readlink "$alias" 2>/dev/null || echo "")
-    [ "$alias_target" = "../.claude/skills" ] && return 0
-    rm -f "$alias" 2>/dev/null || true
+    local alias_abs
+    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$(readlink "$alias")" 2>/dev/null && pwd -P)
+    [ -n "$alias_abs" ] && [ "$alias_abs" = "$canonical_abs" ] && return 0
+    rm -f "$alias" 2>/dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
   elif [ -e "$alias" ]; then
+    echo "  ⏭️  $alias already exists as a non-symlink — skipping (OpenCode)"
     return 0
   fi
   if ln -s ../.claude/skills "$alias" 2>/dev/null; then

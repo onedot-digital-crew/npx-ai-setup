@@ -174,9 +174,9 @@ run_smart_update() {
   # Normalize legacy skills layout in existing projects.
   if command -v ensure_skills_alias >/dev/null 2>&1; then
     ensure_skills_alias
-    ensure_codex_skills_alias
-    ensure_opencode_skills_alias
   fi
+  command -v ensure_codex_skills_alias >/dev/null 2>&1 && ensure_codex_skills_alias
+  command -v ensure_opencode_skills_alias >/dev/null 2>&1 && ensure_opencode_skills_alias
 
   UPD_UPDATED=0
   UPD_SKIPPED=0

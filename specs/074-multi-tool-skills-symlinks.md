@@ -1,6 +1,6 @@
 # Spec: Multi-Tool Skills Symlinks for Codex and OpenCode
 
-> **Spec ID**: 074 | **Created**: 2026-03-10 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 074 | **Created**: 2026-03-10 | **Status**: in-review | **Branch**: —
 
 <!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
 
@@ -19,10 +19,10 @@ Codex CLI reads skills from `.codex/skills/` and OpenCode from `.opencode/skills
 - [x] Step 6: Add both functions to function-presence checks in `tests/smoke.sh`
 
 ## Acceptance Criteria
-- [ ] `.codex/skills` symlink is created when `codex` CLI is installed, skipped otherwise
-- [ ] `.opencode/skills` symlink is created when `opencode` CLI is installed, skipped otherwise
-- [ ] Both symlinks point to the same canonical `.claude/skills` directory
-- [ ] Neither symlink is committed to git (covered by .gitignore)
+- [x] `.codex/skills` symlink is created when `codex` CLI is installed, skipped otherwise
+- [x] `.opencode/skills` symlink is created when `opencode` CLI is installed, skipped otherwise
+- [x] Both symlinks point to the same canonical `.claude/skills` directory
+- [x] Neither symlink is committed to git (covered by .gitignore)
 
 ## Files to Modify
 - `lib/setup.sh` - two new alias functions
