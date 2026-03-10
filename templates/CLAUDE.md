@@ -22,6 +22,7 @@
 - `Esc Esc` — rewind or summarize the last response to recover tokens when context grows large.
 - `/rename` + `/resume` — rename the current session for easy retrieval, then resume it later with `/resume`.
 - Commit after each completed task — creates a checkpoint you can revert to if later changes go wrong.
+- New to this setup? Read `.claude/WORKFLOW-GUIDE.md` for a full commands reference and workflow walkthrough.
 
 ## MCP Servers
 

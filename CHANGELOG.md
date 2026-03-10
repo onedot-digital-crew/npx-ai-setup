@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 071 — Developer Workflow Guide**: installs `.claude/WORKFLOW-GUIDE.md` with Quick Start, full commands reference (20 commands with examples), Claude Code essentials (context files, subagents, hooks), and troubleshooting section; installed and kept up to date via `_install_or_update_file` checksum logic.
 - **Command modernization**: all commands migrated from `Task` to `Agent` tool; added `argument-hint`, `disable-model-invocation`, and inline `Context` blocks with `!git` pre-fetching for commit, pr, review, and spec-work commands.
 - **spec-work hardened**: progress checklist printed before execution; Haiku Investigator sub-agent introduced for auto-diagnosing build/test failures (single-shot, no loop); step numbers renumbered; `--complete` flag skip updated to steps 12–13.
 - **spec-review upgraded**: 10-metric quality scoring system (0–100 each, threshold 85 avg / 70 min); Definition of Done gate from CONVENTIONS.md; file-read cap (5 files max); verdict thresholds updated.

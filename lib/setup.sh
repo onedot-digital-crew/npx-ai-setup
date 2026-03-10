@@ -200,6 +200,12 @@ install_specs() {
   fi
 }
 
+# Install developer workflow guide
+install_workflow_guide() {
+  echo "📖 Installing developer workflow guide..."
+  _install_or_update_file "$TPL/claude/WORKFLOW-GUIDE.md" .claude/WORKFLOW-GUIDE.md
+}
+
 # Install slash commands
 install_commands() {
   echo "⚡ Installing slash commands..."

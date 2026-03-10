@@ -137,6 +137,7 @@ install_copilot
 mkdir -p .agents
 ensure_skills_alias
 install_specs
+install_workflow_guide
 install_commands
 install_shopify_skills
 install_agents
