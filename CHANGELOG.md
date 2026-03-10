@@ -11,63 +11,98 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 ## [Unreleased]
 
 ### Developer Workflow Guide (Spec 071)
-Neue Entwickler wissen nach dem Setup sofort, was sie tun können — ohne die Dokumentation durchsuchen zu müssen. Die Datei `.claude/WORKFLOW-GUIDE.md` wird bei jedem Setup installiert und enthält: Quick Start, den vollständigen Spec-Workflow, alle 20 Slash-Commands mit Beispielen, eine Übersicht über Subagents und Hooks sowie eine Troubleshooting-Sektion.
-*Technisch: Template `templates/claude/WORKFLOW-GUIDE.md` → `_install_or_update_file` → `.claude/WORKFLOW-GUIDE.md`; Checksum-Logik erhält Nutzer-Änderungen; kein Context-Load (keine Token-Kosten); Tipp in `templates/CLAUDE.md` zeigt Entwicklern den Einstiegspunkt.*
+New developers know exactly what to do right after setup — no documentation digging required. Every install now drops `.claude/WORKFLOW-GUIDE.md` with a Quick Start, the full spec workflow, all 20 slash commands with examples, a subagent and hook overview, and a troubleshooting section.
+*Technical: `templates/claude/WORKFLOW-GUIDE.md` → `_install_or_update_file` → `.claude/WORKFLOW-GUIDE.md`; checksum logic preserves user edits; not referenced in CLAUDE.md (zero token cost); tip in `templates/CLAUDE.md` points developers to the file.*
 
-### Spec-Workflow: Crash-Resilience und Selbstheilung (Spec 072)
-Specs die mitten in der Ausführung abbrechen (Context-Komprimierung, Abstürze) können jetzt nahtlos fortgesetzt werden — ohne verlorene Arbeit. `/spec-work` erkennt bereits abgehakte Schritte und überspringt sie automatisch. Jeder abgeschlossene Schritt wird sofort committed, sodass beim Neustart nichts verloren ist. `/spec-board` erkennt inkonsistente Zustände (Schritte fertig, Status noch `in-progress`) und bietet an, sie mit einem Klick zu bereinigen. `/spec` teilt zu große oder mehrschichtige Tasks automatisch in separate Specs auf.
-*Technisch: `spec-work` — Resume-Check bei Schritt 9 (scannt `- [x]`), per-Step-Commit `spec(NNN): step N`, Status auf `in-review` vor code-reviewer. `spec-board` — YAML `mode: plan` entfernt, `Write, Edit, AskUserQuestion` hinzugefügt, Step 6 Consistency Check (Type A: stale in-progress, Type B: completed aber nicht verschoben). `spec-work-all` — expliziter Fallback bei fehlgeschlagenem Subagent → Status `blocked`. `spec` — auto-split bei >60 Zeilen / >8 Steps / mixed layers.*
+### Spec Workflow: Crash Resilience and Self-Healing (Spec 072)
+Specs interrupted mid-execution (context compaction, crashes) can now resume seamlessly — no work lost. `/spec-work` detects already-completed steps and skips them automatically. Each completed step is committed immediately, so re-running picks up exactly where it left off. `/spec-board` detects inconsistent states (steps done but status still `in-progress`) and offers to fix them in one confirmation. `/spec` auto-splits oversized or mixed-layer tasks into separate specs before execution.
+*Technical: `spec-work` — resume check at step 9 (scans `- [x]`), per-step commit `spec(NNN): step N`, status set to `in-review` before code-reviewer agent. `spec-board` — removed `mode: plan`, added `Write, Edit, AskUserQuestion`, Step 6 Consistency Check (Type A: stale in-progress, Type B: completed but not moved). `spec-work-all` — explicit blocked fallback when subagent fails or returns no result. `spec` — auto-split on >60 lines / >8 steps / mixed architectural layers.*
 
-### Robustere Commands und Subagents
-Commands antworten schneller und präziser, weil Kontextdaten jetzt vorab geladen werden — ohne extra Tool-Calls. Subagents laufen zuverlässiger mit klar definierten Grenzen und erinnern sich an Projektkonventionen.
-*Technisch: Alle Commands von `Task` → `Agent` migriert; `argument-hint`, `disable-model-invocation` und inline `Context`-Blöcke mit `!git`-Prefetching (commit, pr, review, spec-work). Agents: `max_turns` für build-validator (10), context-refresher (15), verify-app (20), staff-reviewer (20); `memory: project` für code-reviewer und staff-reviewer. context-refresher: optionaler Repomix-Snapshot (best-effort, silent).*
+### Faster, More Reliable Commands and Subagents
+Commands now pre-load git context before execution — no extra tool-call round-trips. Subagents run with stricter turn limits and remember project conventions across invocations.
+*Technical: All commands migrated from `Task` → `Agent`; added `argument-hint`, `disable-model-invocation`, and inline `Context` blocks with `!git` prefetching (commit, pr, review, spec-work). Agents: `max_turns` for build-validator (10), context-refresher (15), verify-app (20), staff-reviewer (20); `memory: project` for code-reviewer and staff-reviewer. context-refresher: optional repomix snapshot step (best-effort, silent on failure).*
 
-### Qualitätssicherung: /spec-review und /grill verschärft
-Specs werden jetzt nach 10 messbaren Metriken bewertet — ein klares Ampelsystem statt subjektiver Einschätzung. Code-Reviews prüfen zuerst, ob ähnliche Logik bereits existiert, und validieren jeden Befund gegen eine konkrete Zeile im Code.
-*Technisch: `spec-review` — 10-Metrik-Scoring (0–100, Schwelle 85 avg / 70 min), Definition-of-Done-Gate aus CONVENTIONS.md, Datei-Lesecap (5 Dateien). `grill` — Scope Challenge Step 0 mit A/B/C-Auswahl, Grep-Pass vor Flagging, A/B/C-Optionen pro Issue, NOT-reviewed-Ausschlussliste, Self-Verification-Table.*
+### Stricter Quality Gates: /spec-review and /grill
+Specs are now scored on 10 measurable metrics — a clear pass/fail system instead of subjective judgment. Code reviews check for duplicate logic before flagging issues and verify every finding against an exact file and line number.
+*Technical: `spec-review` — 10-metric scoring (0–100, threshold 85 avg / 70 min), Definition-of-Done gate from CONVENTIONS.md, file-read cap (5 files). `grill` — Scope Challenge step 0 with A/B/C choice, Grep pass before flagging, A/B/C resolution options per issue, NOT-reviewed exclusions list, self-verification table as final step.*
 
-### /reflect: Lernen aus der Session
-`/reflect` erfasst jetzt auch Architektur-Entdeckungen und Stack-Entscheidungen aus der Session — nicht nur Korrekturen. Das bedeutet: weniger vergessenes Wissen zwischen Sessions.
-*Technisch: Neue Signalkategorien ARCHITECTURAL und STACK; schreibt in `ARCHITECTURE.md` und `STACK.md` zusätzlich zu `CLAUDE.md` und `CONVENTIONS.md`.*
+### /reflect: Capture More from Every Session
+`/reflect` now captures architectural discoveries and stack decisions — not just corrections. Less knowledge lost between sessions.
+*Technical: New signal categories ARCHITECTURAL and STACK; writes to `ARCHITECTURE.md` and `STACK.md` in addition to `CLAUDE.md` and `CONVENTIONS.md`.*
 
-### Neue Monitoring-Hooks und Regeln
-Fünf neue Hooks überwachen Config-Änderungen, MCP-Gesundheit und fehlgeschlagene Tool-Calls — und protokollieren sie automatisch. Vier Regeldateien dokumentieren Coding-Standards, Git-Konventionen, Testing-Anforderungen und Agent-Delegation.
-*Technisch: config-change-audit.sh, context-monitor.sh, mcp-health.sh, post-tool-failure-log.sh, task-completed-gate.sh. Rules: agents.md, general.md, git.md, testing.md in `.claude/rules/`. liquid-linter Agent hinzugefügt.*
+### New Monitoring Hooks and Coding Rules
+Five new hooks automatically monitor config changes, MCP health, and failed tool calls. Four rule files document coding standards, git conventions, testing requirements, and agent delegation — always available in every session.
+*Technical: config-change-audit.sh, context-monitor.sh, mcp-health.sh, post-tool-failure-log.sh, task-completed-gate.sh. Rules: agents.md, general.md, git.md, testing.md in `.claude/rules/`. liquid-linter agent added.*
 
-### /spec-validate und /update
-Specs können jetzt vor der Ausführung auf Qualität geprüft werden — 10 Metriken, klares Scoring. Updates des ai-setup-Systems sind direkt aus Claude Code heraus möglich, ohne das Terminal zu verlassen.
-*Technisch: `/spec-validate` und `/update` aus Templates installiert.*
+### /spec-validate and /update
+Specs can be quality-checked before execution with a 10-metric score. The ai-setup system can now be updated from within Claude Code — no terminal switch needed.
+*Technical: `/spec-validate` and `/update` installed from templates.*
 
-### Release-Automation
-GitHub Releases werden jetzt automatisch mit dem passenden CHANGELOG-Abschnitt befüllt, wenn ein Version-Tag gepusht wird.
-*Technisch: Hinweis in `release`-Command, dass `.github/workflows/release-from-changelog.yml` das `vX.Y.Z`-Tag abfängt und den Release-Body aus `CHANGELOG.md` befüllt.*
+### Automated GitHub Releases
+GitHub Releases are now automatically populated with the matching CHANGELOG section when a version tag is pushed.
+*Technical: Note added to `release` command — `.github/workflows/release-from-changelog.yml` catches `vX.Y.Z` tags and populates the release body from `CHANGELOG.md`.*
 
 ## [v1.2.8] — 2026-03-09
 
-- **Agent skill injection**: installer now injects `skills:` into agent YAML headers based on detected system — Shopify agents get `shopify-liquid`/`shopify-theme-dev`, Shopware agents get `shopware6-best-practices`, and `test-generator` gets `vitest` when available. Idempotent; skips if already present.
-- **Agent delegation rules**: new `templates/claude/rules/agents.md` with trigger-condition table for all 9 agents, scope limits, and anti-patterns to prevent over-delegation.
-- **Spec backlog cleanup**: pruned 11 backlog specs to 0 — deleted 10 obsolete/redundant specs, consolidated 4 documentation specs into #069, added `BACKLOG.md` with rejected ideas and evaluation items.
-- **Template token optimization** (Spec 060): ~2,600 tokens (~11%) saved across 6 templates — compressed `spec.md` Phase 1e from 30 lines to 5-line checklist, deduplicated 4 identical example blocks in `reflect.md`, consolidated duplicated emit logic in `cross-repo-context.sh`, removed inline bash commentary in `update.md`, replaced spec-work duplication in `spec-work-all.md` with reference, removed AGENTS.md table duplication in hooks README.
-- **Deadloop prevention hardening** (Spec 059): circuit-breaker WARNING now explicitly says "DO NOT edit this file again" (matches BLOCK tone), context-monitor switched from imperative directives ("Commit current work") to advisory language ("Consider saving state"), post-edit-lint.sh documents why all output is suppressed (deadloop prevention), hooks README adds dead-loop prevention notes section.
+### Smarter Agent Skill Injection
+Agents installed by ai-setup now automatically receive the right skills for the detected project type — Shopify, Shopware, or generic. No manual configuration needed.
+*Technical: Installer injects `skills:` into agent YAML headers post-copy based on detected system — Shopify agents get `shopify-liquid`/`shopify-theme-dev`, Shopware agents get `shopware6-best-practices`, `test-generator` gets `vitest` when available. Idempotent; skips if already present.*
+
+### Agent Delegation Rules
+A new rules file tells Claude exactly when to delegate to which agent — and when not to. Prevents over-delegation and keeps simple tasks fast.
+*Technical: New `templates/claude/rules/agents.md` with trigger-condition table for all 9 agents, scope limits, and anti-patterns.*
+
+### Spec Backlog Cleanup
+The backlog went from 11 specs to zero — dead weight removed, good ideas documented.
+*Technical: Deleted 10 obsolete/redundant specs, consolidated 4 documentation specs into #069, added `BACKLOG.md` with rejected ideas and evaluation items.*
+
+### Token Savings: ~11% Context Reduction
+Claude starts each session with ~2,600 fewer tokens consumed by templates — leaving more room for actual work.
+*Technical: Compressed `spec.md` Phase 1e (30 lines → 5-line checklist), deduplicated 4 identical example blocks in `reflect.md`, consolidated emit logic in `cross-repo-context.sh`, removed bash commentary in `update.md`, replaced spec-work duplication in `spec-work-all.md` with reference, removed AGENTS.md table duplication in hooks README.*
+
+### Deadloop Prevention Hardening
+Claude is less likely to get stuck in an edit loop — warnings are clearer, hooks use advisory language instead of commands.
+*Technical: Circuit-breaker WARNING now says "DO NOT edit this file again"; context-monitor switched from imperative ("Commit current work") to advisory ("Consider saving state"); post-edit-lint.sh documents output suppression reason; hooks README adds deadloop prevention notes.*
 
 ## [v1.2.7] — 2026-03-06
 
-- **Release automation hardening**: `release-from-changelog` now supports `create` tag events as a fallback for delayed push events; release docs/command include a manual workflow trigger backup.
-- **CodeRabbit plugin integration**: automatic registration of `coderabbitai/claude-plugin` in `extraKnownMarketplaces` + `enabledPlugins`, CLI install with fallback (`claude-plugin@coderabbitai` and `coderabbitai/claude-plugin`), plus installation summary and README coverage.
-- **Update visibility improvements**: `update-check` now runs on `SessionStart` and `UserPromptSubmit`; version source fallback chain (`npm` -> GitHub Release -> GitHub Tag); added CLI update notice and statusline badge `ai-setup vX -> vY`.
-- **Cross-repo context (framework-agnostic)**: new `cross-repo-context` SessionStart hook with preferred `.agents/context/repo-group.json` map and optional Shopware naming fallback.
-- **Multi-repo setup wizard**: `ai-setup` now offers an interactive prompt to create `.agents/context/repo-group.json` with parent-directory repo discovery and module assignment.
-- **Quality gates/tests**: smoke tests expanded for new functions and hook wiring (`show_cli_update_notice`, `setup_repo_group_context`, SessionStart hooks incl. `cross-repo-context`, and `repo-group.json` support).
+### Reliable GitHub Releases
+Releases no longer fail silently when tag events arrive late — a fallback trigger ensures the release notes always get created.
+*Technical: `release-from-changelog` now supports `create` tag events as fallback for delayed push events; release docs and command include manual workflow trigger backup.*
 
+### Automatic CodeRabbit Integration
+CodeRabbit code review is installed and activated automatically — teams get AI-assisted PR reviews out of the box.
+*Technical: Auto-registers `coderabbitai/claude-plugin` in `extraKnownMarketplaces` + `enabledPlugins`; CLI install with fallback (`claude-plugin@coderabbitai` / `coderabbitai/claude-plugin`); summary and README coverage added.*
+
+### Always-Visible Update Notifications
+Developers are informed of available ai-setup updates at session start and on every prompt — no more stale installs going unnoticed.
+*Technical: `update-check` now runs on `SessionStart` and `UserPromptSubmit`; version source fallback chain (npm → GitHub Release → GitHub Tag); CLI update notice and statusline badge `ai-setup vX → vY`.*
+
+### Cross-Repo Context for Multi-Repo Projects
+Claude now automatically loads context from sibling repositories — useful for monorepos and multi-service setups.
+*Technical: New `cross-repo-context` SessionStart hook with preferred `.agents/context/repo-group.json` map and optional Shopware naming fallback. Multi-repo setup wizard creates the map via interactive parent-directory discovery.*
 
 ## [v1.2.6] — 2026-03-06
 
-- **Template modernization**: migrated command templates and docs from deprecated `Task` tool wording to `Agent` wording for current Claude Code semantics
-- **Hooks expansion**: added `PostToolUseFailure` logging, `ConfigChange` auditing guard, and `TaskCompleted` gate hook templates with settings wiring
-- **Statusline improvements**: switched to workspace JSON fields, added lightweight git caching, and standardized generated `statusLine` settings (`type: command`, `padding`)
-- **Detection + safety**: improved Shopware/Shopify auto-detection signals, introduced local Shopware skill fallback, and hardened Shopware MCP setup to avoid writing credentials into `.mcp.json`
-- **Setup efficiency**: skipped expensive context regeneration in skills-only runs and deduplicated skill installs
-- **Quality gates**: added CI smoke workflow for PRs/main pushes and a tracked pre-push hook that runs `npm test`
+### Commands Use the Correct Tool API
+All command templates and documentation updated to current Claude Code semantics — `Agent` instead of the deprecated `Task` tool. Subagent calls now work reliably.
+*Technical: Migrated all command templates and docs from `Task` → `Agent` wording.*
+
+### More Hooks Out of the Box
+Three new hook types are installed automatically — catching tool failures, config changes, and task completion. Teams get observability without manual setup.
+*Technical: Added `PostToolUseFailure` logging, `ConfigChange` auditing guard, and `TaskCompleted` gate hook templates with settings wiring.*
+
+### Faster Statusline
+The statusline updates more efficiently and no longer causes delays in large repos.
+*Technical: Switched to workspace JSON fields, added lightweight git caching, standardized `statusLine` settings (`type: command`, `padding`).*
+
+### Safer Shopify and Shopware Detection
+Project type detection is more accurate and credentials are never written into shared config files.
+*Technical: Improved Shopware/Shopify auto-detection signals, local Shopware skill fallback, hardened Shopware MCP setup to avoid writing credentials into `.mcp.json`.*
+
+### Smarter Setup Runs
+Re-running the setup is faster — expensive steps are skipped when nothing changed.
+*Technical: Skipped context regeneration in skills-only runs; deduplicated skill installs.*
 
 ## [v1.2.5] — 2026-03-05
 
