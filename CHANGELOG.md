@@ -10,6 +10,9 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+
+## [v1.3.0] — 2026-03-10
+
 - **Spec 076**: /simplify in spec-work + Advanced Tools — added optional `/simplify` cleanup step to spec-work between verify-app and code-reviewer; added Web Fetching rule preferring defuddle and markdown.new over WebFetch; documented ralph-loop and defuddle/markdown.new in WORKFLOW-GUIDE.md Advanced Techniques section.
 
 - **Spec 073**: Generation reliability and install coverage — raised Claude generation turn budgets, added single-retry fallbacks for no-op or partial outputs, and added an offline integration test that verifies installed command templates on a fresh setup.

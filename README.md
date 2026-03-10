@@ -19,8 +19,8 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | **Settings** | Granular bash permissions, opusplan model, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH |
 | **Hooks** | protect-files, auto-lint, circuit-breaker, context-freshness, update-check, cross-repo-context, notifications, SessionStart context reload, PostToolUseFailure log, ConfigChange audit, TaskCompleted gate, Stop quality gate |
 | **Rules** | `.claude/rules/` — general, testing, git, typescript (conditional) |
-| **Commands** | 16 slash commands for spec-driven development, reviews, releases, debugging |
-| **Agents** | 8 subagent templates for parallel verification, review, and architectural assessment |
+| **Commands** | 20 slash commands for spec-driven development, reviews, releases, debugging |
+| **Agents** | 9 subagent templates for parallel verification, review, and architectural assessment |
 | **Context** | `.agents/context/` — STACK.md, ARCHITECTURE.md, CONVENTIONS.md (auto-generated) |
 | **GitHub** | `.github/copilot-instructions.md` + `.github/workflows/release-from-changelog.yml` |
 | **Skills** | AI-curated Claude Code skills matched to your stack via skills.sh |
