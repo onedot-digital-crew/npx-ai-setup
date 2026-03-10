@@ -1,0 +1,37 @@
+{
+  "theme": "dark",
+  "display": {
+    "style": "powerline",
+    "charset": "unicode",
+    "autoWrap": true,
+    "padding": 1
+  },
+  "segments": {
+    "directory": {
+      "enabled": true,
+      "style": "basename"
+    },
+    "git": {
+      "enabled": true,
+      "showSha": false,
+      "showWorkingTree": true,
+      "showOperation": true
+    },
+    "model": {
+      "enabled": true
+    },
+    "context": {
+      "enabled": true,
+      "showPercentageOnly": false
+    },
+    "session": {
+      "enabled": true
+    },
+    "today": {
+      "enabled": true
+    },
+    "metrics": {
+      "enabled": false
+    }
+  }
+}
