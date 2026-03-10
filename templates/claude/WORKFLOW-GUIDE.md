@@ -135,4 +135,43 @@ List all available commands: type `/` in Claude Code to see the autocomplete men
 
 ---
 
+## Advanced Techniques
+
+### ralph-loop — Iterative Task Loops
+
+`ralph-loop` is a Stop-hook-based loop that keeps Claude working on a task across multiple iterations — useful for complex, multi-round implementations where a single session is not enough.
+
+```
+/ralph-loop "Build a REST API for todos. Requirements: CRUD, validation, tests. Output <promise>COMPLETE</promise> when done." --completion-promise "COMPLETE" --max-iterations 50
+```
+
+Claude will work, try to exit, get intercepted by the Stop hook, and re-start with the same prompt — each time seeing the files and git history from the previous iteration. Cancel at any time:
+
+```
+/cancel-ralph
+```
+
+**When to use:** Long iterative tasks, multi-round refactors, tasks that need repeated test-fix cycles.
+**Note:** ralph-loop uses a Stop hook. Do not combine with other Stop hooks.
+
+---
+
+### defuddle + markdown.new — Token-Efficient Web Fetching
+
+Reading web pages with WebFetch returns raw HTML — ~5× more tokens than needed. Two better options:
+
+**defuddle CLI** (strips navigation, ads, clutter — returns clean markdown):
+```bash
+defuddle parse https://example.com/docs --md
+```
+
+**markdown.new** (URL prefix — no CLI required, works in browser and via WebFetch):
+```
+https://markdown.new/https://example.com/docs
+```
+
+Both reduce token usage by ~80% compared to raw HTML. Use WebFetch only when the page requires JavaScript rendering.
+
+---
+
 *This guide is installed and kept up to date by `@onedot/ai-setup`. Do not reference it in CLAUDE.md (it is not loaded into context automatically).*

@@ -20,7 +20,7 @@ Add an optional `/simplify` cleanup step to `spec-work`, document `ralph-loop` a
 - [x] Step 2: Apply the same change to `.claude/commands/spec-work.md` (installed copy).
 - [x] Step 3: In `templates/claude/rules/general.md`, add a `## Web Fetching` section: "Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — it removes navigation and clutter, saving ~80% tokens. Alternative: prepend `https://markdown.new/` to any URL for instant markdown conversion. Use WebFetch only when defuddle is unavailable or the page requires JS rendering."
 - [x] Step 4: Apply same rule change to `.claude/rules/general.md` (installed copy).
-- [ ] Step 5: In `templates/claude/WORKFLOW-GUIDE.md`, add `## Advanced Techniques` section covering: (a) ralph-loop — iterative task loops, usage example, `/cancel-ralph`; (b) defuddle + markdown.new — token-efficient web fetching with examples.
+- [x] Step 5: In `templates/claude/WORKFLOW-GUIDE.md`, add `## Advanced Techniques` section covering: (a) ralph-loop — iterative task loops, usage example, `/cancel-ralph`; (b) defuddle + markdown.new — token-efficient web fetching with examples.
 - [ ] Step 6: Verify smoke tests pass: `bash tests/smoke.sh`
 
 ## Acceptance Criteria
