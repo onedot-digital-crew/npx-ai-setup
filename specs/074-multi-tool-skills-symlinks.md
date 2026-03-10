@@ -16,7 +16,7 @@ Codex CLI reads skills from `.codex/skills/` and OpenCode from `.opencode/skills
 - [x] Step 3: Call both functions from `bin/ai-setup.sh` after `ensure_skills_alias` in the install flow
 - [x] Step 4: In `lib/update.sh`, call both functions in `run_smart_update` alongside existing `ensure_skills_alias` call
 - [x] Step 5: Add `.codex/skills` and `.opencode/skills` to `.gitignore` template (they are symlinks, not source files)
-- [ ] Step 6: Add both functions to function-presence checks in `tests/smoke.sh`
+- [x] Step 6: Add both functions to function-presence checks in `tests/smoke.sh`
 
 ## Acceptance Criteria
 - [ ] `.codex/skills` symlink is created when `codex` CLI is installed, skipped otherwise

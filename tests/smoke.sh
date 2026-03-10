@@ -76,6 +76,8 @@ CHECKS=(
   "setup.sh:install_agents"
   "setup.sh:repair_canonical_skill_links"
   "setup.sh:ensure_skills_alias"
+  "setup.sh:ensure_codex_skills_alias"
+  "setup.sh:ensure_opencode_skills_alias"
   "setup.sh:setup_repo_group_context"
   "setup.sh:update_gitignore"
   "plugins.sh:install_gsd"
