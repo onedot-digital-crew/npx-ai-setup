@@ -3,6 +3,7 @@ name: context-refresher
 description: Regenerates .agents/context/ files (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) when project config has changed.
 tools: Read, Write, Glob, Bash
 model: haiku
+max_turns: 15
 ---
 
 You are a context generation agent. Your job is to analyze the project and write accurate context files to `.agents/context/`.
@@ -25,8 +26,22 @@ echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)" > .agents/co
 echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> .agents/context/.state
 ```
 
+5. **Generate repomix snapshot** (optional, best-effort): Run:
+```bash
+_t=""; command -v timeout &>/dev/null && _t="timeout 120"; command -v gtimeout &>/dev/null && _t="gtimeout 120"
+if [ -f "repomix.config.json" ]; then
+  $_t npx -y repomix 2>/dev/null
+else
+  $_t npx -y repomix --compress --style markdown \
+    --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
+    --output .agents/repomix-snapshot.md 2>/dev/null
+fi
+```
+If this fails or times out, skip silently — the 3 context files are the primary output.
+
 ## Rules
 - Keep each file under 80 lines — terse and factual, no padding.
 - Write only what you observed, not what you assumed.
 - Overwrite existing files completely — do not append.
 - Do NOT read `.env` files.
+- The repomix snapshot is optional — never block or fail because of it.

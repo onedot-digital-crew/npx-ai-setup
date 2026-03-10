@@ -3,7 +3,7 @@ model: sonnet
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-Run the project's test suite and fix any failures.
+Runs the project test suite and fixes failures in source code. Use when tests are failing or before submitting changes.
 
 ## Process
 
@@ -15,8 +15,11 @@ Run the project's test suite and fix any failures.
    - Read the source file being tested
    - Fix the **source code** (not the tests) to make tests pass
    - Re-run tests
-5. **Repeat** until all tests pass or 3 attempts are exhausted.
-6. If still failing after 3 attempts, report what was tried and what remains broken.
+5. **Repeat** with explicit attempt tracking:
+   - **Attempt 1**: Apply fixes, re-run tests. If all pass: report success and stop.
+   - **Attempt 2**: If still failing, read new error output, apply further fixes, re-run tests. If all pass: report success and stop.
+   - **Attempt 3**: If still failing, apply one final round of fixes, re-run tests. If all pass: report success and stop.
+6. If still failing after Attempt 3, report what was tried in each attempt and what remains broken.
 
 ## Rules
 - Fix source code, not tests (unless the test itself has a clear bug).

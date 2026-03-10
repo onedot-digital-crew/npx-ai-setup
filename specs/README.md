@@ -45,7 +45,7 @@ Read the generated spec. Edit steps, acceptance criteria, or files to modify as 
 /spec-work NNN
 ```
 
-Executes the spec step by step, checking off each step as it completes. Moves completed spec to `specs/completed/`.
+Executes the spec step by step, checking off each step as it completes. Sets status to `in-review` when done.
 
 ### 4. Execute all specs in parallel
 
@@ -53,12 +53,44 @@ Executes the spec step by step, checking off each step as it completes. Moves co
 /spec-work-all
 ```
 
-Discovers all draft specs in `specs/`, detects dependencies between them, then executes in parallel waves. Independent specs run simultaneously; dependent specs wait for their dependencies.
+Discovers all draft specs in `specs/`, detects dependencies between them, then executes in parallel waves using **isolated Git worktrees** — one branch per spec, no merge conflicts. Independent specs run simultaneously; dependent specs wait for their dependencies.
 
-## Spec Status
+### 5. Review and create PR
 
-- **draft** — ready to execute
-- **completed** — done, moved to `specs/completed/`
+```
+/spec-review NNN
+```
+
+Opus reviews all code changes against the spec's acceptance criteria. Three possible verdicts:
+- **APPROVED** — spec completed, moved to `specs/completed/`, PR draft prepared
+- **CHANGES REQUESTED** — feedback written to spec, status back to `in-progress` for another `/spec-work` pass
+- **REJECTED** — spec blocked with explanation
+
+### 6. View the board
+
+```
+/spec-board
+```
+
+Kanban-style overview of all specs grouped by status with step-level progress (`[3/8]`) and branch info.
+
+## Spec Status Lifecycle
+
+```
+draft → in-progress → in-review → completed
+                ↑          |
+                └──────────┘  (changes requested)
+                
+Any status → blocked
+```
+
+| Status | Meaning |
+|---|---|
+| `draft` | Planned, not started |
+| `in-progress` | Agent is working on it |
+| `in-review` | Work done, awaiting review |
+| `blocked` | Blocked by dependency or review rejection |
+| `completed` | Reviewed and done, moved to `specs/completed/` |
 
 ## Directory Structure
 
@@ -66,7 +98,8 @@ Discovers all draft specs in `specs/`, detects dependencies between them, then e
 specs/
   README.md           # This file
   TEMPLATE.md         # Blank spec template
-  001-feature-name.md # Draft spec
+  001-feature-name.md # Draft spec (status: draft)
+  002-other-task.md   # In-progress spec (status: in-progress, branch: spec/002-other-task)
   completed/
     000-old-spec.md   # Completed spec
 ```

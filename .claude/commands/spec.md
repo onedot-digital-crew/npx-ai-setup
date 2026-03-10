@@ -1,10 +1,11 @@
 ---
 model: opus
 mode: plan
+argument-hint: "[task description]"
 allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 
-Create a structured spec for the following task: $ARGUMENTS
+Creates a structured spec for the task: $ARGUMENTS. Use before implementing any multi-file or architectural change.
 
 ## Phase 1 — Challenge & Think Through
 
@@ -30,23 +31,14 @@ Rate: **ALIGNED / BORDERLINE / MISALIGNED**. If MISALIGNED → **REJECT** immedi
 - Who reported this problem — users, or us?
 
 ### 1e — Think It Through
-This is the core of the challenge. Sketch the full implementation mentally before committing.
-**Use `AskUserQuestion` whenever you hit a decision point or unresolved ambiguity** — don't assume, ask. Multiple rounds are fine.
-
-**Implementation path:**
-- Which files/systems change? What exactly happens in each?
-- How does it integrate with existing code — what calls what?
-- What are the data flows or state changes?
-
-**Edge cases & failure modes:**
-- What inputs or states could break this?
-- What happens when it fails — is it recoverable?
-- What are the implicit dependencies or side effects?
-
-**Hidden complexity:**
-- What looks simple but isn't?
-- What will be hard to test or debug later?
-- What will be annoying to maintain in 6 months?
+Sketch the full implementation mentally before writing the spec.
+**Use `AskUserQuestion` at any decision point** — don't assume, ask. Multiple rounds are fine.
+Checklist:
+- Files/systems touched; exact change in each
+- Integration path; what calls what; data/state flow
+- Edge cases; failure behavior; recoverability
+- Hidden complexity; hard-to-test/debug parts; 6-month maintenance pain
+- Implicit dependencies and side effects
 
 ### 1f — Overhead & Risk
 - Maintenance burden added?
@@ -58,17 +50,12 @@ List 1-3 alternatives:
 - A smaller scope version
 - A workaround that avoids building anything
 - **"Don't build it"** — explicitly if it applies
-
 Scan with Glob and Grep for similar existing functionality. Check installed skills for overlap.
 
 ### 1h — Verdict
-
 Present a clear summary of the thinking above, then choose exactly one:
-
 **GO** — Needed, fits, complexity is understood. The implementation sketch from 1e becomes the basis for the spec steps.
-
 **SIMPLIFY** — Merits exist but scope is too large. State the reduced scope. Ask user to confirm before proceeding.
-
 **REJECT** — Misaligned, unnecessary, or risk outweighs benefit. State reason. Stop here.
 
 ---
@@ -102,7 +89,10 @@ Use `AskUserQuestion` to ask: "Branch fuer diese Spec erstellen?"
 ```markdown
 # Spec: [Clear Title]
 
-> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft
+> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Branch**: —
+
+<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Branch is set automatically by /spec-work-all (worktree mode) or manually -->
 
 ## Goal
 [One sentence]

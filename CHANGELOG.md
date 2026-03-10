@@ -10,6 +10,22 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Command modernization**: all commands migrated from `Task` to `Agent` tool; added `argument-hint`, `disable-model-invocation`, and inline `Context` blocks with `!git` pre-fetching for commit, pr, review, and spec-work commands.
+- **spec-work hardened**: progress checklist printed before execution; Haiku Investigator sub-agent introduced for auto-diagnosing build/test failures (single-shot, no loop); step numbers renumbered; `--complete` flag skip updated to steps 12–13.
+- **spec-review upgraded**: 10-metric quality scoring system (0–100 each, threshold 85 avg / 70 min); Definition of Done gate from CONVENTIONS.md; file-read cap (5 files max); verdict thresholds updated.
+- **spec-work-all tightened**: Agent-based parallel worktree launch; per-wave prompts compressed; post-processing references updated.
+- **spec-validate installed**: new `/spec-validate` command validates spec quality before execution; installed from templates.
+- **update command installed**: new `/update` command for in-session ai-setup upgrades; installed from templates.
+- **Agent metadata additions**: `max_turns` added to build-validator (10), context-refresher (15), verify-app (20), staff-reviewer (20); `memory: project` added to code-reviewer and staff-reviewer.
+- **context-refresher**: optional repomix snapshot step added (best-effort, silent on failure).
+- **grill strengthened**: Scope Challenge step 0 with AskUserQuestion (A/B/C paths); existing-code Grep pass before flagging; A/B/C resolution options per issue; NOT-reviewed exclusions list; self-verification table as final step.
+- **reflect expanded**: ARCHITECTURAL and STACK signal categories added alongside CORRECTION/AFFIRMATION; targets ARCHITECTURE.md and STACK.md in addition to CLAUDE.md and CONVENTIONS.md.
+- **release command**: note added that pushing a vX.Y.Z tag auto-creates GitHub Release body from CHANGELOG.md via installed workflow.
+- **New hooks**: config-change-audit.sh, context-monitor.sh, mcp-health.sh, post-tool-failure-log.sh, task-completed-gate.sh.
+- **New rules**: agents.md, general.md, git.md, testing.md installed to `.claude/rules/`.
+- **New specs**: 071 (Developer Workflow Guide), 072 (Spec Status Reliability with auto-split, crash resilience, per-step commits).
+- **liquid-linter agent**: added to `.claude/agents/`.
+
 ## [v1.2.8] — 2026-03-09
 
 - **Agent skill injection**: installer now injects `skills:` into agent YAML headers based on detected system — Shopify agents get `shopify-liquid`/`shopify-theme-dev`, Shopware agents get `shopware6-best-practices`, and `test-generator` gets `vitest` when available. Idempotent; skips if already present.

@@ -1,9 +1,10 @@
 ---
 model: sonnet
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 ---
 
-Execute all draft specs in `specs/` using parallel subagents with native worktree isolation.
+Executes all draft specs in parallel using isolated worktrees. Use to batch-implement multiple independent specs.
 
 ## Process
 
@@ -28,13 +29,11 @@ For each spec in the current wave:
    - Set `**Branch**: spec/NNN-title`
 
 #### Wave execution — parallel subagents
-Launch one Task subagent per spec simultaneously using `isolation: "worktree"`. Each subagent receives:
-
+Launch one Agent subagent per spec simultaneously using `isolation: "worktree"`. Each subagent receives:
 **Prompt for each subagent:**
 ```
 Execute this spec. You are running in an isolated Git worktree.
-
-Setup steps (do first, before implementing the spec):
+Do first:
 1. Rename the current branch to `spec/NNN-title`:
    git branch -m spec/NNN-title
 2. Get the main repo path (the parent of this worktree):
@@ -52,21 +51,13 @@ Setup steps (do first, before implementing the spec):
    elif [ -f "pnpm-lock.yaml" ]; then pnpm install --frozen-lockfile 2>/dev/null || echo "⚠️  pnpm install failed"
    elif [ -f "yarn.lock" ]; then yarn install --frozen-lockfile 2>/dev/null || echo "⚠️  yarn install failed"
    fi
-
+Then follow the `/spec-work` process for this spec inside the worktree: read context, load referenced skills, execute each step in order, verify acceptance criteria, then commit with `git add -A && git commit -m "spec(NNN): [spec title]"`.
 Spec content:
 [full spec content here]
-
-Implementation steps:
-1. Read .agents/context/CONVENTIONS.md and .agents/context/STACK.md if they exist
-2. Load relevant skills if referenced in the spec's Context section
-3. Execute each spec step in order
-4. Verify all acceptance criteria are met
-5. Stage and commit all changes:
-   git add -u && git commit -m "spec(NNN): [spec title]"
 ```
 
 #### Wave post-processing — after each subagent returns
-For each completed subagent, using the branch and worktree path from the Task result:
+For each completed subagent, using the branch and worktree path from the Agent result:
 
 1. Check all spec steps off in `specs/NNN-*.md`
 2. Mark all acceptance criteria as checked
@@ -75,7 +66,7 @@ For each completed subagent, using the branch and worktree path from the Task re
    - Add: `- **Spec NNN**: [Title] — [1-sentence summary]`
    - Insert after the `## [Unreleased]` heading
 5. Remove the worktree (branch is preserved for `/spec-review`):
-   `git worktree remove --force <worktree-path-from-task-result>`
+   `git worktree remove --force <worktree-path-from-agent-result>`
 
 **Wave 2+**: After each wave completes, launch the next wave of specs that are now unblocked.
 
@@ -90,4 +81,4 @@ After all waves complete, report:
 - Follow each spec exactly — no scope creep
 - If a step in a spec is blocked or unclear, mark it unchecked and continue remaining steps
 - If `specs/` has no draft specs, report "No draft specs found" and stop
-- If a Task subagent fails, mark the spec as `blocked` and report the error
+- If an Agent subagent fails, mark the spec as `blocked` and report the error
