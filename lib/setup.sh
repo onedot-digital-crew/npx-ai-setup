@@ -618,6 +618,8 @@ update_gitignore() {
       echo ".agents/context/.state" >> .gitignore
       echo ".agents/repomix-snapshot.md" >> .gitignore
       echo "CLAUDE.local.md" >> .gitignore
+      echo ".codex/skills" >> .gitignore
+      echo ".opencode/skills" >> .gitignore
     else
       # Add new entries if missing from existing block
       grep -q "\.ai-setup\.json" .gitignore 2>/dev/null || echo ".ai-setup.json" >> .gitignore
@@ -625,6 +627,8 @@ update_gitignore() {
       grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
       grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.md" >> .gitignore
       grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
+      grep -q "\.codex/skills" .gitignore 2>/dev/null || echo ".codex/skills" >> .gitignore
+      grep -q "\.opencode/skills" .gitignore 2>/dev/null || echo ".opencode/skills" >> .gitignore
     fi
   else
     echo "# Claude Code / AI Setup" > .gitignore
@@ -634,6 +638,8 @@ update_gitignore() {
     echo ".agents/context/.state" >> .gitignore
     echo ".agents/repomix-snapshot.md" >> .gitignore
     echo "CLAUDE.local.md" >> .gitignore
+    echo ".codex/skills" >> .gitignore
+    echo ".opencode/skills" >> .gitignore
   fi
 
   # AGENTS.md should be tracked like CLAUDE.md (never ignored)
