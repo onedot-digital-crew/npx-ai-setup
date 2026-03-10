@@ -1,6 +1,6 @@
 # Spec: Generation Reliability Fix and Integration Tests
 
-> **Spec ID**: 073 | **Created**: 2026-03-10 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 073 | **Created**: 2026-03-10 | **Status**: completed | **Branch**: —
 
 <!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
 
