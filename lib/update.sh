@@ -75,9 +75,19 @@ handle_version_check() {
   local update_rc=0
 
   if [ -n "$INSTALLED_VERSION" ] && [ "$INSTALLED_VERSION" = "$PACKAGE_VERSION" ]; then
-    # Same version — already up to date
+    # Same version — pre-scan to check if templates actually differ
+    # Restore SYSTEM for scan
+    if [ -z "$SYSTEM" ] && [ -f .ai-setup.json ]; then
+      SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+    fi
+    scan_template_changes
+
     echo ""
-    echo "✅ Already up to date (v${PACKAGE_VERSION})."
+    if [ "$SCAN_TOTAL_CHANGES" -eq 0 ]; then
+      echo "✅ Already up to date (v${PACKAGE_VERSION}) — all files match templates."
+    else
+      echo "✅ Already up to date (v${PACKAGE_VERSION}) — ${SCAN_TOTAL_CHANGES} file(s) differ from templates."
+    fi
     echo ""
     echo "   1) Update files  — review template files, ask about user-modified ones"
     echo "   2) Regenerate    — choose exactly what to regenerate (docs/context/commands/agents/skills)"
@@ -127,9 +137,14 @@ handle_version_check() {
     esac
 
   elif [ -n "$INSTALLED_VERSION" ]; then
-    # Different version — offer update options
+    # Different version — pre-scan to show change count
+    if [ -z "$SYSTEM" ] && [ -f .ai-setup.json ]; then
+      SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+    fi
+    scan_template_changes
+
     echo ""
-    echo "🔄 Update available: v${INSTALLED_VERSION} → v${PACKAGE_VERSION}"
+    echo "🔄 Update available: v${INSTALLED_VERSION} → v${PACKAGE_VERSION} (${SCAN_TOTAL_CHANGES} file(s) changed)"
     echo ""
     echo "   1) Update       — smart update (backup modified files, update templates)"
     echo "   2) Reinstall    — delete managed files, fresh install from scratch"
@@ -155,42 +170,82 @@ handle_version_check() {
   fi
 }
 
-# Smart update: checksum diffing, selective category update, backup user-modified files
-# Usage: run_smart_update [--skip-regen]
-run_smart_update() {
-  local skip_regen=0
-  local regen_failed=0
-  [ "${1:-}" = "--skip-regen" ] && skip_regen=1
-  echo ""
-  echo "🔍 Analyzing templates..."
-  echo ""
+# Pre-scan all templates and count changes per category.
+# Sets SCAN_* globals (changed/new/total counts per category) and SCAN_TOTAL_CHANGES.
+# Must be called before ask_update_parts() to provide change counts.
+scan_template_changes() {
+  SCAN_HOOKS_CHANGED=0; SCAN_HOOKS_NEW=0; SCAN_HOOKS_TOTAL=0
+  SCAN_SETTINGS_CHANGED=0; SCAN_SETTINGS_NEW=0; SCAN_SETTINGS_TOTAL=0
+  SCAN_CLAUDE_MD_CHANGED=0; SCAN_CLAUDE_MD_NEW=0; SCAN_CLAUDE_MD_TOTAL=0
+  SCAN_AGENTS_MD_CHANGED=0; SCAN_AGENTS_MD_NEW=0; SCAN_AGENTS_MD_TOTAL=0
+  SCAN_COMMANDS_CHANGED=0; SCAN_COMMANDS_NEW=0; SCAN_COMMANDS_TOTAL=0
+  SCAN_AGENTS_CHANGED=0; SCAN_AGENTS_NEW=0; SCAN_AGENTS_TOTAL=0
+  SCAN_OTHER_CHANGED=0; SCAN_OTHER_NEW=0; SCAN_OTHER_TOTAL=0
+  SCAN_TOTAL_CHANGES=0
 
-  # Restore SYSTEM from metadata if not set via --system flag
-  if [ -z "$SYSTEM" ] && [ -f .ai-setup.json ]; then
-    SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
-    [ -n "$SYSTEM" ] && echo "  🔍 Restored system from previous run: $SYSTEM"
+  local all_mappings=("${TEMPLATE_MAP[@]}")
+  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+    all_mappings+=("${SHOPIFY_SKILLS_MAP[@]}")
   fi
 
-  # Normalize legacy skills layout in existing projects.
-  if command -v ensure_skills_alias >/dev/null 2>&1; then
-    ensure_skills_alias
+  for mapping in "${all_mappings[@]}"; do
+    local tpl="${mapping%%:*}"
+    local target="${mapping#*:}"
+    local cat
+    cat=$(get_template_category "$mapping")
+
+    # Count total per category
+    local var_total="SCAN_${cat^^}_TOTAL"
+    eval "$var_total=\$(( ${!var_total} + 1 ))"
+
+    if [ ! -f "$target" ]; then
+      # New file
+      if [ -f "$SCRIPT_DIR/$tpl" ]; then
+        local var_new="SCAN_${cat^^}_NEW"
+        eval "$var_new=\$(( ${!var_new} + 1 ))"
+        SCAN_TOTAL_CHANGES=$((SCAN_TOTAL_CHANGES + 1))
+      fi
+      continue
+    fi
+
+    if [ ! -f "$SCRIPT_DIR/$tpl" ]; then
+      continue
+    fi
+
+    local tpl_cs cur_cs
+    tpl_cs=$(compute_checksum "$SCRIPT_DIR/$tpl")
+    cur_cs=$(compute_checksum "$target")
+
+    if [ "$tpl_cs" != "$cur_cs" ]; then
+      local var_changed="SCAN_${cat^^}_CHANGED"
+      eval "$var_changed=\$(( ${!var_changed} + 1 ))"
+      SCAN_TOTAL_CHANGES=$((SCAN_TOTAL_CHANGES + 1))
+    fi
+  done
+}
+
+# Format change count for a category: "2 changed" / "1 new" / "unchanged"
+_scan_category_label() {
+  local changed="$1" new="$2"
+  local parts=()
+  [ "$changed" -gt 0 ] && parts+=("${changed} changed")
+  [ "$new" -gt 0 ] && parts+=("${new} new")
+  if [ ${#parts[@]} -eq 0 ]; then
+    echo "unchanged"
+  else
+    local IFS=", "
+    echo "${parts[*]}"
   fi
+}
 
-  UPD_UPDATED=0
-  UPD_SKIPPED=0
-  UPD_NEW=0
-  UPD_BACKED_UP=0
-  UPD_REMOVED=0
-  UPD_REMOVED_BACKED_UP=0
-
-  # Ask which template categories to update
-  ask_update_parts || echo "  ⏭️  No categories selected — skipping template updates"
-  echo ""
-
-  for mapping in "${TEMPLATE_MAP[@]}"; do
+# Process a set of template mappings: install new, update changed, skip unchanged (silently).
+# Usage: _process_update_mappings "${TEMPLATE_MAP[@]}"
+_process_update_mappings() {
+  local mappings=("$@")
+  for mapping in "${mappings[@]}"; do
     should_update_template "$mapping" || continue
-    tpl="${mapping%%:*}"
-    target="${mapping#*:}"
+    local tpl="${mapping%%:*}"
+    local target="${mapping#*:}"
 
     # Target doesn't exist — install as new
     if [ ! -f "$target" ]; then
@@ -205,22 +260,24 @@ run_smart_update() {
     fi
 
     # Compare template to installed file
+    local tpl_cs cur_cs
     tpl_cs=$(compute_checksum "$SCRIPT_DIR/$tpl")
     cur_cs=$(compute_checksum "$target")
 
     if [ "$tpl_cs" = "$cur_cs" ]; then
-      # Template and installed file are identical — skip
-      echo "  ⏭️  $target (unchanged)"
+      # Identical — skip silently (no output for unchanged files)
       UPD_SKIPPED=$((UPD_SKIPPED + 1))
       continue
     fi
 
     # Template differs — check if user modified the file
+    local stored_cs
     stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
 
     if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
       # User modified — ask before overwriting
       if ask_overwrite_modified "$target"; then
+        local bp
         bp=$(backup_file "$target")
         cp "$SCRIPT_DIR/$tpl" "$target"
         [[ "$target" == *.sh ]] && chmod +x "$target"
@@ -232,76 +289,80 @@ run_smart_update() {
         continue
       fi
     else
-      # Not modified by user — silent update
+      # Not modified by user — update
       cp "$SCRIPT_DIR/$tpl" "$target"
       [[ "$target" == *.sh ]] && chmod +x "$target"
       echo "  ✅ $target (updated)"
     fi
     UPD_UPDATED=$((UPD_UPDATED + 1))
   done
+}
 
-  # Also update Shopify-specific skills if system includes shopify
-  if [[ "${SYSTEM:-}" == *shopify* ]]; then
-    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-      should_update_template "$mapping" || continue
-      tpl="${mapping%%:*}"
-      target="${mapping#*:}"
-      if [ ! -f "$target" ]; then
-        if [ -f "$SCRIPT_DIR/$tpl" ]; then
-          mkdir -p "$(dirname "$target")"
-          cp "$SCRIPT_DIR/$tpl" "$target"
-          echo "  ✨ $target (new)"
-          UPD_NEW=$((UPD_NEW + 1))
-        fi
-        continue
-      fi
-      tpl_cs=$(compute_checksum "$SCRIPT_DIR/$tpl")
-      cur_cs=$(compute_checksum "$target")
-      if [ "$tpl_cs" = "$cur_cs" ]; then
-        echo "  ⏭️  $target (unchanged)"
-        UPD_SKIPPED=$((UPD_SKIPPED + 1))
-        continue
-      fi
-      stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
-      if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
-        # User modified — ask before overwriting
-        if ask_overwrite_modified "$target"; then
-          bp=$(backup_file "$target")
-          cp "$SCRIPT_DIR/$tpl" "$target"
-          echo "  ✅ $target (updated — backed up to $bp)"
-          UPD_BACKED_UP=$((UPD_BACKED_UP + 1))
-        else
-          echo "  ⏭️  $target (kept — user version preserved)"
-          UPD_SKIPPED=$((UPD_SKIPPED + 1))
-          continue
-        fi
-      else
-        cp "$SCRIPT_DIR/$tpl" "$target"
-        echo "  ✅ $target (updated)"
-      fi
-      UPD_UPDATED=$((UPD_UPDATED + 1))
-    done
+# Smart update: checksum diffing, selective category update, backup user-modified files
+# Usage: run_smart_update [--skip-regen]
+run_smart_update() {
+  local skip_regen=0
+  local regen_failed=0
+  [ "${1:-}" = "--skip-regen" ] && skip_regen=1
+  echo ""
+  echo "🔍 Analyzing templates..."
+
+  # Restore SYSTEM from metadata if not set via --system flag
+  if [ -z "$SYSTEM" ] && [ -f .ai-setup.json ]; then
+    SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+    [ -n "$SYSTEM" ] && echo "  🔍 Restored system from previous run: $SYSTEM"
   fi
 
-  cleanup_obsolete_managed_files
+  # Normalize legacy skills layout in existing projects.
+  if command -v ensure_skills_alias >/dev/null 2>&1; then
+    ensure_skills_alias
+  fi
 
+  # Pre-scan templates to detect actual changes per category
+  scan_template_changes
+
+  UPD_UPDATED=0
+  UPD_SKIPPED=0
+  UPD_NEW=0
+  UPD_BACKED_UP=0
+  UPD_REMOVED=0
+  UPD_REMOVED_BACKED_UP=0
+
+  if [ "$SCAN_TOTAL_CHANGES" -eq 0 ]; then
+    echo ""
+    echo "  ✅ All template files are up to date — nothing to update."
+    # Still check for obsolete files
+    cleanup_obsolete_managed_files
+    write_metadata
+  else
+    # Ask which template categories to update (with change counts)
+    ask_update_parts || echo "  ⏭️  No categories selected — skipping template updates"
+  fi
   echo ""
-  echo "📊 Update summary:"
-  echo "   Updated:   $UPD_UPDATED"
-  [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
-  [ $UPD_REMOVED -gt 0 ] && echo "   Removed:   $UPD_REMOVED"
-  [ $UPD_SKIPPED -gt 0 ] && echo "   Unchanged: $UPD_SKIPPED"
-  [ $UPD_BACKED_UP -gt 0 ] && echo "   Backed up: $UPD_BACKED_UP (see .ai-setup-backup/)"
-  [ $UPD_REMOVED_BACKED_UP -gt 0 ] && echo "   Backed up before removal: $UPD_REMOVED_BACKED_UP"
-  _upd_cats=""
-  [ "${UPD_HOOKS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Hooks"
-  [ "${UPD_SETTINGS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Settings"
-  [ "${UPD_CLAUDE_MD:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }CLAUDE.md"
-  [ "${UPD_AGENTS_MD:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }AGENTS.md"
-  [ "${UPD_COMMANDS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Commands"
-  [ "${UPD_AGENTS:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Agents"
-  [ "${UPD_OTHER:-yes}" = "yes" ] && _upd_cats="${_upd_cats:+$_upd_cats, }Other"
-  [ -n "$_upd_cats" ] && echo "   Categories: $_upd_cats"
+
+  # Skip template processing when pre-scan found no changes
+  if [ "$SCAN_TOTAL_CHANGES" -gt 0 ]; then
+    _process_update_mappings "${TEMPLATE_MAP[@]}"
+
+    # Also update Shopify-specific skills if system includes shopify
+    if [[ "${SYSTEM:-}" == *shopify* ]]; then
+      _process_update_mappings "${SHOPIFY_SKILLS_MAP[@]}"
+    fi
+
+    cleanup_obsolete_managed_files
+  fi
+
+  # Only show summary when there was work to do
+  if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
+    echo ""
+    echo "📊 Update summary:"
+    [ $UPD_UPDATED -gt 0 ] && echo "   Updated:   $UPD_UPDATED"
+    [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
+    [ $UPD_REMOVED -gt 0 ] && echo "   Removed:   $UPD_REMOVED"
+    [ $UPD_SKIPPED -gt 0 ] && echo "   Unchanged: $UPD_SKIPPED"
+    [ $UPD_BACKED_UP -gt 0 ] && echo "   Backed up: $UPD_BACKED_UP (see .ai-setup-backup/)"
+    [ $UPD_REMOVED_BACKED_UP -gt 0 ] && echo "   Backed up before removal: $UPD_REMOVED_BACKED_UP"
+  fi
 
   # Update metadata
   write_metadata
