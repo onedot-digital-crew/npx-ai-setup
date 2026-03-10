@@ -1,6 +1,6 @@
 # Spec: Replace Statusline with claude-powerline
 
-> **Spec ID**: 075 | **Created**: 2026-03-10 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 075 | **Created**: 2026-03-10 | **Status**: in-review | **Branch**: —
 
 <!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
 
@@ -16,11 +16,11 @@ Replace the custom `statusline.sh` script with `@owloops/claude-powerline` for a
 - [x] Step 3: Delete `templates/statusline.sh` (no longer installed); update `lib/core.sh` TEMPLATE_EXCLUDES to remove `statusline.sh` entry
 
 ## Acceptance Criteria
-- [ ] Fresh install: `.claude/settings.json` statusLine points to `npx -y @owloops/claude-powerline@latest`
-- [ ] Fresh install: `.claude/claude-powerline.json` is created with default config
-- [ ] Fresh install: `.claude/statusline.sh` is NOT created
-- [ ] Idempotency: re-running install skips if statusLine already configured
-- [ ] Smoke tests pass (80/80)
+- [x] Fresh install: `.claude/settings.json` statusLine points to `npx -y @owloops/claude-powerline@latest`
+- [x] Fresh install: `.claude/claude-powerline.json` is created with default config
+- [x] Fresh install: `.claude/statusline.sh` is NOT created
+- [x] Idempotency: re-running install skips if statusLine already configured
+- [x] Smoke tests pass (82/82)
 
 ## Files to Modify
 - `lib/setup.sh` — rewrite `install_statusline_project()`
