@@ -1,6 +1,6 @@
 # Spec 078 — Fix PreCompact Hook: Selective Staging and Proper Commit Message
 
-**Status:** in-review
+**Status:** completed
 **Issue:** https://github.com/onedot-digital-crew/npx-ai-setup/issues/3
 
 ## Goal

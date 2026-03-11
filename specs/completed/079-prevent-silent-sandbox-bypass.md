@@ -1,6 +1,6 @@
 # Spec 079 — Prevent Silent Sandbox Bypass
 
-**Status:** in-review
+**Status:** completed
 **Issue:** https://github.com/onedot-digital-crew/npx-ai-setup/issues/4
 
 ## Goal
