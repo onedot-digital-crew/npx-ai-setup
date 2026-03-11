@@ -9,6 +9,7 @@
 [Why is this needed? What triggered this task?]
 
 ## Steps
+<!-- If a step maps to an installed skill, write it as: - [ ] `/skill-name` args -->
 - [ ] Step 1: description
 - [ ] Step 2: description
 - [ ] Step 3: description

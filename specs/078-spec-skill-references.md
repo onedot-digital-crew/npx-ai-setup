@@ -19,7 +19,7 @@ Skills live in `.claude/skills/` (each as a directory). The skill name = directo
 - [x] Add rule to `spec-work/skill.md`: if a step contains a skill reference (e.g. `` `/shopify-liquid` ``), invoke it via the `Skill` tool instead of reimplementing manually
 - [x] Update `templates/skills/spec/skill.md` with the same rules (source of truth for new installs)
 - [x] Update `templates/skills/spec-work/skill.md` with the skill-invocation rule
-- [ ] Update `templates/specs/TEMPLATE.md`: add inline comment showing skill-reference step syntax
+- [x] Update `templates/specs/TEMPLATE.md`: add inline comment showing skill-reference step syntax
 - [ ] Sync the same rules to `templates/skills/spec-create/skill.md` if it exists and differs
 
 ## Acceptance Criteria
