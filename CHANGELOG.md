@@ -10,8 +10,19 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- **Spec 078**: Skill references in spec steps — spec skill now scans `ls .claude/skills/` before writing steps and references installed skills as `/skill-name`; spec-work invokes skill references via Skill tool instead of reimplementing; templates and TEMPLATE.md synced.
-- **Spec 079**: Skill-First Principle — added skill-first rule to `rules/general.md` (templates + active), `templates/CLAUDE.md` Working Style, and agent definitions (code-reviewer, verify-app); Claude must now check installed skills before manual implementation and ask when no match exists.
+## [v1.3.1] — 2026-03-11
+
+### Skill-First Principle (Spec 078 + 079)
+Claude now discovers installed skills before implementing anything manually — spec creation scans `.claude/skills/`, references matching skills as `/skill-name` in steps, and spec-work invokes them via the Skill tool instead of reimplementing. A `Skill-First` rule was added to `rules/general.md` (templates + active copy), `templates/CLAUDE.md` Working Style, and agent definitions (code-reviewer, verify-app).
+
+### Fix: PreCompact Auto-Commit (Issue #3)
+The auto-save hook on context compaction now stages only tracked modified files (`git add -u` instead of `git add -A`) and uses a proper conventional commit message (`chore: save session state before context compaction`). The `--no-verify` flag that bypassed hooks was removed.
+
+### Fix: Silent Sandbox Bypass Prevention (Issue #4)
+A new `## Sandbox Safety` rule in `rules/general.md` explicitly prohibits using `dangerouslyDisableSandbox: true` without first explaining the restriction to the user and receiving explicit confirmation. Silent retries with sandbox disabled are not allowed.
+
+### Fix: Silent Early Exit in Setup Script (Issue #3 related)
+`_install_or_update_file` now returns `0` (not `1`) for skip and user-modified cases, preventing `set -e` from killing the script mid-loop during `install_rules` and TypeScript detection.
 
 ## [v1.3.0] — 2026-03-10
 
