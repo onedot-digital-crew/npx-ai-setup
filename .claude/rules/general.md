@@ -36,3 +36,10 @@ This applies everywhere: direct chat, spec steps, and delegated agents.
 Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — it strips navigation and clutter, saving ~80% tokens.
 Alternative: prepend `https://markdown.new/` to any URL for instant markdown conversion without a CLI.
 Use WebFetch only when defuddle is unavailable or the page requires JavaScript rendering.
+
+## Sandbox Safety
+Never set `dangerouslyDisableSandbox: true` on a Bash tool call without first:
+1. Explaining to the user why the sandbox blocks the command
+2. Receiving explicit user confirmation to bypass the sandbox
+
+Silent retries with sandbox disabled are not allowed — even if a previous attempt failed.

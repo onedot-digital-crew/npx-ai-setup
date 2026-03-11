@@ -210,7 +210,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cd \"${CLAUDE_PROJECT_DIR:-.}\" && command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1 && [ -n \"$(git status --porcelain 2>/dev/null)\" ] && git add -A && git commit -m \"wip: auto-save before context compaction\" --no-verify || true'",
+            "command": "bash -c 'cd \"${CLAUDE_PROJECT_DIR:-.}\" && command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1 && [ -n \"$(git status --porcelain 2>/dev/null)\" ] && git add -u && git commit -m \"chore: save session state before context compaction\" || true'",
             "timeout": 10
           }
         ]
