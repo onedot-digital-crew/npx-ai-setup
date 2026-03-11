@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 078**: Skill references in spec steps — spec skill now scans `ls .claude/skills/` before writing steps and references installed skills as `/skill-name`; spec-work invokes skill references via Skill tool instead of reimplementing; templates and TEMPLATE.md synced.
 - **Spec 079**: Skill-First Principle — added skill-first rule to `rules/general.md` (templates + active), `templates/CLAUDE.md` Working Style, and agent definitions (code-reviewer, verify-app); Claude must now check installed skills before manual implementation and ask when no match exists.
 
 ## [v1.3.0] — 2026-03-10

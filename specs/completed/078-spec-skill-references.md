@@ -1,6 +1,6 @@
 # Spec: Reference Installed Project Skills in Spec Steps
 
-> **Spec ID**: 078 | **Created**: 2026-03-11 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 078 | **Created**: 2026-03-11 | **Status**: completed | **Branch**: —
 
 ## Goal
 
@@ -24,11 +24,11 @@ Skills live in `.claude/skills/` (each as a directory). The skill name = directo
 
 ## Acceptance Criteria
 
-- [ ] `spec/skill.md` contains: "Before writing steps, run `ls .claude/skills/` to list available skills"
-- [ ] `spec/skill.md` contains: "If a step maps to an installed skill, reference it as `/skill-name` in the step"
-- [ ] `templates/skills/spec/skill.md` mirrors these rules
-- [ ] `templates/specs/TEMPLATE.md` shows an example step using a skill reference
-- [ ] `spec-work/skill.md` contains: "If a step references `/skill-name`, invoke it via the Skill tool"
+- [x] `spec/skill.md` contains: "Before writing steps, run `ls .claude/skills/` to list available skills"
+- [x] `spec/skill.md` contains: "If a step maps to an installed skill, reference it as `/skill-name` in the step"
+- [x] `templates/skills/spec/skill.md` mirrors these rules
+- [x] `templates/specs/TEMPLATE.md` shows an example step using a skill reference
+- [x] `spec-work/skill.md` contains: "If a step references `/skill-name`, invoke it via the Skill tool"
 
 ## Files to Modify
 
