@@ -47,3 +47,4 @@ Reason: one sentence
 - Read the actual code — never speculate.
 - If no issues found, say "No issues found" and verdict is PASS.
 - CONCERNS = medium issues only. FAIL = at least one HIGH issue.
+- **Skill-First**: Before implementing any fix suggestions, check `ls .claude/skills/` — if a skill covers the task, reference it in your findings instead of describing a manual solution.

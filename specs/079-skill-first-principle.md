@@ -20,7 +20,7 @@ This principle must be enforced at three layers:
 - [x] Add rule to `templates/claude/rules/general.md`: "Before implementing, run `ls .claude/skills/` and use any matching skill via the Skill tool"
 - [x] Sync same rule to `.claude/rules/general.md` (active project copy)
 - [x] Add "Skill-First" section to `templates/CLAUDE.md` under Working Style
-- [ ] Add skill-discovery reminder to `templates/agents/code-reviewer.md` and `verify-app.md`
+- [x] Add skill-discovery reminder to `templates/agents/code-reviewer.md` and `verify-app.md`
 - [ ] Verify: read updated `general.md` and confirm rule is present and clear
 
 ## Acceptance Criteria
