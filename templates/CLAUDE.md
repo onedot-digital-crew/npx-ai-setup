@@ -99,6 +99,10 @@ Read relevant code before answering questions about it.
 Implement changes rather than only suggesting them.
 Use subagents for parallel or isolated work. For simple tasks, work directly.
 
+**Skill-First:** Before implementing anything manually, run `ls .claude/skills/` to check installed skills.
+If a skill covers the task, invoke it via the `Skill` tool — never reimplement what a skill already does.
+If no skill matches, ask the user before proceeding with manual implementation.
+
 ## Parallel Orchestration
 Use subagents by default for focused delegated work.
 If teammates must coordinate directly, use experimental agent teams (enable only when needed):
