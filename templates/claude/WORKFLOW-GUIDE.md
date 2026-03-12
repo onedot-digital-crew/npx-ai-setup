@@ -66,6 +66,7 @@ Completed specs move to `specs/completed/`.
 | `/release` | Bump version, update CHANGELOG, tag release | `/release` |
 | `/reflect` | Save session learnings as permanent rules | `/reflect` |
 | `/techdebt` | Scan recently changed files for tech debt | `/techdebt` |
+| `/context` | Show context usage, identify bloat, get optimization tips | `/context` |
 | `/context-full` | Generate full codebase snapshot via repomix | `/context-full` |
 | `/evaluate` | Evaluate external idea/tool/pattern against project | `/evaluate "use Zustand instead of Pinia"` |
 | `/challenge` | Critically evaluate a feature idea before building | `/challenge "add live chat widget"` |
@@ -77,6 +78,7 @@ Completed specs move to `specs/completed/`.
 
 ### Keyboard shortcuts
 - `Esc Esc` — rewind / summarize the last response (recover tokens)
+- `Up arrow` — after interrupting Claude, restores the interrupted prompt and rewinds in one step
 - `Ctrl+C` — cancel current generation
 
 ### Inline shortcuts
