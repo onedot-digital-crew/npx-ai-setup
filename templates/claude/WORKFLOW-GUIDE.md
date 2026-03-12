@@ -158,6 +158,26 @@ Claude will work, try to exit, get intercepted by the Stop hook, and re-start wi
 
 ---
 
+### repomix — Full Codebase Snapshot
+
+Generates a compressed, token-efficient snapshot of the entire codebase. Use before large refactors or architecture reviews.
+
+**Via Claude:**
+```
+/context-full
+```
+
+**Direct CLI:**
+```bash
+npx repomix --compress --style markdown \
+  --ignore "node_modules,dist,.git,.next,.nuxt,coverage,*.lock" \
+  --output .agents/repomix-snapshot.md
+```
+
+Output is written to `.agents/repomix-snapshot.md` (gitignored). Claude reads it automatically when you run `/context-full`.
+
+---
+
 ### defuddle + markdown.new — Token-Efficient Web Fetching
 
 Reading web pages with WebFetch returns raw HTML — ~5× more tokens than needed. Two better options:
