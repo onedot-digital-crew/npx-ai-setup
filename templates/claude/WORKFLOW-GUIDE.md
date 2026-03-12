@@ -139,6 +139,30 @@ List all available commands: type `/` in Claude Code to see the autocomplete men
 
 ## Advanced Techniques
 
+### squirrelscan — Website Audit (SEO, Performance, Security, Accessibility)
+
+240+ rules across 21 categories. Install once as a local binary — faster than npx, no network dependency per run.
+
+**Install:**
+```bash
+curl -fsSL https://squirrelscan.com/install | bash
+```
+
+**CLI usage:**
+```bash
+squirrelscan https://example.com              # full audit
+squirrelscan https://example.com --format llm # LLM-optimized output (40% smaller)
+squirrelscan https://example.com --format json # machine-readable for CI/CD
+```
+
+**Claude Code Skill** (lets Claude run audits autonomously and fix issues):
+```bash
+npx skills install squirrelscan/skills
+```
+Then use `/audit-website` in Claude Code.
+
+---
+
 ### ralph-loop — Iterative Task Loops
 
 `ralph-loop` is a Stop-hook-based loop that keeps Claude working on a task across multiple iterations — useful for complex, multi-round implementations where a single session is not enough.
