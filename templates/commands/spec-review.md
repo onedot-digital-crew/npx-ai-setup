@@ -33,6 +33,11 @@ For each changed file, read the full file to understand context around the chang
 - Are acceptance criteria genuinely met (verify against diff, not checkboxes)?
 - Was anything built that's listed in "Out of Scope"? Flag scope creep.
 
+For structured acceptance criteria (Truths / Artifacts / Key Links), verify each category mechanically:
+- **Truths**: Run the described command or check and confirm the output matches the stated behavior.
+- **Artifacts**: Confirm the file exists, has real implementation (not a placeholder or stub), and meets any minimum line count specified.
+- **Key Links**: Open the source file and confirm the stated import or reference is actually present.
+
 #### 5b — Definition of Done
 If `.agents/context/CONVENTIONS.md` contains a `## Definition of Done` section, verify the code changes satisfy those global quality gates. Report unmet gates as blocking issues.
 

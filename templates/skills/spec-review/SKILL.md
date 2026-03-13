@@ -25,6 +25,10 @@ Reviews a spec in `specs/NNN-*.md` after implementation and decides whether it s
    - Verify acceptance criteria are genuinely satisfied
    - Flag scope creep against Out of Scope
    - Check `.agents/context/CONVENTIONS.md` for global quality gates if present
+   - For structured acceptance criteria (Truths / Artifacts / Key Links), verify each category mechanically:
+     - **Truths**: Run the described command or check and confirm the output matches the stated behavior.
+     - **Artifacts**: Confirm the file exists, has real implementation (not a placeholder or stub), and meets any minimum line count specified.
+     - **Key Links**: Open the source file and confirm the stated import or reference is actually present.
 
 6. **Choose a verdict**:
    - `APPROVED`: status becomes `completed`, move spec to `specs/completed/`

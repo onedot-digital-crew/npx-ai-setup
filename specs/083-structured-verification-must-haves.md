@@ -48,7 +48,7 @@ Relevant files: `templates/commands/spec.md`, `templates/commands/spec-review.md
   - Key Links are checked by confirming imports/references connect
   - Not every spec needs all three categories — omit empty ones
 
-- [ ] **Step 2 — Update spec-review to check structured criteria**
+- [x] **Step 2 — Update spec-review to check structured criteria**
   In `templates/commands/spec-review.md`, update the review process to check each category mechanically:
   - Truths: Run the described command/check
   - Artifacts: Verify file exists, has real content (not placeholder), meets minimum lines if specified
