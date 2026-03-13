@@ -50,7 +50,7 @@ Relevant files: `templates/commands/spec-work.md`, `templates/commands/reflect.m
   In `templates/commands/spec-work.md`, add after step 10 (Execute each step):
   - "If you made an architectural, pattern, library, or convention decision during this step that downstream work should know about, append it to `decisions.md` in the project root. Not every step produces decisions — only append when a meaningful choice was made."
 
-- [ ] **Step 4 — Integrate into reflect command**
+- [x] **Step 4 — Integrate into reflect command**
   In `templates/commands/reflect.md`, add to the ARCHITECTURAL signals classification:
   - After detecting architectural signals, also check if `decisions.md` exists. If yes, append new architectural decisions as rows. Use the next sequential D-number.
 
