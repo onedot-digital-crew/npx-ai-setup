@@ -9,6 +9,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 <!-- Entries are prepended below this line, newest first -->
 
 ## [Unreleased]
+- **Spec 081**: Understanding Confirmation in spec-work — adds a 3-bullet confirmation step for high-complexity specs before branch creation
 
 ## [v1.3.1] — 2026-03-11
 

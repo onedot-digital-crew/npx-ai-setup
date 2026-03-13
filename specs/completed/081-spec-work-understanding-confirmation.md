@@ -1,5 +1,5 @@
 ---
-**Status**: in-progress
+**Status**: in-review
 **Branch**: —
 **Complexity**: low
 ---
@@ -38,10 +38,10 @@ Skills available: spec, spec-work, spec-review, spec-validate, spec-board, spec-
 
 ## Acceptance Criteria
 
-- [ ] `templates/commands/spec-work.md` contains the new understanding confirmation step between "Read the spec" and "Branch setup"
-- [ ] The step is conditional on `Complexity: high` — no change for other specs
-- [ ] `.claude/skills/spec-work/SKILL.md` mirrors the change
-- [ ] All subsequent step numbers are updated correctly in both files
+- [x] `templates/commands/spec-work.md` contains the new understanding confirmation step between "Read the spec" and "Branch setup"
+- [x] The step is conditional on `Complexity: high` — no change for other specs
+- [x] `.claude/skills/spec-work/SKILL.md` mirrors the change
+- [x] All subsequent step numbers are updated correctly in both files
 
 ## Files to Modify
 
