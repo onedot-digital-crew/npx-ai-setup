@@ -32,6 +32,11 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
 9. **Update CHANGELOG.md** — add an entry under `## [Unreleased]`.
 
 10. **Run tests/build** if available. Report PASS or FAIL.
+    - If tests/build **FAIL**, follow the debugging discipline before fixing:
+      - Form a hypothesis before making any change
+      - Change one variable at a time
+      - After 3 failed fix attempts, stop and reassess your mental model
+      - Don't fix symptoms — understand the root cause first
 
 11. **Set status to `completed`**, move file to `specs/completed/`.
 

@@ -74,6 +74,12 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     - If verify-app returns **PASS**: continue to the next step.
     - If verify-app returns **FAIL**: trigger the **Haiku Investigator** (exactly once — never in a loop):
 
+    When diagnosing failures, follow the debugging discipline:
+    - Form a hypothesis before making any change
+    - Change one variable at a time
+    - After 3 failed fix attempts, stop and reassess your mental model
+    - Don't fix symptoms — understand the root cause first
+
     > **Haiku Investigator** — spawn a sub-agent with these constraints:
     > - Model: haiku | Allowed tools: Read, Glob, Grep, Bash (read-only: `cat`, `ls`, `grep`, `find`) | **Forbidden: Write, Edit**
     > - Prompt: "Diagnose this build/test failure. Read the error output and relevant source files. Identify the root cause. Output: (1) root cause in one sentence, (2) the specific line(s) to fix, (3) exact fix to apply. Do NOT edit any files."

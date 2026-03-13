@@ -37,7 +37,7 @@ Relevant files: `templates/commands/bug.md`, `templates/commands/spec-work.md`
   6. **Don't fix symptoms.** Understand *why* something fails before changing code. A test that passes after a change you don't understand is luck, not a fix.
   ```
 
-- [ ] **Step 2 — Add debugging discipline reference to spec-work.md**
+- [x] **Step 2 — Add debugging discipline reference to spec-work.md**
   In `templates/commands/spec-work.md`, find the **"Verify implementation"** step (currently step 13, step 14 after Spec 081 runs) where the Haiku Investigator is defined. Add a note before the Investigator instructions:
   ```markdown
   When diagnosing failures, follow the debugging discipline:
