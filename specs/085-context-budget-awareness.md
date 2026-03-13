@@ -34,7 +34,7 @@ Relevant files: `templates/CLAUDE.md`, `templates/commands/spec-work.md`
   - Never sacrifice handoff quality for one more implementation step
   ```
 
-- [ ] **Step 2 — Add context budget note to spec-work.md**
+- [x] **Step 2 — Add context budget note to spec-work.md**
   In `templates/commands/spec-work.md`, find the **"Execute each step"** section (currently step 10, step 11 after Spec 081 runs). Add a note at the end of that step's bullet list:
   ```markdown
   **Context budget:** If you've been working for many steps and context is growing large, prioritize completing the current step fully (including its commit) over starting the next step. If compaction seems imminent, update the spec with progress markers (`[x]` for completed steps) before continuing — this ensures the next session can resume cleanly.

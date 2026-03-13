@@ -26,6 +26,7 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
    - Check it off in the spec
    - Commit with `git commit -m "spec(NNN): step N — <title>"`
    - If blocked, stop and ask
+   - **Context budget:** If you've been working for many steps and context is growing large, prioritize completing the current step fully (including its commit) over starting the next step. If compaction seems imminent, update the spec with progress markers (`[x]` for completed steps) before continuing — this ensures the next session can resume cleanly.
 
 8. **Verify acceptance criteria** — check each one off in the spec.
    For structured criteria (Truths / Artifacts / Key Links), verify each category mechanically:
