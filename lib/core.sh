@@ -69,7 +69,6 @@ SHOPIFY_SKILLS_MAP=(
 # Workflow skills shipped to every project so Codex can map slash-style spec prompts
 # to the existing spec workflow through .codex/skills -> .claude/skills.
 SPEC_SKILLS_MAP=(
-  "templates/skills/spec/SKILL.md:.claude/skills/spec/SKILL.md"
   "templates/skills/spec-board/SKILL.md:.claude/skills/spec-board/SKILL.md"
   "templates/skills/spec-create/SKILL.md:.claude/skills/spec-create/SKILL.md"
   "templates/skills/spec-review/SKILL.md:.claude/skills/spec-review/SKILL.md"
