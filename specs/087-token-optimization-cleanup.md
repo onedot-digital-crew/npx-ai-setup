@@ -49,7 +49,7 @@ All fixes must be applied in both local `.claude/` and `templates/`.
 
 11. [x] **Trim verbose global skill descriptions** — `~/.claude/skills/defuddle/SKILL.md`, `firecrawl/SKILL.md`, `mcp-builder/SKILL.md`: move examples and bullet lists from `description:` into body. Target: ≤120 chars per description.
 
-12. **Trim `write-as-denis` description** — in `~/.claude/skills/write-as-denis/SKILL.md`: collapse the 9-phrase trigger enumeration to 1 sentence, move examples to body.
+12. [x] **Trim `write-as-denis` description** — in `~/.claude/skills/write-as-denis/SKILL.md`: collapse the 9-phrase trigger enumeration to 1 sentence, move examples to body.
 
 14. **Update `/update` command to show changed files** — in `templates/commands/update.md`: after `npx github:onedot-digital-crew/npx-ai-setup` runs, display a diff summary of which files were actually added/modified.
 
