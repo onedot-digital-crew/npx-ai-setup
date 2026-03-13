@@ -4,34 +4,51 @@
     "style": "powerline",
     "charset": "unicode",
     "autoWrap": true,
-    "padding": 1
+    "padding": 1,
+    "lines": [
+      {
+        "segments": {
+          "model": {
+            "enabled": true
+          },
+          "context": {
+            "enabled": true,
+            "showPercentageOnly": false,
+            "displayStyle": "text",
+            "autocompactBuffer": 33000
+          },
+          "block": {
+            "enabled": true,
+            "type": "weighted",
+            "burnType": "tokens"
+          },
+          "session": {
+            "enabled": true,
+            "type": "tokens"
+          }
+        }
+      },
+      {
+        "segments": {
+          "directory": {
+            "enabled": true,
+            "style": "basename"
+          },
+          "git": {
+            "enabled": true,
+            "showSha": false,
+            "showWorkingTree": true,
+            "showOperation": true
+          }
+        }
+      }
+    ]
   },
-  "segments": {
-    "directory": {
-      "enabled": true,
-      "style": "basename"
-    },
-    "git": {
-      "enabled": true,
-      "showSha": false,
-      "showWorkingTree": true,
-      "showOperation": true
-    },
-    "model": {
-      "enabled": true
-    },
-    "context": {
-      "enabled": true,
-      "showPercentageOnly": false
-    },
-    "session": {
-      "enabled": true
-    },
-    "today": {
-      "enabled": true
-    },
-    "metrics": {
-      "enabled": false
+  "budget": {
+    "block": {
+      "amount": 200000,
+      "type": "tokens",
+      "warningThreshold": 75
     }
   }
 }
