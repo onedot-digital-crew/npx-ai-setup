@@ -1,10 +1,3 @@
----
-paths:
-  - "**/.git*"
-  - "**/COMMIT_EDITMSG"
-  - "**/*.{js,ts,tsx,jsx,vue,py,sh,go,rs,rb,php,md}"
----
-
 # Git Rules
 
 ## Commit Message Format
