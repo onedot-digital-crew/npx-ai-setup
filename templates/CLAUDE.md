@@ -84,6 +84,12 @@ After fresh start: review git log, open specs, check test state.
 
 If you see `[CONTEXT STALE]` in your context: note that project context files may be outdated, but continue with the current task. Do not interrupt work to refresh context.
 
+**Context budget:** When context is running low (you receive a compaction warning, or you sense the conversation is very long):
+- Stop implementing new steps
+- Prioritize writing a handoff: commit current work, update the spec with progress, or write HANDOFF.md
+- A partial handoff that enables clean resumption is more valuable than one more half-finished step
+- Never sacrifice handoff quality for one more implementation step
+
 ## Prompt Cache Strategy
 Claude caches prompts as a prefix — static content first, dynamic content last maximizes cache hits:
 1. **System prompt + tools** — globally cached across all sessions

@@ -24,7 +24,7 @@ Relevant files: `templates/CLAUDE.md`, `templates/commands/spec-work.md`
 
 ## Steps
 
-- [ ] **Step 1 — Add context budget rule to CLAUDE.md**
+- [x] **Step 1 — Add context budget rule to CLAUDE.md**
   In `templates/CLAUDE.md` (root of templates/, NOT templates/claude/), in the "Context Management" section (the one that mentions compaction and HANDOFF.md), add this rule after the existing bullets:
   ```markdown
   **Context budget:** When context is running low (you receive a compaction warning, or you sense the conversation is very long):
