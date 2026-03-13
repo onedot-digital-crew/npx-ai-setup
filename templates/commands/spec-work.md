@@ -61,8 +61,13 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     - Commit the completed step: `git add -A && git commit -m "spec(NNN): step N — <title>"`
     - If a step is blocked or unclear, stop and ask the user
     - If you made an architectural, pattern, library, or convention decision during this step that downstream work should know about, append it to `decisions.md` in the project root. Not every step produces decisions — only append when a meaningful choice was made.
+    - **Context budget:** If you've been working for many steps and context is growing large, prioritize completing the current step fully (including its commit) over starting the next step. If compaction seems imminent, update the spec with progress markers (`[x]` for completed steps) before continuing — this ensures the next session can resume cleanly.
 
 12. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
+    For structured criteria (Truths / Artifacts / Key Links), verify each category mechanically:
+    - **Truths**: Run the described commands and confirm output matches the stated behavior.
+    - **Artifacts**: Read the files and confirm real implementation is present (not stubs or placeholders).
+    - **Key Links**: Verify the stated imports or references exist in the source file.
 
 13. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
     - Find the `## [Unreleased]` heading (it's just below the `<!-- Entries are prepended below this line, newest first -->` comment)

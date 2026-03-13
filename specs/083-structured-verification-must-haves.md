@@ -54,7 +54,7 @@ Relevant files: `templates/commands/spec.md`, `templates/commands/spec-review.md
   - Artifacts: Verify file exists, has real content (not placeholder), meets minimum lines if specified
   - Key Links: Verify the import/reference actually exists in the source file
 
-- [ ] **Step 3 — Update spec-work verification step**
+- [x] **Step 3 — Update spec-work verification step**
   In `templates/commands/spec-work.md`, find the **"Verify acceptance criteria"** step (currently step 11, step 12 if Spec 081 has run first). Add guidance:
   - "Check Truths by running the described commands. Check Artifacts by reading the files and confirming real implementation. Check Key Links by verifying imports exist."
 

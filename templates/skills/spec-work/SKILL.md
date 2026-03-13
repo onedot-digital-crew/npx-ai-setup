@@ -28,6 +28,10 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
    - If blocked, stop and ask
 
 8. **Verify acceptance criteria** — check each one off in the spec.
+   For structured criteria (Truths / Artifacts / Key Links), verify each category mechanically:
+   - **Truths**: Run the described commands and confirm output matches the stated behavior.
+   - **Artifacts**: Read the files and confirm real implementation is present (not stubs or placeholders).
+   - **Key Links**: Verify the stated imports or references exist in the source file.
 
 9. **Update CHANGELOG.md** — add an entry under `## [Unreleased]`.
 
