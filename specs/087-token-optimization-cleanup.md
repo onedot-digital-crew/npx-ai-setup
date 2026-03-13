@@ -43,7 +43,7 @@ All fixes must be applied in both local `.claude/` and `templates/`.
 
 8. [x] **Add `paths:` scoping to rules files** — add `paths:` frontmatter to `agents.md`, `git.md`, `testing.md` (local + templates) so they only load when relevant files are in context.
 
-9. **Add `MAX_MCP_OUTPUT_TOKENS`** — add `"MAX_MCP_OUTPUT_TOKENS": "10000"` to `env` in `templates/claude/settings.json` and local `.claude/settings.json` to cap large MCP responses.
+9. [x] **Add `MAX_MCP_OUTPUT_TOKENS`** — add `"MAX_MCP_OUTPUT_TOKENS": "10000"` to `env` in `templates/claude/settings.json` and local `.claude/settings.json` to cap large MCP responses.
 
 10. **Fix `brainstorming` trigger** — in `~/.claude/skills/brainstorming/SKILL.md`: replace `"You MUST use this before any creative work"` with a precise trigger (`Use when user explicitly asks to brainstorm, explore options, or plan before implementing`). Remove "MUST" language — prevents false-positive invocations that load 96 lines unnecessarily.
 

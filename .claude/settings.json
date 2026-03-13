@@ -126,6 +126,9 @@
       }
     ]
   },
+  "env": {
+    "MAX_MCP_OUTPUT_TOKENS": "10000"
+  },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
