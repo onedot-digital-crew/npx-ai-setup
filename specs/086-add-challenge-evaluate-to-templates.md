@@ -50,7 +50,7 @@ Both files need small generalizations before they can be distributed:
 - [x] **Step 3 — Generalize .claude/commands/challenge.md**
   Apply the same Phase 2 generalization from Step 1 to `.claude/commands/challenge.md` so the project-local copy stays in sync with the template.
 
-- [ ] **Step 4 — Generalize .claude/commands/evaluate.md**
+- [x] **Step 4 — Generalize .claude/commands/evaluate.md**
   Apply the same changes from Step 2 to `.claude/commands/evaluate.md` (project-local copy) so it no longer hardcodes "npx-ai-setup template inventory". This keeps the local version consistent with the distributed template.
 
 ## Files to Modify

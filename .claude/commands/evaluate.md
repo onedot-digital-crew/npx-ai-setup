@@ -119,14 +119,14 @@ List all NEW, PARTIAL, and BETTER findings with medium/high user value:
 ## Adoption Candidates
 
 1. [Pattern] — [one-line rationale]
-   Class: NEW | Action: Create spec for `templates/commands/[name].md`
+   Class: NEW | Action: Create spec for `[commands-dir]/[name].md`
 
 2. [Pattern] — [one-line rationale]
    Class: PARTIAL | Specific improvement: [exact change to make]
-   Action: Modify `templates/claude/hooks/[file].sh` via spec — add [what]
+   Action: Modify `[hooks-dir]/[file].sh` via spec — add [what]
 
 3. [Pattern] — [one-line rationale]
-   Class: BETTER | Action: Replace `templates/agents/[name].md` via spec
+   Class: BETTER | Action: Replace `[agents-dir]/[name].md` via spec
 ```
 
 ---
