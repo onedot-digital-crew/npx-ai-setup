@@ -13,23 +13,32 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 
 2. **Read the spec** and understand Goal, Steps, and Files to Modify.
 
-3. **Branch setup**: Ask the user whether to create a new branch before starting work.
+3. **Understanding confirmation** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes:
+   - Show a 3-bullet summary:
+     - **Goal**: [one sentence from the spec Goal section]
+     - **Approach**: [main implementation strategy inferred from the Steps]
+     - **Files**: [comma-separated list from the Files to Modify section]
+   - Ask via AskUserQuestion: "Does this match your expectations before I create the branch and start work?"
+     Options: [Yes, proceed] [No, clarify first]
+   - If user selects "No, clarify first": stop, ask an open-ended follow-up question to understand the correction, and do not proceed.
+
+4. **Branch setup**: Ask the user whether to create a new branch before starting work.
    - Derive the branch name from the spec filename: `spec/NNN-title` (lowercase, hyphens, strip `.md`)
    - If user says yes: run `git checkout -b spec/NNN-title`. If the branch already exists, offer to switch to it with `git checkout spec/NNN-title`.
    - Update the spec header: set `**Branch**: spec/NNN-title` (or `—` if no branch created).
 
-4. **Read project context**: Skim `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md` to follow project patterns and use correct libraries.
+5. **Read project context**: Skim `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md` to follow project patterns and use correct libraries.
 
-5. **Load relevant skills**: If the spec's Context section mentions skills, read `.claude/skills/<name>/SKILL.md` for each and apply throughout execution. Skip if none listed.
+6. **Load relevant skills**: If the spec's Context section mentions skills, read `.claude/skills/<name>/SKILL.md` for each and apply throughout execution. Skip if none listed.
 
-6. **Architectural review** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes, spawn the `code-architect` agent via Agent tool, passing the full spec content as the prompt. Then:
+7. **Architectural review** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes, spawn the `code-architect` agent via Agent tool, passing the full spec content as the prompt. Then:
    - If the verdict is **REDESIGN**: stop immediately, report all concerns to the user, and do not proceed.
    - If the verdict is **PROCEED WITH CHANGES**: report the concerns to the user, then continue.
    - If the verdict is **PROCEED**: continue normally.
 
-7. **Start work**: Update the spec header — set `**Status**: in-progress`.
+8. **Start work**: Update the spec header — set `**Status**: in-progress`.
 
-8. **Output progress checklist**: Before executing, print a checklist of all steps found in the spec:
+9. **Output progress checklist**: Before executing, print a checklist of all steps found in the spec:
    ```
    Progress — Spec NNN
    [ ] Step 1: <title>
@@ -38,28 +47,28 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
    ```
    Check off each item (`[x]`) as you complete it so the user can follow along.
 
-9. **Resume check**: Before executing, scan the spec file for already-checked steps (`- [x]`). If any are found, print a summary:
-   ```
-   Resuming Spec NNN — skipping N completed steps: Step 1, Step 2, ...
-   Continuing from Step N.
-   ```
-   Skip those steps and begin from the first unchecked step. If all steps are already checked, jump to step 10.
+10. **Resume check**: Before executing, scan the spec file for already-checked steps (`- [x]`). If any are found, print a summary:
+    ```
+    Resuming Spec NNN — skipping N completed steps: Step 1, Step 2, ...
+    Continuing from Step N.
+    ```
+    Skip those steps and begin from the first unchecked step. If all steps are already checked, jump to step 11.
 
-10. **Execute each step** in order:
+11. **Execute each step** in order:
     - Implement the change
     - After completing a step, edit the spec file to check it off: `- [ ]` -> `- [x]`
     - Update the printed progress checklist to reflect the completed step
     - Commit the completed step: `git add -A && git commit -m "spec(NNN): step N — <title>"`
     - If a step is blocked or unclear, stop and ask the user
 
-11. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
+12. **Verify acceptance criteria**: After all steps are done, check each acceptance criterion. Mark them as checked in the spec.
 
-12. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
+13. **Update CHANGELOG.md**: Add an entry to the `## [Unreleased]` section in `CHANGELOG.md`:
     - Find the `## [Unreleased]` heading (it's just below the `<!-- Entries are prepended below this line, newest first -->` comment)
     - Insert after `## [Unreleased]`: `- **Spec NNN**: [Spec title] — [1-sentence summary of what changed]`
     - Do NOT create date headings — entries accumulate under [Unreleased] until `/release` is run
 
-13. **Verify implementation**: Spawn `verify-app` via Agent tool with the prompt:
+14. **Verify implementation**: Spawn `verify-app` via Agent tool with the prompt:
     > "Verify that the implementation for spec NNN is correct. Check if the project has a test suite and run it. Check if there is a build command and run it. Report PASS or FAIL."
     - If verify-app returns **PASS**: continue to the next step.
     - If verify-app returns **FAIL**: trigger the **Haiku Investigator** (exactly once — never in a loop):
@@ -68,23 +77,23 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     > - Model: haiku | Allowed tools: Read, Glob, Grep, Bash (read-only: `cat`, `ls`, `grep`, `find`) | **Forbidden: Write, Edit**
     > - Prompt: "Diagnose this build/test failure. Read the error output and relevant source files. Identify the root cause. Output: (1) root cause in one sentence, (2) the specific line(s) to fix, (3) exact fix to apply. Do NOT edit any files."
     > - Pass the full verify-app error output to the investigator.
-    
+
     Apply the investigator's suggested fix as a **single targeted edit**, then run verify-app once more.
     - If the second verify-app returns **PASS**: continue normally.
-    - If the second verify-app returns **FAIL**: set status to `in-review`, report the investigator's diagnosis and remaining error, **stop**. Do NOT proceed to step 16 (code-reviewer). Do NOT run the investigator again. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
+    - If the second verify-app returns **FAIL**: set status to `in-review`, report the investigator's diagnosis and remaining error, **stop**. Do NOT proceed to step 17 (code-reviewer). Do NOT run the investigator again. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
 
-14. **Optional cleanup**: Offer to run `/simplify` to improve code quality before review. If the user confirms (or execution is non-interactive), invoke it. Skip if the user declines or if no significant code was changed.
+15. **Optional cleanup**: Offer to run `/simplify` to improve code quality before review. If the user confirms (or execution is non-interactive), invoke it. Skip if the user declines or if no significant code was changed.
 
-15. **Update status**: Set spec status to `in-review` now — before spawning code-reviewer. This ensures status is saved even if the agent call fails.
+16. **Update status**: Set spec status to `in-review` now — before spawning code-reviewer. This ensures status is saved even if the agent call fails.
 
-16. **Auto-review**: Spawn the `code-reviewer` agent via Agent tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
+17. **Auto-review**: Spawn the `code-reviewer` agent via Agent tool to review the changes. Pass the spec content and the current branch name so the agent can run the correct diff.
     - If verdict is **FAIL**: leave status as `in-review`. Report the issues. Suggest: `Run /spec-review NNN to review manually.`
     - If verdict is **PASS** or **CONCERNS**: set status to `completed`, move spec file `specs/NNN-*.md` → `specs/completed/NNN-*.md`. Report: "Auto-review passed. Spec NNN completed."
 
 ## Rules
-- **ALWAYS update status and move the file when done — this is the single most important step.** Status update (step 15) happens before the review agent — never skip it.
+- **ALWAYS update status and move the file when done — this is the single most important step.** Status update (step 16) happens before the review agent — never skip it.
 - Follow the spec exactly — nothing outside the Steps and within scope.
 - Check off each step in the spec file as you complete it (progress tracking).
 - Commit after each completed step (`git add -A && git commit -m "spec(NNN): step N — <title>"`). This enables crash resilience and resume.
 - If a step fails or is blocked, leave it unchecked, set status to `blocked`, and ask the user.
-- If called with `--complete` flag, skip steps 13–15: set status directly to `completed` and move to `specs/completed/` (legacy behavior).
+- If called with `--complete` flag, skip steps 14–16: set status directly to `completed` and move to `specs/completed/` (legacy behavior).
