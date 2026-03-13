@@ -14,8 +14,7 @@
           "context": {
             "enabled": true,
             "showPercentageOnly": false,
-            "displayStyle": "text",
-            "autocompactBuffer": 33000
+            "displayStyle": "text"
           },
           "session": {
             "enabled": true,

@@ -61,7 +61,13 @@ Will review customized templates, optionally regenerate AI context, and back up 
 Use AskUserQuestion: "Proceed with update?" Options: "Yes, update now" / "No, cancel"
 If user cancels, stop.
 
-### Step 6: Run update
+### Step 6: Capture pre-update SHA
+
+```bash
+PRE_UPDATE_SHA=$(git -C "${CLAUDE_PROJECT_DIR:-.}" rev-parse HEAD 2>/dev/null || echo "")
+```
+
+### Step 7: Run update
 
 ```bash
 npx github:onedot-digital-crew/npx-ai-setup
@@ -69,19 +75,21 @@ npx github:onedot-digital-crew/npx-ai-setup
 
 This launches the interactive update flow.
 
-### Step 7: Clear update cache
+### Step 8: Clear update cache
 
 ```bash
 rm -f /tmp/ai-setup-update-*.txt /tmp/ai-setup-cli-latest-version.txt
 ```
 
-### Step 8: Show changed files
+### Step 9: Show changed files
 
-Run git diff to list files added or modified by the update:
+If `$PRE_UPDATE_SHA` is non-empty, diff against it to show exactly what changed:
 
 ```bash
-git -C "${CLAUDE_PROJECT_DIR:-.}" diff --name-status HEAD~1 HEAD -- .claude/ templates/ CLAUDE.md 2>/dev/null | head -30
+git -C "${CLAUDE_PROJECT_DIR:-.}" diff --name-status "$PRE_UPDATE_SHA" HEAD -- .claude/ templates/ CLAUDE.md 2>/dev/null | head -30
 ```
+
+If `$PRE_UPDATE_SHA` is empty (no git repo), skip this step.
 
 Display the result as a concise summary:
 ```
@@ -94,3 +102,5 @@ Changed files:
 
 Restart Claude Code to pick up new hooks and settings.
 ```
+
+If no files changed (update was a no-op or failed silently), say so explicitly.
