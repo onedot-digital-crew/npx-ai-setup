@@ -45,7 +45,7 @@ All fixes must be applied in both local `.claude/` and `templates/`.
 
 9. [x] **Add `MAX_MCP_OUTPUT_TOKENS`** — add `"MAX_MCP_OUTPUT_TOKENS": "10000"` to `env` in `templates/claude/settings.json` and local `.claude/settings.json` to cap large MCP responses.
 
-10. **Fix `brainstorming` trigger** — in `~/.claude/skills/brainstorming/SKILL.md`: replace `"You MUST use this before any creative work"` with a precise trigger (`Use when user explicitly asks to brainstorm, explore options, or plan before implementing`). Remove "MUST" language — prevents false-positive invocations that load 96 lines unnecessarily.
+10. [x] **Fix `brainstorming` trigger** — in `~/.claude/skills/brainstorming/SKILL.md`: replace `"You MUST use this before any creative work"` with a precise trigger (`Use when user explicitly asks to brainstorm, explore options, or plan before implementing`). Remove "MUST" language — prevents false-positive invocations that load 96 lines unnecessarily.
 
 11. **Trim verbose global skill descriptions** — `~/.claude/skills/defuddle/SKILL.md`, `firecrawl/SKILL.md`, `mcp-builder/SKILL.md`: move examples and bullet lists from `description:` into body. Target: ≤120 chars per description.
 
