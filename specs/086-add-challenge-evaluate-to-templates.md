@@ -25,7 +25,7 @@ Both files need small generalizations before they can be distributed:
   - Replace the hardcoded `"one command, zero config, template-based"` principle text with: `"the project's core principles as defined in .agents/context/CONCEPT.md"`. If `CONCEPT.md` does not exist, skip the concept fit check.
   - Keep all other phases (1, 3–7) identical to the source file.
 
-- [ ] **Step 2 — Create templates/commands/evaluate.md**
+- [x] **Step 2 — Create templates/commands/evaluate.md**
   First read `.claude/commands/evaluate.md` in full. Then copy to `templates/commands/evaluate.md` with these specific changes:
 
   **Line 8 description**: Replace `"against the existing npx-ai-setup template inventory"` with `"against the existing project's Claude Code setup"`.
