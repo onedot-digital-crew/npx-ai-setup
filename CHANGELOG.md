@@ -9,12 +9,30 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 <!-- Entries are prepended below this line, newest first -->
 
 ## [Unreleased]
-- **Spec 086**: Challenge and Evaluate Commands in Templates — distributes generalized challenge.md and evaluate.md to templates/commands/ so all installed projects receive them
-- **Spec 082**: Decisions Register Template — adds append-only decisions.md template for tracking architectural decisions across sessions
-- **Spec 085**: Context Budget Awareness Rule — adds context budget instruction to CLAUDE.md and spec-work.md to prioritize handoff over last implementation step
-- **Spec 084**: Debugging Discipline Methodology — adds 6-point structured debugging methodology to bug.md and spec-work.md verification failure path
-- **Spec 083**: Structured Verification Must-Haves — replaces freetext acceptance criteria with Truths/Artifacts/Key Links structure for mechanical verification
-- **Spec 081**: Understanding Confirmation in spec-work — adds a 3-bullet confirmation step for high-complexity specs before branch creation
+
+## [v1.3.2] — 2026-03-13
+
+### Spec Quality & Execution Improvements (Specs 081–086)
+
+Six improvements to the spec-driven workflow, porting patterns from GSD-2 evaluation.
+
+**Understanding Confirmation (Spec 081)**
+`spec-work` now shows a 3-bullet summary (Goal, Approach, Files) and asks for confirmation before creating a branch for `Complexity: high` specs — preventing wasted execution on misunderstood specs.
+
+**Decisions Register (Spec 082)**
+New `decisions.md` template installed at project root — an append-only table for tracking architectural decisions across sessions. `spec-work` prompts to append decisions after meaningful steps; `reflect` appends architectural signals automatically. `CLAUDE.md` instructs reading it before planning.
+
+**Structured Verification (Spec 083)**
+Acceptance criteria in spec templates now use three checkable categories: **Truths** (observable behaviors), **Artifacts** (files with real implementation), **Key Links** (imports/wiring between files). `spec-review` and `verify-app` verify each category mechanically.
+
+**Debugging Discipline (Spec 084)**
+New 6-point debugging methodology added to `bug.md` and `spec-work` verification failure path: hypothesis first, one variable at a time, read completely, distinguish know vs. assume, stop after 3 failed fixes, don't fix symptoms.
+
+**Context Budget Awareness (Spec 085)**
+`CLAUDE.md` Context Management section now includes a context budget rule: when context is running low, stop implementing and prioritize writing a handoff. `spec-work` execution loop adds the same reminder at step level.
+
+**Challenge & Evaluate in Templates (Spec 086)**
+`challenge.md` and `evaluate.md` added to `templates/commands/` so all projects installed via `npx @onedot/ai-setup` receive them. Both generalized: challenge reads `.agents/context/CONCEPT.md` for project principles; evaluate scans `.claude/` and `templates/` (whichever exist) instead of hardcoded paths.
 
 ## [v1.3.1] — 2026-03-11
 
