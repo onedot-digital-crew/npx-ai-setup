@@ -11,6 +11,14 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 ## [Unreleased]
 
 - **Spec 087**: Token Optimization: Config and Template Cleanup — reduced per-session token overhead by removing duplicate rules, trimming CLAUDE.md, scoping rules files with paths: frontmatter, capping MCP output, and fixing skill descriptions.
+- **fix**: Remove autocompactBuffer from powerline config — reclaims ~20% context per session.
+- **fix**: Remove ineffective paths: scoping from git.md and agents.md — both load unconditionally as intended.
+- **fix**: Register context-monitor.sh as PostToolUse hook (was installed but never executed).
+- **fix**: AUTOCOMPACT threshold 70% → 80%, aligns with /compact guidance and buffer removal.
+- **fix**: circuit-breaker whitelist for specs/*.md and HANDOFF.md; fix substring count bug.
+- **fix**: update command PRE_UPDATE_SHA via temp file (bash vars don't persist between blocks).
+- **fix**: Remove empty claude-mem-context tag from template CLAUDE.md.
+- **fix**: Default model opusplan → sonnet in template settings (Opus reserved for /spec creation).
 
 ## [v1.3.2] — 2026-03-13
 
