@@ -47,7 +47,7 @@ Both files need small generalizations before they can be distributed:
 
   Keep the full 6-phase evaluation process and all other content intact.
 
-- [ ] **Step 3 — Generalize .claude/commands/challenge.md**
+- [x] **Step 3 — Generalize .claude/commands/challenge.md**
   Apply the same Phase 2 generalization from Step 1 to `.claude/commands/challenge.md` so the project-local copy stays in sync with the template.
 
 - [ ] **Step 4 — Generalize .claude/commands/evaluate.md**
