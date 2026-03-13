@@ -1,5 +1,5 @@
 ---
-**Status**: draft
+**Status**: in-review
 **Branch**: —
 **Complexity**: low
 ---
@@ -56,11 +56,11 @@ Relevant files: `templates/commands/bug.md`, `templates/commands/spec-work.md`
 
 ## Acceptance Criteria
 
-- [ ] `bug.md` contains the 6-point debugging discipline section placed before any fix attempts
-- [ ] `spec-work.md` references the debugging discipline before the Haiku Investigator instructions
-- [ ] All 6 rules use imperative mood ("State", "Change", "Read", "Stop", "Don't")
-- [ ] Rule 5 threshold (3 failed fixes) is below the circuit-breaker block threshold (8 edits)
-- [ ] `templates/skills/spec-work/SKILL.md` mirrors the spec-work.md change
+- [x] `bug.md` contains the 6-point debugging discipline section placed before any fix attempts
+- [x] `spec-work.md` references the debugging discipline before the Haiku Investigator instructions
+- [x] All 6 rules use imperative mood ("State", "Change", "Read", "Stop", "Don't")
+- [x] Rule 5 threshold (3 failed fixes) is below the circuit-breaker block threshold (8 edits)
+- [x] `templates/skills/spec-work/SKILL.md` mirrors the spec-work.md change
 
 ## Out of Scope
 
