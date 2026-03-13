@@ -6,6 +6,11 @@ INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 [ -z "$FILE_PATH" ] && exit 0
 
+# Whitelist: spec progress files and handoff docs are edited frequently by design
+case "$FILE_PATH" in
+  */specs/*.md|*/HANDOFF.md) exit 0 ;;
+esac
+
 PROJ_HASH=$(echo "$PWD" | shasum | cut -c1-8)
 LOG="/tmp/claude-cb-${PROJ_HASH}.log"
 NOW=$(date +%s)
@@ -18,7 +23,7 @@ echo "$NOW $FILE_PATH" >> "$LOG"
 CUTOFF=$((NOW - WINDOW))
 awk -v c="$CUTOFF" '$1 >= c' "$LOG" > "${LOG}.tmp" 2>/dev/null && mv "${LOG}.tmp" "$LOG"
 
-COUNT=$(grep -cF "$FILE_PATH" "$LOG" 2>/dev/null || echo 0)
+COUNT=$(awk -v f="$FILE_PATH" 'NF>=2 && $2==f' "$LOG" 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "$COUNT" -ge "$BLOCK" ]; then
   echo "⛔ CIRCUIT BREAKER TRIGGERED — Edit blocked." >&2

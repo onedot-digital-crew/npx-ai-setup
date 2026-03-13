@@ -113,5 +113,3 @@ Specs live in `specs/` — structured task plans created before coding.
 **Skip specs for:** Single-file fixes, typos, config changes.
 
 See `specs/README.md` for details.
-
-<claude-mem-context></claude-mem-context>

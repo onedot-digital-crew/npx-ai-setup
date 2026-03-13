@@ -64,7 +64,7 @@ If user cancels, stop.
 ### Step 6: Capture pre-update SHA
 
 ```bash
-PRE_UPDATE_SHA=$(git -C "${CLAUDE_PROJECT_DIR:-.}" rev-parse HEAD 2>/dev/null || echo "")
+git -C "${CLAUDE_PROJECT_DIR:-.}" rev-parse HEAD 2>/dev/null > /tmp/ai-setup-pre-sha.txt || true
 ```
 
 ### Step 7: Run update
@@ -83,13 +83,12 @@ rm -f /tmp/ai-setup-update-*.txt /tmp/ai-setup-cli-latest-version.txt
 
 ### Step 9: Show changed files
 
-If `$PRE_UPDATE_SHA` is non-empty, diff against it to show exactly what changed:
+Read the saved SHA and diff against it to show exactly what changed:
 
 ```bash
-git -C "${CLAUDE_PROJECT_DIR:-.}" diff --name-status "$PRE_UPDATE_SHA" HEAD -- .claude/ templates/ CLAUDE.md 2>/dev/null | head -30
+PRE_SHA=$(cat /tmp/ai-setup-pre-sha.txt 2>/dev/null | tr -cd 'a-f0-9'); rm -f /tmp/ai-setup-pre-sha.txt
+[ -n "$PRE_SHA" ] && git -C "${CLAUDE_PROJECT_DIR:-.}" diff --name-status "$PRE_SHA" HEAD -- .claude/ templates/ CLAUDE.md 2>/dev/null | head -30 || echo "(no git history available)"
 ```
-
-If `$PRE_UPDATE_SHA` is empty (no git repo), skip this step.
 
 Display the result as a concise summary:
 ```
