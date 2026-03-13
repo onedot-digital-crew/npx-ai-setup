@@ -17,6 +17,17 @@ Investigates and fixes bug: $ARGUMENTS. Use when a defect needs root-cause analy
 - Trace the execution path to find where behavior diverges from expected
 - State the root cause in one sentence before fixing
 
+## Debugging Discipline
+
+Follow these rules strictly when investigating and fixing:
+
+1. **Hypothesis first.** State what you think is wrong and why, then test that specific theory. Don't shotgun-fix.
+2. **One variable at a time.** Make one change, test, observe. Multiple simultaneous changes mean you can't attribute what worked.
+3. **Read completely.** When investigating, read entire functions and their imports, not just the line that looks relevant.
+4. **Distinguish "I know" from "I assume."** Observable facts (the error says X, the test output shows Y) are strong evidence. Assumptions (this library should work this way) need verification.
+5. **Stop after 3 failed fixes.** If you've tried 3+ fixes without progress, your mental model is probably wrong. Stop. List what you know for certain. List what you've ruled out. Form fresh hypotheses from there.
+6. **Don't fix symptoms.** Understand *why* something fails before changing code. A test that passes after a change you don't understand is luck, not a fix.
+
 ### 3. Fix
 - Make the minimal change that fixes the root cause
 - Do NOT refactor surrounding code or add unrelated improvements

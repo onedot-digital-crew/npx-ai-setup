@@ -22,7 +22,7 @@ Relevant files: `templates/commands/bug.md`, `templates/commands/spec-work.md`
 
 ## Steps
 
-- [ ] **Step 1 — Add debugging discipline to bug.md**
+- [x] **Step 1 — Add debugging discipline to bug.md**
   In `templates/commands/bug.md`, add a "Debugging Discipline" section early in the process (after initial analysis, before any fix attempts):
   ```markdown
   ## Debugging Discipline
