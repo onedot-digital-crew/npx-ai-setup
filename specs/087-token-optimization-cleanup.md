@@ -51,7 +51,7 @@ All fixes must be applied in both local `.claude/` and `templates/`.
 
 12. [x] **Trim `write-as-denis` description** — in `~/.claude/skills/write-as-denis/SKILL.md`: collapse the 9-phrase trigger enumeration to 1 sentence, move examples to body.
 
-14. **Update `/update` command to show changed files** — in `templates/commands/update.md`: after `npx github:onedot-digital-crew/npx-ai-setup` runs, display a diff summary of which files were actually added/modified.
+14. [x] **Update `/update` command to show changed files** — in `templates/commands/update.md`: after `npx github:onedot-digital-crew/npx-ai-setup` runs, display a diff summary of which files were actually added/modified.
 
 15. **Verify** — run `git diff --stat`, check `/spec` works, run `measure.py report` to confirm savings.
 

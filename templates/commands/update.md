@@ -75,8 +75,22 @@ This launches the interactive update flow.
 rm -f /tmp/ai-setup-update-*.txt /tmp/ai-setup-cli-latest-version.txt
 ```
 
-### Step 8: Display result
+### Step 8: Show changed files
+
+Run git diff to list files added or modified by the update:
+
+```bash
+git -C "${CLAUDE_PROJECT_DIR:-.}" diff --name-status HEAD~1 HEAD -- .claude/ templates/ CLAUDE.md 2>/dev/null | head -30
+```
+
+Display the result as a concise summary:
 ```
 ai-setup updated: vX.Y.Z -> vA.B.C
+
+Changed files:
+  M .claude/settings.json
+  A .claude/hooks/new-hook.sh
+  ...
+
 Restart Claude Code to pick up new hooks and settings.
 ```
