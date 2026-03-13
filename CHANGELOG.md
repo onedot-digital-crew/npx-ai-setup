@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 087**: Token Optimization: Config and Template Cleanup — reduced per-session token overhead by removing duplicate rules, trimming CLAUDE.md, scoping rules files with paths: frontmatter, capping MCP output, and fixing skill descriptions.
+
 ## [v1.3.2] — 2026-03-13
 
 ### Spec Quality & Execution Improvements (Specs 081–086)

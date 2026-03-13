@@ -1,7 +1,7 @@
 ---
 id: "087"
 title: "Token Optimization: Config and Template Cleanup"
-status: in-progress
+status: completed
 ---
 
 ## Goal
@@ -53,7 +53,7 @@ All fixes must be applied in both local `.claude/` and `templates/`.
 
 14. [x] **Update `/update` command to show changed files** — in `templates/commands/update.md`: after `npx github:onedot-digital-crew/npx-ai-setup` runs, display a diff summary of which files were actually added/modified.
 
-15. **Verify** — run `git diff --stat`, check `/spec` works, run `measure.py report` to confirm savings.
+15. [x] **Verify** — run `git diff --stat`, check `/spec` works, run `measure.py report` to confirm savings.
 
 ## Acceptance Criteria
 
