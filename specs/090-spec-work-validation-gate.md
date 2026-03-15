@@ -1,6 +1,6 @@
 # Spec: Add Validation Gate to spec-work
 
-> **Spec ID**: 090 | **Created**: 2026-03-15 | **Status**: draft | **Branch**: —
+> **Spec ID**: 090 | **Created**: 2026-03-15 | **Status**: in-progress | **Branch**: —
 
 ## Goal
 Add an automatic spec validation step to spec-work that blocks execution of weak specs before any code changes happen.
@@ -9,7 +9,7 @@ Add an automatic spec validation step to spec-work that blocks execution of weak
 Specs 088 and 089 both failed validation (wrong paths: globs, missing verification steps). The `/spec-validate` skill exists but is manual — users forget to run it. Adding a gate to spec-work ensures no weak spec reaches execution. The gate reuses spec-validate's 10 scoring criteria without duplicating them.
 
 ## Steps
-- [ ] Step 1: Add validation gate step (new step 3) to `templates/commands/spec-work.md` — after "Read the spec" (step 2), before "Understanding confirmation" (currently step 3). Score on 10 criteria, FAIL → show issues and STOP, PASS → continue. Reference spec-validate criteria by name, do not inline them.
+- [x] Step 1: Add validation gate step (new step 3) to `templates/commands/spec-work.md` — after "Read the spec" (step 2), before "Understanding confirmation" (currently step 3). Score on 10 criteria, FAIL → show issues and STOP, PASS → continue. Reference spec-validate criteria by name, do not inline them.
 - [ ] Step 2: Mirror the same validation gate step to `.claude/skills/spec-work/SKILL.md` (between existing steps 2 and 3)
 - [ ] Step 3: Add `--skip-validate` flag documentation to the Rules section in both files — allows bypassing the gate for resumed specs or user override
 - [ ] Step 4: Add a smoke test assertion to `tests/smoke.sh` — verify `templates/commands/spec-work.md` contains "validation gate" or "spec-validate"
