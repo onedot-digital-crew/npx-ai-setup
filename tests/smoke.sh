@@ -150,7 +150,16 @@ else
   fail "templates/commands/spec-work.md missing validation gate"
 fi
 
-# Step 8: Verify skills alias migration is wired in both setup and update paths
+# Step 8: Verify Complexity field in spec template
+echo ""
+echo "--- Spec template Complexity field ---"
+if grep -q '**Complexity**:' specs/TEMPLATE.md 2>/dev/null; then
+  pass "specs/TEMPLATE.md has Complexity field in header"
+else
+  fail "specs/TEMPLATE.md missing Complexity field"
+fi
+
+# Step 9: Verify skills alias migration is wired in both setup and update paths
 echo ""
 echo "--- Skills alias migration wiring ---"
 if grep -q 'ensure_skills_alias' bin/ai-setup.sh 2>/dev/null; then
