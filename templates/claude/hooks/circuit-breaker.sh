@@ -18,6 +18,12 @@ WINDOW=600
 WARN=5
 BLOCK=8
 
+# Raise thresholds when a spec is actively in-progress — planned edits, not a loop
+if [ -d specs ] && grep -rl "Status.*in-progress" specs/*.md >/dev/null 2>&1; then
+  WARN=12
+  BLOCK=20
+fi
+
 echo "$NOW $FILE_PATH" >> "$LOG"
 
 CUTOFF=$((NOW - WINDOW))
