@@ -25,9 +25,16 @@ TPL="$SCRIPT_DIR/templates"
 # Parse flags
 SYSTEM=""
 REGENERATE=""
+PATCH_PATTERN=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --regenerate) REGENERATE="yes"; shift ;;
+    --patch)
+      if [[ $# -lt 2 ]]; then
+        echo "❌ --patch requires a pattern (e.g. --patch spec-work)"
+        exit 1
+      fi
+      PATCH_PATTERN="$2"; shift 2 ;;
     --system)
       if [[ $# -lt 2 ]]; then
         echo "❌ --system requires a value (auto|shopify|nuxt|next|laravel|shopware|storyblok)"
@@ -69,6 +76,12 @@ if [ -n "$SYSTEM" ]; then
     echo "❌ 'auto' cannot be combined with other systems"
     exit 1
   fi
+fi
+
+# Fast patch mode — copy specific template files without full update flow
+if [ -n "$PATCH_PATTERN" ]; then
+  run_patch "$PATCH_PATTERN"
+  exit $?
 fi
 
 # Lightweight registry check (cached) to hint when a newer ai-setup is available.

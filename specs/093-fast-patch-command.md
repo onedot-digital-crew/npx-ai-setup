@@ -10,7 +10,7 @@ When iterating on templates (e.g. `spec-work.md`, `SKILL.md`), running the full 
 
 ## Steps
 - [x] Step 1: Add `run_patch()` to `lib/update.sh` — accepts a pattern string, filters all template mappings (TEMPLATE_MAP + SHOPIFY_SKILLS_MAP + spec skills), copies matching files directly to their target paths, prints each copied file, exits 0
-- [ ] Step 2: Add `--patch <pattern>` flag parsing to `bin/ai-setup.sh` — detect flag, call `run_patch "$pattern"`, exit. Must run before the version-check/menu flow.
+- [x] Step 2: Add `--patch <pattern>` flag parsing to `bin/ai-setup.sh` — detect flag, call `run_patch "$pattern"`, exit. Must run before the version-check/menu flow.
 - [ ] Step 3: Document `--patch` flag in `templates/CLAUDE.md` under the Commands section
 
 ## Acceptance Criteria
