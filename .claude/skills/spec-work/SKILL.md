@@ -13,7 +13,12 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
 
 2. **Read the spec** — understand Goal, Steps, Acceptance Criteria, Files to Modify.
 
-3. **Understanding confirmation** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes:
+3. **Validation gate** (skip if `--skip-validate` flag is set or spec status is `in-progress`):
+   Score the spec on these 10 criteria — Goal clarity, Step decomposition, Dependency identification, Coverage completeness, Acceptance criteria quality, Scope coherence, Risk and blockers, File coverage, Out of scope clarity, Integration awareness.
+   - If any criterion has a critical gap: show the specific issues and **STOP**. Tell the user: "Fix these issues first, then re-run `/spec-work NNN`. Use `/spec-validate NNN` for details."
+   - If all criteria pass: continue to step 4.
+
+4. **Understanding confirmation** (high-complexity specs only): Check if the spec header contains `**Complexity**: high`. If yes:
    - Show a 3-bullet summary:
      - **Goal**: [one sentence from the spec Goal section]
      - **Approach**: [main implementation strategy inferred from the Steps]
@@ -22,33 +27,33 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
      Options: [Yes, proceed] [No, clarify first]
    - If user selects "No, clarify first": stop, ask an open-ended follow-up question to understand the correction, and do not proceed.
 
-4. **Read project context**: Skim `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md`.
+5. **Read project context**: Skim `.agents/context/CONVENTIONS.md` and `.agents/context/STACK.md`.
 
-5. **Update status**: Set `**Status**: in-progress` in the spec header.
+6. **Update status**: Set `**Status**: in-progress` in the spec header.
 
-6. **Print a progress checklist** of all steps before starting:
+7. **Print a progress checklist** of all steps before starting:
    ```
    Progress — Spec NNN
    [ ] Step 1: <title>
    [ ] Step 2: <title>
    ```
 
-7. **Resume check**: Scan for already-checked steps (`- [x]`). If found, skip them and continue from the first unchecked step.
+8. **Resume check**: Scan for already-checked steps (`- [x]`). If found, skip them and continue from the first unchecked step.
 
-8. **Execute each step** in order:
+9. **Execute each step** in order:
    - Implement the change
    - Check it off in the spec: `- [ ]` → `- [x]`
    - Commit: `git add -A && git commit -m "spec(NNN): step N — <title>"`
    - If blocked, stop and ask
 
-9. **Verify acceptance criteria** — check each one off in the spec.
+10. **Verify acceptance criteria** — check each one off in the spec.
 
-10. **Update CHANGELOG.md** — add entry under `## [Unreleased]`:
+11. **Update CHANGELOG.md** — add entry under `## [Unreleased]`:
     `- **Spec NNN**: [title] — [one-sentence summary]`
 
-11. **Run tests/build** if available (`bash tests/smoke.sh` or equivalent). Report PASS or FAIL.
+12. **Run tests/build** if available (`bash tests/smoke.sh` or equivalent). Report PASS or FAIL.
 
-12. **Set status to `completed`**, move file: `specs/NNN-*.md` → `specs/completed/NNN-*.md`.
+13. **Set status to `completed`**, move file: `specs/NNN-*.md` → `specs/completed/NNN-*.md`.
 
 ## Rules
 - Commit after every step — enables crash resilience

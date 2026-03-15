@@ -10,7 +10,7 @@ Specs 088 and 089 both failed validation (wrong paths: globs, missing verificati
 
 ## Steps
 - [x] Step 1: Add validation gate step (new step 3) to `templates/commands/spec-work.md` — after "Read the spec" (step 2), before "Understanding confirmation" (currently step 3). Score on 10 criteria, FAIL → show issues and STOP, PASS → continue. Reference spec-validate criteria by name, do not inline them.
-- [ ] Step 2: Mirror the same validation gate step to `.claude/skills/spec-work/SKILL.md` (between existing steps 2 and 3)
+- [x] Step 2: Mirror the same validation gate step to `.claude/skills/spec-work/SKILL.md` (between existing steps 2 and 3)
 - [ ] Step 3: Add `--skip-validate` flag documentation to the Rules section in both files — allows bypassing the gate for resumed specs or user override
 - [ ] Step 4: Add a smoke test assertion to `tests/smoke.sh` — verify `templates/commands/spec-work.md` contains "validation gate" or "spec-validate"
 - [ ] Step 5: Test manually: run `/spec-work 088` (known-failing spec) — confirm it stops with validation issues
