@@ -1,6 +1,6 @@
 # Spec: Fast --patch flag for syncing specific template files
 
-> **Spec ID**: 093 | **Created**: 2026-03-15 | **Status**: in-progress | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 093 | **Created**: 2026-03-15 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Add a `--patch <pattern>` flag to `bin/ai-setup.sh` that copies only matching template files to the project without running the full update flow — for quick syncing of specific files during development.

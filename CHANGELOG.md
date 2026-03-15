@@ -9,6 +9,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 <!-- Entries are prepended below this line, newest first -->
 
 ## [Unreleased]
+- **Spec 093**: Fast --patch flag — sync specific template files without full update flow (e.g. `--patch spec-work`)
 - **Spec 092**: spec-work low complexity executes directly — no subagent overhead for simple specs; subagents only for medium (Sonnet) and high (Opus)
 - **Spec 091**: Complexity-based Model Routing in spec-work — Haiku/Sonnet/Opus automatically selected for implementation based on `**Complexity**` field; Opus sets the field when creating specs
 - **Spec 090**: Validation Gate in spec-work — spec-work now scores specs on 10 criteria before executing; blocks weak specs with actionable feedback
