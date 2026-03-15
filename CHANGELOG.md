@@ -9,6 +9,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 <!-- Entries are prepended below this line, newest first -->
 
 ## [Unreleased]
+- **Spec 094**: Circuit Breaker spec-aware — raises block threshold (8→20) when a spec is in-progress; prevents false positives during planned migrations
 
 ## [1.3.3] — 2026-03-15
 - **Spec 093**: Fast --patch flag — sync specific template files without full update flow (e.g. `--patch spec-work`)

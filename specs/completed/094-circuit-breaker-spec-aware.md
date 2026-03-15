@@ -1,6 +1,6 @@
 # Spec: Circuit Breaker raises thresholds when a spec is in-progress
 
-> **Spec ID**: 094 | **Created**: 2026-03-15 | **Status**: in-progress | **Complexity**: low | **Branch**: —
+> **Spec ID**: 094 | **Created**: 2026-03-15 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 Prevent false-positive circuit breaker blocks during legitimate spec execution by raising edit thresholds when a `specs/*.md` file has `Status: in-progress`.
