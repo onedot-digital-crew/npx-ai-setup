@@ -286,6 +286,51 @@ _process_update_mappings() {
   done
 }
 
+# Fast patch: copy only template files matching a filename pattern, no prompts or scanning.
+# Usage: run_patch <pattern>
+# Example: run_patch "spec-work"  →  copies all templates whose path contains "spec-work"
+run_patch() {
+  local pattern="${1:-}"
+  if [ -z "$pattern" ]; then
+    echo "❌ --patch requires a pattern (e.g. --patch spec-work)"
+    exit 1
+  fi
+
+  if [ ! -f ".ai-setup.json" ]; then
+    echo "❌ No .ai-setup.json found — run ai-setup first to initialize this project"
+    exit 1
+  fi
+
+  local all_mappings=("${TEMPLATE_MAP[@]}" "${SPEC_SKILLS_MAP[@]}")
+  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+    all_mappings+=("${SHOPIFY_SKILLS_MAP[@]}")
+  fi
+
+  local copied=0
+  for mapping in "${all_mappings[@]}"; do
+    local tpl="${mapping%%:*}"
+    local target="${mapping#*:}"
+    # Match pattern against template path (filename or directory segment)
+    [[ "$tpl" == *"$pattern"* ]] || continue
+    if [ ! -f "$SCRIPT_DIR/$tpl" ]; then
+      echo "  ⚠️  source not found: $tpl"
+      continue
+    fi
+    mkdir -p "$(dirname "$target")"
+    cp "$SCRIPT_DIR/$tpl" "$target"
+    [[ "$target" == *.sh ]] && chmod +x "$target"
+    echo "  ✅ $target"
+    copied=$((copied + 1))
+  done
+
+  if [ "$copied" -eq 0 ]; then
+    echo "  ⚠️  No templates matched pattern: $pattern"
+    exit 1
+  fi
+  echo ""
+  echo "Patched $copied file(s) matching '$pattern'."
+}
+
 # Smart update: checksum diffing, selective category update, backup user-modified files
 # Usage: run_smart_update [--skip-regen]
 run_smart_update() {
