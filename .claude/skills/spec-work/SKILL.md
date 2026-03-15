@@ -59,4 +59,5 @@ Executes a spec from `specs/NNN-*.md` step by step, commits after each step, and
 - Commit after every step — enables crash resilience
 - Never skip the status update and file move at the end
 - If a step fails, set status to `blocked` and stop
+- If called with `--skip-validate` flag, skip step 3 (validation gate). Use for already-validated or resuming in-progress specs.
 - **Skill-First**: If a step contains a skill reference (e.g. `` `/shopify-liquid` ``, `` `/vitest` ``), invoke it via the `Skill` tool instead of reimplementing the action manually
