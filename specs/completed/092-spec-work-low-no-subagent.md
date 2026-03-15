@@ -1,6 +1,6 @@
 # Spec: spec-work low complexity executes directly without subagent
 
-> **Spec ID**: 092 | **Created**: 2026-03-15 | **Status**: in-progress | **Complexity**: low | **Branch**: —
+> **Spec ID**: 092 | **Created**: 2026-03-15 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 Remove subagent spawn overhead for `low` complexity specs — execute directly, spawn subagent only for `medium` and `high`.
