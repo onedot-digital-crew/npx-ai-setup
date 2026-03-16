@@ -10,7 +10,7 @@ The SessionStart hook `cat`s full STACK.md + CONVENTIONS.md into every session (
 
 ## Steps
 - [x] Step 1: In `templates/claude/settings.json`, replace `cat` with `head -20` in the SessionStart inline bash command
-- [ ] Step 2: Update smoke test if any assertion depends on full context injection output
+- [x] Step 2: Update smoke test if any assertion depends on full context injection output
 - [ ] Step 3: Run smoke tests to verify nothing breaks
 
 ## Acceptance Criteria
