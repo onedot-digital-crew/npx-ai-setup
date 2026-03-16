@@ -106,6 +106,7 @@ install_official_plugins() {
     "code-review:Automated PR review with 4 parallel agents + confidence scoring"
     "feature-dev:7-phase feature workflow (discovery → architecture → review)"
     "frontend-design:Anti-generic design guidance for frontend projects"
+    "commit-commands:Git workflow slash commands (/commit, /commit-push-pr, /clean_gone)"
   )
 
   INSTALLED_PLUGINS=""

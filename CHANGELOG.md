@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 101**: commit-commands added to official plugins — installs /commit, /commit-push-pr, /clean_gone on setup
 - **Spec 098**: Project onboarding audit — `--audit` flag + `/project-audit` skill; agent produces PATTERNS.md and AUDIT.md from efficient codebase read; asks before creating specs
 - **Spec 100**: gitignore team boundary — documents team-vs-local split; PATTERNS.md/AUDIT.md listed in CLAUDE.md and WORKFLOW-GUIDE as team-committed context
 - **Spec 099**: Circuit breaker batch detection — raises BLOCK to 40 / WARN to 25 when ≥2 specs are in-progress simultaneously (spec-work-all scenario)
