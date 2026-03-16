@@ -13,7 +13,7 @@ Eliminate the hard jq dependency by creating a `_json` wrapper function that use
 - [x] Step 2: Replace 5 most common jq patterns in `lib/core.sh` with `_json_read` / `_json_build` calls (version read, metadata write, ai-setup.json parsing)
 - [x] Step 3: Replace jq calls in `lib/detect.sh` and `lib/generate.sh` dependency extraction with `_json_read`
 - [x] Step 4: Replace jq calls in `lib/plugins.sh` settings merge with `_json_merge`
-- [ ] Step 5: Replace jq calls in `lib/setup.sh` storyblok script injection with `_json_merge` (blocked by circuit breaker — 1 edit remaining)
+- [x] Step 5: Replace jq calls in `lib/setup.sh` storyblok script injection with `_json_merge`
 - [x] Step 6: Add `lib/json.sh` to `_loader.sh` source chain
 - [ ] Step 7: Test: run setup on a system without jq installed, verify complete setup succeeds with Node.js fallback
 - [ ] Step 8: Add smoke test asserting `lib/json.sh` exists and exports `_json_read`

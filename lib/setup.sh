@@ -255,9 +255,7 @@ install_storyblok_scripts() {
   _install_or_update_file "$TPL/scripts/storyblok-dump.ts" "$target"
   # Add npm script entry if package.json present and entry missing
   if [ -f "package.json" ]; then
-    local _existing_script
-    _existing_script=$(_json_read package.json '.scripts["storyblok-dump"]' 2>/dev/null || true)
-    if [ -z "$_existing_script" ]; then
+    if ! grep -q '"storyblok-dump"' package.json 2>/dev/null; then
       _json_merge package.json '{"scripts":{"storyblok-dump":"tsx scripts/storyblok-dump.ts"}}'
       echo "  ✅ Added storyblok-dump script to package.json"
     else
