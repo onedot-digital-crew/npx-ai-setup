@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 099**: Circuit breaker batch detection — raises BLOCK to 40 / WARN to 25 when ≥2 specs are in-progress simultaneously (spec-work-all scenario)
 - **Spec 079**: Storyblok dump auto-install — copies storyblok-dump.ts to Storyblok projects and adds npm script; enables token-efficient MCP workflows via local story cache
 - **Spec 096**: Snapshot freshness detection — hook warns [SNAPSHOT STALE] when repomix snapshot is older than 7 days; writes SNAPSHOT_AT/SNAPSHOT_HASH to .state
 - **Spec 097**: Skill search caching — skips curl + Claude ranking on re-runs when package.json + STACK.md unchanged; --force-skills flag bypasses cache

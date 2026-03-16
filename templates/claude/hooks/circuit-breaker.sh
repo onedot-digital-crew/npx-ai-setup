@@ -22,6 +22,12 @@ BLOCK=8
 if [ -d specs ] && grep -rl "Status.*in-progress" specs/*.md >/dev/null 2>&1; then
   WARN=12
   BLOCK=20
+  # Further raise when multiple specs are in-progress (spec-work-all batch scenario)
+  SPEC_COUNT=$(grep -rl "Status.*in-progress" specs/*.md 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${SPEC_COUNT:-0}" -ge 2 ]; then
+    WARN=25
+    BLOCK=40
+  fi
 fi
 
 echo "$NOW $FILE_PATH" >> "$LOG"

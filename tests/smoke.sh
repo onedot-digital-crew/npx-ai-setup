@@ -201,6 +201,12 @@ else
   fail "circuit-breaker.sh missing spec-active threshold override"
 fi
 
+if grep -q 'SPEC_COUNT' templates/claude/hooks/circuit-breaker.sh 2>/dev/null; then
+  pass "circuit-breaker.sh raises thresholds further for spec-work-all batch runs"
+else
+  fail "circuit-breaker.sh missing multi-spec batch detection"
+fi
+
 # Summary
 echo ""
 echo "Results: ${PASS} passed, ${FAIL} failed"
