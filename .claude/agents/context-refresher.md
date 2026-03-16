@@ -32,9 +32,10 @@ _t=""; command -v timeout &>/dev/null && _t="timeout 120"; command -v gtimeout &
 if [ -f "repomix.config.json" ]; then
   $_t npx -y repomix 2>/dev/null
 else
-  $_t npx -y repomix --compress --style markdown \
+  $_t npx -y repomix --compress --style xml \
+    --remove-comments --remove-empty-lines \
     --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
-    --output .agents/repomix-snapshot.md 2>/dev/null
+    --output .agents/repomix-snapshot.xml 2>/dev/null
 fi
 ```
 If this fails or times out, skip silently — the 3 context files are the primary output.

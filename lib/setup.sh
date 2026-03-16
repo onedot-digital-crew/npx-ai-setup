@@ -638,7 +638,7 @@ update_gitignore() {
       echo ".ai-setup-backup/" >> .gitignore
       echo ".agents/context/.state" >> .gitignore
       echo ".agents/memory/" >> .gitignore
-      echo ".agents/repomix-snapshot.md" >> .gitignore
+      echo ".agents/repomix-snapshot.xml" >> .gitignore
       echo "CLAUDE.local.md" >> .gitignore
       echo ".codex/skills" >> .gitignore
       echo ".opencode/skills" >> .gitignore
@@ -648,7 +648,7 @@ update_gitignore() {
       grep -q "\.ai-setup-backup" .gitignore 2>/dev/null || echo ".ai-setup-backup/" >> .gitignore
       grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
       grep -q "\.agents/memory" .gitignore 2>/dev/null || echo ".agents/memory/" >> .gitignore
-      grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.md" >> .gitignore
+      grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.xml" >> .gitignore
       grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
       grep -q "\.codex/skills" .gitignore 2>/dev/null || echo ".codex/skills" >> .gitignore
       grep -q "\.opencode/skills" .gitignore 2>/dev/null || echo ".opencode/skills" >> .gitignore
@@ -659,7 +659,7 @@ update_gitignore() {
     echo ".ai-setup.json" >> .gitignore
     echo ".ai-setup-backup/" >> .gitignore
     echo ".agents/context/.state" >> .gitignore
-    echo ".agents/repomix-snapshot.md" >> .gitignore
+    echo ".agents/repomix-snapshot.xml" >> .gitignore
     echo "CLAUDE.local.md" >> .gitignore
     echo ".codex/skills" >> .gitignore
     echo ".opencode/skills" >> .gitignore
@@ -828,7 +828,7 @@ install_statusline_project() {
 
 # Generate repomix codebase snapshot in background (once, if not already present)
 generate_repomix_snapshot() {
-  if [ -f ".agents/repomix-snapshot.md" ]; then
+  if [ -f ".agents/repomix-snapshot.xml" ]; then
     return 0
   fi
   mkdir -p .agents
@@ -842,9 +842,10 @@ generate_repomix_snapshot() {
   if [ -f "repomix.config.json" ]; then
     $_repomix_timeout npx -y repomix >/dev/null 2>&1 &
   else
-    $_repomix_timeout npx -y repomix --compress --style markdown \
+    $_repomix_timeout npx -y repomix --compress --style xml \
+      --remove-comments --remove-empty-lines \
       --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
-      --output .agents/repomix-snapshot.md >/dev/null 2>&1 &
+      --output .agents/repomix-snapshot.xml >/dev/null 2>&1 &
   fi
   REPOMIX_PID=$!
 
@@ -859,11 +860,11 @@ generate_repomix_snapshot() {
   REPOMIX_EXIT=0
   wait $REPOMIX_PID 2>/dev/null || REPOMIX_EXIT=$?
 
-  if [ $REPOMIX_EXIT -eq 0 ] && [ -f ".agents/repomix-snapshot.md" ]; then
-    LINES=$(wc -l < .agents/repomix-snapshot.md 2>/dev/null || echo "?")
-    printf "\r  ✅ Snapshot written to .agents/repomix-snapshot.md (%s lines)%*s\n" "$LINES" 10 ""
+  if [ $REPOMIX_EXIT -eq 0 ] && [ -f ".agents/repomix-snapshot.xml" ]; then
+    LINES=$(wc -l < .agents/repomix-snapshot.xml 2>/dev/null || echo "?")
+    printf "\r  ✅ Snapshot written to .agents/repomix-snapshot.xml (%s lines)%*s\n" "$LINES" 10 ""
   else
     printf "\r  ⏭️  repomix unavailable, skipping snapshot%*s\n" 20 ""
-    rm -f .agents/repomix-snapshot.md
+    rm -f .agents/repomix-snapshot.xml
   fi
 }

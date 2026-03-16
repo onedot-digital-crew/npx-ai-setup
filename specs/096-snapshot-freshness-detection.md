@@ -1,6 +1,6 @@
 # Spec: Repomix Snapshot Freshness Detection
 
-> **Spec ID**: 096 | **Created**: 2026-03-16 | **Status**: draft | **Branch**: —
+> **Spec ID**: 096 | **Created**: 2026-03-16 | **Status**: draft | **Branch**: — | **Depends on**: 095
 
 ## Goal
 Detect stale repomix snapshots via the existing freshness hook and warn when the snapshot is outdated.
@@ -11,9 +11,8 @@ The snapshot is generated once during setup and never refreshed — even if the 
 ## Steps
 - [ ] Step 1: In `lib/generate.sh` state file block (~line 629), add `SNAPSHOT_AT` timestamp after snapshot generation completes
 - [ ] Step 2: In `lib/setup.sh` `generate_repomix_snapshot()`, write snapshot cksum to `.agents/context/.state` as `SNAPSHOT_HASH` after successful generation
-- [ ] Step 3: In `templates/claude/hooks/context-freshness.sh`, add snapshot staleness check — read `SNAPSHOT_AT`, warn if older than 7 days via stderr
-- [ ] Step 4: Update the installed hook at `.claude/hooks/context-freshness.sh` to match the template
-- [ ] Step 5: Test: generate snapshot, advance system clock or manually edit `.state` timestamp, verify `[SNAPSHOT STALE]` warning appears
+- [ ] Step 3: In `templates/claude/hooks/context-freshness.sh`, add snapshot staleness check — read `SNAPSHOT_AT`, warn if older than 7 days via stderr. Reference `.agents/repomix-snapshot.xml` (updated by 095).
+- [ ] Step 4: Test: generate snapshot, advance system clock or manually edit `.state` timestamp, verify `[SNAPSHOT STALE]` warning appears
 
 ## Acceptance Criteria
 - [ ] `.state` file contains `SNAPSHOT_HASH` and `SNAPSHOT_AT` after setup

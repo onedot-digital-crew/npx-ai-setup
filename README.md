@@ -76,7 +76,7 @@ Native project slash commands are available in Claude Code and compatible client
 | `/grill` | Opus | Adversarial code review — blocks until all issues resolved |
 | `/analyze` | Sonnet | 3 parallel agents — architecture, hotspots, risks |
 | `/reflect` | Sonnet | Detect session corrections → write as permanent CLAUDE.md rules |
-| `/context-full` | Sonnet | Full codebase snapshot via repomix (`npx repomix --compress --style markdown --output .agents/repomix-snapshot.md`) |
+| `/context-full` | Sonnet | Full codebase snapshot via repomix (`npx repomix --compress --style xml --remove-comments --remove-empty-lines --output .agents/repomix-snapshot.xml`) |
 
 ## Subagents
 

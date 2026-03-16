@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 095**: repomix XML output — switches snapshot format to XML with comment/whitespace stripping for ~15-20% token reduction; all 4 locations updated consistently
 - **Spec 078**: WORKFLOW-GUIDE Local API Dumps section — documents the dump→read→targeted-MCP pattern for token-efficient CMS/API workflows (Storyblok example)
 
 ## [1.3.4] — 2026-03-15

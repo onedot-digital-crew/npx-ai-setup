@@ -193,12 +193,13 @@ Generates a compressed, token-efficient snapshot of the entire codebase. Use bef
 
 **Direct CLI:**
 ```bash
-npx repomix --compress --style markdown \
+npx repomix --compress --style xml \
+  --remove-comments --remove-empty-lines \
   --ignore "node_modules,dist,.git,.next,.nuxt,coverage,*.lock" \
-  --output .agents/repomix-snapshot.md
+  --output .agents/repomix-snapshot.xml
 ```
 
-Output is written to `.agents/repomix-snapshot.md` (gitignored). Claude reads it automatically when you run `/context-full`.
+Output is written to `.agents/repomix-snapshot.xml` (gitignored). Claude reads it automatically when you run `/context-full`.
 
 ---
 

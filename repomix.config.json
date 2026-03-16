@@ -1,8 +1,10 @@
 {
   "output": {
-    "filePath": ".agents/repomix-snapshot.md",
-    "style": "markdown",
-    "compress": true
+    "filePath": ".agents/repomix-snapshot.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": true,
+    "removeEmptyLines": true
   },
   "ignore": {
     "useGitignore": true,
@@ -17,7 +19,7 @@
       ".turbo",
       "*.lock",
       "*.lockb",
-      ".agents/repomix-snapshot.md"
+      ".agents/repomix-snapshot.xml"
     ]
   },
   "security": {
