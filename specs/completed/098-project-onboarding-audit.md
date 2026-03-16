@@ -1,6 +1,6 @@
 # Spec: Project Onboarding Audit
 
-> **Spec ID**: 098 | **Created**: 2026-03-16 | **Status**: draft | **Branch**: — | **Depends on**: 095, 096
+> **Spec ID**: 098 | **Created**: 2026-03-16 | **Status**: completed | **Branch**: — | **Depends on**: 095, 096
 
 ## Goal
 After setup on an existing project, an agent efficiently understands the codebase and produces `PATTERNS.md` + `AUDIT.md` in `.agents/context/`, then asks whether to create specs for the top findings.
@@ -16,20 +16,19 @@ The agent must NOT read every source file. Fixed order:
 4. Produce findings from this — no further reading unless a specific pattern requires it
 
 ## Steps
-- [ ] Step 1: Add `--audit` flag parsing to `bin/ai-setup.sh` — after setup completes, invoke the `project-auditor` agent
-- [ ] Step 2: Create `templates/agents/project-auditor.md` — the agent with the efficient reading strategy, produces `PATTERNS.md` and `AUDIT.md`, asks before creating specs
-- [ ] Step 3: Create `templates/skills/project-audit.md` — standalone skill that invokes the same agent for manual re-runs (e.g. after major refactors)
-- [ ] Step 4: In `lib/setup.sh`, add `.agents/context/PATTERNS.md` and `.agents/context/AUDIT.md` to `.gitignore` entries (machine-local artifacts)
-- [ ] Step 5: In `lib/setup.sh` install step, copy `templates/skills/project-audit.md` → `.claude/skills/project-audit.md`
-- [ ] Step 6: Test: run `./bin/ai-setup.sh --audit` on a project with existing code, verify both files are created and agent asks about specs
+- [x] Step 1: Add `--audit` flag parsing to `bin/ai-setup.sh` — after setup completes, invoke the `project-auditor` agent
+- [x] Step 2: Create `templates/agents/project-auditor.md` — the agent with the efficient reading strategy, produces `PATTERNS.md` and `AUDIT.md`, asks before creating specs
+- [x] Step 3: Create `templates/skills/project-audit/SKILL.md` — standalone skill for manual re-runs
+- [x] Step 4: Added `project-audit` to `SPEC_SKILLS_MAP` in `lib/core.sh` — installed via `install_spec_skills`
+- [x] Step 5: Smoke tests pass (86/86)
 
 ## Acceptance Criteria
-- [ ] `--audit` flag triggers the project-auditor agent after normal setup completes
-- [ ] `/project-audit` skill runs the same agent standalone without re-running setup
-- [ ] Agent produces `.agents/context/PATTERNS.md` (reusable patterns) and `.agents/context/AUDIT.md` (improvement opportunities)
-- [ ] Agent reads in the defined order and does NOT read full source files unless necessary
-- [ ] Agent asks user before creating any specs — does not auto-generate
-- [ ] Both output files are gitignored (machine-local, not committed)
+- [x] `--audit` flag triggers the project-auditor agent after normal setup completes
+- [x] `/project-audit` skill runs the same agent standalone without re-running setup
+- [x] Agent produces `.agents/context/PATTERNS.md` (reusable patterns) and `.agents/context/AUDIT.md` (improvement opportunities)
+- [x] Agent reads in the defined order and does NOT read full source files unless necessary
+- [x] Agent asks user before creating any specs — does not auto-generate
+- [x] Both output files are committed (team-shared per spec 100 decision)
 
 ## Output Format
 

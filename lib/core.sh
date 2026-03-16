@@ -78,6 +78,7 @@ SPEC_SKILLS_MAP=(
   "templates/skills/spec-validate/SKILL.md:.claude/skills/spec-validate/SKILL.md"
   "templates/skills/spec-work/SKILL.md:.claude/skills/spec-work/SKILL.md"
   "templates/skills/spec-work-all/SKILL.md:.claude/skills/spec-work-all/SKILL.md"
+  "templates/skills/project-audit/SKILL.md:.claude/skills/project-audit/SKILL.md"
 )
 
 # TypeScript-specific rules (only added when *.ts or *.tsx files are detected)

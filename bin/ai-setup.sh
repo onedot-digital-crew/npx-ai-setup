@@ -27,10 +27,12 @@ SYSTEM=""
 REGENERATE=""
 PATCH_PATTERN=""
 FORCE_SKILLS=""
+RUN_AUDIT=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --regenerate) REGENERATE="yes"; shift ;;
     --force-skills) FORCE_SKILLS="yes"; shift ;;
+    --audit) RUN_AUDIT="yes"; shift ;;
     --patch)
       if [[ $# -lt 2 ]]; then
         echo "❌ --patch requires a pattern (e.g. --patch spec-work)"
@@ -236,3 +238,11 @@ fi
 
 show_installation_summary
 show_next_steps
+
+# --audit flag: run project onboarding audit after setup
+if [ "${RUN_AUDIT:-}" = "yes" ] && [ "$AI_CLI" = "claude" ]; then
+  echo ""
+  echo "🔍 Running project onboarding audit..."
+  claude --agent project-auditor "Analyze this project and produce .agents/context/PATTERNS.md and .agents/context/AUDIT.md. Follow the efficient reading strategy in your instructions. When done, ask the user if specs should be created for the top findings." 2>/dev/null || \
+    echo "⚠️  Audit skipped (claude CLI unavailable or agent failed)"
+fi
