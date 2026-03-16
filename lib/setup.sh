@@ -639,6 +639,7 @@ update_gitignore() {
       echo ".agents/context/.state" >> .gitignore
       echo ".agents/memory/" >> .gitignore
       echo ".agents/repomix-snapshot.xml" >> .gitignore
+      echo ".agents/.skill-cache.json" >> .gitignore
       echo "CLAUDE.local.md" >> .gitignore
       echo ".codex/skills" >> .gitignore
       echo ".opencode/skills" >> .gitignore
@@ -649,6 +650,7 @@ update_gitignore() {
       grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
       grep -q "\.agents/memory" .gitignore 2>/dev/null || echo ".agents/memory/" >> .gitignore
       grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.xml" >> .gitignore
+      grep -q "skill-cache" .gitignore 2>/dev/null || echo ".agents/.skill-cache.json" >> .gitignore
       grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
       grep -q "\.codex/skills" .gitignore 2>/dev/null || echo ".codex/skills" >> .gitignore
       grep -q "\.opencode/skills" .gitignore 2>/dev/null || echo ".opencode/skills" >> .gitignore
@@ -660,6 +662,7 @@ update_gitignore() {
     echo ".ai-setup-backup/" >> .gitignore
     echo ".agents/context/.state" >> .gitignore
     echo ".agents/repomix-snapshot.xml" >> .gitignore
+    echo ".agents/.skill-cache.json" >> .gitignore
     echo "CLAUDE.local.md" >> .gitignore
     echo ".codex/skills" >> .gitignore
     echo ".opencode/skills" >> .gitignore

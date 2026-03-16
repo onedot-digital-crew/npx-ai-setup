@@ -715,12 +715,28 @@ EOF
     else
       echo "  Detected: ${KEYWORDS[*]}"
 
+      # Cache check: skip search + Claude ranking if hashes match
+      SKILL_CACHE_FILE=".agents/.skill-cache.json"
+      CACHED_SELECTED=""
+      if [ -z "${FORCE_SKILLS:-}" ] && [ -f "$SKILL_CACHE_FILE" ] && command -v jq >/dev/null 2>&1; then
+        local _cur_pkg_hash _cur_stack_hash _cached_pkg _cached_stack
+        _cur_pkg_hash=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)
+        _cur_stack_hash=$(cksum .agents/context/STACK.md 2>/dev/null | cut -d' ' -f1,2)
+        _cached_pkg=$(jq -r '.pkg_hash // ""' "$SKILL_CACHE_FILE" 2>/dev/null)
+        _cached_stack=$(jq -r '.stack_hash // ""' "$SKILL_CACHE_FILE" 2>/dev/null)
+        if [ -n "$_cur_pkg_hash" ] && [ "$_cur_pkg_hash" = "$_cached_pkg" ] && [ "$_cur_stack_hash" = "$_cached_stack" ]; then
+          CACHED_SELECTED=$(jq -r '.selected // [] | .[]' "$SKILL_CACHE_FILE" 2>/dev/null)
+          echo "  ♻️  Using cached skill selection (hash match)"
+        fi
+      fi
+
       ALL_SKILLS=""
       SEARCH_TMPDIR=$(mktemp -d)
       declare -a SEARCH_PIDS=()
       declare -a SEARCH_KWS=()
 
       for kw in "${KEYWORDS[@]}"; do
+        [ -n "$CACHED_SELECTED" ] && continue
         # Skip keywords with curated skills — installed directly via KEYWORD_SKILLS below
         if [ -n "$(get_keyword_skills "$kw")" ]; then
           printf "  ✅ %-20s (curated)\n" "$kw:"
@@ -801,6 +817,9 @@ EOF
         done <<< "$ALL_SKILLS"
         rm -rf "$INSTALLS_DIR"
 
+        if [ -n "$CACHED_SELECTED" ]; then
+          SELECTED="$CACHED_SELECTED"
+        else
         echo "  🤖 Claude selecting best skills ($TOTAL_FOUND found)..."
 
         # Phase 2: Claude selects the most relevant skills (haiku, 60s timeout)
@@ -843,6 +862,24 @@ Rules:
             | sort -u \
             | head -5)
         fi
+
+        # Write cache after successful ranking
+        if [ -n "$SELECTED" ] && command -v jq >/dev/null 2>&1; then
+          local _pkg_h _stack_h
+          _pkg_h=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)
+          _stack_h=$(cksum .agents/context/STACK.md 2>/dev/null | cut -d' ' -f1,2)
+          mkdir -p .agents
+          jq -n \
+            --arg pkg_hash "$_pkg_h" \
+            --arg stack_hash "$_stack_h" \
+            --arg cached_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --argjson keywords "$(printf '%s\n' "${KEYWORDS[@]}" | jq -R . | jq -s .)" \
+            --argjson selected "$(printf '%s\n' "$SELECTED" | jq -R . | jq -s .)" \
+            '{pkg_hash: $pkg_hash, stack_hash: $stack_hash, cached_at: $cached_at, keywords: $keywords, selected: $selected}' \
+            > "$SKILL_CACHE_FILE" 2>/dev/null || true
+        fi
+
+        fi  # end cache-miss branch
 
         if [ -n "$SELECTED" ]; then
           SELECTED_COUNT=$(printf '%s\n' "$SELECTED" | wc -l | tr -d ' ')

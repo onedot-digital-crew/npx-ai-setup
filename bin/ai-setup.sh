@@ -26,9 +26,11 @@ TPL="$SCRIPT_DIR/templates"
 SYSTEM=""
 REGENERATE=""
 PATCH_PATTERN=""
+FORCE_SKILLS=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --regenerate) REGENERATE="yes"; shift ;;
+    --force-skills) FORCE_SKILLS="yes"; shift ;;
     --patch)
       if [[ $# -lt 2 ]]; then
         echo "❌ --patch requires a pattern (e.g. --patch spec-work)"
