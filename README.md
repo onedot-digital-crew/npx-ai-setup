@@ -179,7 +179,7 @@ When you push a version tag like `v1.2.5`, it creates or updates the GitHub Rele
 ## Requirements
 
 - Node.js >= 18 + npm
-- `jq` — `brew install jq`
+- `jq` — `brew install jq` (optional — Node.js fallback used when not installed)
 - Claude Code CLI (`claude`) — for Auto-Init (optional, Copilot as fallback)
 
 ---

@@ -207,6 +207,40 @@ else
   fail "circuit-breaker.sh missing multi-spec batch detection"
 fi
 
+echo "--- lib/json.sh wrapper ---"
+if [ -f lib/json.sh ]; then
+  pass "lib/json.sh exists"
+else
+  fail "lib/json.sh missing"
+fi
+
+if grep -q '_json_read' lib/json.sh 2>/dev/null; then
+  pass "lib/json.sh exports _json_read"
+else
+  fail "lib/json.sh missing _json_read"
+fi
+
+if grep -q '_json_merge' lib/json.sh 2>/dev/null; then
+  pass "lib/json.sh exports _json_merge"
+else
+  fail "lib/json.sh missing _json_merge"
+fi
+
+echo "--- lib/monorepo.sh ---"
+if [ -f lib/monorepo.sh ] && grep -q 'detect_workspaces' lib/monorepo.sh 2>/dev/null; then
+  pass "lib/monorepo.sh exists with detect_workspaces"
+else
+  fail "lib/monorepo.sh missing or detect_workspaces not found"
+fi
+
+echo "--- .claudeignore template ---"
+CLAUDEIGNORE_COUNT=$(grep -c '^[^#]' templates/.claudeignore 2>/dev/null || echo 0)
+if [ "$CLAUDEIGNORE_COUNT" -ge 30 ]; then
+  pass "templates/.claudeignore has ${CLAUDEIGNORE_COUNT} patterns (>= 30)"
+else
+  fail "templates/.claudeignore only has ${CLAUDEIGNORE_COUNT} patterns (expected >= 30)"
+fi
+
 # Summary
 echo ""
 echo "Results: ${PASS} passed, ${FAIL} failed"
