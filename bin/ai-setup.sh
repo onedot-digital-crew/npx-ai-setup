@@ -125,6 +125,10 @@ if [ "$REGENERATE" = "yes" ]; then
     echo "   - CLAUDE.md + AGENTS.md updated"
     [ -d .agents/context ] && echo "   - .agents/context/ regenerated"
     [ ${INSTALLED:-0} -gt 0 ] && echo "   - $INSTALLED skills installed"
+    echo ""
+    echo "📚 Generating project context files..."
+    claude --agent context-refresher "Analyze this project and generate .agents/context/STACK.md, .agents/context/ARCHITECTURE.md, and .agents/context/CONVENTIONS.md." 2>/dev/null || \
+      echo "⚠️  Context generation skipped (agent failed)"
     exit 0
   fi
   echo ""
@@ -244,6 +248,14 @@ fi
 
 show_installation_summary
 show_next_steps
+
+# Generate project context files (.agents/context/STACK.md, ARCHITECTURE.md, CONVENTIONS.md)
+if [ "$AI_CLI" = "claude" ]; then
+  echo ""
+  echo "📚 Generating project context files..."
+  claude --agent context-refresher "Analyze this project and generate .agents/context/STACK.md, .agents/context/ARCHITECTURE.md, and .agents/context/CONVENTIONS.md." 2>/dev/null || \
+    echo "⚠️  Context generation skipped (claude CLI unavailable or agent failed)"
+fi
 
 # --audit flag: run project onboarding audit after setup
 if [ "${RUN_AUDIT:-}" = "yes" ] && [ "$AI_CLI" = "claude" ]; then
