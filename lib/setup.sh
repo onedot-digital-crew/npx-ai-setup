@@ -876,39 +876,11 @@ install_repomix_config() {
   fi
 }
 
-# Install claude-powerline statusline into project settings.json.
+# Install claude-statusline globally via npx.
 install_statusline_project() {
-  # Idempotency: skip if statusLine is already configured
-  if [ -f ".claude/settings.json" ] && jq -e '.statusLine' ".claude/settings.json" >/dev/null 2>&1; then
-    return 0
-  fi
-  mkdir -p ".claude"
-  # Copy default powerline config (skip if already present)
-  if [ ! -f ".claude/claude-powerline.json" ] && [ -f "$SCRIPT_DIR/templates/.claude-powerline.json" ]; then
-    cp "$SCRIPT_DIR/templates/.claude-powerline.json" ".claude/claude-powerline.json"
-  fi
-  local status_cmd="npx -y @owloops/claude-powerline@latest --style=powerline --theme=dark"
-  if [ -f ".claude/settings.json" ]; then
-    local TMP
-    TMP=$(mktemp)
-    if jq --arg cmd "$status_cmd" '.statusLine = {"type":"command","command":$cmd,"padding":2}' ".claude/settings.json" > "$TMP"; then
-      mv "$TMP" ".claude/settings.json"
-    else
-      rm -f "$TMP"
-      echo "  ⚠️  Failed to update .claude/settings.json (jq error)"
-      return 1
-    fi
-  else
-    local TMP2
-    TMP2=$(mktemp)
-    if jq -n --arg cmd "$status_cmd" '{"statusLine":{"type":"command","command":$cmd,"padding":2}}' > "$TMP2"; then
-      mv "$TMP2" ".claude/settings.json"
-    else
-      rm -f "$TMP2"
-      return 1
-    fi
-  fi
-  echo "  Statusline installed -> claude-powerline (@owloops/claude-powerline)"
+  echo "  Installing statusline..."
+  npx @kamranahmedse/claude-statusline
+  echo "  Statusline installed -> @kamranahmedse/claude-statusline"
 }
 
 # Generate repomix codebase snapshot in background (once, if not already present)

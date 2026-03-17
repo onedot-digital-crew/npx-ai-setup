@@ -138,7 +138,6 @@
   "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
   "statusLine": {
     "type": "command",
-    "command": "npx -y @owloops/claude-powerline@latest --style=powerline --theme=dark --config=.claude/claude-powerline.json",
-    "padding": 2
+    "command": "bash \"$HOME/.claude/statusline.sh\""
   }
 }

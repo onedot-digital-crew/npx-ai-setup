@@ -193,8 +193,8 @@ show_plugin_summary
 # OpenCode compatibility (generates opencode.json from .mcp.json)
 generate_opencode_config
 
-# Statusline (project-level — only in fresh install mode, skip if already configured)
-if ! jq -e '.statusLine' ".claude/settings.json" >/dev/null 2>&1; then
+# Statusline (global install — only if not already configured in ~/.claude/settings.json)
+if ! jq -e '.statusLine' "$HOME/.claude/settings.json" >/dev/null 2>&1; then
   echo ""
   echo "Statusline"
   echo "   ──────────────────────────────────────────────────────────"
