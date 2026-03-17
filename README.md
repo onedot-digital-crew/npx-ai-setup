@@ -19,7 +19,7 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | **Settings** | Granular bash permissions, opusplan model, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH |
 | **Hooks** | protect-files, auto-lint, circuit-breaker, context-freshness, update-check, cross-repo-context, notifications, SessionStart context reload, PostToolUseFailure log, ConfigChange audit, TaskCompleted gate, Stop quality gate |
 | **Rules** | `.claude/rules/` — general, testing, git, typescript (conditional) |
-| **Commands** | 20 slash commands for spec-driven development, reviews, releases, debugging |
+| **Commands** | 21 slash commands for spec-driven development, reviews, releases, security scanning, debugging |
 | **Agents** | 9 subagent templates for parallel verification, review, and architectural assessment |
 | **Context** | `.agents/context/` — STACK.md, ARCHITECTURE.md, CONVENTIONS.md (auto-generated) |
 | **GitHub** | `.github/copilot-instructions.md` + `.github/workflows/release-from-changelog.yml` |
@@ -76,6 +76,7 @@ Native project slash commands are available in Claude Code and compatible client
 | `/grill` | Opus | Adversarial code review — blocks until all issues resolved |
 | `/analyze` | Sonnet | 3 parallel agents — architecture, hotspots, risks |
 | `/reflect` | Sonnet | Detect session corrections → write as permanent CLAUDE.md rules |
+| `/scan` | Sonnet | Security vulnerability scan — detects snyk/npm audit/pip-audit/bundler-audit, reports by CRITICAL/HIGH/MEDIUM/LOW |
 | `/context-full` | Sonnet | Full codebase snapshot via repomix (`npx repomix --compress --style xml --remove-comments --remove-empty-lines --output .agents/repomix-snapshot.xml`) |
 
 ## Subagents
