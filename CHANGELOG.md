@@ -8,6 +8,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 <!-- Entries are prepended below this line, newest first -->
 
+## [Unreleased]
+
+- **Spec 081**: /scan command — security vulnerability scanner that detects snyk/npm audit/pip-audit/bundler-audit and reports findings grouped by CRITICAL/HIGH/MEDIUM/LOW severity
+
 ## [v1.3.5] — 2026-03-16
 
 - **Spec 107**: SessionStart head-truncation — `cat` → `head -20` for STACK.md/CONVENTIONS.md injection, saves ~60-70% tokens per session
