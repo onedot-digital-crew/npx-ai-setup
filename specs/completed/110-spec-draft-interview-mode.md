@@ -1,6 +1,6 @@
 # Spec: Add Draft-First Interview Mode to /spec Command
 
-> **Spec ID**: 110 | **Created**: 2026-03-19 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 110 | **Created**: 2026-03-19 | **Status**: completed | **Branch**: —
 
 <!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
 
@@ -15,13 +15,13 @@ Currently `/spec` always generates specs from a text description. When users alr
 - [x] Step 2: Add new Phase 1b-interview block: read draft file, then systematically interview via AskUserQuestion (categories: technical implementation, UI/UX, edge cases, tradeoffs, dependencies) — questions must be non-obvious, continue until all areas covered
 - [x] Step 3: After interview completes, write refined spec back to the draft file, then continue with Phase 1c
 - [x] Step 4: Mirror identical changes to `.claude/commands/spec.md`
-- [ ] Step 5: Test both paths: (a) `/spec "text description"` still works as before, (b) `/spec specs/110-spec-draft-interview-mode.md` triggers interview mode
+- [x] Step 5: Test both paths: (a) `/spec "text description"` still works as before, (b) `/spec specs/110-spec-draft-interview-mode.md` triggers interview mode
 
 ## Acceptance Criteria
-- [ ] File-path argument triggers interview mode; text argument triggers normal flow
-- [ ] Interview asks minimum 3 rounds of non-obvious AskUserQuestion calls
-- [ ] Refined spec is written back to the original draft file
-- [ ] Existing Phase 1b (Clarify) unchanged for text arguments
+- [x] File-path argument triggers interview mode; text argument triggers normal flow
+- [x] Interview asks minimum 3 rounds of non-obvious AskUserQuestion calls
+- [x] Refined spec is written back to the original draft file
+- [x] Existing Phase 1b (Clarify) unchanged for text arguments
 
 ## Files to Modify
 - `templates/commands/spec.md` — add conditional branch + interview phase

@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 110**: Draft-First Interview Mode — `/spec` now detects file-path arguments and enters an exhaustive AskUserQuestion interview loop to refine existing draft specs before writing them back
 - **Spec 081**: /scan command — security vulnerability scanner that detects snyk/npm audit/pip-audit/bundler-audit and reports findings grouped by CRITICAL/HIGH/MEDIUM/LOW severity
 
 ## [v1.3.5] — 2026-03-16
