@@ -28,7 +28,7 @@ build_template_map() {
     done
     [ "$excluded" = "true" ] && continue
 
-    # Skip skills/ — handled explicitly by SHOPIFY_SKILLS_MAP with system check
+    # Skip skills/ — handled by system plugins (lib/systems/*.sh)
     [[ "$rel" == skills/* ]] && continue
 
     # Skip scripts/ — handled explicitly by system-specific install functions
@@ -54,20 +54,6 @@ build_template_map() {
 
 # Populate TEMPLATE_MAP at startup
 build_template_map
-
-# Shopify-specific skills (only added when system includes shopify)
-SHOPIFY_SKILLS_MAP=(
-  "templates/skills/shopify-theme-dev/SKILL.md:.claude/skills/shopify-theme-dev/SKILL.md"
-  "templates/skills/shopify-liquid/SKILL.md:.claude/skills/shopify-liquid/SKILL.md"
-  "templates/skills/shopify-app-dev/SKILL.md:.claude/skills/shopify-app-dev/SKILL.md"
-  "templates/skills/shopify-graphql-api/SKILL.md:.claude/skills/shopify-graphql-api/SKILL.md"
-  "templates/skills/shopify-hydrogen/SKILL.md:.claude/skills/shopify-hydrogen/SKILL.md"
-  "templates/skills/shopify-checkout/SKILL.md:.claude/skills/shopify-checkout/SKILL.md"
-  "templates/skills/shopify-functions/SKILL.md:.claude/skills/shopify-functions/SKILL.md"
-  "templates/skills/shopify-cli-tools/SKILL.md:.claude/skills/shopify-cli-tools/SKILL.md"
-  "templates/skills/shopify-new-section/SKILL.md:.claude/skills/shopify-new-section/SKILL.md"
-  "templates/skills/shopify-new-block/SKILL.md:.claude/skills/shopify-new-block/SKILL.md"
-)
 
 # Workflow skills shipped to every project so Codex can map slash-style spec prompts
 # to the existing spec workflow through .codex/skills -> .claude/skills.
@@ -167,8 +153,8 @@ write_metadata() {
     fi
   done
 
-  # Include Shopify skills if system includes shopify
-  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+  # Include system-specific skills (loaded by system plugin)
+  if [ "${#SHOPIFY_SKILLS_MAP[@]}" -gt 0 ] 2>/dev/null; then
     for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
       local tpl="${mapping%%:*}"
       local target="${mapping#*:}"
@@ -204,7 +190,7 @@ is_current_managed_target() {
     [ "${mapping#*:}" = "$target" ] && return 0
   done
 
-  if [[ "${SYSTEM:-}" == *shopify* ]]; then
+  if [ "${#SHOPIFY_SKILLS_MAP[@]}" -gt 0 ] 2>/dev/null; then
     for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
       [ "${mapping#*:}" = "$target" ] && return 0
     done

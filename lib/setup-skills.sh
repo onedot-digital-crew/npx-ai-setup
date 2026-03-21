@@ -1,43 +1,7 @@
 #!/bin/bash
-# Skills and agents installation: Shopify/Storyblok/spec skills, agent templates, skill aliases
-# Requires: core.sh ($TPL, $TEMPLATE_MAP, $SHOPIFY_SKILLS_MAP, $SPEC_SKILLS_MAP), setup.sh (_install_or_update_file)
-
-# Install Shopify-specific template skills (when system includes shopify)
-install_shopify_skills() {
-  if [[ "${SYSTEM:-}" == *shopify* ]]; then
-    echo "  🛍️  Installing Shopify skills..."
-    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-      local local_tpl="${mapping%%:*}"
-      local local_target="${mapping#*:}"
-      local skill_dir
-      skill_dir="$(dirname "$local_target")"
-      mkdir -p "$skill_dir"
-      # Backwards-compat: rename legacy prompt.md to SKILL.md if present
-      if [ -f "$skill_dir/prompt.md" ] && [ ! -f "$skill_dir/SKILL.md" ]; then
-        mv "$skill_dir/prompt.md" "$skill_dir/SKILL.md"
-      fi
-      _install_or_update_file "$TPL/${local_tpl#templates/}" "$local_target"
-    done
-  fi
-}
-
-install_storyblok_scripts() {
-  [[ "${SYSTEM:-}" == *storyblok* ]] || return 0
-  echo "  📦 Installing Storyblok scripts..."
-  local scripts_dir="scripts"
-  mkdir -p "$scripts_dir"
-  local target="$scripts_dir/storyblok-dump.ts"
-  _install_or_update_file "$TPL/scripts/storyblok-dump.ts" "$target"
-  # Add npm script entry if package.json present and entry missing
-  if [ -f "package.json" ]; then
-    if ! grep -q '"storyblok-dump"' package.json 2>/dev/null; then
-      _json_merge package.json '{"scripts":{"storyblok-dump":"tsx scripts/storyblok-dump.ts"}}'
-      echo "  ✅ Added storyblok-dump script to package.json"
-    else
-      echo "  ⏭️  storyblok-dump script already in package.json"
-    fi
-  fi
-}
+# Skills and agents installation: spec skills, agent templates, skill aliases
+# Requires: core.sh ($TPL, $TEMPLATE_MAP, $SPEC_SKILLS_MAP), setup.sh (_install_or_update_file)
+# System-specific skills are in lib/systems/*.sh
 
 install_spec_skills() {
   [ "${#SPEC_SKILLS_MAP[@]}" -gt 0 ] || return 0
@@ -104,13 +68,9 @@ _inject_agent_skills() {
     mv "$tmpfile" "$agent_file"
   }
 
-  if [ "$SYSTEM" = "shopify" ]; then
-    _inject_skill "liquid-linter.md" "shopify-liquid" "shopify-theme-dev"
-    _inject_skill "code-reviewer.md" "shopify-theme-dev"
-  fi
-
-  if [ "$SYSTEM" = "shopware" ]; then
-    _inject_skill "code-reviewer.md" "shopware6-best-practices"
+  # Delegate to system plugin if available
+  if type system_inject_agent_skills &>/dev/null; then
+    system_inject_agent_skills
   fi
 
   # vitest skill for test-generator (any system, if vitest is installed)
