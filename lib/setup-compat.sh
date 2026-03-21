@@ -1,7 +1,7 @@
 #!/bin/bash
 # Compatibility layers and config file installation
 # Handles: OpenCode, Copilot, claudeignore, repomix, statusline
-# Requires: core.sh ($TPL, $SYSTEM), setup.sh (_install_or_update_file)
+# Requires: core.sh ($TPL), setup.sh (_install_or_update_file)
 
 # Install all GitHub templates (copilot instructions + workflows)
 install_copilot() {
@@ -121,7 +121,7 @@ generate_opencode_config() {
   fi
 }
 
-# Install .claudeignore with universal patterns and optional system-specific additions.
+# Install .claudeignore with universal patterns.
 # Idempotent: merges new patterns into existing file, never removes user entries.
 install_claudeignore() {
   if [ ! -f .claudeignore ]; then
@@ -141,27 +141,6 @@ install_claudeignore() {
     [ "$added" -gt 0 ] && echo "  📄 .claudeignore updated (+$added patterns)"
   fi
 
-  # Append system-specific patterns
-  case "${SYSTEM:-}" in
-    shopware*)
-      for p in "var/cache/" "public/bundles/" "var/log/"; do
-        grep -qxF "$p" .claudeignore || echo "$p" >> .claudeignore
-      done
-      ;;
-    nuxt*)
-      for p in ".nuxt/" ".output/"; do
-        grep -qxF "$p" .claudeignore || echo "$p" >> .claudeignore
-      done
-      ;;
-    next*)
-      grep -qxF ".next/" .claudeignore || echo ".next/" >> .claudeignore
-      ;;
-    laravel*)
-      for p in "bootstrap/cache/" "storage/framework/"; do
-        grep -qxF "$p" .claudeignore || echo "$p" >> .claudeignore
-      done
-      ;;
-  esac
 }
 
 # Install repomix.config.json for codebase snapshot configuration
@@ -181,7 +160,7 @@ install_statusline_project() {
 }
 
 # Generate repomix codebase snapshot in background (once, if not already present)
-# Generate .repomixignore with base patterns + SYSTEM-specific exclusions.
+# Generate .repomixignore with base patterns.
 # Repomix reads .repomixignore natively (like .gitignore). Machine-local artifact.
 install_repomixignore() {
   [ -f .repomixignore ] && return 0
@@ -210,21 +189,6 @@ coverage/
 *.pdf
 REPOMIX_IGNORE_EOF
 
-  # Append system-specific patterns
-  case "${SYSTEM:-}" in
-    shopware*)
-      printf '\n# Shopware\nvar/cache/\nvar/log/\npublic/bundles/\n' >> .repomixignore
-      ;;
-    nuxt*)
-      printf '\n# Nuxt\n.nuxt/\n.output/\n' >> .repomixignore
-      ;;
-    next*)
-      printf '\n# Next.js\n.next/\n' >> .repomixignore
-      ;;
-    laravel*)
-      printf '\n# Laravel\nbootstrap/cache/\nstorage/framework/\nstorage/logs/\n' >> .repomixignore
-      ;;
-  esac
   echo "  📄 .repomixignore generated"
 }
 

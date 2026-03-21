@@ -60,15 +60,15 @@ _json_merge() {
 }
 
 # Build the initial .ai-setup.json structure.
-# Usage: _json_build_metadata VER INST_TIME UPD_TIME SYSTEM
+# Usage: _json_build_metadata VER INST_TIME UPD_TIME
 _json_build_metadata() {
-  local ver="$1" inst="$2" upd="$3" sys="$4"
+  local ver="$1" inst="$2" upd="$3"
   if [ "$_JSON_CMD" = "jq" ]; then
-    jq -n --arg ver "$ver" --arg inst "$inst" --arg upd "$upd" --arg sys "$sys" \
-      '{version:$ver,installed_at:$inst,updated_at:$upd,system:$sys,files:{}}'
+    jq -n --arg ver "$ver" --arg inst "$inst" --arg upd "$upd" \
+      '{version:$ver,installed_at:$inst,updated_at:$upd,files:{}}'
   else
     node -e "process.stdout.write(JSON.stringify(
-      {version:'$ver',installed_at:'$inst',updated_at:'$upd',system:'$sys',files:{}},null,2));"
+      {version:'$ver',installed_at:'$inst',updated_at:'$upd',files:{}},null,2));"
   fi
 }
 

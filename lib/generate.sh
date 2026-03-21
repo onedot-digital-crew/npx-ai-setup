@@ -1,8 +1,7 @@
 #!/bin/bash
 # AI generation: CLAUDE.md extension, context generation, skill discovery
-# Requires: core.sh, process.sh, detect.sh, skills.sh
-# Requires: $SYSTEM, $TEMPLATE_MAP, $REGEN_*
-# System plugins loaded via load_system_plugins()
+# Requires: core.sh, process.sh, skills.sh
+# Requires: $TEMPLATE_MAP, $REGEN_*
 
 # Count generated context files in .agents/context/.
 count_generated_context_files() {
@@ -15,7 +14,7 @@ count_generated_context_files() {
 
 # Main generation orchestrator
 # Called by both normal setup (Auto-Init) and --regenerate mode.
-# Requires: $SYSTEM is set, claude CLI is available
+# Requires: claude CLI is available
 # Sets: $INSTALLED (number of skills installed)
 run_generation() {
   # Disable errexit — background processes, wait, and command substitutions
@@ -62,15 +61,7 @@ run_generation() {
   fi
 
   if [ "$regen_ai_context" = "yes" ]; then
-    echo "🚀 Generating project context (System: $SYSTEM)..."
-
-    # Detect Shopware sub-type and gather system-specific context
-    detect_shopware_type
-    if [ -n "$SHOPWARE_TYPE" ]; then
-      echo "  Shopware type: $SHOPWARE_TYPE"
-    fi
-    gather_shopware_context
-    setup_shopware_mcp
+    echo "🚀 Generating project context..."
 
     # Cache file list once (avoid running collect_project_files 3x)
     CACHED_FILES=$(collect_project_files 80)
@@ -193,10 +184,9 @@ Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any 
 Based on the package.json scripts below, document the most important ones (dev, build, lint, test, etc.) as a bullet list.
 
 ## Critical Rules
-Based on the eslint/prettier config below and the framework/system ($SYSTEM), write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
+Based on the eslint/prettier config below and the detected framework, write concrete, actionable rules. Max 5 sections, 3-5 bullet points each.
 Cover these categories where evidence exists: code style (formatting, naming), TypeScript (strict mode, type patterns), imports (path aliases, barrel files), framework-specific (SSR, routing, state), testing (commands, patterns). Omit categories where no evidence exists in the config — do not fabricate rules.
 $TDD_INSTRUCTION
-$SHOPWARE_RULE
 
 Rules:
 - Edit CLAUDE.md directly. Replace both sections including any <!-- comments -->.
@@ -204,7 +194,6 @@ Rules:
 - Keep CLAUDE.md content stable and static — it is a prompt cache layer. Do not add timestamps, random IDs, or session-specific data.
 
 $CONTEXT
-$CTX_SHOPWARE
 EOF
 )
     AGENTS_MD_PROMPT=$(cat <<EOF
@@ -213,7 +202,7 @@ IMPORTANT: All project context is provided below. Do NOT read any files. Directl
 Replace the ## Project Overview, ## Architecture Summary, ## Commands, and ## Critical Rules sections in AGENTS.md (remove any HTML comments in those sections).
 
 ## Project Overview
-Write 4-6 concise bullet points: project purpose, main system/framework ($SYSTEM), runtime/language, key dependencies, and delivery/runtime context if available.
+Write 4-6 concise bullet points: project purpose, main framework/runtime/language, key dependencies, and delivery/runtime context if available.
 
 ## Architecture Summary
 Write 4-6 concise bullet points covering entry points, directory layout, data flow, and important boundaries.
@@ -224,7 +213,7 @@ If the project includes spec workflow commands or skills, also include /spec, /s
 For Codex-compatible projects, do not claim custom /spec* client commands. Instead add one bullet noting that Codex uses the corresponding skills via .codex/skills with \$spec* or natural language, while /spec* remains client-dependent.
 
 ## Critical Rules
-Based on eslint/prettier and detected framework/system ($SYSTEM), write actionable engineering rules.
+Based on eslint/prettier and detected framework, write actionable engineering rules.
 Max 5 sections, 3-5 bullet points each.
 Cover categories only if evidence exists: formatting/naming, typing patterns, imports/module boundaries, framework conventions, testing.
 $TDD_INSTRUCTION
@@ -235,7 +224,6 @@ Rules:
 - No umlauts. English only.
 
 $CONTEXT
-$CTX_SHOPWARE
 EOF
 )
     CONTEXT_PROMPT=$(cat <<EOF
@@ -247,8 +235,6 @@ Create exactly 3 files in .agents/context/ using the Write tool:
 - **.agents/context/ARCHITECTURE.md** — project type, directory structure, entry points, data flow, key patterns
 - **.agents/context/CONVENTIONS.md** — naming patterns, import style, component structure, error handling, TypeScript usage, testing patterns. Include a "## Definition of Done" section with project-appropriate quality gates derived from detected tools (e.g. linter: no lint errors, TypeScript: no explicit any/type errors, test runner: all tests green, formatter: code formatted). If a tool is not detected, omit its gate.
 
-Project system/framework: $SYSTEM
-
 Rules:
 - Create all 3 files in one turn using the Write tool.
 - Base ALL content on the provided context. Do not invent details.
@@ -256,7 +242,6 @@ Rules:
 - Use markdown headers and bullet points.
 - If information is not available, write 'Not determined from available context.'
 - No umlauts. English only.
-$SHOPWARE_INSTRUCTION
 
 --- package.json ---
 $CTX_PKG
@@ -272,7 +257,6 @@ $CTX_CONFIGS
 $CTX_README
 --- Sample source files ---
 $CTX_SAMPLE
-$CTX_SHOPWARE
 EOF
 )
 
@@ -405,10 +389,6 @@ EOF
       echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
       echo "DIR_HASH=$(echo "$CACHED_FILES" | cksum | cut -d' ' -f1,2)" >> "$STATE_FILE"
       echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
-      if [ "$SYSTEM" = "shopware" ] && [ -f composer.json ]; then
-        echo "COMPOSER_HASH=$(cksum composer.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
-        echo "SHOPWARE_TYPE=$SHOPWARE_TYPE" >> "$STATE_FILE"
-      fi
     fi
   else
     echo "⏭️  Skipping AI context generation (not selected)."
@@ -416,18 +396,6 @@ EOF
 
   # Step 3: Search and install skills (AI-curated, haiku for ranking)
   if [ "$REGEN_SKILLS" = "yes" ]; then
-  # Ensure bundled system skills are present when relevant.
-  if [ "${#SHOPIFY_SKILLS_MAP[@]}" -gt 0 ] 2>/dev/null; then
-    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-      local tpl="${mapping%%:*}"
-      local target="${mapping#*:}"
-      if [ -f "$SCRIPT_DIR/$tpl" ]; then
-        mkdir -p "$(dirname "$target")"
-        cp "$SCRIPT_DIR/$tpl" "$target"
-      fi
-    done
-  fi
-
   echo ""
   echo "🔌 Searching and installing skills..."
   INSTALLED=0
@@ -741,11 +709,10 @@ Rules:
     echo "  No package.json found."
   fi
 
-  # System-specific default skills (delegated to system plugins)
+  # Default + curated skills for this project
   SYSTEM_SKILLS=()
-  if type system_get_default_skills &>/dev/null; then
-    system_get_default_skills
-  fi
+  # Universal skills installed for every project regardless of stack
+  SYSTEM_SKILLS+=("vercel-labs/agent-browser@agent-browser")
 
   # Add curated keyword-based skills (from detected package.json dependencies)
   if [ ${#KEYWORDS[@]} -gt 0 ]; then
@@ -769,7 +736,7 @@ EOF
     SYSTEM_SKILLS=("${SYSTEM_SKILLS_UNIQ[@]}")
 
     echo ""
-    echo "  📦 Installing system-specific skills ($SYSTEM)..."
+    echo "  📦 Installing skills..."
 
     # Install system skills in parallel; tally results after all complete
     SYS_INSTALL_TMPDIR=$(mktemp -d)

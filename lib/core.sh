@@ -28,10 +28,10 @@ build_template_map() {
     done
     [ "$excluded" = "true" ] && continue
 
-    # Skip skills/ — handled by system plugins (lib/systems/*.sh)
+    # Skip skills/ — handled separately via SPEC_SKILLS_MAP
     [[ "$rel" == skills/* ]] && continue
 
-    # Skip scripts/ — handled explicitly by system-specific install functions
+    # Skip scripts/ — not installed by generic base layer
     [[ "$rel" == scripts/* ]] && continue
 
     # Skip typescript.md — handled conditionally by TS_RULES_MAP in install_rules()
@@ -85,8 +85,6 @@ _semver_gt() {
   return 1  # equal
 }
 
-VALID_SYSTEMS=(auto shopify nuxt next laravel shopware storyblok)
-
 # Get package version from package.json
 get_package_version() {
   _json_read "$SCRIPT_DIR/package.json" '.version' 2>/dev/null || echo "unknown"
@@ -99,20 +97,6 @@ get_installed_version() {
   else
     echo ""
   fi
-}
-
-# Restore SYSTEM from .ai-setup.json metadata if not already set.
-# Skips "auto" values (those require detection, not restoration).
-# Usage: restore_system_from_metadata [--quiet]
-restore_system_from_metadata() {
-  [ -n "$SYSTEM" ] && return 0
-  [ -f .ai-setup.json ] || return 0
-  local stored
-  stored=$(_json_read .ai-setup.json '.system')
-  [ -z "$stored" ] && return 0
-  [ "$stored" = "auto" ] && return 0
-  SYSTEM="$stored"
-  [ "${1:-}" != "--quiet" ] && echo "  🔍 Restored system from previous run: $SYSTEM" || true
 }
 
 # Compute checksum for a file (cksum outputs: checksum size filename)
@@ -141,7 +125,7 @@ write_metadata() {
 
   # Build JSON
   local json
-  json=$(_json_build_metadata "$version" "$install_time" "$timestamp" "${SYSTEM:-}")
+  json=$(_json_build_metadata "$version" "$install_time" "$timestamp")
 
   for mapping in "${TEMPLATE_MAP[@]}"; do
     local tpl="${mapping%%:*}"
@@ -152,19 +136,6 @@ write_metadata() {
       json=$(echo "$json" | _json_set_file "$target" "$cs")
     fi
   done
-
-  # Include system-specific skills (loaded by system plugin)
-  if [ "${#SHOPIFY_SKILLS_MAP[@]}" -gt 0 ] 2>/dev/null; then
-    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-      local tpl="${mapping%%:*}"
-      local target="${mapping#*:}"
-      if [ -f "$target" ]; then
-        local cs
-        cs=$(compute_checksum "$target")
-        json=$(echo "$json" | _json_set_file "$target" "$cs")
-      fi
-    done
-  fi
 
   # Include TypeScript rules if installed
   for mapping in "${TS_RULES_MAP[@]}"; do
@@ -189,12 +160,6 @@ is_current_managed_target() {
   for mapping in "${TEMPLATE_MAP[@]}"; do
     [ "${mapping#*:}" = "$target" ] && return 0
   done
-
-  if [ "${#SHOPIFY_SKILLS_MAP[@]}" -gt 0 ] 2>/dev/null; then
-    for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
-      [ "${mapping#*:}" = "$target" ] && return 0
-    done
-  fi
 
   for mapping in "${TS_RULES_MAP[@]}"; do
     [ "${mapping#*:}" = "$target" ] && return 0

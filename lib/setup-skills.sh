@@ -1,7 +1,6 @@
 #!/bin/bash
 # Skills and agents installation: spec skills, agent templates, skill aliases
 # Requires: core.sh ($TPL, $TEMPLATE_MAP, $SPEC_SKILLS_MAP), setup.sh (_install_or_update_file)
-# System-specific skills are in lib/systems/*.sh
 
 install_spec_skills() {
   [ "${#SPEC_SKILLS_MAP[@]}" -gt 0 ] || return 0
@@ -79,11 +78,6 @@ _inject_agent_skills() {
     done < "$agent_file"
     mv "$tmpfile" "$agent_file"
   }
-
-  # Delegate to system plugin if available
-  if type system_inject_agent_skills &>/dev/null; then
-    system_inject_agent_skills
-  fi
 
   # vitest skill for test-generator (any system, if vitest is installed)
   if [ -d ".claude/skills/vitest" ]; then

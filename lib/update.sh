@@ -76,7 +76,6 @@ handle_version_check() {
 
   if [ -n "$INSTALLED_VERSION" ] && [ "$INSTALLED_VERSION" = "$PACKAGE_VERSION" ]; then
     # Same version — pre-scan to check if templates actually differ
-    restore_system_from_metadata --quiet
     scan_template_changes
 
     echo ""
@@ -102,11 +101,6 @@ handle_version_check() {
         regen_ok=0
         if command -v claude &>/dev/null; then
           if ask_regen_parts; then
-            restore_system_from_metadata
-            if [ -z "$SYSTEM" ]; then
-              select_system
-            fi
-            detect_system
             run_generation || regen_ok=$?
             write_metadata
             echo ""
@@ -132,7 +126,6 @@ handle_version_check() {
 
   elif [ -n "$INSTALLED_VERSION" ]; then
     # Different version — pre-scan to show change count
-    restore_system_from_metadata --quiet
     scan_template_changes
 
     echo ""
@@ -176,9 +169,6 @@ scan_template_changes() {
   SCAN_TOTAL_CHANGES=0
 
   local all_mappings=("${TEMPLATE_MAP[@]}")
-  if [[ "${SYSTEM:-}" == *shopify* ]]; then
-    all_mappings+=("${SHOPIFY_SKILLS_MAP[@]}")
-  fi
 
   for mapping in "${all_mappings[@]}"; do
     local tpl="${mapping%%:*}"
@@ -301,13 +291,7 @@ run_patch() {
     exit 1
   fi
 
-  # Restore system from metadata so shopify-specific maps are included if applicable
-  restore_system_from_metadata --quiet
-
   local all_mappings=("${TEMPLATE_MAP[@]}" "${SPEC_SKILLS_MAP[@]}")
-  if [[ "${SYSTEM:-}" == *shopify* ]]; then
-    all_mappings+=("${SHOPIFY_SKILLS_MAP[@]}")
-  fi
 
   local copied=0
   for mapping in "${all_mappings[@]}"; do
@@ -342,9 +326,6 @@ run_smart_update() {
   [ "${1:-}" = "--skip-regen" ] && skip_regen=1
   echo ""
   echo "🔍 Analyzing templates..."
-
-  # Restore SYSTEM from metadata if not set via --system flag
-  restore_system_from_metadata
 
   # Normalize legacy skills layout in existing projects.
   if command -v ensure_skills_alias >/dev/null 2>&1; then
@@ -382,11 +363,6 @@ run_smart_update() {
   if [ "$SCAN_TOTAL_CHANGES" -gt 0 ]; then
     _process_update_mappings "${TEMPLATE_MAP[@]}"
 
-    # Also update Shopify-specific skills if system includes shopify
-    if [[ "${SYSTEM:-}" == *shopify* ]]; then
-      _process_update_mappings "${SHOPIFY_SKILLS_MAP[@]}"
-    fi
-
     cleanup_obsolete_managed_files
   fi
 
@@ -421,10 +397,6 @@ run_smart_update() {
       fi
       # Use granular selector instead of binary y/N (Steps 3-4)
       if ask_regen_parts; then
-        if [ -z "$SYSTEM" ]; then
-          select_system
-        fi
-        detect_system
         regen_ok=0
         run_generation || regen_ok=$?
         write_metadata
@@ -465,15 +437,6 @@ run_clean_reinstall() {
   cleanup_obsolete_managed_files reinstall
 
   for mapping in "${TEMPLATE_MAP[@]}"; do
-    target="${mapping#*:}"
-    if [ -f "$target" ]; then
-      rm -f "$target"
-      echo "   Removed: $target"
-    fi
-  done
-
-  # Also remove Shopify-specific skills
-  for mapping in "${SHOPIFY_SKILLS_MAP[@]}"; do
     target="${mapping#*:}"
     if [ -f "$target" ]; then
       rm -f "$target"
