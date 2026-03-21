@@ -19,7 +19,7 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | **Settings** | Granular bash permissions, opusplan model, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH |
 | **Hooks** | protect-files, post-edit-lint, circuit-breaker, context-freshness, context-monitor, context-reinforcement, update-check, cross-repo-context, notify, mcp-health, post-tool-failure-log, config-change-audit, task-completed-gate |
 | **Rules** | `.claude/rules/` — general, testing, git, typescript (conditional) |
-| **Commands** | 22 slash commands for spec-driven development, reviews, releases, security scanning, debugging |
+| **Commands** | 23 slash commands for spec-driven development, reviews, releases, security scanning, debugging |
 | **Agents** | 11 subagent templates for parallel verification, review, and architectural assessment |
 | **Context** | `.agents/context/` — STACK.md, ARCHITECTURE.md, CONVENTIONS.md (auto-generated) |
 | **GitHub** | `.github/copilot-instructions.md` + `.github/workflows/release-from-changelog.yml` |
@@ -68,6 +68,7 @@ Native project slash commands are available in Claude Code and compatible client
 | `/spec-validate 001` | Sonnet | Validate spec quality before executing |
 | `/spec-board` | Sonnet | Kanban-style overview of all specs |
 | `/debug "description"` | Sonnet | Hypothesis-first bug investigation and fix |
+| `/build-fix` | Sonnet | Incremental build-error fixer — run, parse, fix, repeat (max 10 iterations) |
 | `/commit` | Sonnet | Stage changes + create descriptive commit |
 | `/pr` | Sonnet | Draft PR title/body, run build validation |
 | `/review` | Opus | Review uncommitted changes (Quick Scan / Standard / Adversarial Grill) |
