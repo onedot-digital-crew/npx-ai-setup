@@ -1,6 +1,6 @@
 # Spec: Split generate.sh and setup.sh into focused modules
 
-> **Spec ID**: 111 | **Created**: 2026-03-21 | **Status**: in-progress | **Branch**: —
+> **Spec ID**: 111 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 Extract logically independent code from the two largest lib modules (generate.sh 1081 LOC, setup.sh 979 LOC) into focused sub-modules for better maintainability.
@@ -13,13 +13,13 @@ The lib/ directory already has 12 modules, but generate.sh and setup.sh grew int
 - [x] Step 2: Extract skills/agents functions from `lib/setup.sh` → new `lib/setup-skills.sh`: `install_shopify_skills`, `install_storyblok_scripts`, `install_spec_skills`, `install_agents`, `_inject_agent_skills`, `merge_skills_dir_into_canonical`, `repair_canonical_skill_links`, `ensure_skills_alias`, `ensure_codex_skills_alias`, `ensure_opencode_skills_alias`. Add `source_lib`.
 - [x] Step 3: Extract compat/config functions from `lib/setup.sh` → new `lib/setup-compat.sh`: `generate_opencode_config`, `_oc_model`, `install_claudeignore`, `install_repomix_config`, `install_repomixignore`, `generate_repomix_snapshot`, `install_statusline_project`, `install_copilot`. Add `source_lib`.
 - [x] Step 4: Verify all function calls in `bin/ai-setup.sh` still resolve. Run `./bin/ai-setup.sh --help` or dry-run to confirm no breakage.
-- [ ] Step 5: Run `npx @onedot/ai-setup` in a test project to verify full setup works end-to-end.
+- [x] Step 5: Run `npx @onedot/ai-setup` in a test project to verify full setup works end-to-end.
 
 ## Acceptance Criteria
-- [ ] `lib/generate.sh` contains only generation logic (< 850 LOC)
-- [ ] `lib/setup.sh` contains only core template installation (< 450 LOC)
-- [ ] Three new modules exist: `shopware.sh`, `setup-skills.sh`, `setup-compat.sh`
-- [ ] Full setup (`npx @onedot/ai-setup`) completes without errors
+- [x] `lib/generate.sh` contains only generation logic (816 LOC < 850)
+- [x] `lib/setup.sh` contains only core template installation (376 LOC < 450)
+- [x] Three new modules exist: `shopware.sh`, `setup-skills.sh`, `setup-compat.sh`
+- [x] Full setup (`./bin/ai-setup.sh`) completes without errors
 
 ## Files to Modify
 - `lib/generate.sh` — remove Shopware functions
