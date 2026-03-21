@@ -1,155 +1,160 @@
 ---
 model: opus
 mode: plan
-argument-hint: "<url-or-pasted-text>"
-allowed-tools: Read, Glob, Grep, WebFetch, WebSearch, AskUserQuestion
+argument-hint: "<github-url or article-url>"
+allowed-tools: Read, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, Bash
 ---
 
-Systematically evaluates an external idea, article, tool, or pattern against the existing project's Claude Code setup. Input: $ARGUMENTS
+Deep-evaluates an external repository, tool, or pattern against the existing project's Claude Code setup. Produces a comprehensive brainstorm document with prioritized adoption candidates. Input: $ARGUMENTS
 
-## Phase 1 — Acquire Input
+## Phase 1 — Acquire & Scrape Deep
 
-### 1a — Parse Input
+### 1a — Detect Input Type
 
-Inspect `$ARGUMENTS`:
+- **GitHub repo URL** (contains `github.com`): enter **Deep Repo Scrape** mode (1b)
+- **Article/blog URL**: WebFetch → extract patterns → proceed to Phase 2 with summary
+- **Search query** (no URL): WebSearch → WebFetch best result → proceed to Phase 2
+- **Pasted text**: extract patterns directly → proceed to Phase 2
 
-- If it starts with `http://` or `https://`: fetch via WebFetch. Use the prompt: "Extract all Claude Code patterns, workflow commands, agent definitions, hook configurations, settings fields, and tool recommendations mentioned in this content. List each as a named item with a one-sentence description."
-- If it looks like a search query (no URL, short phrase): use WebSearch to find the most relevant article or discussion, then WebFetch the result.
-- Otherwise: treat the full argument text as pasted content and extract patterns directly by reading it carefully.
+### 1b — Deep Repo Scrape (GitHub repos only)
 
-Produce a numbered **Proposal Inventory** — every distinct pattern, feature, command, agent, rule, hook, or tool identified in the input. For each item, also note any specific implementation details, code snippets, or concrete approaches mentioned. Format:
+**Goal**: Read EVERY relevant file, not just the README.
 
-```
-1. [Name]: [one-line description]
-   Implementation detail: [specific code, config, or approach if given]
-2. [Name]: [one-line description]
-   Implementation detail: [...]
-```
+1. Identify key directories to scrape. For Claude Code repos, this typically includes:
+   `.claude/commands/`, `.claude/agents/`, `.claude/skills/`, `.claude/hooks/`, `.claude/rules/`,
+   `scripts/`, `hooks/`, `agents/`, `mcp-server/`, `src/`
 
-If nothing can be extracted, report "No actionable Claude Code patterns found" and stop.
+2. **Spawn parallel Agent workers** (model: haiku for listing, sonnet for content) to scrape each directory:
+   - Agent 1: List + read all command files
+   - Agent 2: List + read all agent/persona files
+   - Agent 3: List + read all skill files
+   - Agent 4: List + read all hook/script files
+   - Agent 5: Read README, config files, package.json
 
----
+   Each agent uses `defuddle parse <url> --md` for directory listing, then `WebFetch` on raw GitHub URLs
+   (`https://raw.githubusercontent.com/OWNER/REPO/main/PATH`) for file content.
+   Agents must return **full file content**, not summaries.
 
-## Phase 2 — Build Existing Inventory (Shallow Pass)
+3. In parallel, **read all our existing files** via a separate Agent:
+   - All files in `templates/commands/`, `templates/agents/`, `templates/hooks/`
+   - All files in `.claude/commands/`, `.claude/agents/`, `.claude/rules/`
+   - `lib/plugins.sh`, `bin/ai-setup.sh` (for integration context)
 
-Scan the project to understand what we already have. Run all reads in parallel. Scan whichever of these directories exist in the current project:
-
-1. `.claude/commands/` or `templates/commands/` — list all .md filenames
-2. `.claude/agents/` or `templates/agents/` — list all .md filenames
-3. `.claude/rules/` or `templates/claude/rules/` — list all .md filenames
-4. `.claude/hooks/` or `templates/claude/hooks/` — list all .sh filenames
-5. `.claude/settings.json` or `templates/claude/settings.json` — note hook types and field names (no need to read full content)
-6. `.claude/commands/` (project-local) — list all filenames
-
-Produce a compact **Existing Inventory** by category (names only at this stage).
-
----
-
-## Phase 3 — Gap Analysis with Deep Comparison
-
-For each item in the Proposal Inventory:
-
-**Step 3a — Initial match**: Use Grep to search `.claude/` and `templates/` directories (whichever exist) for the concept name, key terms, or related keywords. Identify the most likely existing equivalent.
-
-**Step 3b — Deep read for non-obvious cases**: If a potential match is found and it's not immediately clear whether it's REDUNDANT or could be improved:
-- Read the **full content** of the matching existing file(s)
-- Read any related files referenced in it (e.g., if a command delegates to an agent, read that agent too)
-- Compare the proposed implementation detail against our actual code line by line
-
-**Step 3c — Classify** using these categories:
-
-| Classification | Meaning |
-|---|---|
-| **NEW** | We have nothing equivalent — this fills a genuine gap |
-| **PARTIAL** | We have this but the proposal has specific improvements we could adopt (list exactly what) |
-| **BETTER** | The proposal is stronger overall — our version should be replaced |
-| **REDUNDANT** | We have this fully — our version is equivalent or superior, nothing to borrow |
-| **WORSE** | We have this and our version is clearly stronger — the proposal would be a downgrade |
-
-**Critical rule**: Do NOT classify as REDUNDANT without reading the full file and comparing implementation details. Even similar-sounding features may differ in edge case handling, error recovery, scope, or specific code patterns.
+4. Compile a **complete inventory** of both sides:
+   ```
+   EXTERNAL: [count] commands, [count] agents, [count] skills, [count] hooks, [count] scripts
+   OURS:     [count] commands, [count] agents, [count] rules, [count] hooks
+   ```
 
 ---
 
-## Phase 4 — Output: Findings Table
+## Phase 2 — Existing Inventory Match
 
+For each external item, find the closest match in our codebase:
+
+| External Item | Our Equivalent | Status |
+|--------------|---------------|--------|
+| [name]       | [our file]    | ✅ Covered / ⚠️ Partial / ❌ Missing |
+
+Group into:
+- **Already covered**: We have an equivalent or better version
+- **Partially covered**: We have something similar but theirs adds specific improvements
+- **New**: We have nothing equivalent
+
+---
+
+## Phase 3 — Deep Comparison (the valuable part)
+
+### 3a — Line-by-line comparison for "Partially covered" items
+
+For each partially covered item:
+1. Read our file completely
+2. Read their file completely
+3. Identify **specific sentences, patterns, or techniques** worth adopting
+4. Quote the exact line/approach from theirs that we lack
+
+Example output:
 ```
-## Evaluation Results
-
-**Source**: [URL or "inline text"]
-**Evaluated**: [date]
-
-### Findings
-
-| # | Pattern | Class | Existing File | Detail |
-|---|---------|-------|---------------|--------|
-| 1 | name    | NEW   | —             | —      |
-| 2 | name    | PARTIAL | [commands-dir]/foo.md | Proposal adds: [specific line/approach missing from ours] |
-| 3 | name    | BETTER  | [agents-dir]/bar.md   | Proposal is stronger because: [specific reason] |
-| 4 | name    | REDUNDANT | [commands-dir]/baz.md | Our version covers this fully |
-| 5 | name    | WORSE   | [hooks-dir]/general.md | Our version handles: [what theirs misses] |
+Their `/review` has: "Check for stub code, placeholder implementations, TODO-marked incomplete code"
+Our `/review` at line 24 lacks this — would catch AI-generated incomplete code.
 ```
 
-For **PARTIAL** and **BETTER** findings, the Detail column must be specific:
-- Quote or describe the exact code/approach from the proposal that we lack
-- Reference the exact line or section in our existing file where this could be added
-- Example: "Proposal adds `tsc --noEmit` after TS edits; our `post-edit-lint.sh:7` only runs ESLint"
+### 3b — Architecture patterns analysis
 
-```
-### Summary
-- NEW: N | PARTIAL: N | BETTER: N | REDUNDANT: N | WORSE: N
+Look beyond individual files for **systemic patterns**:
+- How do they structure agent delegation? (routing, when_to_use/avoid_if)
+- What quality gates exist? (hooks that validate output)
+- What's scripted vs. LLM-driven? (token savings opportunities)
+- What's their testing/validation approach?
 
-### Overhead Assessment (NEW, PARTIAL, BETTER only)
+### 3c — Strategic analysis
 
-| # | Pattern | Maintenance | Integration | User Value | Adopt? |
-|---|---------|-------------|-------------|------------|--------|
-| 1 | name    | low         | low         | high       | YES    |
+- **Token economics**: Would adopting X save tokens? How much?
+- **Quality impact**: Would adopting Y improve output consistency?
+- **Maintenance cost**: Would adopting Z add maintenance burden?
+- **Team impact**: Would this help onboarding new developers?
 
-### Verdict
+---
 
-[One paragraph: overall assessment. Highlight the highest-value PARTIAL/BETTER/NEW findings.]
+## Phase 4 — Create Brainstorm Document
+
+Write a comprehensive brainstorm document to `specs/NNN-evaluate-[source-name].md`:
+
+```markdown
+# Brainstorm: [Source Name] Adaptionen für [project]
+
+> **Source**: [URL]
+> **Erstellt**: [date]
+> **Zweck**: Evaluierung welche Patterns adaptierbar sind
+
+## Bestandsvergleich: Was haben wir schon?
+[Table of covered items]
+
+## Kandidaten für Adaption
+[For each NEW/PARTIAL item: description, what it does, our gap, effort, recommendation]
+
+## Einzelne Sätze/Patterns zum Adaptieren
+[Specific lines worth stealing — even from "covered" items]
+
+## Architektur-Patterns
+[Systemic patterns worth adopting]
+
+## Gesamtranking nach Aufwand/Nutzen
+[Ranked table with: Item, Value ★, Aufwand, Empfehlung]
 ```
 
 ---
 
-## Phase 5 — Adoption Candidates
+## Phase 5 — Interview & Prioritize
 
-List all NEW, PARTIAL, and BETTER findings with medium/high user value:
+Use `AskUserQuestion` to discuss findings with the user:
 
-```
-## Adoption Candidates
+1. **First question**: Present top 5 findings, ask which areas to explore deeper
+2. **Follow-up rounds**: Based on user interest, dive into specific areas
+3. **Strategic questions**: Ask about team context, priorities, constraints
 
-1. [Pattern] — [one-line rationale]
-   Class: NEW | Action: Create spec for `[commands-dir]/[name].md`
-
-2. [Pattern] — [one-line rationale]
-   Class: PARTIAL | Specific improvement: [exact change to make]
-   Action: Modify `[hooks-dir]/[file].sh` via spec — add [what]
-
-3. [Pattern] — [one-line rationale]
-   Class: BETTER | Action: Replace `[agents-dir]/[name].md` via spec
-```
+Continue interviewing until the user signals they're satisfied. Minimum 2 rounds.
 
 ---
 
 ## Phase 6 — Spec Creation Gate
 
-Use `AskUserQuestion` with multiSelect: true. Options: one per adoption candidate, plus "Keine — spaeter entscheiden".
+After interview rounds, present final prioritized list:
 
-If the user selects items: output pre-filled `/spec` commands with enough detail that the spec writer understands the exact change needed. For PARTIAL items, include the specific code or line to add.
+Use `AskUserQuestion` with multiSelect: true — one option per adoption candidate.
 
-Example:
-```
-Run these commands to create specs:
-
-  /spec "Add tsc --noEmit to post-edit-lint.sh after .ts/.tsx edits — only when tsconfig.json exists in project root; insert after ESLint block at line 7"
-```
+For selected items: create actual spec files (not just `/spec` commands).
+Each spec should reference the brainstorm document for context.
 
 ---
 
 ## Rules
 
-- Read-only: never write, create, or modify any file
-- Never auto-create specs — only recommend `/spec` commands
-- Always read the full existing file before classifying as REDUNDANT
-- Scoped to Claude Code AI dev environment patterns only
-- If WebFetch fails, ask user to paste content directly
+- **Deep scrape**: For GitHub repos, read EVERY file — not just README
+- **Full content**: Agents must return complete file content, not summaries
+- **Parallel**: Use Agent workers for scraping — never sequentially fetch 20+ files
+- **Specific**: Quote exact lines/approaches, not vague comparisons
+- **Honest**: If our version is better, say so. Don't invent improvements that don't exist
+- **Strategic**: Always include token economics and maintenance cost analysis
+- If WebFetch/defuddle fails for a URL, ask user to paste content or try raw GitHub URLs
+- The brainstorm document is the primary deliverable — it persists across sessions
