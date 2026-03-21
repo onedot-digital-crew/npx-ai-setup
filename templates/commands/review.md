@@ -11,7 +11,7 @@ Reviews uncommitted changes and reports bugs, security issues, and improvements.
 Run the prep script first to collect all diffs and duplicate findings in one pass:
 
 ```bash
-bash .claude/scripts/review-prep.sh
+!bash .claude/scripts/review-prep.sh
 ```
 
 Use the output as your sole source of diff data and duplicate findings. Do NOT re-run git diff or grep for duplicates — the script already captured this.

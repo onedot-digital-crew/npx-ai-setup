@@ -20,7 +20,9 @@ SPEC_FILE=""
 if printf '%s' "$SPEC_ARG" | grep -qE '^[0-9]+$'; then
   # Zero-pad to 3 digits and glob
   PADDED="$(printf '%03d' "$SPEC_ARG")"
-  SPEC_FILE="$(ls specs/${PADDED}-*.md 2>/dev/null | head -1 || true)"
+  for _f in specs/${PADDED}-*.md; do
+    [ -f "$_f" ] && SPEC_FILE="$_f" && break
+  done
   if [ -z "$SPEC_FILE" ]; then
     printf "No spec found matching specs/%s-*.md\n" "$PADDED" >&2
     exit 1
@@ -80,17 +82,13 @@ fi
 # ---------------------------------------------------------------------------
 section "Required Sections"
 
-REQUIRED_SECTIONS="Goal Context Steps Acceptance.Criteria Files.to.Modify Out.of.Scope"
+REQUIRED_SECTIONS=("Goal" "Context" "Steps" "Acceptance Criteria" "Files to Modify" "Out of Scope")
 
 printf "%-30s %s\n" "Section" "Status"
 printf "%-30s %s\n" "-------" "------"
 
-for raw_section in $REQUIRED_SECTIONS; do
-  # Convert dots to spaces for display and grep
-  display="$(printf '%s' "$raw_section" | tr '.' ' ')"
-  # Build regex: match "## Goal", "## Acceptance Criteria", etc.
-  regex="$(printf '%s' "$display")"
-  status="$(grep -qE "^## ${regex}" "$SPEC_FILE" 2>/dev/null && echo "[PRESENT]" || echo "[MISSING]")"
+for display in "${REQUIRED_SECTIONS[@]}"; do
+  status="$(grep -qE "^## ${display}" "$SPEC_FILE" 2>/dev/null && echo "[PRESENT]" || echo "[MISSING]")"
   printf "%-30s %s\n" "$display" "$status"
 done
 
@@ -102,8 +100,7 @@ section "Line Counts per Section"
 printf "%-30s %s\n" "Section" "Lines"
 printf "%-30s %s\n" "-------" "-----"
 
-for raw_section in $REQUIRED_SECTIONS; do
-  display="$(printf '%s' "$raw_section" | tr '.' ' ')"
+for display in "${REQUIRED_SECTIONS[@]}"; do
   lines="$(count_section_lines "$SPEC_FILE" "$display")"
   printf "%-30s %s\n" "$display" "$lines"
 done
@@ -171,8 +168,7 @@ SCORE=0
 MAX=100
 
 # Each required section present: +12 points (6 sections * 12 = 72)
-for raw_section in $REQUIRED_SECTIONS; do
-  display="$(printf '%s' "$raw_section" | tr '.' ' ')"
+for display in "${REQUIRED_SECTIONS[@]}"; do
   if grep -qE "^## ${display}" "$SPEC_FILE" 2>/dev/null; then
     SCORE=$((SCORE + 12))
   fi

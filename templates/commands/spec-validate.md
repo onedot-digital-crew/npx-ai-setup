@@ -17,7 +17,7 @@ If `$ARGUMENTS` is a number (e.g. `011`), open `specs/011-*.md`. If it's a filen
 Run the prep script to pre-parse the spec structure before reading it yourself:
 
 ```bash
-bash .claude/scripts/spec-validate-prep.sh $ARGUMENTS
+bash .claude/scripts/spec-validate-prep.sh "$ARGUMENTS"
 ```
 
 Use the prep output to populate the scoring table in step 5 — it provides:

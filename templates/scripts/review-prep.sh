@@ -35,7 +35,7 @@ ALL_CHANGED="$(printf '%s\n%s\n' "$STAGED_FILES" "$UNSTAGED_FILES" \
 if [ -z "$ALL_CHANGED" ]; then
   printf "No changed files found (working tree clean, nothing staged).\n"
 else
-  CHANGED_COUNT="$(printf '%s\n' "$ALL_CHANGED" | wc -l | tr -d ' ')"
+  CHANGED_COUNT="$(printf '%s\n' "$ALL_CHANGED" | grep -c '.' 2>/dev/null || echo 0)"
   printf "%s file(s) changed:\n\n" "$CHANGED_COUNT"
   while IFS= read -r f; do
     [ -z "$f" ] && continue
@@ -126,13 +126,21 @@ else
       [ "${#fname}" -lt 4 ] && continue
 
       # Search for this name in the codebase (excluding the file itself and build dirs)
-      MATCHES="$(git grep -l --word-regexp "$fname" -- \
-        ':!dist/' ':!.output/' ':!node_modules/' ':!*.min.js' \
-        2>/dev/null \
-        | grep -vxF "$file" || true)"
+      # Use pathspec exclusion only on Git >= 2.16 (older versions don't support :!path)
+      if git --version 2>/dev/null | grep -qE 'git version [01]\.|git version 2\.[0-9]\.|git version 2\.1[0-5]\.'; then
+        MATCHES="$(git grep -l --word-regexp "$fname" -- \
+          '*.sh' '*.js' '*.ts' '*.py' \
+          2>/dev/null \
+          | grep -vxF "$file" || true)"
+      else
+        MATCHES="$(git grep -l --word-regexp "$fname" -- \
+          '*.sh' '*.js' '*.ts' '*.py' ':!dist/' ':!.output/' ':!node_modules/' ':!*.min.js' \
+          2>/dev/null \
+          | grep -vxF "$file" || true)"
+      fi
 
       if [ -n "$MATCHES" ]; then
-        MATCH_COUNT="$(printf '%s\n' "$MATCHES" | wc -l | tr -d ' ')"
+        MATCH_COUNT="$(printf '%s\n' "$MATCHES" | grep -c '.' 2>/dev/null || echo 0)"
         DUPE_FINDINGS="${DUPE_FINDINGS}- \`${fname}\` (defined in \`${file}\`) also found in ${MATCH_COUNT} other file(s):\n"
         while IFS= read -r m; do
           [ -z "$m" ] && continue
