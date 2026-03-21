@@ -1,6 +1,6 @@
 # Spec: Lean Review Flow mit Complexity-Gate
 
-> **Spec ID**: 129 | **Created**: 2026-03-21 | **Status**: in-progress | **Branch**: spec/129-lean-review-complexity-gate | **Complexity**: medium
+> **Spec ID**: 129 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: spec/129-lean-review-complexity-gate | **Complexity**: medium
 
 ## Goal
 Remove meaningless scoring from spec-review and add complexity-gated staff-reviewer for high-complexity specs in both spec-work and spec-review.
@@ -15,10 +15,10 @@ The current spec-review uses a 10-metric scoring system (0-100) that produces ar
 - [x] Step 4: Mirror Step 2 changes to `.claude/commands/spec-review.md`
 
 ## Acceptance Criteria
-- [ ] No scoring metrics or score tables remain in spec-review (template + active)
-- [ ] spec-work Step 18 spawns staff-reviewer additionally when Complexity is high
-- [ ] spec-review spawns staff-reviewer additionally when Complexity is high
-- [ ] Verdict logic in spec-review uses code-reviewer verdict + acceptance criteria, not numeric scores
+- [x] No scoring metrics or score tables remain in spec-review (template + active)
+- [x] spec-work Step 18 spawns staff-reviewer additionally when Complexity is high
+- [x] spec-review spawns staff-reviewer additionally when Complexity is high
+- [x] Verdict logic in spec-review uses code-reviewer verdict + acceptance criteria, not numeric scores
 
 ## Files to Modify
 - `templates/commands/spec-work.md` — Step 18 complexity gate
