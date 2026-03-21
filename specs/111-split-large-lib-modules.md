@@ -12,7 +12,7 @@ The lib/ directory already has 12 modules, but generate.sh and setup.sh grew int
 - [x] Step 1: Extract `gather_shopware_context()` + `setup_shopware_mcp()` from `lib/generate.sh` → new `lib/shopware.sh`. Add `source_lib "shopware.sh"` to `bin/ai-setup.sh`.
 - [x] Step 2: Extract skills/agents functions from `lib/setup.sh` → new `lib/setup-skills.sh`: `install_shopify_skills`, `install_storyblok_scripts`, `install_spec_skills`, `install_agents`, `_inject_agent_skills`, `merge_skills_dir_into_canonical`, `repair_canonical_skill_links`, `ensure_skills_alias`, `ensure_codex_skills_alias`, `ensure_opencode_skills_alias`. Add `source_lib`.
 - [x] Step 3: Extract compat/config functions from `lib/setup.sh` → new `lib/setup-compat.sh`: `generate_opencode_config`, `_oc_model`, `install_claudeignore`, `install_repomix_config`, `install_repomixignore`, `generate_repomix_snapshot`, `install_statusline_project`, `install_copilot`. Add `source_lib`.
-- [ ] Step 4: Verify all function calls in `bin/ai-setup.sh` still resolve. Run `./bin/ai-setup.sh --help` or dry-run to confirm no breakage.
+- [x] Step 4: Verify all function calls in `bin/ai-setup.sh` still resolve. Run `./bin/ai-setup.sh --help` or dry-run to confirm no breakage.
 - [ ] Step 5: Run `npx @onedot/ai-setup` in a test project to verify full setup works end-to-end.
 
 ## Acceptance Criteria
