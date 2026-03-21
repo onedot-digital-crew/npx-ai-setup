@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 130**: Docs sync — updated README (counts, tables, hooks), WORKFLOW-GUIDE (commands, agents, hooks), CHANGELOG (specs 108–128)
 - **Spec 129**: Lean review flow with complexity gate — removed 10-metric scoring from spec-review, added staff-reviewer for high-complexity specs
 - **Spec 128**: Global developer workstation setup — `npx @onedot/ai-setup-global` installs CLI tools, global Claude settings, and API key checks
 - **Spec 127**: Pre-release validation script — `scripts/validate-release.sh` checks version, CHANGELOG, template integrity before release

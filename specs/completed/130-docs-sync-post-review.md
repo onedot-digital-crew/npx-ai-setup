@@ -1,6 +1,6 @@
 # Spec: Sync all documentation after Specs 108–128
 
-> **Spec ID**: 130 | **Created**: 2026-03-21 | **Status**: in-progress | **Complexity**: low | **Branch**: —
+> **Spec ID**: 130 | **Created**: 2026-03-21 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 Update all developer-facing documentation to reflect the current state after Specs 108–128.
@@ -13,12 +13,12 @@ Specs 108–128 added new commands, removed /grill (merged into /review), added 
 - [x] Step 2: Update README.md — header counts, command table (remove /grill, add missing), agent table (add 3 new)
 - [x] Step 3: Update README.md hooks description to use actual hook filenames
 - [x] Step 4: Add missing CHANGELOG entries for Specs 108–128 under [Unreleased]
-- [ ] Step 5: Verify all counts match actual file counts in templates/
+- [x] Step 5: Verify all counts match actual file counts in templates/
 
 ## Acceptance Criteria
-- [ ] WORKFLOW-GUIDE lists all commands, all 11 agents, all 12 hooks
-- [ ] README counts match `ls templates/commands/*.md` and `ls templates/agents/*.md`
-- [ ] CHANGELOG [Unreleased] has entries for all specs 108–128
+- [x] WORKFLOW-GUIDE lists all commands, all 11 agents, all 12 hooks
+- [x] README counts match `ls templates/commands/*.md` and `ls templates/agents/*.md`
+- [x] CHANGELOG [Unreleased] has entries for all specs 108–128
 
 ## Files to Modify
 - `templates/claude/WORKFLOW-GUIDE.md` — commands, agents, hooks sections
