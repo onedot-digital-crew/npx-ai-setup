@@ -1,7 +1,45 @@
 #!/bin/bash
-# Shopware-specific context gathering and MCP setup
-# Requires: core.sh, detect.sh ($SYSTEM, $SHOPWARE_TYPE)
-# Sets: CTX_SHOPWARE, SHOPWARE_INSTRUCTION, SHOPWARE_RULE
+# System plugin: Shopware 6
+# Provides: detect_shopware_type, gather_shopware_context, setup_shopware_mcp,
+#           system_get_default_skills, system_inject_agent_skills
+# Requires: core.sh ($SYSTEM), json.sh (_json_read)
+
+# Distinguish Shopware plugin project from full shop repository.
+# Sets SHOPWARE_TYPE to "plugin" or "shop".
+# Called from run_generation() after SYSTEM is set.
+detect_shopware_type() {
+  SHOPWARE_TYPE=""
+  [ "$SYSTEM" != "shopware" ] && return 0
+
+  # Shop indicator: custom/plugins or custom/static-plugins directory
+  if [ -d "custom/plugins" ] || [ -d "custom/static-plugins" ]; then
+    SHOPWARE_TYPE="shop"
+    return 0
+  fi
+
+  # Plugin indicator: composer.json type field
+  local ctype
+  ctype=$(_json_read composer.json '.type')
+  if [ "$ctype" = "shopware-platform-plugin" ] || [ "$ctype" = "shopware-bundle" ]; then
+    SHOPWARE_TYPE="plugin"
+    return 0
+  fi
+
+  # Plugin indicator: bootstrap PHP class in src/
+  if find src -maxdepth 2 \( -name "*Plugin.php" -o -name "*Bundle.php" \) 2>/dev/null | grep -q .; then
+    SHOPWARE_TYPE="plugin"
+    return 0
+  fi
+
+  # Plugin indicator: app-system manifest
+  if [ -f manifest.xml ]; then
+    SHOPWARE_TYPE="plugin"
+    return 0
+  fi
+
+  # Fallback: assume plugin (smaller scope, safer default)
+  SHOPWARE_TYPE="plugin"
+}
 
 # Gather Shopware-specific context for Claude prompts.
 # Sets: CTX_SHOPWARE, SHOPWARE_INSTRUCTION, SHOPWARE_RULE
@@ -266,4 +304,16 @@ setup_shopware_mcp() {
   if [ -z "$SW_URL" ]; then
     echo "      export SHOPWARE_API_URL=https://your-shop.com"
   fi
+}
+
+# System plugin interface: default skills for AI-curated installation
+system_get_default_skills() {
+  SYSTEM_SKILLS+=(
+    "bartundmett/skills@shopware6-best-practices"
+  )
+}
+
+# System plugin interface: inject skills into agent YAML headers
+system_inject_agent_skills() {
+  _inject_skill "code-reviewer.md" "shopware6-best-practices"
 }

@@ -37,43 +37,6 @@ detect_system() {
   fi
 }
 
-# Distinguish Shopware plugin project from full shop repository.
-# Sets SHOPWARE_TYPE to "plugin" or "shop".
-# Called from run_generation() after SYSTEM is set.
-detect_shopware_type() {
-  SHOPWARE_TYPE=""
-  [ "$SYSTEM" != "shopware" ] && return 0
-
-  # Shop indicator: custom/plugins or custom/static-plugins directory
-  if [ -d "custom/plugins" ] || [ -d "custom/static-plugins" ]; then
-    SHOPWARE_TYPE="shop"
-    return 0
-  fi
-
-  # Plugin indicator: composer.json type field
-  local ctype
-  ctype=$(_json_read composer.json '.type')
-  if [ "$ctype" = "shopware-platform-plugin" ] || [ "$ctype" = "shopware-bundle" ]; then
-    SHOPWARE_TYPE="plugin"
-    return 0
-  fi
-
-  # Plugin indicator: bootstrap PHP class in src/
-  if find src -maxdepth 2 \( -name "*Plugin.php" -o -name "*Bundle.php" \) 2>/dev/null | grep -q .; then
-    SHOPWARE_TYPE="plugin"
-    return 0
-  fi
-
-  # Plugin indicator: app-system manifest
-  if [ -f manifest.xml ]; then
-    SHOPWARE_TYPE="plugin"
-    return 0
-  fi
-
-  # Fallback: assume plugin (smaller scope, safer default)
-  SHOPWARE_TYPE="plugin"
-}
-
 # Returns the category name for a given template mapping target path.
 # Used by scan_template_changes() and should_update_template().
 get_template_category() {
