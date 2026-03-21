@@ -44,9 +44,21 @@ List 1-3 alternatives, including:
 
 Also scan the codebase with Glob and Grep to check if similar functionality already exists.
 
+### Phase 6b — Stakeholder Perspectives
+
+Simulate the following viewpoints. Skip any perspective that is clearly not applicable (e.g. skip UX for a CLI-only backend change — state "N/A" with a one-line reason).
+
+**Security Engineer** — Does this introduce attack surface, data exposure, or trust boundary issues? Are there auth, input validation, or secrets-handling concerns?
+
+**UX Designer** — Does this affect the user-facing experience or discoverability? Is the interaction model consistent with existing conventions? Could it confuse or overwhelm users?
+
+**DevOps Engineer** — Does this impact deployment, CI/CD, environment config, or observability? Are there operational risks (rollback difficulty, missing metrics, config drift)?
+
+**End User** — Does this solve a problem the user actually has? Is it discoverable without reading docs? Could it cause unintended side effects the user would not expect?
+
 ### Phase 7 — Verdict
 
-Choose exactly one:
+Choose exactly one. Incorporate concerns raised in Phase 6b into the rationale.
 
 **GO** — Concept fits, clearly needed, manageable complexity. Recommend proceeding.
 
