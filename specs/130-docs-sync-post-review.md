@@ -10,7 +10,7 @@ Specs 108–128 added new commands, removed /grill (merged into /review), added 
 
 ## Steps
 - [x] Step 1: Update WORKFLOW-GUIDE.md — commands table (remove /grill, add missing), agents table (5→11), hooks list (4→12)
-- [ ] Step 2: Update README.md — header counts, command table (remove /grill, add missing), agent table (add 3 new)
+- [x] Step 2: Update README.md — header counts, command table (remove /grill, add missing), agent table (add 3 new)
 - [ ] Step 3: Update README.md hooks description to use actual hook filenames
 - [ ] Step 4: Add missing CHANGELOG entries for Specs 108–128 under [Unreleased]
 - [ ] Step 5: Verify all counts match actual file counts in templates/

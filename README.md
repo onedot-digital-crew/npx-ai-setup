@@ -19,8 +19,8 @@ Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection
 | **Settings** | Granular bash permissions, opusplan model, AUTOCOMPACT=30, ENABLE_TOOL_SEARCH |
 | **Hooks** | protect-files, auto-lint, circuit-breaker, context-freshness, update-check, cross-repo-context, notifications, SessionStart context reload, PostToolUseFailure log, ConfigChange audit, TaskCompleted gate, Stop quality gate |
 | **Rules** | `.claude/rules/` — general, testing, git, typescript (conditional) |
-| **Commands** | 21 slash commands for spec-driven development, reviews, releases, security scanning, debugging |
-| **Agents** | 9 subagent templates for parallel verification, review, and architectural assessment |
+| **Commands** | 22 slash commands for spec-driven development, reviews, releases, security scanning, debugging |
+| **Agents** | 11 subagent templates for parallel verification, review, and architectural assessment |
 | **Context** | `.agents/context/` — STACK.md, ARCHITECTURE.md, CONVENTIONS.md (auto-generated) |
 | **GitHub** | `.github/copilot-instructions.md` + `.github/workflows/release-from-changelog.yml` |
 | **Skills** | AI-curated Claude Code skills matched to your stack via skills.sh |
@@ -65,19 +65,24 @@ Native project slash commands are available in Claude Code and compatible client
 | `/spec-work 001` | Sonnet | Execute a spec step by step |
 | `/spec-work-all` | Sonnet | Execute all draft specs in parallel via Git worktrees |
 | `/spec-review 001` | Opus | Review spec changes against acceptance criteria |
+| `/spec-validate 001` | Sonnet | Validate spec quality before executing |
 | `/spec-board` | Sonnet | Kanban-style overview of all specs |
-| `/debug "description"` | Sonnet | Reproduce → Hypothesis → Root Cause → Fix → Regression Test → Verify → Review |
+| `/debug "description"` | Sonnet | Hypothesis-first bug investigation and fix |
 | `/commit` | Sonnet | Stage changes + create descriptive commit |
 | `/pr` | Sonnet | Draft PR title/body, run build validation |
-| `/review` | Opus | Review uncommitted changes — bugs, security, performance |
+| `/review` | Opus | Review uncommitted changes (Quick Scan / Standard / Adversarial Grill) |
 | `/test` | Sonnet | Run tests + fix failures (up to 3 attempts) |
 | `/techdebt` | Sonnet | End-of-session sweep — dead code, unused imports |
 | `/release` | Sonnet | Bump version, update CHANGELOG, commit + git tag |
-| `/grill` | Opus | Adversarial code review — blocks until all issues resolved |
+| `/scan` | Sonnet | Security vulnerability scan (snyk/npm audit/pip-audit/bundler-audit) |
 | `/analyze` | Sonnet | 3 parallel agents — architecture, hotspots, risks |
-| `/reflect` | Sonnet | Detect session corrections → write as permanent CLAUDE.md rules |
-| `/scan` | Sonnet | Security vulnerability scan — detects snyk/npm audit/pip-audit/bundler-audit, reports by CRITICAL/HIGH/MEDIUM/LOW |
-| `/context-full` | Sonnet | Full codebase snapshot via repomix (`npx repomix --compress --style xml --remove-comments --remove-empty-lines --output .agents/repomix-snapshot.xml`) |
+| `/reflect` | Sonnet | Detect session corrections → write as permanent rules |
+| `/context-full` | Sonnet | Full codebase snapshot via repomix |
+| `/evaluate "tool"` | Opus | Evaluate external idea/tool/pattern against project |
+| `/challenge "idea"` | Opus | Critically evaluate a feature idea before building |
+| `/discover` | Opus | Reverse-engineer draft specs from existing code |
+| `/doctor` | Sonnet | AI setup health check (hooks, settings, context, MCP) |
+| `/update` | Sonnet | Check for ai-setup updates and install |
 
 ## Subagents
 
@@ -91,6 +96,9 @@ Native project slash commands are available in Claude Code and compatible client
 | `perf-reviewer` | Performance analysis — FAST/CONCERNS/SLOW |
 | `test-generator` | Generate missing tests for changed files |
 | `context-refresher` | Regenerate `.agents/context/` on `[CONTEXT STALE]` |
+| `frontend-developer` | React, Vue, Nuxt, Next.js specialist |
+| `project-auditor` | Analyze codebase, produce PATTERNS.md and AUDIT.md |
+| `liquid-linter` | Validate Shopify Liquid templates |
 
 ---
 
