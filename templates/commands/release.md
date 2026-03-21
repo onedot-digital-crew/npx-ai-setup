@@ -8,6 +8,11 @@ Bumps version, updates CHANGELOG, commits, and tags the release. Use when shippi
 
 ## Process
 
+0. **Pre-flight validation** (run before anything else)
+   - Run `bash scripts/validate-release.sh` from the repo root
+   - If it exits non-zero, stop and fix the reported issues before continuing
+   - The script checks: version/CHANGELOG consistency, clean working tree, template integrity
+
 1. **Read current state**
    - Run `git log --oneline $(git describe --tags --abbrev=0 2>/dev/null)..HEAD 2>/dev/null || git log --oneline` to see commits since last tag
    - Read `CHANGELOG.md` — find the `## [Unreleased]` section and collect its entries
