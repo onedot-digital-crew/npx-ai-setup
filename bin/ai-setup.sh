@@ -62,6 +62,7 @@ source_lib "generate.sh"
 source_lib "update.sh"
 source_lib "setup.sh"
 source_lib "setup-skills.sh"
+source_lib "setup-compat.sh"
 source_lib "monorepo.sh"
 source_lib "plugins.sh"
 
