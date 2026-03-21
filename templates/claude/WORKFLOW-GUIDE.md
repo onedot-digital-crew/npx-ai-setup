@@ -66,7 +66,6 @@ Completed specs move to `specs/completed/`.
 | `/scan` | Security vulnerability scan (snyk/npm audit/pip-audit/bundler-audit) | `/scan` |
 | `/reflect` | Save session learnings as permanent rules | `/reflect` |
 | `/techdebt` | Scan recently changed files for tech debt | `/techdebt` |
-| `/context-full` | Generate full codebase snapshot via repomix | `/context-full` |
 | `/evaluate` | Evaluate external idea/tool/pattern against project | `/evaluate "use Zustand instead of Pinia"` |
 | `/challenge` | Critically evaluate a feature idea before building | `/challenge "add live chat widget"` |
 | `/discover` | Reverse-engineer draft specs from existing code | `/discover` |
@@ -205,12 +204,6 @@ Claude will work, try to exit, get intercepted by the Stop hook, and re-start wi
 
 Generates a compressed, token-efficient snapshot of the entire codebase. Use before large refactors or architecture reviews.
 
-**Via Claude:**
-```
-/context-full
-```
-
-**Direct CLI:**
 ```bash
 npx repomix --compress --style xml \
   --remove-comments --remove-empty-lines \
@@ -218,7 +211,7 @@ npx repomix --compress --style xml \
   --output .agents/repomix-snapshot.xml
 ```
 
-Output is written to `.agents/repomix-snapshot.xml` (gitignored). Claude reads it automatically when you run `/context-full`.
+Output is written to `.agents/repomix-snapshot.xml` (gitignored).
 
 ---
 

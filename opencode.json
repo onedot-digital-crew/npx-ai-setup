@@ -129,10 +129,6 @@
       "description": "commit",
       "template": "{file:.claude/commands/commit.md}\\n\\n$ARGUMENTS"
     },
-    "context-full": {
-      "description": "context full",
-      "template": "{file:.claude/commands/context-full.md}\\n\\n$ARGUMENTS"
-    },
     "evaluate": {
       "description": "evaluate",
       "template": "{file:.claude/commands/evaluate.md}\\n\\n$ARGUMENTS"

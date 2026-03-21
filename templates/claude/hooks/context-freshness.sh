@@ -54,7 +54,7 @@ if [ -n "$SNAPSHOT_AT" ]; then
   if [ -n "$SNAP_EPOCH" ] && [ -n "$NOW" ]; then
     AGE_DAYS=$(( (NOW - SNAP_EPOCH) / 86400 ))
     if [ "$AGE_DAYS" -ge 7 ]; then
-      echo "[SNAPSHOT STALE] Repomix snapshot is ${AGE_DAYS} days old. Run /context-full to refresh." >&2
+      echo "[SNAPSHOT STALE] Repomix snapshot is ${AGE_DAYS} days old. Run: npx -y repomix" >&2
     fi
   fi
 fi

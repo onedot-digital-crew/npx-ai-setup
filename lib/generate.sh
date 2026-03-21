@@ -110,13 +110,47 @@ $(cat AGENTS.md 2>/dev/null)"
       biome.json 2>/dev/null || echo "No config files found")
     CTX_README=$(head -50 README.md 2>/dev/null || echo "No README")
 
-    # Sample source files (generic: first 3 project files)
+    # Sample source files: targeted selection of architecturally relevant files
     CTX_SAMPLE=""
-    for f in $(echo "$CACHED_FILES" | head -3); do
+    local _sample_files=""
+
+    # 1. Entry points (most architecturally informative)
+    for _ep in bin/*.sh src/index.* src/main.* app/page.* app/layout.* pages/index.* \
+               index.ts index.js main.ts main.js server.ts server.js app.ts app.js \
+               src/App.* src/app.* nuxt.config.* next.config.* vite.config.* astro.config.*; do
+      [ -f "$_ep" ] && _sample_files="${_sample_files} ${_ep}"
+    done
+
+    # 2. First route/component/composable (framework conventions)
+    for _dir in components pages routes composables hooks lib/api src/routes src/pages \
+                app/api sections snippets Resources/views custom/plugins; do
+      if [ -d "$_dir" ]; then
+        local _first
+        _first=$(find "$_dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.vue' -o -name '*.svelte' -o -name '*.php' -o -name '*.liquid' -o -name '*.sh' \) 2>/dev/null | head -1)
+        [ -n "$_first" ] && _sample_files="${_sample_files} ${_first}"
+      fi
+    done
+
+    # 3. Deduplicate and limit to 5 files
+    local _seen="" _count=0
+    for f in $_sample_files; do
+      case "$_seen" in *" $f "*) continue ;; esac
+      _seen="$_seen $f "
       CTX_SAMPLE+="
 --- $f (first 50 lines) ---
 $(head -50 "$f" 2>/dev/null)"
+      _count=$((_count + 1))
+      [ "$_count" -ge 5 ] && break
     done
+
+    # 4. Fallback: if nothing matched, use first 3 from file list (original behavior)
+    if [ "$_count" -eq 0 ]; then
+      for f in $(echo "$CACHED_FILES" | head -3); do
+        CTX_SAMPLE+="
+--- $f (first 50 lines) ---
+$(head -50 "$f" 2>/dev/null)"
+      done
+    fi
 
     # Temp files for error capture (cleaned up on exit/interrupt)
     ERR_CM=$(mktemp)
@@ -268,7 +302,7 @@ EOF
     if [ "$REGEN_CONTEXT" = "yes" ]; then
     mkdir -p .agents/context
 
-  claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 8 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1 &
+  claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 8 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1 &
     PID_CTX=$!
     fi
 
@@ -338,7 +372,7 @@ EOF
 
     if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -lt 3 ]; then
       echo "  ↻ Context generation created $CTX_COUNT of 3 files, retrying with --max-turns 12..."
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 12 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1
+      claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 12 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1
       EXIT_CTX=$?
       CTX_COUNT=$(count_generated_context_files)
       if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -eq 3 ]; then

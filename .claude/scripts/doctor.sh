@@ -93,9 +93,9 @@ done
 if [ "$context_found" -eq 3 ]; then
   add_row "$PASS" "Context files"       "STACK, ARCHITECTURE, CONVENTIONS present"
 elif [ "$context_found" -gt 0 ]; then
-  add_row "$WARN" "Context files"       "${context_found}/3 present — run /context-full to regenerate"
+  add_row "$WARN" "Context files"       "${context_found}/3 present — run npx @onedot/ai-setup --regenerate"
 else
-  add_row "$WARN" "Context files"       "None found in .agents/context/ — run /context-full"
+  add_row "$WARN" "Context files"       "None found in .agents/context/ — run npx @onedot/ai-setup --regenerate"
 fi
 
 # 7. .mcp.json present
