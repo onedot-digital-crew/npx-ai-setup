@@ -4,7 +4,7 @@
 # @onedot/ai-setup - AI infrastructure for projects
 # ==============================================================================
 # Installs Claude Code hooks, project context, and AI-curated skills
-# Usage: npx @onedot/ai-setup [--system <name>] [--regenerate]
+# Usage: npx @onedot/ai-setup [--force-skills] [--audit] [--patch <pattern>]
 # Auto-detects updates: if .ai-setup.json exists with older version, offers update/reinstall
 # ==============================================================================
 
@@ -23,14 +23,11 @@ unset _SCRIPT _DIR
 TPL="$SCRIPT_DIR/templates"
 
 # Parse flags
-SYSTEM=""
-REGENERATE=""
 PATCH_PATTERN=""
 FORCE_SKILLS=""
 RUN_AUDIT=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --regenerate) REGENERATE="yes"; shift ;;
     --force-skills) FORCE_SKILLS="yes"; shift ;;
     --audit) RUN_AUDIT="yes"; shift ;;
     --patch)
@@ -39,12 +36,10 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       PATCH_PATTERN="$2"; shift 2 ;;
-    --system)
-      if [[ $# -lt 2 ]]; then
-        echo "❌ --system requires a value (auto|shopify|nuxt|next|laravel|shopware|storyblok)"
-        exit 1
-      fi
-      SYSTEM="$2"; shift 2 ;;
+    --system|--regenerate)
+      echo "❌ Flag '$1' has been removed. ai-setup is now a generic base layer."
+      exit 1
+      ;;
     *) shift ;;
   esac
 done
@@ -62,31 +57,7 @@ source_lib "update.sh"
 source_lib "setup.sh"
 source_lib "setup-skills.sh"
 source_lib "setup-compat.sh"
-source_lib "monorepo.sh"
 source_lib "plugins.sh"
-
-# Validate --system value (supports comma-separated list)
-if [ -n "$SYSTEM" ]; then
-  IFS=',' read -ra SYSTEMS_TO_VALIDATE <<< "$SYSTEM"
-  for sys in "${SYSTEMS_TO_VALIDATE[@]}"; do
-    VALID=false
-    for s in "${VALID_SYSTEMS[@]}"; do
-      [ "$sys" = "$s" ] && VALID=true
-    done
-    if [ "$VALID" = false ]; then
-      echo "❌ Unknown system: $sys"
-      echo "   Valid options: ${VALID_SYSTEMS[*]}"
-      exit 1
-    fi
-  done
-  # Ensure "auto" is not combined with other systems
-  if [[ "$SYSTEM" == *"auto"* ]] && [[ "$SYSTEM" == *","* ]]; then
-    echo "❌ 'auto' cannot be combined with other systems"
-    exit 1
-  fi
-  # Load system-specific plugins for explicitly set systems
-  [ "$SYSTEM" != "auto" ] && load_system_plugins
-fi
 
 # Fast patch mode — copy specific template files without full update flow
 if [ -n "$PATCH_PATTERN" ]; then
@@ -96,51 +67,6 @@ fi
 
 # Lightweight registry check (cached) to hint when a newer ai-setup is available.
 show_cli_update_notice
-
-# ==============================================================================
-# REGENERATE MODE (--regenerate flag)
-# ==============================================================================
-if [ "$REGENERATE" = "yes" ]; then
-  if ! command -v claude &>/dev/null; then
-    echo "❌ Claude CLI required for regeneration."
-    echo "   Install: npm i -g @anthropic-ai/claude-code"
-    exit 1
-  fi
-
-  # Select system if not provided via --system flag
-  if [ -z "$SYSTEM" ]; then
-    # Try to restore from previous run stored in .ai-setup.json
-    if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
-      STORED_SYSTEM=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
-      if [ -n "$STORED_SYSTEM" ] && [ "$STORED_SYSTEM" != "auto" ]; then
-        SYSTEM="$STORED_SYSTEM"
-        echo "  🔍 Restored system from previous run: $SYSTEM"
-      fi
-    fi
-  fi
-  if [ -z "$SYSTEM" ]; then
-    select_system
-  fi
-  detect_system
-  load_system_plugins
-
-  if run_generation; then
-    echo ""
-    echo "✅ Regeneration complete! (System: $SYSTEM)"
-    echo "   - CLAUDE.md + AGENTS.md updated"
-    [ -d .agents/context ] && echo "   - .agents/context/ regenerated"
-    [ ${INSTALLED:-0} -gt 0 ] && echo "   - $INSTALLED skills installed"
-    echo ""
-    echo "📚 Generating project context files..."
-    claude --agent context-refresher "Analyze this project and generate .agents/context/STACK.md, .agents/context/ARCHITECTURE.md, and .agents/context/CONVENTIONS.md." 2>/dev/null || \
-      echo "⚠️  Context generation skipped (agent failed)"
-    exit 0
-  fi
-  echo ""
-  echo "⚠️  Regeneration finished with warnings (System: $SYSTEM)."
-  echo "   Review the warnings above and re-run after fixing the underlying issue."
-  exit 1
-fi
 
 # ==============================================================================
 # AUTO-DETECT: UPDATE / REINSTALL / FRESH INSTALL
@@ -171,12 +97,9 @@ install_workflow_guide
 install_commands
 install_claude_scripts
 install_spec_skills
-type install_shopify_skills &>/dev/null && install_shopify_skills
-type install_storyblok_scripts &>/dev/null && install_storyblok_scripts
 install_agents
 detect_workspaces
 generate_workspace_repo_group
-setup_repo_group_context
 echo "📋 Writing installation metadata..."
 write_metadata
 update_gitignore
@@ -218,13 +141,6 @@ echo ""
 if [ "$AI_CLI" = "claude" ]; then
   read -p "🤖 Run Auto-Init now? (Y/n) " RUN_INIT
   if [[ ! "$RUN_INIT" =~ ^[Nn]$ ]]; then
-    # Select system if not provided via --system flag
-    if [ -z "$SYSTEM" ]; then
-      select_system
-    fi
-    detect_system
-    load_system_plugins
-
     AUTO_INIT_OK="no"
     if run_generation; then
       AUTO_INIT_OK="yes"

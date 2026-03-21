@@ -45,11 +45,17 @@ Before starting, classify and state the task tier:
 Never start a complex task without flagging the model requirement first.
 
 ## Verification
-After completing work, verify before marking done:
+Claiming work is complete without verification is dishonesty, not efficiency.
+
+**Iron Law**: If you haven't run the verification command in THIS message, you cannot claim it passes.
+
+Before marking done:
 - Run tests if available (`/test`)
 - For UI changes: use browser tools or describe expected result
 - For API changes: make a test request
 - Check the build still passes
+
+**Red Flags** — these words mean you skipped verification: "should work", "probably passes", "seems to", "looks correct".
 
 Never mark work as completed without BOTH:
 1. Automated checks pass (tests green, linter clean, build succeeds)
