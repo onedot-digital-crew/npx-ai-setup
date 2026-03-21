@@ -11,7 +11,24 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 ## [Unreleased]
 
 - **Spec 129**: Lean review flow with complexity gate — removed 10-metric scoring from spec-review, added staff-reviewer for high-complexity specs
+- **Spec 128**: Global developer workstation setup — `npx @onedot/ai-setup-global` installs CLI tools, global Claude settings, and API key checks
+- **Spec 127**: Pre-release validation script — `scripts/validate-release.sh` checks version, CHANGELOG, template integrity before release
+- **Spec 126**: Validate no hardcoded paths — CI script to detect hardcoded user paths in templates
 - **Spec 125**: Stall Detection for /spec-work — adds per-step retry limit (>3 retries → blocked), consecutive no-change detection (2 steps without git diff → user prompt), and completion stats summary
+- **Spec 124**: Quality principles as reusable rule templates — 4 new files in `templates/claude/rules/quality-*.md` (general, security, performance, maintainability)
+- **Spec 123**: Frontend-developer agent template — React, Vue, Nuxt, Next.js specialist subagent
+- **Spec 122**: Agent routing metadata — added `When to Use` and `Avoid If` sections to all 11 agent templates
+- **Spec 121**: Context reinforcement hook — SessionStart hook reloads context after compaction
+- **Spec 120**: Rename /bug to /debug — hypothesis-first methodology with structured investigation flow
+- **Spec 119**: Merge /review + /grill — single `/review` command with selectable intensity (Quick Scan / Standard / Adversarial Grill)
+- **Spec 118**: Review-prep scripts — `review-prep.sh` and `spec-validate-prep.sh` for zero-token data collection
+- **Spec 117**: Hybrid script commands — `scan-prep.sh`, `commit-prep.sh`, `test-prep.sh` for script-assisted commands
+- **Spec 116**: Pure script commands — `spec-board`, `doctor`, `release` delegate to shell scripts
+- **Spec 115**: Boilerplate-first architecture with release migrations
+- **Spec 114**: CONCEPT.md — project concept and design philosophy document
+- **Spec 112**: Numeric quality scoring for /spec-validate — weighted 0-10 criteria replacing PASS/FAIL
+- **Spec 109**: Stakeholder perspectives in /challenge — Phase 6b adds multi-perspective evaluation
+- **Spec 108**: /discover command — reverse-engineers draft specs from existing codebases for legacy onboarding
 - **Spec 080**: System plugin architecture — extracted system-specific code into `lib/systems/*.sh` (shopware, shopify, nuxt, next, laravel, storyblok) with loader pattern and plugin interface
 - **Spec 111**: Split large lib modules — extracted shopware.sh (269 LOC), setup-skills.sh (335 LOC), setup-compat.sh (276 LOC) from generate.sh and setup.sh for better maintainability
 - **Spec 110**: Draft-First Interview Mode — `/spec` now detects file-path arguments and enters an exhaustive AskUserQuestion interview loop to refine existing draft specs before writing them back
