@@ -169,6 +169,7 @@ ensure_opencode_skills_alias
 install_specs
 install_workflow_guide
 install_commands
+install_claude_scripts
 install_spec_skills
 type install_shopify_skills &>/dev/null && install_shopify_skills
 type install_storyblok_scripts &>/dev/null && install_storyblok_scripts

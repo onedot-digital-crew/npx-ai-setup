@@ -217,6 +217,23 @@ install_commands() {
   done < <(find "$TPL/commands" -maxdepth 1 -type f -print0 | sort -z)
 }
 
+# Install Claude scripts (pure Bash, zero-token alternatives to Claude-driven commands)
+install_claude_scripts() {
+  if [ ! -d "$TPL/scripts" ]; then return 0; fi
+  local _count=0
+  echo "📜 Installing Claude scripts..."
+  mkdir -p .claude/scripts
+  while IFS= read -r -d '' _script_path; do
+    _script_name="${_script_path##*/}"
+    # Only install .sh files
+    case "$_script_name" in *.sh) ;; *) continue ;; esac
+    _install_or_update_file "$_script_path" ".claude/scripts/$_script_name"
+    chmod +x ".claude/scripts/$_script_name" 2>/dev/null || true
+    _count=$((_count + 1))
+  done < <(find "$TPL/scripts" -maxdepth 1 -name "*.sh" -print0 | sort -z)
+  [ "$_count" -gt 0 ] && echo "  ✅ ${_count} script(s) installed to .claude/scripts/"
+}
+
 # Heuristic module detection from repository name.
 _detect_repo_module() {
   local _name

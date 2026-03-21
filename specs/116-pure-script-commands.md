@@ -1,6 +1,6 @@
 # Spec: Pure Script Commands (spec-board, doctor, release)
 
-> **Spec ID**: 116 | **Created**: 2026-03-21 | **Status**: draft | **Branch**: —
+> **Spec ID**: 116 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: spec/116-pure-script-commands
 
 ## Goal
 Replace `/spec-board`, `/doctor`, and `/release` with pure Bash scripts that produce output with zero LLM tokens.
@@ -9,12 +9,12 @@ Replace `/spec-board`, `/doctor`, and `/release` with pure Bash scripts that pro
 These three commands perform deterministic operations (file parsing, status checks, version bumps) that don't need Claude's intelligence. Moving them to Bash scripts saves ~95% of their token cost. Scripts live in `templates/scripts/` and are copied to `.claude/scripts/` during setup. Commands call scripts via `!` prefix.
 
 ## Steps
-- [ ] Step 1: Create `templates/scripts/spec-board.sh` — reads all `specs/*.md`, parses frontmatter Status/Steps, outputs Kanban table as Markdown
-- [ ] Step 2: Create `templates/scripts/doctor.sh` — 12 checks (hooks exist, settings.json valid, context files present, CLAUDE.md size, MCP servers, skills, git config), outputs results table
-- [ ] Step 3: Create `templates/scripts/release.sh` — version bump in package.json, CHANGELOG entry template, git tag, git push with confirmation gate
-- [ ] Step 4: Update corresponding command `.md` files to call scripts via `!.claude/scripts/<name>.sh` instead of Claude-driven logic
-- [ ] Step 5: Add `scripts/` directory to `bin/ai-setup.sh` install flow (copy templates/scripts/ → .claude/scripts/, chmod +x)
-- [ ] Step 6: Verify all 3 scripts work standalone (`bash .claude/scripts/spec-board.sh`) and produce correct output
+- [x] Step 1: Create `templates/scripts/spec-board.sh` — reads all `specs/*.md`, parses frontmatter Status/Steps, outputs Kanban table as Markdown
+- [x] Step 2: Create `templates/scripts/doctor.sh` — 12 checks (hooks exist, settings.json valid, context files present, CLAUDE.md size, MCP servers, skills, git config), outputs results table
+- [x] Step 3: Create `templates/scripts/release.sh` — version bump in package.json, CHANGELOG entry template, git tag, git push with confirmation gate
+- [x] Step 4: Update corresponding command `.md` files to call scripts via `!.claude/scripts/<name>.sh` instead of Claude-driven logic
+- [x] Step 5: Add `scripts/` directory to `bin/ai-setup.sh` install flow (copy templates/scripts/ → .claude/scripts/, chmod +x)
+- [x] Step 6: Verify all 3 scripts work standalone (`bash .claude/scripts/spec-board.sh`) and produce correct output
 
 ## Acceptance Criteria
 - [ ] All 3 commands produce output without consuming LLM tokens
