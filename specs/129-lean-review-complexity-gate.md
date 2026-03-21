@@ -12,7 +12,7 @@ The current spec-review uses a 10-metric scoring system (0-100) that produces ar
 - [x] Step 1: Update `templates/commands/spec-work.md` Step 18 — add complexity-gated review (Low/Medium: code-reviewer only; High: code-reviewer + staff-reviewer in parallel)
 - [x] Step 2: Update `templates/commands/spec-review.md` — remove section 5d (quality scoring), remove score table from section 6 verdict, simplify verdict logic to use code-reviewer + AC pass/fail, add complexity gate for staff-reviewer in section 5c
 - [x] Step 3: Mirror Step 1 changes to `.claude/commands/spec-work.md`
-- [ ] Step 4: Mirror Step 2 changes to `.claude/commands/spec-review.md`
+- [x] Step 4: Mirror Step 2 changes to `.claude/commands/spec-review.md`
 
 ## Acceptance Criteria
 - [ ] No scoring metrics or score tables remain in spec-review (template + active)
