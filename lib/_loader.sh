@@ -12,3 +12,17 @@ source_lib() {
   fi
   source "$LIB_DIR/$module"
 }
+
+# Load system-specific plugin after SYSTEM is detected.
+# Sources lib/systems/${SYSTEM}.sh if it exists, silent no-op otherwise.
+# Supports comma-separated systems — loads each in order.
+load_system_plugins() {
+  [ -z "$SYSTEM" ] && return 0
+  local sys
+  IFS=',' read -ra _SYSTEMS <<< "$SYSTEM"
+  for sys in "${_SYSTEMS[@]}"; do
+    if [ -f "$LIB_DIR/systems/${sys}.sh" ]; then
+      source "$LIB_DIR/systems/${sys}.sh"
+    fi
+  done
+}

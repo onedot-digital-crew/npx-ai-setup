@@ -57,7 +57,6 @@ source_lib "process.sh"
 source_lib "detect.sh"
 source_lib "tui.sh"
 source_lib "skills.sh"
-source_lib "shopware.sh"
 source_lib "generate.sh"
 source_lib "update.sh"
 source_lib "setup.sh"
@@ -85,6 +84,8 @@ if [ -n "$SYSTEM" ]; then
     echo "❌ 'auto' cannot be combined with other systems"
     exit 1
   fi
+  # Load system-specific plugins for explicitly set systems
+  [ "$SYSTEM" != "auto" ] && load_system_plugins
 fi
 
 # Fast patch mode — copy specific template files without full update flow
@@ -121,6 +122,7 @@ if [ "$REGENERATE" = "yes" ]; then
     select_system
   fi
   detect_system
+  load_system_plugins
 
   if run_generation; then
     echo ""
@@ -168,8 +170,8 @@ install_specs
 install_workflow_guide
 install_commands
 install_spec_skills
-install_shopify_skills
-install_storyblok_scripts
+type install_shopify_skills &>/dev/null && install_shopify_skills
+type install_storyblok_scripts &>/dev/null && install_storyblok_scripts
 install_agents
 detect_workspaces
 generate_workspace_repo_group
@@ -220,6 +222,7 @@ if [ "$AI_CLI" = "claude" ]; then
       select_system
     fi
     detect_system
+    load_system_plugins
 
     AUTO_INIT_OK="no"
     if run_generation; then

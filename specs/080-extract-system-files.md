@@ -1,67 +1,48 @@
 # Spec 080 — Extract System-Specific Logic into lib/systems/*.sh
 
-**Status:** backlog
-**Created:** 2026-03-12
+> **Spec ID**: 080 | **Created**: 2026-03-12 | **Status**: in-progress | **Branch**: —
 
 ## Goal
-
-Move all system-specific functions and logic from `generate.sh`, `setup.sh`, and `detect.sh` into per-system files under `lib/systems/`. The install flow, CLI interface, and user experience stay identical — this is a pure code-organization refactor.
+Move all remaining system-specific functions and data from shared modules into per-system files under `lib/systems/`. Pure code-organization refactor — identical output before and after.
 
 ## Context
-
-`generate.sh` (1000+ lines) and `setup.sh` (300+ lines) contain system-specific blocks scattered throughout: Shopware context gathering, Shopify skill injection, system-skills switch-case, Shopware plugin detection. As more systems get features (e.g. Storyblok dump from spec 079), these files grow harder to navigate and debug. Extracting per-system files makes it easy to find and modify system-specific code without touching shared logic.
-
-**What moves:**
-- `detect.sh`: `detect_shopware_type()` → `lib/systems/shopware.sh`
-- `generate.sh:13-190`: Shopware context functions → `lib/systems/shopware.sh`
-- `generate.sh:922-1011`: System-skills switch-case → split into per-system files
-- `setup.sh:303-310`: Agent skill injection (Shopify/Shopware) → respective system files
-- `setup.sh:220-236`: `install_shopify_skills()` → `lib/systems/shopify.sh`
-- `core.sh:56-67`: `SHOPIFY_SKILLS_MAP` → `lib/systems/shopify.sh`
-
-**What stays the same:**
-- `bin/ai-setup.sh` install flow and call order
-- `--system` flag behavior
-- `detect_system()` in `detect.sh` (sets `$SYSTEM`, used by all systems)
-- Template mapping and update logic
+Spec 111 extracted Shopware functions to `lib/shopware.sh` and skills functions to `lib/setup-skills.sh`. But system-specific logic is still scattered: `SHOPIFY_SKILLS_MAP` in core.sh, `detect_shopware_type()` in detect.sh, system-skills switch-case (60 LOC) in generate.sh, hardcoded Shopify/Shopware agent injection in setup-skills.sh. This spec completes the extraction into `lib/systems/` with a loader pattern.
 
 ## Steps
-
-- [ ] **1. Create `lib/systems/` directory** and a loader function in `detect.sh` that sources `lib/systems/${SYSTEM}.sh` after `detect_system()` runs (with fallback no-op if file doesn't exist).
-- [ ] **2. Create `lib/systems/shopify.sh`** — move `SHOPIFY_SKILLS_MAP`, `install_shopify_skills()`, and Shopify agent-injection block. Export functions with same names so callers don't change.
-- [ ] **3. Create `lib/systems/shopware.sh`** — move `detect_shopware_type()`, `gather_shopware_context()`, `setup_shopware_mcp()`, Shopware agent-injection block, and Shopware system-skills entries.
-- [ ] **4. Create `lib/systems/storyblok.sh`** — stub file with Storyblok system-skills entry (extracted from generate.sh switch-case). Ready for spec 079 to add `install_storyblok_scripts()`.
-- [ ] **5. Refactor `generate.sh`** — replace system-skills switch-case with calls to per-system functions. Remove moved Shopware functions. Keep `$SYSTEM` in context-generation prompts (that's generic).
-- [ ] **6. Refactor `setup.sh` and `core.sh`** — remove moved functions/maps. Add `source` calls if not handled by the loader.
-- [ ] **7. Run `bash tests/smoke.sh`** — verify all files parse, functions exist, no syntax errors.
+- [x] Step 1: Create `lib/systems/` directory. Add loader function `load_system_plugins()` in `lib/_loader.sh` that sources `lib/systems/${SYSTEM}.sh` if it exists (silent no-op otherwise). Call it from `bin/ai-setup.sh` after `detect_system()` and after system validation.
+- [ ] Step 2: Create `lib/systems/shopware.sh` — move `lib/shopware.sh` content here + `detect_shopware_type()` from detect.sh. Add `system_get_default_skills()` returning the Shopware skills array from generate.sh:709-752. Remove old `lib/shopware.sh`.
+- [ ] Step 3: Create `lib/systems/shopify.sh` — move `SHOPIFY_SKILLS_MAP` from core.sh, Shopify agent-injection block from `_inject_agent_skills()` in setup-skills.sh, and Shopify system-skills entries from generate.sh. Add `system_get_default_skills()`.
+- [ ] Step 4: Create `lib/systems/nuxt.sh`, `next.sh`, `laravel.sh`, `storyblok.sh` — each with `system_get_default_skills()` containing the respective skills arrays from generate.sh:709-758.
+- [ ] Step 5: Refactor `lib/generate.sh` — replace the system-skills switch-case (lines 709-758) with a call to `system_get_default_skills` (if function exists). Remove `SHOPIFY_SKILLS_MAP` references.
+- [ ] Step 6: Refactor `lib/setup-skills.sh` — replace hardcoded Shopify/Shopware blocks in `_inject_agent_skills()` with a `system_inject_agent_skills()` call dispatched from the system plugin. Remove `SHOPIFY_SKILLS_MAP` from core.sh.
+- [ ] Step 7: Syntax-check all files (`bash -n lib/systems/*.sh lib/*.sh`), run E2E test with `--system shopware` and `--system shopify`.
 
 ## Acceptance Criteria
-
-- [ ] `lib/systems/shopify.sh`, `shopware.sh`, `storyblok.sh` exist
-- [ ] Running `npx @onedot/ai-setup` produces identical output before and after refactor
-- [ ] `generate.sh` no longer contains Shopware-specific function definitions
-- [ ] `setup.sh` no longer contains `SHOPIFY_SKILLS_MAP` or `install_shopify_skills()`
-- [ ] `core.sh` no longer contains `SHOPIFY_SKILLS_MAP`
-- [ ] All system-specific skill lists are in their respective system files
-- [ ] Smoke tests pass
-- [ ] `--system shopify` and `--system shopware` still work correctly
+- [ ] `lib/systems/shopware.sh`, `shopify.sh`, `nuxt.sh`, `next.sh`, `laravel.sh`, `storyblok.sh` exist
+- [ ] `generate.sh` contains no system-skills switch-case
+- [ ] `core.sh` contains no `SHOPIFY_SKILLS_MAP`
+- [ ] `setup-skills.sh:_inject_agent_skills()` contains no hardcoded system names
+- [ ] `detect.sh` contains no `detect_shopware_type()`
+- [ ] `--system shopware` and `--system shopify` produce identical output as before
 
 ## Files to Modify
-
-- `lib/systems/shopify.sh` — **create** (extracted from core.sh + setup.sh)
-- `lib/systems/shopware.sh` — **create** (extracted from generate.sh + detect.sh + setup.sh)
-- `lib/systems/storyblok.sh` — **create** (stub, extracted from generate.sh)
-- `lib/detect.sh` — add system-file loader after detect_system()
-- `lib/generate.sh` — remove system-specific functions, use per-system calls
-- `lib/setup.sh` — remove moved functions
+- `lib/_loader.sh` — add `load_system_plugin()`
+- `lib/systems/shopware.sh` — new (from lib/shopware.sh + detect.sh + generate.sh)
+- `lib/systems/shopify.sh` — new (from core.sh + setup-skills.sh + generate.sh)
+- `lib/systems/nuxt.sh` — new (from generate.sh)
+- `lib/systems/next.sh` — new (from generate.sh)
+- `lib/systems/laravel.sh` — new (from generate.sh)
+- `lib/systems/storyblok.sh` — new (from generate.sh)
+- `lib/generate.sh` — remove system-skills switch-case
+- `lib/setup-skills.sh` — remove hardcoded system blocks from _inject_agent_skills
 - `lib/core.sh` — remove SHOPIFY_SKILLS_MAP
+- `lib/detect.sh` — remove detect_shopware_type()
+- `lib/shopware.sh` — delete (moved to systems/)
+- `bin/ai-setup.sh` — replace `source_lib "shopware.sh"` with `load_system_plugin` call
 
 ## Out of Scope
-
-- Changing CLI interface or adding new commands
 - Two-mode architecture (spec 077)
-- Storyblok dump script (spec 079)
-- Nuxt/Next/Laravel system files (create when needed)
+- New system detection logic
+- Changing CLI interface
 
 ## Complexity: medium
-Touches 7 files but changes are mechanical (move, not rewrite). Run with Sonnet.
