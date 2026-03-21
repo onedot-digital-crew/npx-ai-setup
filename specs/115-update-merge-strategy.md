@@ -1,42 +1,53 @@
-# Spec: Update & Merge Strategy — Boilerplate-First Architecture
+# Spec: Boilerplate-First Architecture — Remove System Code, Smart Merge
 
 > **Spec ID**: 115 | **Created**: 2026-03-21 | **Status**: draft | **Branch**: —
 
-<!-- Absorbs Spec 077 (Base/System Split). The Two-Mode idea is replaced by a Boilerplate-First approach where system-specific config lives in boilerplate repos, not in ai-setup. -->
+<!-- Absorbs Spec 077 (Base/System Split). System-specific config moves to boilerplate repos. -->
 
 ## Goal
-Restructure ai-setup so system-specific config lives in boilerplate repos, not in the package. ai-setup becomes a pure base layer that merges updates without overwriting project-specific or boilerplate-provided files.
+Remove all system-specific code from ai-setup. The package becomes a pure generic base layer. System-specific config (skills, MCP, rules) lives in boilerplate repos. Update flow uses section-by-section merge for settings.json and adds new files without overwriting existing ones.
 
 ## Context
-Projects are created from boilerplate repos (sp-shopify-boilerplate, sb-nuxt-boilerplate, etc.) that already contain system-specific `.claude/skills/`, rules, agents, settings, and MCP config. Today ai-setup duplicates this: `lib/systems/*.sh` installs the same skills the boilerplate already provides, and `_install_or_update_file()` can overwrite boilerplate customizations. The fix: ai-setup provides only the generic base, boilerplates own system-specific config, and the update flow merges intelligently.
+Projects are created from boilerplate repos that already contain system-specific `.claude/` setup. ai-setup currently duplicates this via `lib/systems/*.sh`. After removal, ai-setup provides only: hooks, commands, agents, rules, settings, plugins. System detection (`--system`) becomes unnecessary. `--regenerate` relies on Claude reading the project directly instead of hardcoded system prompts.
 
-**From Spec 077:** The original Two-Mode Split (base-only vs. system-only runs) was rejected as over-engineering. Instead, every run is a combined run that respects what's already present.
+## Decisions (from discussion 2026-03-21)
+1. `--system` flag: evaluate removal feasibility, deprecate if possible
+2. Boilerplate detection: not needed — treat every project the same
+3. settings.json: section-by-section merge (hooks, permissions, env separately)
+4. `lib/systems/`: remove entirely
+5. New files on update: auto-add, never overwrite existing
+6. `--regenerate`: Claude reads project via repomix/files, no hardcoded system prompts
 
-## Open Questions (to resolve before implementation)
-1. Should `--system` flag be deprecated or kept as fallback for non-boilerplate projects?
-2. Should ai-setup detect boilerplate origin (e.g. via `.ai-setup.json` or git remote)?
-3. How should settings.json merge work — deep merge, or section-by-section?
-4. Should `lib/systems/*.sh` be removed entirely, or kept as optional fallback?
-5. What happens when ai-setup adds a new command that the boilerplate doesn't have yet?
-6. How does `--regenerate` work without system-specific prompts (CTX_SHOPWARE etc.)?
+## Steps
+- [ ] Step 1: Delete `lib/systems/` directory (6 files). Remove `load_system_plugins()` from `_loader.sh`. Remove system plugin calls from `bin/ai-setup.sh`.
+- [ ] Step 2: Remove `--system` flag from `bin/ai-setup.sh`. Remove `detect_system()` from `detect.sh`. Remove `VALID_SYSTEMS` array from `core.sh`. Remove system-guarded calls (`install_shopify_skills`, `install_storyblok_scripts`).
+- [ ] Step 3: Simplify `generate.sh` — remove `system_get_default_skills` call, remove `CTX_SHOPWARE`/`SHOPWARE_INSTRUCTION`/`SHOPWARE_RULE` from prompts. Claude gets raw project context only (package.json, file tree, existing CLAUDE.md).
+- [ ] Step 4: Implement section-by-section merge for `settings.json` in `setup.sh`. Merge strategy: add new hook entries, add new permission entries, preserve user-added entries. Never remove existing entries.
+- [ ] Step 5: Update `_install_or_update_file()` — new files always install, existing files with matching checksum update silently, user-modified files are skipped with notice.
+- [ ] Step 6: Remove `install_shopify_skills`, `install_storyblok_scripts` from `setup-skills.sh`. Remove `SHOPIFY_SKILLS_MAP` references from remaining code.
+- [ ] Step 7: Syntax-check all files. E2E test in fresh project + boilerplate-based project.
 
 ## Acceptance Criteria
-- [ ] Running `npx @onedot/ai-setup` in a boilerplate-based project preserves all user/boilerplate modifications
-- [ ] New files from ai-setup updates are added without conflict
-- [ ] Updated template files are offered as diff or skipped, not silently applied
-- [ ] System-specific config is documented as boilerplate responsibility
-- [ ] Strategy is documented in WORKFLOW-GUIDE.md
+- [ ] `lib/systems/` directory does not exist
+- [ ] `--system` flag is removed or deprecated with warning
+- [ ] `settings.json` is merged section-by-section, not overwritten
+- [ ] Running in a boilerplate project preserves all existing files
+- [ ] New commands/agents from ai-setup updates are auto-added
+- [ ] `--regenerate` works without system-specific prompts
 
 ## Files to Modify
-- `bin/ai-setup.sh` — simplify flow, potentially remove `--system`
-- `lib/setup.sh` — improve `_install_or_update_file()` merge logic
-- `lib/systems/*.sh` — deprecate or remove
-- `lib/generate.sh` — decouple from system-specific prompts
-- `lib/core.sh` — remove system-specific maps if deprecated
+- `lib/systems/*.sh` — delete all 6 files
+- `lib/_loader.sh` — remove `load_system_plugins()`
+- `bin/ai-setup.sh` — remove `--system`, `detect_system`, system guards
+- `lib/detect.sh` — remove `detect_system()` or simplify
+- `lib/generate.sh` — remove system-specific prompt sections
+- `lib/setup.sh` — implement section merge for settings.json
+- `lib/setup-skills.sh` — remove system-specific functions
+- `lib/core.sh` — remove `VALID_SYSTEMS`, system-specific maps
 
 ## Out of Scope
-- Auto-pull from boilerplate repos via GitHub API (future feature)
-- Remote system plugin discovery
-- Boilerplate repo modifications (separate task per boilerplate)
+- Boilerplate repo modifications (separate task per repo)
+- Auto-pull from boilerplate repos via GitHub API
+- Two-mode architecture (rejected from Spec 077)
 
 ## Complexity: high
