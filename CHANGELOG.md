@@ -66,157 +66,69 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [1.3.2-patch] — 2026-03-13
 
-- **Spec 087**: Token Optimization: Config and Template Cleanup — reduced per-session token overhead by removing duplicate rules, trimming CLAUDE.md, scoping rules files with paths: frontmatter, capping MCP output, and fixing skill descriptions.
-- **fix**: Remove autocompactBuffer from powerline config — reclaims ~20% context per session.
-- **fix**: Remove ineffective paths: scoping from git.md and agents.md — both load unconditionally as intended.
-- **fix**: Register context-monitor.sh as PostToolUse hook (was installed but never executed).
-- **fix**: AUTOCOMPACT threshold 70% → 80%, aligns with /compact guidance and buffer removal.
-- **fix**: circuit-breaker whitelist for specs/*.md and HANDOFF.md; fix substring count bug.
-- **fix**: update command PRE_UPDATE_SHA via temp file (bash vars don't persist between blocks).
-- **fix**: Remove empty claude-mem-context tag from template CLAUDE.md.
-- **fix**: Default model opusplan → sonnet in template settings (Opus reserved for /spec creation).
+- **Spec 087**: Token Optimization — reduced per-session overhead by removing duplicate rules, trimming CLAUDE.md, capping MCP output, fixing skill descriptions
+- **fix**: Remove autocompactBuffer from powerline config — reclaims ~20% context per session
+- **fix**: Remove ineffective paths: scoping from git.md and agents.md — both load unconditionally as intended
+- **fix**: Register context-monitor.sh as PostToolUse hook (was installed but never executed)
+- **fix**: AUTOCOMPACT threshold 70% → 80%, aligns with /compact guidance and buffer removal
+- **fix**: circuit-breaker whitelist for specs/*.md and HANDOFF.md; fix substring count bug
+- **fix**: update command PRE_UPDATE_SHA via temp file (bash vars don't persist between blocks)
+- **fix**: Remove empty claude-mem-context tag from template CLAUDE.md
+- **fix**: Default model opusplan → sonnet in template settings (Opus reserved for /spec creation)
 
 ## [v1.3.2] — 2026-03-13
 
-### Spec Quality & Execution Improvements (Specs 081–086)
-
-Six improvements to the spec-driven workflow, porting patterns from GSD-2 evaluation.
-
-**Understanding Confirmation (Spec 081)**
-`spec-work` now shows a 3-bullet summary (Goal, Approach, Files) and asks for confirmation before creating a branch for `Complexity: high` specs — preventing wasted execution on misunderstood specs.
-
-**Decisions Register (Spec 082)**
-New `decisions.md` template installed at project root — an append-only table for tracking architectural decisions across sessions. `spec-work` prompts to append decisions after meaningful steps; `reflect` appends architectural signals automatically. `CLAUDE.md` instructs reading it before planning.
-
-**Structured Verification (Spec 083)**
-Acceptance criteria in spec templates now use three checkable categories: **Truths** (observable behaviors), **Artifacts** (files with real implementation), **Key Links** (imports/wiring between files). `spec-review` and `verify-app` verify each category mechanically.
-
-**Debugging Discipline (Spec 084)**
-New 6-point debugging methodology added to `bug.md` and `spec-work` verification failure path: hypothesis first, one variable at a time, read completely, distinguish know vs. assume, stop after 3 failed fixes, don't fix symptoms.
-
-**Context Budget Awareness (Spec 085)**
-`CLAUDE.md` Context Management section now includes a context budget rule: when context is running low, stop implementing and prioritize writing a handoff. `spec-work` execution loop adds the same reminder at step level.
-
-**Challenge & Evaluate in Templates (Spec 086)**
-`challenge.md` and `evaluate.md` added to `templates/commands/` so all projects installed via `npx @onedot/ai-setup` receive them. Both generalized: challenge reads `.agents/context/CONCEPT.md` for project principles; evaluate scans `.claude/` and `templates/` (whichever exist) instead of hardcoded paths.
+- **Spec 086**: Challenge & Evaluate in templates — `challenge.md` and `evaluate.md` added to `templates/commands/`, generalized for any project
+- **Spec 085**: Context budget awareness — CLAUDE.md and spec-work now prioritize handoff when context is low
+- **Spec 084**: Debugging discipline — 6-point methodology added to `debug.md` and spec-work verification failure path
+- **Spec 083**: Structured verification — acceptance criteria use Truths/Artifacts/Key Links categories; `spec-review` and `verify-app` verify mechanically
+- **Spec 082**: Decisions register — append-only `decisions.md` for architectural decisions; `spec-work` and `reflect` append automatically
+- **Spec 081**: Understanding confirmation — `spec-work` shows Goal/Approach/Files summary before branching for high-complexity specs
 
 ## [v1.3.1] — 2026-03-11
 
-### Skill-First Principle (Spec 078 + 079)
-Claude now discovers installed skills before implementing anything manually — spec creation scans `.claude/skills/`, references matching skills as `/skill-name` in steps, and spec-work invokes them via the Skill tool instead of reimplementing. A `Skill-First` rule was added to `rules/general.md` (templates + active copy), `templates/CLAUDE.md` Working Style, and agent definitions (code-reviewer, verify-app).
-
-### Fix: PreCompact Auto-Commit (Issue #3)
-The auto-save hook on context compaction now stages only tracked modified files (`git add -u` instead of `git add -A`) and uses a proper conventional commit message (`chore: save session state before context compaction`). The `--no-verify` flag that bypassed hooks was removed.
-
-### Fix: Silent Sandbox Bypass Prevention (Issue #4)
-A new `## Sandbox Safety` rule in `rules/general.md` explicitly prohibits using `dangerouslyDisableSandbox: true` without first explaining the restriction to the user and receiving explicit confirmation. Silent retries with sandbox disabled are not allowed.
-
-### Fix: Silent Early Exit in Setup Script (Issue #3 related)
-`_install_or_update_file` now returns `0` (not `1`) for skip and user-modified cases, preventing `set -e` from killing the script mid-loop during `install_rules` and TypeScript detection.
+- **Spec 078+079**: Skill-First principle — Claude discovers installed skills before implementing manually; `Skill-First` rule added to rules, CLAUDE.md, and agent definitions
+- **fix**: PreCompact auto-commit — `git add -u` instead of `-A`, proper conventional commit message, removed `--no-verify`
+- **fix**: Silent sandbox bypass prevention — new Sandbox Safety rule requires explicit user confirmation before `dangerouslyDisableSandbox`
+- **fix**: Silent early exit in setup script — `_install_or_update_file` returns `0` for skip/user-modified cases
 
 ## [v1.3.0] — 2026-03-10
 
-- **Spec 076**: /simplify in spec-work + Advanced Tools — added optional `/simplify` cleanup step to spec-work between verify-app and code-reviewer; added Web Fetching rule preferring defuddle and markdown.new over WebFetch; documented ralph-loop and defuddle/markdown.new in WORKFLOW-GUIDE.md Advanced Techniques section.
-
-- **Spec 073**: Generation reliability and install coverage — raised Claude generation turn budgets, added single-retry fallbacks for no-op or partial outputs, and added an offline integration test that verifies installed command templates on a fresh setup.
-
-- **Spec 075**: Replace Statusline with claude-powerline — `install_statusline_project()` now wires `@owloops/claude-powerline` via npx with a dark powerline theme and copies a default `.claude/claude-powerline.json` config; the custom `statusline.sh` script is removed.
-
-- **Spec 074**: Multi-Tool Skills Symlinks — skills installed in `.claude/skills/` are now automatically linked to `.codex/skills` and `.opencode/skills` when the respective CLIs are installed, enabling all three tools to share the same skill library without duplication.
-
-### Developer Workflow Guide (Spec 071)
-New developers know exactly what to do right after setup — no documentation digging required. Every install now drops `.claude/WORKFLOW-GUIDE.md` with a Quick Start, the full spec workflow, all 20 slash commands with examples, a subagent and hook overview, and a troubleshooting section.
-*Technical: `templates/claude/WORKFLOW-GUIDE.md` → `_install_or_update_file` → `.claude/WORKFLOW-GUIDE.md`; checksum logic preserves user edits; not referenced in CLAUDE.md (zero token cost); tip in `templates/CLAUDE.md` points developers to the file.*
-
-### Spec Workflow: Crash Resilience and Self-Healing (Spec 072)
-Specs interrupted mid-execution (context compaction, crashes) can now resume seamlessly — no work lost. `/spec-work` detects already-completed steps and skips them automatically. Each completed step is committed immediately, so re-running picks up exactly where it left off. `/spec-board` detects inconsistent states (steps done but status still `in-progress`) and offers to fix them in one confirmation. `/spec` auto-splits oversized or mixed-layer tasks into separate specs before execution.
-*Technical: `spec-work` — resume check at step 9 (scans `- [x]`), per-step commit `spec(NNN): step N`, status set to `in-review` before code-reviewer agent. `spec-board` — removed `mode: plan`, added `Write, Edit, AskUserQuestion`, Step 6 Consistency Check (Type A: stale in-progress, Type B: completed but not moved). `spec-work-all` — explicit blocked fallback when subagent fails or returns no result. `spec` — auto-split on >60 lines / >8 steps / mixed architectural layers.*
-
-### Faster, More Reliable Commands and Subagents
-Commands now pre-load git context before execution — no extra tool-call round-trips. Subagents run with stricter turn limits and remember project conventions across invocations.
-*Technical: All commands migrated from `Task` → `Agent`; added `argument-hint`, `disable-model-invocation`, and inline `Context` blocks with `!git` prefetching (commit, pr, review, spec-work). Agents: `max_turns` for build-validator (10), context-refresher (15), verify-app (20), staff-reviewer (20); `memory: project` for code-reviewer and staff-reviewer. context-refresher: optional repomix snapshot step (best-effort, silent on failure).*
-
-### Stricter Quality Gates: /spec-review and /grill
-Specs are now scored on 10 measurable metrics — a clear pass/fail system instead of subjective judgment. Code reviews check for duplicate logic before flagging issues and verify every finding against an exact file and line number.
-*Technical: `spec-review` — 10-metric scoring (0–100, threshold 85 avg / 70 min), Definition-of-Done gate from CONVENTIONS.md, file-read cap (5 files). `grill` — Scope Challenge step 0 with A/B/C choice, Grep pass before flagging, A/B/C resolution options per issue, NOT-reviewed exclusions list, self-verification table as final step.*
-
-### /reflect: Capture More from Every Session
-`/reflect` now captures architectural discoveries and stack decisions — not just corrections. Less knowledge lost between sessions.
-*Technical: New signal categories ARCHITECTURAL and STACK; writes to `ARCHITECTURE.md` and `STACK.md` in addition to `CLAUDE.md` and `CONVENTIONS.md`.*
-
-### New Monitoring Hooks and Coding Rules
-Five new hooks automatically monitor config changes, MCP health, and failed tool calls. Four rule files document coding standards, git conventions, testing requirements, and agent delegation — always available in every session.
-*Technical: config-change-audit.sh, context-monitor.sh, mcp-health.sh, post-tool-failure-log.sh, task-completed-gate.sh. Rules: agents.md, general.md, git.md, testing.md in `.claude/rules/`. liquid-linter agent added.*
-
-### /spec-validate and /update
-Specs can be quality-checked before execution with a 10-metric score. The ai-setup system can now be updated from within Claude Code — no terminal switch needed.
-*Technical: `/spec-validate` and `/update` installed from templates.*
-
-### Automated GitHub Releases
-GitHub Releases are now automatically populated with the matching CHANGELOG section when a version tag is pushed.
-*Technical: Note added to `release` command — `.github/workflows/release-from-changelog.yml` catches `vX.Y.Z` tags and populates the release body from `CHANGELOG.md`.*
+- **Spec 076**: /simplify in spec-work — optional cleanup step between verify-app and code-reviewer; Web Fetching rule and Advanced Techniques section in WORKFLOW-GUIDE
+- **Spec 075**: Replace Statusline with claude-powerline — `@owloops/claude-powerline` via npx with dark theme; custom `statusline.sh` removed
+- **Spec 074**: Multi-tool skills symlinks — `.claude/skills/` auto-linked to `.codex/skills` and `.opencode/skills` when respective CLIs are installed
+- **Spec 073**: Generation reliability — raised turn budgets, single-retry fallbacks, offline integration test for installed templates
+- **Spec 072**: Crash resilience — `spec-work` detects completed steps and resumes; per-step commits; `spec-board` detects inconsistent states; `spec` auto-splits oversized specs
+- **Spec 071**: Developer Workflow Guide — `.claude/WORKFLOW-GUIDE.md` installed with Quick Start, commands, subagents, hooks, and troubleshooting
+- **feat**: Faster commands — pre-loaded git context, `argument-hint`, `disable-model-invocation`, `max_turns` caps for agents
+- **feat**: Stricter quality gates — `spec-review` 10-metric scoring (0–100), `grill` scope challenge with A/B/C options
+- **feat**: /reflect captures architectural discoveries and stack decisions in addition to corrections
+- **feat**: 5 new monitoring hooks (config-change-audit, context-monitor, mcp-health, post-tool-failure-log, task-completed-gate) + 4 rules files
+- **feat**: /spec-validate and /update commands — spec quality scoring and in-session ai-setup updates
+- **feat**: Automated GitHub Releases — `release-from-changelog.yml` populates release body from CHANGELOG on `vX.Y.Z` tags
 
 ## [v1.2.8] — 2026-03-09
 
-### Smarter Agent Skill Injection
-Agents installed by ai-setup now automatically receive the right skills for the detected project type — Shopify, Shopware, or generic. No manual configuration needed.
-*Technical: Installer injects `skills:` into agent YAML headers post-copy based on detected system — Shopify agents get `shopify-liquid`/`shopify-theme-dev`, Shopware agents get `shopware6-best-practices`, `test-generator` gets `vitest` when available. Idempotent; skips if already present.*
-
-### Agent Delegation Rules
-A new rules file tells Claude exactly when to delegate to which agent — and when not to. Prevents over-delegation and keeps simple tasks fast.
-*Technical: New `templates/claude/rules/agents.md` with trigger-condition table for all 9 agents, scope limits, and anti-patterns.*
-
-### Spec Backlog Cleanup
-The backlog went from 11 specs to zero — dead weight removed, good ideas documented.
-*Technical: Deleted 10 obsolete/redundant specs, consolidated 4 documentation specs into #069, added `BACKLOG.md` with rejected ideas and evaluation items.*
-
-### Token Savings: ~11% Context Reduction
-Claude starts each session with ~2,600 fewer tokens consumed by templates — leaving more room for actual work.
-*Technical: Compressed `spec.md` Phase 1e (30 lines → 5-line checklist), deduplicated 4 identical example blocks in `reflect.md`, consolidated emit logic in `cross-repo-context.sh`, removed bash commentary in `update.md`, replaced spec-work duplication in `spec-work-all.md` with reference, removed AGENTS.md table duplication in hooks README.*
-
-### Deadloop Prevention Hardening
-Claude is less likely to get stuck in an edit loop — warnings are clearer, hooks use advisory language instead of commands.
-*Technical: Circuit-breaker WARNING now says "DO NOT edit this file again"; context-monitor switched from imperative ("Commit current work") to advisory ("Consider saving state"); post-edit-lint.sh documents output suppression reason; hooks README adds deadloop prevention notes.*
+- **feat**: Agent skill injection — agents receive system-specific skills (Shopify, Shopware, generic) automatically on install
+- **feat**: Agent delegation rules — `rules/agents.md` with trigger-condition table, scope limits, and anti-patterns
+- **chore**: Spec backlog cleanup — 11 specs → 0; dead specs deleted, good ideas moved to `BACKLOG.md`
+- **perf**: ~11% context reduction (~2,600 fewer tokens) — compressed spec.md, deduplicated reflect.md, consolidated cross-repo-context.sh
+- **fix**: Deadloop prevention hardening — clearer circuit-breaker warnings, advisory language in hooks
 
 ## [v1.2.7] — 2026-03-06
 
-### Reliable GitHub Releases
-Releases no longer fail silently when tag events arrive late — a fallback trigger ensures the release notes always get created.
-*Technical: `release-from-changelog` now supports `create` tag events as fallback for delayed push events; release docs and command include manual workflow trigger backup.*
-
-### Automatic CodeRabbit Integration
-CodeRabbit code review is installed and activated automatically — teams get AI-assisted PR reviews out of the box.
-*Technical: Auto-registers `coderabbitai/claude-plugin` in `extraKnownMarketplaces` + `enabledPlugins`; CLI install with fallback (`claude-plugin@coderabbitai` / `coderabbitai/claude-plugin`); summary and README coverage added.*
-
-### Always-Visible Update Notifications
-Developers are informed of available ai-setup updates at session start and on every prompt — no more stale installs going unnoticed.
-*Technical: `update-check` now runs on `SessionStart` and `UserPromptSubmit`; version source fallback chain (npm → GitHub Release → GitHub Tag); CLI update notice and statusline badge `ai-setup vX → vY`.*
-
-### Cross-Repo Context for Multi-Repo Projects
-Claude now automatically loads context from sibling repositories — useful for monorepos and multi-service setups.
-*Technical: New `cross-repo-context` SessionStart hook with preferred `.agents/context/repo-group.json` map and optional Shopware naming fallback. Multi-repo setup wizard creates the map via interactive parent-directory discovery.*
+- **fix**: Reliable GitHub releases — `create` tag event fallback for delayed push events; manual workflow trigger backup
+- **feat**: Automatic CodeRabbit integration — `coderabbitai/claude-plugin` installed and activated on setup
+- **feat**: Always-visible update notifications — `update-check` runs on SessionStart and UserPromptSubmit; npm → GitHub Release → Tag fallback chain
+- **feat**: Cross-repo context — SessionStart hook loads sibling repo context via `repo-group.json` or Shopware naming fallback
 
 ## [v1.2.6] — 2026-03-06
 
-### Commands Use the Correct Tool API
-All command templates and documentation updated to current Claude Code semantics — `Agent` instead of the deprecated `Task` tool. Subagent calls now work reliably.
-*Technical: Migrated all command templates and docs from `Task` → `Agent` wording.*
-
-### More Hooks Out of the Box
-Three new hook types are installed automatically — catching tool failures, config changes, and task completion. Teams get observability without manual setup.
-*Technical: Added `PostToolUseFailure` logging, `ConfigChange` auditing guard, and `TaskCompleted` gate hook templates with settings wiring.*
-
-### Faster Statusline
-The statusline updates more efficiently and no longer causes delays in large repos.
-*Technical: Switched to workspace JSON fields, added lightweight git caching, standardized `statusLine` settings (`type: command`, `padding`).*
-
-### Safer Shopify and Shopware Detection
-Project type detection is more accurate and credentials are never written into shared config files.
-*Technical: Improved Shopware/Shopify auto-detection signals, local Shopware skill fallback, hardened Shopware MCP setup to avoid writing credentials into `.mcp.json`.*
-
-### Smarter Setup Runs
-Re-running the setup is faster — expensive steps are skipped when nothing changed.
-*Technical: Skipped context regeneration in skills-only runs; deduplicated skill installs.*
+- **refactor**: Commands use correct Tool API — all templates migrated from `Task` → `Agent` wording
+- **feat**: 3 new hooks out of the box — PostToolUseFailure logging, ConfigChange audit, TaskCompleted gate
+- **perf**: Faster statusline — workspace JSON fields, lightweight git caching
+- **fix**: Safer Shopify/Shopware detection — improved auto-detection signals, credentials never written to `.mcp.json`
+- **perf**: Smarter setup runs — skip context regeneration in skills-only runs, deduplicate skill installs
 
 ## [v1.2.5] — 2026-03-05
 
@@ -290,27 +202,21 @@ Re-running the setup is faster — expensive steps are skipped when nothing chan
 
 ## [v1.1.4] — 2026-02-23
 
-- **Spec 020**: Granular template update selector — smart update now shows a 5-category checkbox UI (Hooks, Settings, Commands, Agents, Other) before processing templates, so users can update only the categories they want
-
-- **Spec 019**: Shopify templates moved to skills — relocated 8 Shopify knowledge templates from `templates/commands/shopify/` to `templates/skills/shopify-*/prompt.md`, updated all install/update/uninstall references to target `.claude/skills/`, removed redundant `dragnoir/Shopify-agent-skills` marketplace entries
+- **Spec 020**: Granular template update selector — 5-category checkbox UI (Hooks, Settings, Commands, Agents, Other) for selective updates
+- **Spec 019**: Shopify templates moved to skills — relocated 8 templates to `templates/skills/shopify-*/prompt.md`
 
 ## [v1.1.3] — 2026-02-23
 
-- **Spec 018**: Native worktree rewrite — replaced manual `git worktree add/remove` in spec-work-all with Claude Code's native `Agent(isolation: "worktree")`; subagent now handles .env copy, dep install, and branch rename
-
-- **Spec 016**: Worktree env and deps — `spec-work-all` now auto-copies `.env*` files and runs dependency install (bun/npm/pnpm/yarn) into each worktree before launching agents; failures are warnings, not blockers
+- **Spec 018**: Native worktree rewrite — `Agent(isolation: "worktree")` replaces manual git worktree management in spec-work-all
+- **Spec 016**: Worktree env and deps — auto-copies `.env*` files and runs dep install in each worktree before agents
 
 ## [v1.1.2] — 2026-02-22
 
-- **Spec 015**: Spec workflow branch and review improvements — `/spec-work` now prompts for branch creation before starting and offers auto-review with corrections after execution; `/spec-review` APPROVED verdict no longer suggests PR commands
-
-- **Spec 014**: Skills Discovery Section — added `## Skills Discovery` to `templates/CLAUDE.md` so Claude can search and install skills on demand using `npx skills find` and `npx skills add`
-
-- **feat**: Mini-VibeKanban spec workflow — full status lifecycle (`draft` → `in-progress` → `in-review` → `completed` / `blocked`), `/spec-board` Kanban overview with step progress, `/spec-review NNN` Opus-powered review with PR drafting, `/spec-work-all` rewritten to use Git worktrees for isolated parallel execution, `/spec-work` updated with status transitions
-
-- **Spec 013**: Dynamic Template Map — replaced hardcoded TEMPLATE_MAP array and install loops with dynamic generation from `templates/` directory
-
-- **feat**: `/spec` challenge phase deepened — now thinks through implementation before verdict, mirrors plan mode
+- **Spec 015**: Spec workflow branch and review — branch creation prompt before start, auto-review with corrections after execution
+- **Spec 014**: Skills Discovery Section — `## Skills Discovery` in CLAUDE.md for on-demand skill search/install
+- **feat**: Mini-VibeKanban spec workflow — full status lifecycle, `/spec-board` Kanban, `/spec-review` with PR drafting, worktree-based parallel execution
+- **Spec 013**: Dynamic Template Map — replaced hardcoded TEMPLATE_MAP with dynamic generation from `templates/`
+- **feat**: `/spec` challenge phase deepened — thinks through implementation before verdict
 - **feat**: `/spec` challenge uses `AskUserQuestion` at decision points during analysis
 - **feat**: `/spec` and `/spec-work` auto-load relevant installed skills from `.claude/skills/`
 - **feat**: `update-check.sh` hook — notifies at session start when a new `@onedot/ai-setup` version is available

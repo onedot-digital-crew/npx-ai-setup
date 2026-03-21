@@ -121,6 +121,7 @@ Claude spawns specialized agents automatically during `/spec-work`, `/pr`, and `
 - `cross-repo-context.sh` — loads sibling repo context on session start
 - `post-edit-lint.sh` — runs linter after edits (when available)
 - `context-freshness.sh` — warns when context files are stale
+- `context-reinforcement.sh` — re-injects critical rules after context compaction
 - `context-monitor.sh` — tracks context usage after tool calls
 - `config-change-audit.sh` — audits changes to settings files
 - `task-completed-gate.sh` — verification gate before marking tasks done
