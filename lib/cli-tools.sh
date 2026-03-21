@@ -15,7 +15,7 @@ CLI_TOOL_REGISTRY=(
   "repomix:npm:repomix:required:Pack repo into AI-readable format for Claude context"
   "codex:npm:@openai/codex:optional:OpenAI Codex CLI (needs OPENAI_API_KEY)"
   "gemini:npm:@google/gemini-cli:optional:Google Gemini CLI (needs GEMINI_API_KEY)"
-  "agent-browser:cargo:agent-browser:optional:Persistent browser daemon for Claude automation (needs cargo)"
+  "agent-browser:npm:agent-browser:required:Persistent browser daemon for Claude automation"
 )
 
 # Colors (safe to re-define — idempotent)
@@ -144,6 +144,15 @@ install_cli_tools() {
     if _install_tool "$name" "$pm" "$package"; then
       echo -e "${_CT_GREEN}done${_CT_RESET}"
       installed=$((installed + 1))
+      # Post-install: agent-browser needs Chrome for Testing downloaded once
+      if [ "$name" = "agent-browser" ] && command -v agent-browser &>/dev/null; then
+        echo -n "   Downloading Chrome for Testing (agent-browser install) ... "
+        if agent-browser install &>/dev/null; then
+          echo -e "${_CT_GREEN}done${_CT_RESET}"
+        else
+          echo -e "${_CT_YELLOW}skipped (non-fatal)${_CT_RESET}"
+        fi
+      fi
     else
       if [ "$tier" = "required" ]; then
         echo -e "${_CT_RED}FAILED${_CT_RESET}"
