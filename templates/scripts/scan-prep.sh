@@ -33,7 +33,7 @@ run_npm() {
 
   # Extract counts per severity using python (always available on macOS/Linux)
   local summary
-  summary=$(python3 - <<'PYEOF'
+  summary=$(echo "$json" | python3 -c '
 import json, sys
 
 data = json.load(sys.stdin)
@@ -44,7 +44,7 @@ if "vulnerabilities" in data:
     for name, info in data["vulnerabilities"].items():
         sev = info.get("severity", "unknown").upper()
         vulns.setdefault(sev, []).append(
-            f"{name}@{info.get('range','?')} — fix: {info.get('fixAvailable', False)}"
+            f"{name}@{info.get("range","?")} — fix: {info.get("fixAvailable", False)}"
         )
 elif "advisories" in data:
     for adv_id, info in data["advisories"].items():
@@ -65,8 +65,7 @@ for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
 total = sum(len(v) for v in vulns.values())
 if total == 0:
     print("NO_VULNERABILITIES_FOUND")
-PYEOF
-    <<< "$json")
+')
 
   echo "$summary"
 
@@ -84,7 +83,8 @@ run_snyk() {
   local json
   json=$(snyk test --json 2>/dev/null || true)
 
-  python3 - <<'PYEOF'
+  local summary
+  summary=$(echo "$json" | python3 -c '
 import json, sys
 
 try:
@@ -111,10 +111,15 @@ for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
 total = sum(len(v) for v in vulns.values())
 if total == 0:
     print("NO_VULNERABILITIES_FOUND")
-PYEOF
+')
 
-  local exit_code=$?
-  exit "$exit_code"
+  echo "$summary"
+
+  if echo "$summary" | grep -q "NO_VULNERABILITIES_FOUND"; then
+    exit 0
+  else
+    exit 2
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -125,7 +130,8 @@ run_pip() {
     local out
     out=$(pip-audit --format=json 2>/dev/null || true)
 
-    python3 - <<'PYEOF'
+    local summary
+    summary=$(echo "$out" | python3 -c '
 import json, sys
 
 try:
@@ -138,7 +144,7 @@ vulns = {"HIGH": [], "MEDIUM": [], "LOW": []}
 for dep in data.get("dependencies", []):
     for vuln in dep.get("vulns", []):
         sev = vuln.get("fix_versions", ["?"])
-        entry = f"{dep['name']}@{dep['version']} ({vuln['id']}) — fix: {sev}"
+        entry = f"{dep[\"name\"]}@{dep[\"version\"]} ({vuln[\"id\"]}) — fix: {sev}"
         vulns["HIGH"].append(entry)  # pip-audit does not expose CVSS natively
 
 for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
@@ -151,7 +157,14 @@ for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
 total = sum(len(v) for v in vulns.values())
 if total == 0:
     print("NO_VULNERABILITIES_FOUND")
-PYEOF
+')
+    echo "$summary"
+
+    if echo "$summary" | grep -q "NO_VULNERABILITIES_FOUND"; then
+      exit 0
+    else
+      exit 2
+    fi
 
   elif has safety; then
     safety check --full-report 2>/dev/null || true
