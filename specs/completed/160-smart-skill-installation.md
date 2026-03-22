@@ -1,6 +1,6 @@
 # Spec: Simplify Skill Installation — Global Only + Boilerplate
 
-> **Spec ID**: 160 | **Created**: 2026-03-22 | **Status**: in-progress | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 160 | **Created**: 2026-03-22 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Extract skill installation into its own step, reduce to 3 global skills, remove keyword-based mapping, and clean up dead code.
@@ -20,19 +20,19 @@ Skills are embedded in `run_generation()` alongside AI context generation. 10+ s
 - [x] Step 3: Wire `run_skill_installation` as own step in `ai-setup.sh` between plugins and Auto-Init. Wire into update flow (`lib/update.sh`) where `REGEN_SKILLS=yes`
 - [x] Step 4: Update TUI (`lib/tui.sh`) — rename "Skills" option description to reflect reduced scope, keep REGEN_SKILLS toggle working with new function
 - [x] Step 5: Remove dead code — `FORCE_SKILLS` from ai-setup.sh, `SKILL_PATTERN` from skills.sh, `SKIPPED` from skills.sh/generate.sh, `get_keyword_skills()` from skills.sh
-- [ ] Step 6: Add post-install hint in `run_skill_installation()` — after install output, print hint: "Run /find-skills in Claude Code to discover skills matched to your project" + 1-2 sentences why (skills matched to actual project context are more useful than generic stack-based ones)
-- [ ] Step 7: Test `./bin/ai-setup.sh` on this repo — verify only 3 skills install, no keyword detection output, hint is shown
+- [x] Step 6: Add post-install hint in `run_skill_installation()` — after install output, print hint: "Run /find-skills in Claude Code to discover skills matched to your project" + 1-2 sentences why (skills matched to actual project context are more useful than generic stack-based ones)
+- [x] Step 7: Test `./bin/ai-setup.sh` on this repo — verify only 3 skills install, no keyword detection output, hint is shown
 
 ## Acceptance Criteria
 
 ### Truths
-- [ ] "Running ai-setup installs exactly 3 global skills (minus already-installed)"
-- [ ] "run_generation() contains zero skill-related code"
-- [ ] "Grepping for FORCE_SKILLS, SKILL_PATTERN, get_keyword_skills returns no results in lib/ and bin/"
+- [x] "Running ai-setup installs exactly 3 global skills (minus already-installed)"
+- [x] "run_generation() contains zero skill-related code"
+- [x] "Grepping for FORCE_SKILLS, SKILL_PATTERN, get_keyword_skills returns no results in lib/ and bin/"
 
 ### Key Links
-- [ ] `bin/ai-setup.sh` → `lib/skills.sh` via `run_skill_installation` call
-- [ ] `lib/update.sh` → `lib/skills.sh` via `run_skill_installation` when REGEN_SKILLS=yes
+- [x] `bin/ai-setup.sh` → `lib/skills.sh` via `run_skill_installation` call
+- [x] `lib/update.sh` → `lib/skills.sh` via `run_skill_installation` when REGEN_SKILLS=yes
 
 ## Files to Modify
 - `lib/skills.sh` — add run_skill_installation(), remove get_keyword_skills(), SKILL_PATTERN, SKIPPED

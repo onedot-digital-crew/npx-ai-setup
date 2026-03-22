@@ -13,7 +13,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 - **Spec 156**: Prep-script expansion — 4 new prep scripts (build, lint, pr, changelog) with zero-token green paths, wired into build-fix/lint/pr/release skills
 - **Spec 157**: Token optimization strategy — RTK activation in setup, shared prep-lib.sh, green-path hardening, CLI health check hook, developer guide
 - **Spec 159**: Gemini & Codex minimal integration — optional config templates, skills symlinks, and AGENTS.md as multi-tool workflow router
-- **Spec 160**: Multi-agent orchestrator — explicit delegation to Gemini/Codex CLI via wrapper scripts and orchestrate skill
+- **Spec 160**: Smart skill installation — reduced to 3 global skills (agent-browser, find-skills, gh-cli), removed keyword-based mapping, extracted skills into own setup step, cleaned up dead code
 
 ## [v2.0.0] — 2026-03-22
 
