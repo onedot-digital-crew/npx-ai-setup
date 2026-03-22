@@ -30,6 +30,8 @@ Executes all draft specs in `specs/` in dependency-aware waves.
 
 ## Rules
 
+- **Max 2 concurrent worktree agents per wave.** Parallel agents each consume an auth session — more than 2 causes "Not logged in" failures. Split larger waves into sub-waves of 2.
+- Low-complexity specs (1-2 files, no build step) can run directly in the main repo without worktree isolation to save auth sessions.
 - Respect spec dependencies.
 - Do not silently skip blocked specs.
 - Report partial completion clearly.
