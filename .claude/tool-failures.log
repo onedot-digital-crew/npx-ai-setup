@@ -1,0 +1,2 @@
+2026-03-22T14:51:30Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-22T15:02:14Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.

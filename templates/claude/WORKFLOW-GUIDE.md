@@ -67,6 +67,7 @@ Parallel execution: `/spec-work-all` runs all draft specs in isolated Git worktr
 | `/challenge "idea"` | Critically evaluate a feature idea before building (GO/SIMPLIFY/REJECT verdict) |
 | `/commit` | Stage changes + conventional commit message |
 | `/pr` | Build validation + staff review + PR draft |
+| `/ci` | Check CI status via gh pr checks / gh run list, suggests next step |
 | `/release` | Bump version, update CHANGELOG, tag release |
 
 ---

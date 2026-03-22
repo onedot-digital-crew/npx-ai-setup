@@ -4,7 +4,7 @@
 
 install_spec_skills() {
   [ "${#SPEC_SKILLS_MAP[@]}" -gt 0 ] || return 0
-  echo "  📚 Installing spec workflow skills..."
+  tui_step "Installing spec workflow skills"
   for mapping in "${SPEC_SKILLS_MAP[@]}"; do
     local local_tpl="${mapping%%:*}"
     local local_target="${mapping#*:}"
@@ -19,7 +19,7 @@ install_spec_skills() {
 
 # Install subagent templates
 install_agents() {
-  echo "🤖 Installing subagent templates..."
+  tui_step "Installing subagent templates"
   mkdir -p .claude/agents
 
   # Detect frontend stack from package.json for conditional agent install
@@ -32,7 +32,7 @@ install_agents() {
     _agent_name="${_agent_path##*/}"
     # frontend-developer agent: only install when a frontend framework is detected
     if [ "$_agent_name" = "frontend-developer.md" ] && [ "$_has_frontend" = "false" ]; then
-      echo "  ⏭️  frontend-developer agent skipped (no frontend stack detected)"
+      tui_info "frontend-developer agent skipped (no frontend stack detected)"
       continue
     fi
     _install_or_update_file "$_agent_path" ".claude/agents/$_agent_name"

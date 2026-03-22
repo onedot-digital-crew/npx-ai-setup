@@ -149,7 +149,7 @@ CTX7EOF
 show_plugin_summary() {
   if [ -n "$PENDING_PLUGINS" ]; then
     echo ""
-    echo "  ⚡ Pending plugin installations (run in a Claude Code session):"
+    tui_warn "Pending plugin installations (run in a Claude Code session)"
     for PP in $PENDING_PLUGINS; do
       case "$PP" in
         claude-mem)
@@ -168,75 +168,70 @@ show_plugin_summary() {
       esac
     done
     echo ""
-    echo "  Then restart Claude Code."
+    tui_info "Restart Claude Code afterwards"
   fi
 }
 
 # Show installation summary
 show_installation_summary() {
+  tui_section "Setup Summary" "Project files, plugins, and optional follow-up tasks"
+  tui_success "Setup complete. Core project files are ready."
   echo ""
-  echo "🎉 AI Setup complete! Your project is ready for AI-assisted development."
-  echo ""
-  echo "📦 Installation Summary"
-  echo "   ──────────────────────────────────────────────────────────"
-  echo ""
-  echo "✅ Files created:"
-  [ -f CLAUDE.md ] && echo "   - CLAUDE.md (project rules)"
-  [ -f AGENTS.md ] && echo "   - AGENTS.md (universal passive agent context)"
-  [ -f .claude/settings.json ] && echo "   - .claude/settings.json (permissions)"
-  [ -f .github/copilot-instructions.md ] && echo "   - .github/copilot-instructions.md"
-  echo "   - .claude/hooks/ (protect-files, post-edit-lint, circuit-breaker, context-freshness, update-check)"
-  [ -f .mcp.json ] && echo "   - .mcp.json (MCP server config)"
-  [ -d specs ] && echo "   - specs/ (spec-driven workflow)"
-  [ -d .claude/commands ] && echo "   - .claude/commands/ (spec, spec-work, commit, pr, review, test, techdebt, bug, grill)"
-  [ -d .claude/agents ] && echo "   - .claude/agents/ (verify-app, build-validator, staff-reviewer, context-refresher, code-reviewer, code-architect, perf-reviewer, test-generator)"
-
-  echo ""
-  echo "✅ Tools & Plugins:"
-  local CLAUDE_MEM_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
-  if [ -d "$CLAUDE_MEM_DIR" ]; then
-    echo "   - Claude-Mem (persistent memory) ✅"
-  else
-    echo "   - Claude-Mem (pending — run install commands in Claude Code)"
-  fi
-  local CODERABBIT_DIR="${HOME}/.claude/plugins/cache/coderabbitai/claude-plugin"
-  if [ -d "$CODERABBIT_DIR" ]; then
-    echo "   - CodeRabbit plugin ✅"
-  else
-    echo "   - CodeRabbit plugin (pending — run install commands in Claude Code)"
-  fi
-  [ -n "${INSTALLED_PLUGINS:-}" ] && echo "   - Plugins: ${INSTALLED_PLUGINS}"
-  [ -f .mcp.json ] && echo "   - Context7 MCP server (.mcp.json)"
-  if [ -n "$PENDING_PLUGINS" ]; then
-    echo "   - ⚠️  Pending plugins: ${PENDING_PLUGINS}(see install commands above)"
-  fi
-
+  local docs_status hooks_status workflow_status mcp_status skills_status context_status plugin_status
+  docs_status="CLAUDE.md"
+  [ -f AGENTS.md ] && docs_status="${docs_status}, AGENTS.md"
+  hooks_status="missing"
+  [ -d .claude/hooks ] && hooks_status="installed"
+  workflow_status="basic"
+  [ -d .claude/commands ] && workflow_status="commands"
+  [ -d .claude/agents ] && workflow_status="${workflow_status} + agents"
+  [ -d specs ] && workflow_status="${workflow_status} + specs"
+  mcp_status="not configured"
+  [ -f .mcp.json ] && mcp_status="configured"
+  skills_status="none"
+  [ ${INSTALLED:-0} -gt 0 ] && skills_status="${INSTALLED} installed"
+  context_status="not generated"
   if [ "$AI_CLI" = "claude" ] && [[ ! "${RUN_INIT:-N}" =~ ^[Nn]$ ]]; then
-    echo ""
     if [ "${AUTO_INIT_OK:-yes}" = "yes" ]; then
-      echo "✅ Auto-Init completed:"
-      echo "   - CLAUDE.md + AGENTS.md extended with project-specific sections"
-      [ -d .agents/context ] && echo "   - .agents/context/ (STACK.md, ARCHITECTURE.md, CONVENTIONS.md)"
-      if [ ${INSTALLED:-0} -gt 0 ]; then
-        echo "   - ${INSTALLED} skills installed"
-      fi
+      context_status="generated"
     else
-      echo "⚠️  Auto-Init finished with warnings — review output above."
+      context_status="generated with warnings"
     fi
   fi
 
+  local CLAUDE_MEM_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
+  local mem_status="pending"
+  if [ -d "$CLAUDE_MEM_DIR" ]; then
+    mem_status="installed"
+  fi
+  local CODERABBIT_DIR="${HOME}/.claude/plugins/cache/coderabbitai/claude-plugin"
+  local rabbit_status="pending"
+  if [ -d "$CODERABBIT_DIR" ]; then
+    rabbit_status="installed"
+  fi
+  plugin_status="Claude-Mem ${mem_status}, CodeRabbit ${rabbit_status}"
+  [ -n "${INSTALLED_PLUGINS:-}" ] && plugin_status="${plugin_status}, extras ${INSTALLED_PLUGINS}"
+  if [ -n "$PENDING_PLUGINS" ]; then
+    plugin_status="${plugin_status}, pending ${PENDING_PLUGINS}"
+  fi
+
+  tui_key_value "Docs" "$docs_status"
+  tui_key_value "Hooks" "$hooks_status"
+  tui_key_value "Workflow" "$workflow_status"
+  tui_key_value "MCP" "$mcp_status"
+  tui_key_value "Skills" "$skills_status"
+  tui_key_value "Context" "$context_status"
+  tui_key_value "Plugins" "$plugin_status"
+
   echo ""
-  echo "📂 Project structure ready for AI development"
+  tui_success "Project structure is ready"
 }
 
 # Show next steps and cheat sheet
 show_next_steps() {
-  echo ""
-  echo "🎯 Next Steps"
-  echo "   ──────────────────────────────────────────────────────────"
-  echo ""
-  echo "Start a Claude Code session and begin working."
-  echo "Your project context, CLAUDE.md, and AGENTS.md are ready."
+  tui_section "Next Steps" "How to start"
+  echo "Open Claude Code in this project and start working."
+  echo "The core project docs and workflow files are ready."
   echo ""
   echo "Spec-driven workflow:"
   echo "  /spec \"task description\"    Create a structured spec before coding"
@@ -246,9 +241,7 @@ show_next_steps() {
   echo "  npx @onedot/ai-setup"
 
   echo ""
-  echo "🔗 Links"
-  echo "   ──────────────────────────────────────────────────────────"
-  echo ""
+  printf '  %bLinks%b\n' "$TUI_BOLD" "$TUI_RESET"
   echo "  Skills:   https://skills.sh/"
   echo "  Memory:   https://claude-mem.ai"
   echo "  Claude:   https://docs.anthropic.com/en/docs/claude-code"

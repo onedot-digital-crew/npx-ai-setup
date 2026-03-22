@@ -58,6 +58,9 @@ source_lib "setup-skills.sh"
 source_lib "setup-compat.sh"
 source_lib "plugins.sh"
 source_lib "boilerplate.sh"
+trap 'tui_cleanup' EXIT INT TERM
+
+ensure_valid_working_directory || exit 1
 
 # Fast patch mode — copy specific template files without full update flow
 if [ -n "$PATCH_PATTERN" ]; then
@@ -67,6 +70,9 @@ fi
 
 # Lightweight registry check (cached) to hint when a newer ai-setup is available.
 show_cli_update_notice
+
+# Shared launch banner for fresh install and update flows.
+tui_brand_banner_once "Install project rules, workflow files, and helper tools"
 
 # ==============================================================================
 # AUTO-DETECT: UPDATE / REINSTALL / FRESH INSTALL
@@ -78,7 +84,8 @@ fi
 # ==============================================================================
 # NORMAL SETUP MODE
 # ==============================================================================
-echo "🚀 Starting AI Setup (Claude Code + Skills)..."
+tui_brand_banner_once "Install project rules, workflow files, and helper tools"
+tui_section "Set Up Project" "Create core instructions, settings, workflow files, and helper tools"
 
 check_requirements
 cleanup_legacy
@@ -102,15 +109,13 @@ install_claude_scripts
 install_spec_skills
 install_agents
 select_boilerplate_system
-echo "📋 Writing installation metadata..."
+tui_step "Writing installation metadata"
 write_metadata
 update_gitignore
 install_claudeignore
 
 # Plugins & extensions
-echo ""
-echo "🔌 Plugins & Extensions"
-echo "   ──────────────────────────────────────────────────────────"
+tui_section "Plugins & Extensions" "Marketplace plugins, MCP servers, and editor-side helpers"
 
 install_claude_mem
 install_coderabbit_plugin
@@ -126,49 +131,50 @@ generate_opencode_config
 
 # Statusline (global install — only if not already configured in ~/.claude/settings.json)
 if ! jq -e '.statusLine' "$HOME/.claude/settings.json" >/dev/null 2>&1; then
-  echo ""
-  echo "Statusline"
-  echo "   ──────────────────────────────────────────────────────────"
-  read -p "   Install statusline for Claude Code? (y/N) " INSTALL_STATUSLINE
-  if [[ "$INSTALL_STATUSLINE" =~ ^[Yy]$ ]]; then
+  tui_section "Statusline" "Optional global Claude Code status line"
+  if ask_yes_no_menu \
+    "Install the optional Claude Code statusline?" \
+    "Yes" "Install it now" \
+    "No" "Skip this step" \
+    "no"; then
     install_statusline_project
   fi
 fi
 
-# Auto-Init
-echo ""
-echo "✅ Setup complete!"
-echo ""
+# Optional context generation
+tui_section "Finish Setup" "Optionally generate project-specific docs and context with Claude"
+tui_success "Base setup complete"
 
 if [ "$AI_CLI" = "claude" ]; then
-  read -p "🤖 Run Auto-Init now? (Y/n) " RUN_INIT
-  if [[ ! "$RUN_INIT" =~ ^[Nn]$ ]]; then
+  if ask_yes_no_menu \
+    "Generate project-specific context now?" \
+    "Yes" "Generate docs and context now" \
+    "No" "Do this later" \
+    "yes"; then
     AUTO_INIT_OK="no"
     if run_generation; then
       AUTO_INIT_OK="yes"
-      echo ""
-      echo "✅ Auto-Init complete!"
-      _NOTIFY_MSG="Auto-Init complete!"
+      tui_success "Project context generated"
+      _NOTIFY_MSG="Project context generated"
     else
-      echo ""
-      echo "⚠️  Auto-Init finished with warnings. Review output above."
-      _NOTIFY_MSG="Auto-Init finished with warnings"
+      tui_warn "Project context generated with warnings"
+      _NOTIFY_MSG="Project context generated with warnings"
     fi
     case "$(uname -s)" in
-      Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"AI Setup\" sound name \"Glass\"" 2>/dev/null || true ;;
-      Linux) command -v notify-send >/dev/null 2>&1 && notify-send "AI Setup" "$_NOTIFY_MSG" 2>/dev/null || true ;;
+      Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"Project Setup\" sound name \"Glass\"" 2>/dev/null || true ;;
+      Linux) command -v notify-send >/dev/null 2>&1 && notify-send "Project Setup" "$_NOTIFY_MSG" 2>/dev/null || true ;;
     esac
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
-  echo "💡 GitHub Copilot detected (no claude CLI)."
+  tui_info "GitHub Copilot detected (no claude CLI)"
   echo "   Manual steps required:"
   echo ""
   echo "   1. Open VS Code / GitHub Copilot Chat"
   echo "   2. Ask Copilot to extend CLAUDE.md and AGENTS.md with project-specific sections"
 else
-  echo "⚠️  No AI CLI detected (neither claude nor gh copilot)."
+  tui_warn "No AI CLI detected (neither claude nor gh copilot)"
   echo "   Install Claude Code: npm i -g @anthropic-ai/claude-code"
-  echo "   Then run the setup steps in NEXT STEPS below"
+  echo "   Then follow the next steps shown below"
 fi
 
 show_installation_summary
@@ -176,16 +182,22 @@ show_next_steps
 
 # Generate project context files (.agents/context/STACK.md, ARCHITECTURE.md, CONVENTIONS.md)
 if [ "$AI_CLI" = "claude" ]; then
-  echo ""
-  echo "📚 Generating project context files..."
-  claude --agent context-refresher "Analyze this project and generate .agents/context/STACK.md, .agents/context/ARCHITECTURE.md, and .agents/context/CONVENTIONS.md." 2>/dev/null || \
-    echo "⚠️  Context generation skipped (claude CLI unavailable or agent failed)"
+  tui_section "Project Context" "Refreshing STACK.md, ARCHITECTURE.md, and CONVENTIONS.md"
+  tui_spinner_start "Generating project context files"
+  if claude --agent context-refresher "Analyze this project and generate .agents/context/STACK.md, .agents/context/ARCHITECTURE.md, and .agents/context/CONVENTIONS.md." >/dev/null 2>&1; then
+    tui_spinner_stop ok "Project context files refreshed"
+  else
+    tui_spinner_stop warn "Project context refresh skipped"
+  fi
 fi
 
 # --audit flag: run project onboarding audit after setup
 if [ "${RUN_AUDIT:-}" = "yes" ] && [ "$AI_CLI" = "claude" ]; then
-  echo ""
-  echo "🔍 Running project onboarding audit..."
-  claude --agent project-auditor "Analyze this project and produce .agents/context/PATTERNS.md and .agents/context/AUDIT.md. Follow the efficient reading strategy in your instructions. When done, ask the user if specs should be created for the top findings." 2>/dev/null || \
-    echo "⚠️  Audit skipped (claude CLI unavailable or agent failed)"
+  tui_section "Project Audit" "Optional onboarding audit for patterns and top findings"
+  tui_spinner_start "Running project onboarding audit"
+  if claude --agent project-auditor "Analyze this project and produce .agents/context/PATTERNS.md and .agents/context/AUDIT.md. Follow the efficient reading strategy in your instructions. When done, ask the user if specs should be created for the top findings." >/dev/null 2>&1; then
+    tui_spinner_stop ok "Project audit completed"
+  else
+    tui_spinner_stop warn "Project audit skipped"
+  fi
 fi

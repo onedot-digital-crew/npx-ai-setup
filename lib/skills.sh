@@ -18,7 +18,8 @@ install_local_skill_template() {
   [ -f "$local_template" ] || return 1
   mkdir -p "$local_target_dir"
   cp "$local_template" "$local_target_dir/SKILL.md"
-  printf "\r     ✅ %s (local template fallback)\n" "$sid"
+  printf "\r\033[K"
+  tui_success "${sid} (local template fallback)"
   return 0
 }
 
@@ -30,19 +31,19 @@ install_skill() {
 
   # Check if already installed (local or global)
   if [ -d ".claude/skills/$skill_name" ] || [ -d "${HOME}/.claude/skills/$skill_name" ]; then
-    printf "     ⏭️  %s (already installed)\n" "$sid"
+    tui_info "${sid} (already installed)"
     return 0
   fi
 
-  printf "     ⏳ %s ..." "$sid"
+  tui_spinner_start "Installing skill ${sid}"
   if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
-    printf "\r     ✅ %s\n" "$sid"
+    tui_spinner_stop ok "${sid}"
     return 0
   else
     if install_local_skill_template "$sid"; then
       return 0
     fi
-    printf "\r     ❌ %s (install failed)\n" "$sid"
+    tui_spinner_stop error "${sid} (install failed)"
     return 1
   fi
 }
@@ -53,7 +54,7 @@ install_skill() {
 run_skill_installation() {
   set +e
   echo ""
-  echo "🔌 Installing global skills..."
+  tui_section "Shared Skills" "Installing reusable skills bundled with this setup"
   INSTALLED=0
 
   local GLOBAL_SKILLS=(
@@ -63,7 +64,7 @@ run_skill_installation() {
   )
 
   echo ""
-  echo "  📦 Installing skills..."
+  tui_step "Installing skills"
 
   # Install in parallel; tally results after all complete
   local tmpdir
@@ -94,7 +95,7 @@ run_skill_installation() {
   rm -rf "$tmpdir"
 
   echo ""
-  echo "  💡 Run /find-skills in Claude Code to discover skills matched to your project."
+  tui_info "Run /find-skills in Claude Code to discover skills matched to your project"
   echo "     Skills that understand your actual codebase are more effective than generic ones."
 
   set -e

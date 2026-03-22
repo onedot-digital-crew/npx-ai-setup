@@ -9,33 +9,48 @@ kill_tree() {
   wait "$pid" 2>/dev/null || true
 }
 
+_progress_bar_chars() {
+  _tui_init
+  local filled="$1"
+  local empty="$2"
+  printf '%s%s' \
+    "$(tui_repeat_char "$TUI_BAR_FILL" "$filled")" \
+    "$(tui_repeat_char "$TUI_BAR_EMPTY" "$empty")"
+}
+
 # Progress bar for a single process
 # Usage: progress_bar <pid> <label> [est_seconds] [max_seconds]
 progress_bar() {
+  _tui_init
   local pid=$1 label=$2 est=${3:-120} max=${4:-600}
   local width=30 elapsed=0
   while kill -0 "$pid" 2>/dev/null; do
     if [ "$elapsed" -ge "$max" ]; then
       kill_tree "$pid"
-      printf "\r  ⚠️  %s cancelled after %ds (timeout)%*s\n" "$label" "$elapsed" 20 ""
+      printf "\r\033[K"
+      tui_warn "$label cancelled after ${elapsed}s (timeout)"
       return 0
     fi
     local pct=$((elapsed * 100 / est))
     [ "$pct" -gt 95 ] && pct=95
     local filled=$((pct * width / 100))
     local empty=$((width - filled))
-    local bar=$(printf '█%.0s' $(seq 1 $filled 2>/dev/null) ; printf '░%.0s' $(seq 1 $empty 2>/dev/null))
-    printf "\r  %s %s [%s] %d%% (%ds)" "⏳" "$label" "$bar" "$pct" "$elapsed"
+    local bar
+    bar=$(_progress_bar_chars "$filled" "$empty")
+    printf "\r  %b%s%b %-24s [%s] %3d%% (%ds)" "$TUI_CYAN" "$TUI_INFO" "$TUI_RESET" "$label" "$bar" "$pct" "$elapsed"
     sleep 1
     elapsed=$((elapsed + 1))
   done
-  local bar=$(printf '█%.0s' $(seq 1 $width))
-  printf "\r  ✅ %s [%s] 100%% (%ds)\n" "$label" "$bar" "$elapsed"
+  local bar
+  bar=$(_progress_bar_chars "$width" 0)
+  printf "\r\033[K"
+  printf "  %b%s%b %-24s [%s] 100%% (%ds)\n" "$TUI_GREEN" "$TUI_OK" "$TUI_RESET" "$label" "$bar" "$elapsed"
 }
 
 # Parallel progress bars for multiple processes
 # Usage: wait_parallel "PID:Label:Est:Max" "PID:Label:Est:Max" ...
 wait_parallel() {
+  _tui_init
   local specs=("$@")
   local count=${#specs[@]}
   local width=30
@@ -69,18 +84,20 @@ wait_parallel() {
 
       if [ "${done_at[$i]}" -gt 0 ]; then
         # Already finished
-        local bar=$(printf '█%.0s' $(seq 1 $width))
-        printf "\r  ✅ %-25s [%s] 100%% (%ds)%*s\n" "$label" "$bar" "${done_at[$i]}" 5 ""
+        local bar
+        bar=$(_progress_bar_chars "$width" 0)
+        printf "\r\033[K  %b%s%b %-25s [%s] 100%% (%ds)\n" "$TUI_GREEN" "$TUI_OK" "$TUI_RESET" "$label" "$bar" "${done_at[$i]}"
       elif ! kill -0 "$pid" 2>/dev/null; then
         # Just finished
         done_at[$i]=$((elapsed > 0 ? elapsed : 1))
-        local bar=$(printf '█%.0s' $(seq 1 $width))
-        printf "\r  ✅ %-25s [%s] 100%% (%ds)%*s\n" "$label" "$bar" "$elapsed" 5 ""
+        local bar
+        bar=$(_progress_bar_chars "$width" 0)
+        printf "\r\033[K  %b%s%b %-25s [%s] 100%% (%ds)\n" "$TUI_GREEN" "$TUI_OK" "$TUI_RESET" "$label" "$bar" "$elapsed"
       elif [ "$elapsed" -ge "$max" ]; then
         # Timeout
         kill_tree "$pid"
         done_at[$i]=$elapsed
-        printf "\r  ⚠️  %-25s cancelled after %ds (timeout)%*s\n" "$label" "$elapsed" 10 ""
+        printf "\r\033[K  %b%s%b %-25s cancelled after %ds (timeout)\n" "$TUI_YELLOW" "$TUI_WARN" "$TUI_RESET" "$label" "$elapsed"
       else
         # Still running
         running=$((running + 1))
@@ -88,8 +105,9 @@ wait_parallel() {
         [ "$pct" -gt 95 ] && pct=95
         local filled=$((pct * width / 100))
         local empty=$((width - filled))
-        local bar=$(printf '█%.0s' $(seq 1 $filled 2>/dev/null) ; printf '░%.0s' $(seq 1 $empty 2>/dev/null))
-        printf "\r  ⏳ %-25s [%s] %d%% (%ds)%*s\n" "$label" "$bar" "$pct" "$elapsed" 5 ""
+        local bar
+        bar=$(_progress_bar_chars "$filled" "$empty")
+        printf "\r\033[K  %b%s%b %-25s [%s] %3d%% (%ds)\n" "$TUI_CYAN" "$TUI_INFO" "$TUI_RESET" "$label" "$bar" "$pct" "$elapsed"
       fi
     done
 

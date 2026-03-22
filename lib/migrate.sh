@@ -32,16 +32,16 @@ run_migrations() {
   fi
 
   echo ""
-  echo "🔄 Applying ${#pending[@]} migration(s)..."
+  tui_section "Migrations" "Applying ${#pending[@]} migration(s)"
 
   for mfile in "${pending[@]}"; do
     local mver
     mver=$(basename "$mfile" .sh)
-    echo "   → $mver"
+    tui_step "$mver"
     if source "$mfile"; then
       applied=$((applied + 1))
     else
-      echo "   ❌ Migration $mver failed"
+      tui_error "Migration $mver failed"
       failed=$((failed + 1))
       break
     fi
@@ -49,11 +49,11 @@ run_migrations() {
 
   echo ""
   if [ "$failed" -gt 0 ]; then
-    echo "⚠️  $applied migration(s) applied, $failed failed."
+    tui_warn "$applied migration(s) applied, $failed failed."
     return 1
   fi
 
-  echo "✅ $applied migration(s) applied."
+  tui_success "$applied migration(s) applied."
   return 0
 }
 

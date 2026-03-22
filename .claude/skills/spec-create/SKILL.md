@@ -18,49 +18,24 @@ Creates a spec file in `specs/NNN-title.md` for an approved task before coding b
 
 3. **Determine the next spec number** — run `ls specs/*.md | sort | tail -1` to find the highest number, increment by 1.
 
-4. **Think through implementation**:
+4. **Discover installed skills** — run `ls .claude/skills/` to see all available skills in this project. Keep this list in mind when writing steps — if a step's action is covered by an installed skill, reference it as `` `/skill-name` `` instead of describing the action in prose.
+
+5. **Think through implementation**:
    - Which files change?
    - What's the exact change in each file?
    - Edge cases and failure modes?
    - Hidden complexity?
 
-5. **Write the spec file** `specs/NNN-title.md` using this template:
+6. **Write the spec file** `specs/NNN-title.md` using this template:
+   - Goal
+   - Context
+   - Steps
+   - Acceptance Criteria (categories: Truths, Artifacts, and optionally Scenarios)
+   - Files to Modify
+   - Out of Scope
 
-```markdown
-# Spec: [Title]
-
-> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Branch**: —
-
-## Goal
-[One sentence: what this achieves and why]
-
-## Context
-[Why now, relevant background, related files/systems]
-
-## Steps
-- [ ] Step 1: [Specific, actionable, one file/system per step]
-- [ ] Step 2: ...
-
-## Acceptance Criteria
-
-### Truths
-- [ ] "[Observable, testable outcome as a quoted statement]"
-
-### Artifacts
-- [ ] `path/to/file` — what it contains or does
-
-<!-- ### Scenarios (optional)
-Use only for user-facing behavior (UI features, API endpoints, user workflows).
-Format: WHEN <trigger> THEN <outcome> [AND <additional outcome>]
-- [ ] WHEN user does X THEN system responds Y
--->
-
-## Files to Modify
-- `path/to/file.sh` — what changes
-
-## Out of Scope
-- [What this spec deliberately does NOT do]
-```
+   **Scenarios (optional AC category):** Use WHEN/THEN/AND format only when behavior is user-facing
+   (UI features, API endpoints, user workflows). Skip for internal changes or config-only tasks.
 
 ## Rules
 - Steps must be atomic — one file or system per step

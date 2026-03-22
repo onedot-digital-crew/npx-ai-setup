@@ -1,4 +1,32 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "claude-sonnet-4-6",
+  "plansDirectory": ".claude/plans",
+  "autoMemoryDirectory": ".agents/memory",
+  "enableAllProjectMcpServers": true,
+  "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
+  "respectGitignore": true,
+  "attribution": {
+    "coAuthoredBy": true,
+    "template": "Co-Authored-By: Claude <noreply@anthropic.com>"
+  },
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80",
+    "ENABLE_TOOL_SEARCH": "true",
+    "MAX_MCP_OUTPUT_TOKENS": "10000",
+    "BASH_MAX_OUTPUT_LENGTH": "20000"
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowedNetworkHosts": [
+      "github.com",
+      "api.github.com",
+      "npmjs.org",
+      "registry.npmjs.org",
+      "skills.sh",
+      "api.skills.sh"
+    ]
+  },
   "permissions": {
     "allow": [
       "Read(src/**)",
@@ -31,7 +59,6 @@
       "Bash(npx eslint *)",
       "Bash(npx prettier *)",
       "Bash(npx vitest *)",
-      "Bash(npx playwright *)",
       "Bash(gh pr *)",
       "Bash(gh issue *)",
       "Bash(jq:*)",
@@ -40,6 +67,27 @@
     ],
     "deny": [
       "Read(.env*)",
+      "Read(dist/**)",
+      "Read(.output/**)",
+      "Read(.nuxt/**)",
+      "Read(coverage/**)",
+      "Read(.next/**)",
+      "Read(build/**)",
+      "Read(package-lock.json)",
+      "Read(yarn.lock)",
+      "Read(pnpm-lock.yaml)",
+      "Read(bun.lockb)",
+      "Read(composer.lock)",
+      "Read(.turbo/**)",
+      "Read(.vercel/**)",
+      "Read(.svelte-kit/**)",
+      "Read(.cache/**)",
+      "Read(.parcel-cache/**)",
+      "Read(storybook-static/**)",
+      "Read(*.min.js)",
+      "Read(*.min.css)",
+      "Read(*.map)",
+      "Read(*.chunk.js)",
       "Bash(rm -r *)",
       "Bash(rm -rf *)",
       "Bash(git reset --hard *)",
@@ -55,7 +103,22 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/context-reinforcement.sh",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'for f in STACK.md CONVENTIONS.md; do [ -f \"${CLAUDE_PROJECT_DIR:-.}/.agents/context/$f\" ] && echo \"=== $f ==\" && head -20 \"${CLAUDE_PROJECT_DIR:-.}/.agents/context/$f\"; done'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/cross-repo-context.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/mcp-health.sh",
             "timeout": 5
           },
           {
@@ -87,6 +150,28 @@
         ]
       }
     ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/post-tool-failure-log.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/config-change-audit.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
@@ -104,7 +189,6 @@
     ],
     "UserPromptSubmit": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
@@ -121,11 +205,21 @@
     ],
     "Notification": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "osascript -e 'display notification \"Claude Code is ready\" with title \"Claude Code\"'"
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/notify.sh"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/task-completed-gate.sh",
+            "timeout": 10
           }
         ]
       }
@@ -141,19 +235,5 @@
         ]
       }
     ]
-  },
-  "env": {
-    "MAX_MCP_OUTPUT_TOKENS": "10000",
-    "BASH_MAX_OUTPUT_LENGTH": "20000"
-  },
-  "enabledPlugins": {
-    "code-review@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
-  },
-  "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
-  "statusLine": {
-    "type": "command",
-    "command": "bash \"$HOME/.claude/statusline.sh\""
   }
 }

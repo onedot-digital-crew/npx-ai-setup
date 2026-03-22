@@ -61,7 +61,7 @@ show_cli_update_notice() {
   # Only show notice when registry version is strictly newer (semver compare)
   if [ "$latest" != "$current" ] && _semver_gt "$latest" "$current"; then
     echo ""
-    echo "ℹ️  New version available: @onedot/ai-setup v${latest} (current: v${current})"
+    tui_info "New version available: @onedot/ai-setup v${latest} (current: v${current})"
     echo "   Update command: npx github:onedot-digital-crew/npx-ai-setup"
     echo ""
   fi
@@ -80,16 +80,15 @@ handle_version_check() {
 
     echo ""
     if [ "$SCAN_TOTAL_CHANGES" -eq 0 ]; then
-      echo "✅ Already up to date (v${PACKAGE_VERSION}) — all files match templates."
+      tui_success "Already up to date (v${PACKAGE_VERSION}) - all files match templates"
     else
-      echo "✅ Already up to date (v${PACKAGE_VERSION}) — ${SCAN_TOTAL_CHANGES} file(s) differ from templates."
+      tui_success "Already up to date (v${PACKAGE_VERSION}) - ${SCAN_TOTAL_CHANGES} file(s) differ from templates"
     fi
-    echo ""
-    echo "   1) Update files  — review template files, ask about user-modified ones"
-    echo "   2) Regenerate    — choose exactly what to regenerate (docs/context/commands/agents/skills)"
-    echo "   3) Skip          — exit without changes"
-    echo ""
-    read -p "   Choose [1/2/3]: " UPTODATE_CHOICE
+    ask_single_choice_menu "What should happen next?" --default 3 \
+      "Update files|Sync changed template files|Recommended" \
+      "Regenerate|Rebuild docs, context, commands, and skills" \
+      "Skip|Exit without changes|Default"
+    UPTODATE_CHOICE="${TUI_MENU_INDEX:-3}"
 
     case "$UPTODATE_CHOICE" in
       1)
@@ -106,14 +105,14 @@ handle_version_check() {
             write_metadata
             echo ""
             if [ "$regen_ok" -eq 0 ]; then
-              echo "✅ Regeneration complete!"
+              tui_success "Regeneration complete"
             else
-              echo "⚠️  Regeneration finished with warnings. Review output above."
+              tui_warn "Regeneration finished with warnings. Review output above."
             fi
           fi
         else
           echo ""
-          echo "  ⚠️  Claude CLI not found. Regeneration requires Claude Code."
+          tui_warn "Claude CLI not found. Regeneration requires Claude Code."
           echo "  Install: npm i -g @anthropic-ai/claude-code"
           regen_ok=1
         fi
@@ -132,20 +131,19 @@ handle_version_check() {
     pkg_major="${PACKAGE_VERSION%%.*}"
 
     echo ""
-    echo "🔄 Update available: v${INSTALLED_VERSION} → v${PACKAGE_VERSION}"
-    echo ""
-    echo "   1) Update       — apply versioned migrations (incremental)"
-    echo "   2) Reinstall    — delete managed files, fresh install from scratch"
-    echo "   3) Skip         — exit without changes"
-    echo ""
-    read -p "   Choose [1/2/3]: " UPDATE_CHOICE
+    tui_section "Project Update" "v${INSTALLED_VERSION} -> v${PACKAGE_VERSION}"
+    ask_single_choice_menu "How should this project be updated?" --default 3 \
+      "Update|Run migrations and preserve project files|Recommended" \
+      "Reinstall|Replace managed files with a clean install|Destructive" \
+      "Skip|Exit without changes|Default"
+    UPDATE_CHOICE="${TUI_MENU_INDEX:-3}"
 
     case "$UPDATE_CHOICE" in
       1)
         update_rc=0
         # Major version jump: fall back to smart update (migrations may not cover it)
         if [ "$inst_major" != "$pkg_major" ]; then
-          echo "   ⚠️  Major version jump detected — using full template update instead of migrations."
+          tui_warn "Major version jump detected - using full template update instead of migrations"
           scan_template_changes
           run_smart_update || update_rc=$?
         else
@@ -154,9 +152,9 @@ handle_version_check() {
             write_metadata
             update_gitignore
             echo ""
-            echo "✅ Migration complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+            tui_success "Migration complete (v${INSTALLED_VERSION} -> v${PACKAGE_VERSION})"
           else
-            echo "⚠️  Migration finished with errors — run again or choose Reinstall."
+            tui_warn "Migration finished with errors - run again or choose Reinstall."
           fi
         fi
         exit "$update_rc"
@@ -305,7 +303,7 @@ run_patch() {
   fi
 
   if [ ! -f ".ai-setup.json" ]; then
-    echo "❌ No .ai-setup.json found — run ai-setup first to initialize this project"
+    echo "❌ No .ai-setup.json found — run the setup command first to initialize this project"
     exit 1
   fi
 
@@ -343,7 +341,7 @@ run_smart_update() {
   local regen_failed=0
   [ "${1:-}" = "--skip-regen" ] && skip_regen=1
   echo ""
-  echo "🔍 Analyzing templates..."
+  tui_section "Template Analysis" "Scanning installed files against the current template set"
 
   # Normalize legacy skills layout in existing projects.
   if command -v ensure_skills_alias >/dev/null 2>&1; then
@@ -367,7 +365,7 @@ run_smart_update() {
 
   if [ "$SCAN_TOTAL_CHANGES" -eq 0 ]; then
     echo ""
-    echo "  ✅ All template files are up to date — nothing to update."
+    tui_success "All template files are up to date - nothing to update"
     # Still check for obsolete files
     cleanup_obsolete_managed_files
     write_metadata
@@ -387,7 +385,7 @@ run_smart_update() {
   # Only show summary when there was work to do
   if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
     echo ""
-    echo "📊 Update summary:"
+    tui_section "Update Summary"
     [ $UPD_UPDATED -gt 0 ] && echo "   Updated:   $UPD_UPDATED"
     [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
     [ $UPD_REMOVED -gt 0 ] && echo "   Removed:   $UPD_REMOVED"
@@ -421,15 +419,15 @@ run_smart_update() {
         write_metadata
         echo ""
         if [ "$regen_ok" -eq 0 ]; then
-          echo "✅ Regeneration complete!"
+          tui_success "Regeneration complete"
         else
           regen_failed=1
-          echo "⚠️  Regeneration finished with warnings. Review output above."
+          tui_warn "Regeneration finished with warnings. Review output above."
         fi
       fi
     else
       echo ""
-      echo "  ⚠️  Skipping regeneration (claude CLI not found)."
+      tui_warn "Skipping regeneration (claude CLI not found)."
       echo "  Install: npm i -g @anthropic-ai/claude-code"
     fi
   fi
@@ -440,10 +438,10 @@ run_smart_update() {
   local _version_info="v${PACKAGE_VERSION}"
   [ "$INSTALLED_VERSION" != "$PACKAGE_VERSION" ] && _version_info="v${INSTALLED_VERSION} → v${PACKAGE_VERSION}"
   if [ "$regen_failed" -eq 0 ]; then
-    echo "✅ Update complete! (${_version_info})"
+    tui_success "Update complete (${_version_info})"
     return 0
   fi
-  echo "⚠️  Update complete with warnings (${_version_info})"
+  tui_warn "Update complete with warnings (${_version_info})"
   return 1
 }
 

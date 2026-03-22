@@ -10,3 +10,9 @@ node_modules/
 .idea
 .claude/worktrees/
 CLAUDE.local.md
+.agents/memory/
+.agents/.skill-cache.json
+scripts/storyblok-dump.json
+.codex/skills
+.gemini/agents
+.opencode/skills

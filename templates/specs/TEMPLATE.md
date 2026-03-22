@@ -1,6 +1,6 @@
 # Spec: [TITLE]
 
-> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Branch**: —
+> **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Complexity**: medium | **Branch**: —
 
 ## Goal
 [One sentence: what is the desired outcome?]

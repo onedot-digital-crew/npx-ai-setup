@@ -40,7 +40,7 @@ _install_or_update_file() {
     fi
     if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
       # User modified this file — don't overwrite
-      echo "  ⏭️  $target (user-modified, kept)"
+      tui_warn "$target kept (user-modified)"
       return 0
     fi
   fi
@@ -48,7 +48,7 @@ _install_or_update_file() {
   # Not user-modified — safe to update
   cp "$src" "$target"
   [[ "$target" == *.sh ]] && chmod +x "$target"
-  echo "  ✅ $target (updated)"
+  tui_success "$target updated"
   return 0
 }
 # Install all files from a template directory into a target directory.
@@ -97,11 +97,11 @@ check_requirements() {
   if ! command -v jq &>/dev/null && ! command -v node &>/dev/null; then
     MISSING+=("jq or node (brew install jq, or install Node.js >= 18)")
   elif ! command -v jq &>/dev/null; then
-    echo "  ℹ️  jq not found — Node.js JSON fallback active (install jq for better performance)"
+    tui_info "jq not found - Node.js JSON fallback active"
   fi
 
   if [ ${#MISSING[@]} -gt 0 ]; then
-    echo "❌ Missing requirements:"
+    tui_error "Missing requirements"
     for m in "${MISSING[@]}"; do echo "   - $m"; done
     echo ""
     echo "Install the missing tools and try again."
@@ -111,13 +111,13 @@ check_requirements() {
   # Node.js version check (>= 18)
   NODE_VERSION=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
   if [ -n "$NODE_VERSION" ] && [ "$NODE_VERSION" -lt 18 ]; then
-    echo "❌ Node.js >= 18 required (found v$NODE_VERSION)"
+    tui_error "Node.js >= 18 required (found v$NODE_VERSION)"
     exit 1
   fi
 
   # Template directory validation
   if [ ! -d "$TPL" ]; then
-    echo "❌ Template directory not found: $TPL"
+    tui_error "Template directory not found: $TPL"
     echo "   The package may be corrupted. Try: npm cache clean --force && npx @onedot/ai-setup"
     exit 1
   fi
@@ -129,7 +129,7 @@ check_requirements() {
   elif command -v gh &>/dev/null && gh copilot --version &>/dev/null 2>&1; then
     AI_CLI="copilot"
   fi
-  echo "✅ Requirements OK (AI CLI: ${AI_CLI:-none detected})"
+  tui_success "Requirements OK (AI CLI: ${AI_CLI:-none detected})"
 }
 
 # Detect and remove legacy AI structures
@@ -146,46 +146,49 @@ cleanup_legacy() {
   [ -f "skillkit.yaml" ] && FOUND+=("skillkit.yaml")
 
   if [ ${#FOUND[@]} -gt 0 ]; then
-    echo "⚠️  Legacy AI structures found:"
+    tui_warn "Legacy AI structures found"
     for f in "${FOUND[@]}"; do echo "   - $f"; done
     echo ""
-    read -p "Delete? (Y/n) " CLEANUP
-    if [[ ! "$CLEANUP" =~ ^[Nn]$ ]]; then
+    if ask_yes_no_menu \
+      "Remove old AI setup files before continuing?" \
+      "Yes" "Delete them now" \
+      "No" "Keep them and continue" \
+      "yes"; then
       for f in "${FOUND[@]}"; do rm -rf "$f"; done
-      echo "✅ Cleanup done."
+      tui_success "Legacy cleanup complete"
     else
-      echo "⏭️  Cleanup skipped."
+      tui_info "Legacy cleanup skipped"
     fi
   else
-    echo "✅ No legacy structures found."
+    tui_success "No legacy structures found"
   fi
 }
 
 # Copy CLAUDE.md template
 install_claude_md() {
-  echo "📝 Writing CLAUDE.md..."
+  tui_step "Writing CLAUDE.md"
   if [ ! -f CLAUDE.md ]; then
     cp "$TPL/CLAUDE.md" CLAUDE.md
-    echo "  CLAUDE.md created (template — customize as needed)."
+    tui_success "CLAUDE.md created"
   else
-    echo "  CLAUDE.md already exists, skipping."
+    tui_info "CLAUDE.md already exists, kept"
   fi
 }
 
 # Copy AGENTS.md template
 install_agents_md() {
-  echo "📝 Writing AGENTS.md..."
+  tui_step "Writing AGENTS.md"
   if [ ! -f AGENTS.md ]; then
     cp "$TPL/AGENTS.md" AGENTS.md
-    echo "  AGENTS.md created (template — customize as needed)."
+    tui_success "AGENTS.md created"
   else
-    echo "  AGENTS.md already exists, skipping."
+    tui_info "AGENTS.md already exists, kept"
   fi
 }
 
 # Create .claude/settings.json
 install_settings() {
-  echo "⚙️  Writing .claude/settings.json..."
+  tui_step "Writing .claude/settings.json"
   mkdir -p .claude
   _install_or_update_file "$TPL/claude/settings.json" .claude/settings.json
 }
@@ -193,7 +196,7 @@ install_settings() {
 # Install .gemini/settings.json if gemini CLI is available
 install_gemini_config() {
   command -v gemini >/dev/null 2>&1 || return 0
-  echo "⚙️  Writing .gemini/settings.json..."
+  tui_step "Writing .gemini/settings.json"
   mkdir -p .gemini
   _install_or_update_file "$TPL/gemini/settings.json" .gemini/settings.json
 }
@@ -201,20 +204,20 @@ install_gemini_config() {
 # Install .codex/config.toml if codex CLI is available
 install_codex_config() {
   command -v codex >/dev/null 2>&1 || return 0
-  echo "⚙️  Writing .codex/config.toml..."
+  tui_step "Writing .codex/config.toml"
   mkdir -p .codex
   _install_or_update_file "$TPL/codex/config.toml" .codex/config.toml
 }
 
 # Install hook scripts
 install_hooks() {
-  echo "🛡️  Creating hooks..."
+  tui_step "Installing hooks"
   _install_template_dir "$TPL/claude/hooks" ".claude/hooks" "" "executable" >/dev/null
 }
 
 # Install rule templates
 install_rules() {
-  echo "📐 Installing rules..."
+  tui_step "Installing rules"
   mkdir -p .claude/rules
 
   # Install all rules except typescript.md (handled conditionally below)
@@ -229,7 +232,7 @@ install_rules() {
   local _ts_found
   _ts_found=$(find . \( -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" 2>/dev/null | head -1)
   if [ -n "$_ts_found" ]; then
-    echo "  TypeScript detected — installing typescript.md rules..."
+    tui_info "TypeScript detected - installing typescript.md rules"
     for _ts_mapping in "${TS_RULES_MAP[@]}"; do
       local _ts_tpl="${_ts_mapping%%:*}"
       local _ts_target="${_ts_mapping#*:}"
@@ -240,7 +243,7 @@ install_rules() {
 
 # Create specs/ directory structure
 install_specs() {
-  echo "📋 Setting up spec-driven workflow..."
+  tui_step "Setting up spec workflow"
   mkdir -p specs/completed
   _install_or_update_file "$TPL/specs/TEMPLATE.md" specs/TEMPLATE.md
   _install_or_update_file "$TPL/specs/README.md" specs/README.md
@@ -251,13 +254,13 @@ install_specs() {
 
 # Install developer workflow guide
 install_workflow_guide() {
-  echo "📖 Installing developer workflow guide..."
+  tui_step "Installing workflow guide"
   _install_or_update_file "$TPL/claude/WORKFLOW-GUIDE.md" .claude/WORKFLOW-GUIDE.md
 }
 
 # Install slash commands
 install_commands() {
-  echo "⚡ Installing slash commands..."
+  tui_step "Installing slash commands"
   _install_template_dir "$TPL/commands" ".claude/commands" "" "" >/dev/null
 }
 
@@ -265,11 +268,11 @@ install_commands() {
 # into .claude/scripts/ during setup.
 install_claude_scripts() {
   if [ ! -d "$TPL/scripts" ]; then return 0; fi
-  echo "📜 Installing Claude scripts..."
+  tui_step "Installing Claude scripts"
   local _result
   _result=$(_install_template_dir "$TPL/scripts" ".claude/scripts" "*.sh" "executable")
   local _count="${_result##*COUNT:}"
-  [ "$_count" -gt 0 ] && echo "  ✅ ${_count} script(s) installed to .claude/scripts/"
+  [ "$_count" -gt 0 ] && tui_success "${_count} script(s) installed to .claude/scripts/"
 }
 
 # Heuristic module detection from repository name.
@@ -294,14 +297,17 @@ setup_repo_group_context() {
   mkdir -p .agents/context
 
   if [ -f "$group_file" ]; then
-    echo "🔗 Multi-repo context map already exists, skipping."
+    tui_info "Multi-repo context map already exists, kept"
     return 0
   fi
 
   echo ""
-  echo "🔗 Multi-Repo Context (optional)"
-  read -p "   Setup shared repo map (.agents/context/repo-group.json)? (y/N) " SETUP_MULTI_REPO
-  [[ "$SETUP_MULTI_REPO" =~ ^[Yy]$ ]] || return 0
+  tui_section "Multi-Repo Context" "Optional shared map for related repositories in the same workspace"
+  ask_yes_no_menu \
+    "Set up shared multi-repo context now?" \
+    "Yes" "Create the shared repo map" \
+    "No" "Skip and continue" \
+    "no" || return 0
 
   local current_repo parent_dir default_group group_name
   current_repo="$(basename "$PWD")"
@@ -311,7 +317,7 @@ setup_repo_group_context() {
     default_group="${current_repo##*-}"
   fi
 
-  read -p "   Group name [${default_group}]: " group_name
+  group_name="$(tui_read_line "$(tui_prompt_text "Group name [${default_group}]: ")")"
   [ -n "$group_name" ] || group_name="$default_group"
 
   local repos_json
@@ -329,15 +335,25 @@ setup_repo_group_context() {
     fi
 
     if [ "$repo_name" = "$current_repo" ]; then
-      read -p "   Include ${repo_name} (current repo)? (Y/n) " include_ans
-      [[ "$include_ans" =~ ^[Nn]$ ]] && continue
+      if ! ask_yes_no_menu \
+        "Add ${repo_name} (this repository) to the shared context group?" \
+        "Yes" "Include it in the repo map" \
+        "No" "Leave it out" \
+        "yes"; then
+        continue
+      fi
     else
-      read -p "   Include ${repo_name}? (y/N) " include_ans
-      [[ "$include_ans" =~ ^[Yy]$ ]] || continue
+      if ! ask_yes_no_menu \
+        "Add ${repo_name} to the shared context group?" \
+        "Yes" "Include it in the repo map" \
+        "No" "Leave it out" \
+        "no"; then
+        continue
+      fi
     fi
 
     module_default="$(_detect_repo_module "$repo_name")"
-    read -p "      Module for ${repo_name} [${module_default}]: " module
+    module="$(tui_read_line "$(tui_prompt_text "Module for ${repo_name} [${module_default}]: ")")"
     [ -n "$module" ] || module="$module_default"
 
     if [ "$repo_name" = "$current_repo" ]; then
@@ -374,11 +390,11 @@ setup_repo_group_context() {
 #   COMMITTED  (team-shared):   .agents/context/*.md (STACK, ARCHITECTURE, CONVENTIONS, PATTERNS, AUDIT)
 #   Never add .agents/context/*.md files to gitignore — they are shared team knowledge.
 update_gitignore() {
-  echo "🚫 Updating .gitignore..."
+  tui_step "Updating .gitignore"
   if [ -f .gitignore ]; then
     if ! grep -q "claude/settings.local" .gitignore 2>/dev/null; then
       echo "" >> .gitignore
-      echo "# Claude Code / AI Setup" >> .gitignore
+      echo "# Claude Code / Project setup" >> .gitignore
       echo ".claude/settings.local.json" >> .gitignore
       echo ".ai-setup.json" >> .gitignore
       echo ".ai-setup-backup/" >> .gitignore
@@ -404,7 +420,7 @@ update_gitignore() {
       grep -q "\.opencode/skills" .gitignore 2>/dev/null || echo ".opencode/skills" >> .gitignore
     fi
   else
-    echo "# Claude Code / AI Setup" > .gitignore
+    echo "# Claude Code / Project setup" > .gitignore
     echo ".claude/settings.local.json" >> .gitignore
     echo ".ai-setup.json" >> .gitignore
     echo ".ai-setup-backup/" >> .gitignore

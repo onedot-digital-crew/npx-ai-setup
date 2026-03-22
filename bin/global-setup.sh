@@ -32,18 +32,12 @@ done
 
 # Load modules
 source "$SCRIPT_DIR/lib/_loader.sh"
+source_lib "tui.sh"
 source_lib "cli-tools.sh"
 source_lib "global-settings.sh"
+trap 'tui_cleanup' EXIT INT TERM
 
-# ==============================================================================
-# COLORS
-# ==============================================================================
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-BOLD='\033[1m'
-RESET='\033[0m'
+ensure_valid_working_directory || exit 1
 
 # ==============================================================================
 # PHASE HEADER
@@ -51,9 +45,7 @@ RESET='\033[0m'
 _phase() {
   local num="$1"
   local title="$2"
-  echo ""
-  echo -e "${BOLD}Phase ${num}: ${title}${RESET}"
-  echo "   ──────────────────────────────────────────────────────────"
+  tui_section "Phase ${num}: ${title}"
 }
 
 # ==============================================================================
@@ -77,30 +69,30 @@ phase_system_check() {
   if command -v node &>/dev/null; then
     local node_ver
     node_ver="$(node -v 2>/dev/null)"
-    echo -e "   Node.js  : ${GREEN}${node_ver}${RESET}"
+    tui_key_value "Node.js" "${node_ver}"
   else
-    echo -e "   Node.js  : ${RED}not found${RESET} (install from https://nodejs.org)"
+    tui_error "Node.js not found (install from https://nodejs.org)"
     ok=false
   fi
 
   # npm
   if command -v npm &>/dev/null; then
-    echo -e "   npm      : ${GREEN}$(npm -v 2>/dev/null)${RESET}"
+    tui_key_value "npm" "$(npm -v 2>/dev/null)"
   else
-    echo -e "   npm      : ${RED}not found${RESET}"
+    tui_error "npm not found"
     ok=false
   fi
 
   # cargo (optional — needed for agent-browser)
   if command -v cargo &>/dev/null; then
-    echo -e "   cargo    : ${GREEN}$(cargo -V 2>/dev/null | awk '{print $2}')${RESET}"
+    tui_key_value "cargo" "$(cargo -V 2>/dev/null | awk '{print $2}')"
   else
-    echo -e "   cargo    : ${YELLOW}not found${RESET} (optional — needed for agent-browser)"
+    tui_warn "cargo not found (optional - needed for agent-browser)"
   fi
 
   if [ "$ok" = "false" ]; then
     echo ""
-    echo -e "   ${RED}Required tools missing. Install them and re-run.${RESET}"
+    tui_error "Required tools missing. Install them and re-run."
     exit 1
   fi
 }
@@ -142,9 +134,9 @@ phase_api_keys() {
     local var="$2"
     local hint="$3"
     if [ -n "${!var:-}" ]; then
-      echo -e "   ${GREEN}✔${RESET}  $name ($var)"
+      tui_success "$name ($var)"
     else
-      echo -e "   ${YELLOW}✗${RESET}  $name ($var) — not set"
+      tui_warn "$name ($var) - not set"
       if [ "$CHECK_MODE" != "yes" ]; then
         echo "      Add to ~/.zshrc:  export ${var}=\"your-key-here\""
         [ -n "$hint" ] && echo "      Get key: $hint"
@@ -168,10 +160,10 @@ phase_api_keys() {
 # ==============================================================================
 main() {
   if [ "$CHECK_MODE" = "yes" ]; then
-    echo -e "${BOLD}@onedot/ai-setup-global — Status Check${RESET}"
-    echo "   Dry-run mode: no changes will be made."
+    tui_banner "Developer Workstation Check" "Review the tools and settings used on this machine"
+    tui_info "Dry-run mode: no changes will be made"
   else
-    echo -e "${BOLD}@onedot/ai-setup-global — Global Developer Workstation Setup${RESET}"
+    tui_banner "Developer Workstation Setup" "Install the shared tools and settings used on this machine"
   fi
 
   phase_system_check
@@ -181,9 +173,9 @@ main() {
 
   echo ""
   if [ "$CHECK_MODE" = "yes" ]; then
-    echo -e "${BOLD}Check complete.${RESET}"
+    tui_success "Check complete"
   else
-    echo -e "${GREEN}${BOLD}Setup complete!${RESET}"
+    tui_success "Setup complete"
     echo ""
     echo "   Reload your shell to activate all tools:"
     echo "     source ~/.zshrc"

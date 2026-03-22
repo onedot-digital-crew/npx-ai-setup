@@ -17,12 +17,6 @@ CLI_TOOL_REGISTRY=(
   "agent-browser:npm:agent-browser:required:Persistent browser daemon for Claude automation"
 )
 
-# Colors (safe to re-define — idempotent)
-_CT_GREEN='\033[0;32m'
-_CT_YELLOW='\033[1;33m'
-_CT_RED='\033[0;31m'
-_CT_RESET='\033[0m'
-
 # ==============================================================================
 # INTERNAL HELPERS
 # ==============================================================================
@@ -91,17 +85,17 @@ check_cli_tools() {
     IFS=: read -r name pm package tier description <<< "$entry"
 
     if _tool_installed "$name"; then
-      echo -e "   ${_CT_GREEN}✔${_CT_RESET}  $name"
+      tui_success "$name"
     else
       if [ "$tier" = "required" ]; then
-        echo -e "   ${_CT_RED}✗${_CT_RESET}  $name (MISSING — required)"
+        tui_error "$name (missing - required)"
         missing_required=$((missing_required + 1))
       else
         # Check if prereqs are even possible
         if _tool_prereqs_met "$name" "$pm" "$tier" 2>/dev/null; then
-          echo -e "   ${_CT_YELLOW}✗${_CT_RESET}  $name (not installed — optional)"
+          tui_warn "$name (not installed - optional)"
         else
-          echo -e "   ${_CT_YELLOW}-${_CT_RESET}  $name (skipped — prereqs missing)"
+          tui_info "$name (skipped - prerequisites missing)"
         fi
       fi
     fi
@@ -127,60 +121,60 @@ install_cli_tools() {
 
     # Already installed — skip
     if _tool_installed "$name"; then
-      echo -e "   ${_CT_GREEN}✔${_CT_RESET}  $name (already installed)"
+      tui_success "$name (already installed)"
       continue
     fi
 
     # Check prerequisites
     if ! _tool_prereqs_met "$name" "$pm" "$tier" 2>/dev/null; then
-      echo -e "   ${_CT_YELLOW}-${_CT_RESET}  $name (skipped — prereqs missing)"
+      tui_info "$name (skipped - prerequisites missing)"
       skipped=$((skipped + 1))
       continue
     fi
 
     # Attempt install
-    echo -n "   Installing $name ... "
+    tui_spinner_start "Installing ${name}"
     if _install_tool "$name" "$pm" "$package"; then
-      echo -e "${_CT_GREEN}done${_CT_RESET}"
+      tui_spinner_stop ok "${name} installed"
       installed=$((installed + 1))
       # Post-install: agent-browser needs Chrome for Testing downloaded once
       if [ "$name" = "agent-browser" ] && command -v agent-browser &>/dev/null; then
-        echo -n "   Downloading Chrome for Testing (agent-browser install) ... "
+        tui_spinner_start "Downloading Chrome for Testing"
         if agent-browser install &>/dev/null; then
-          echo -e "${_CT_GREEN}done${_CT_RESET}"
+          tui_spinner_stop ok "Chrome for Testing ready"
         else
-          echo -e "${_CT_YELLOW}skipped (non-fatal)${_CT_RESET}"
+          tui_spinner_stop warn "Chrome for Testing skipped (non-fatal)"
         fi
       fi
     else
       if [ "$tier" = "required" ]; then
-        echo -e "${_CT_RED}FAILED${_CT_RESET}"
+        tui_spinner_stop error "${name} install failed"
         failed=$((failed + 1))
       else
-        echo -e "${_CT_YELLOW}failed (optional, skipping)${_CT_RESET}"
+        tui_spinner_stop warn "${name} install failed (optional, skipping)"
         skipped=$((skipped + 1))
       fi
     fi
   done
 
   echo ""
-  echo "   Installed: $installed | Skipped: $skipped | Failed: $failed"
+  tui_info "Installed: $installed | Skipped: $skipped | Failed: $failed"
 
   # Ensure RTK hooks are active (idempotent — safe to re-run)
   if command -v rtk &>/dev/null; then
     if ! rtk gain &>/dev/null 2>&1; then
-      echo -n "   Activating RTK hooks ... "
+      tui_spinner_start "Activating RTK hooks"
       if rtk init --global &>/dev/null; then
-        echo -e "${_CT_GREEN}done${_CT_RESET}"
+        tui_spinner_stop ok "RTK hooks activated"
       else
-        echo -e "${_CT_YELLOW}skipped (non-fatal)${_CT_RESET}"
+        tui_spinner_stop warn "RTK hooks skipped (non-fatal)"
       fi
     fi
   fi
 
   if [ "$failed" -gt 0 ]; then
     echo ""
-    echo -e "   ${_CT_RED}Required tool installation failed. Check npm permissions.${_CT_RESET}"
+    tui_error "Required tool installation failed. Check npm permissions."
     return 1
   fi
 }

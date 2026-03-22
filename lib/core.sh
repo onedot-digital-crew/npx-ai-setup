@@ -31,9 +31,6 @@ build_template_map() {
     # Skip skills/ — handled separately via SPEC_SKILLS_MAP
     [[ "$rel" == skills/* ]] && continue
 
-    # Skip scripts/ — not installed by generic base layer
-    [[ "$rel" == scripts/* ]] && continue
-
     # Skip typescript.md — handled conditionally by TS_RULES_MAP in install_rules()
     [[ "$rel" == "claude/rules/typescript.md" ]] && continue
 
@@ -44,6 +41,7 @@ build_template_map() {
       github/*)   target=".${rel}" ;;
       commands/*) target=".claude/${rel}" ;;
       agents/*)   target=".claude/${rel}" ;;
+      scripts/*)  target=".claude/${rel}" ;;
       specs/*)    target="${rel}" ;;
       *)          target="${rel}" ;;
     esac
@@ -162,6 +160,16 @@ write_metadata() {
     fi
   done
 
+  # Include scripts installed via install_claude_scripts
+  if [ -d ".claude/scripts" ]; then
+    while IFS= read -r -d '' _script; do
+      local _target="${_script#./}"
+      local cs
+      cs=$(compute_checksum "$_target")
+      json=$(echo "$json" | _json_set_file "$_target" "$cs")
+    done < <(find .claude/scripts -type f -print0 | sort -z)
+  fi
+
   echo "$json" > .ai-setup.json
 }
 
@@ -178,6 +186,9 @@ is_current_managed_target() {
   for mapping in "${TS_RULES_MAP[@]}"; do
     [ "${mapping#*:}" = "$target" ] && return 0
   done
+
+  # Scripts are managed via install_claude_scripts
+  [[ "$target" == .claude/scripts/* ]] && return 0
 
   return 1
 }

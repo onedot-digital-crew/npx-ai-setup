@@ -40,7 +40,7 @@ run_generation() {
 
   # Re-deploy slash commands and/or agent templates from package templates.
   if [ "$REGEN_COMMANDS" = "yes" ] || [ "$REGEN_AGENTS" = "yes" ]; then
-    echo "📋 Updating command and agent templates..."
+    tui_step "Updating command and agent templates"
     local cmd_updated=0
     for mapping in "${TEMPLATE_MAP[@]}"; do
       local tpl="${mapping%%:*}"
@@ -54,11 +54,11 @@ run_generation() {
         fi
       fi
     done
-    echo "  ✅ $cmd_updated file(s) updated"
+    tui_success "$cmd_updated file(s) updated"
   fi
 
   if [ "$regen_ai_context" = "yes" ]; then
-    echo "🚀 Generating project context..."
+    tui_section "Generate Context" "Refresh project docs, command files, and context"
 
     # Cache file list once (avoid running collect_project_files 3x)
     CACHED_FILES=$(collect_project_files 80)
@@ -300,22 +300,22 @@ EOF
     wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
     CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
     if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
-      echo "  ↻ CLAUDE.md unchanged after initial generation, retrying with --max-turns 6..."
+      tui_warn "CLAUDE.md unchanged after initial generation - retrying"
       claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$CLAUDE_MD_PROMPT" >"$ERR_CM" 2>&1
       EXIT_CM=$?
       CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
       if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" != "$CLAUDE_MD_AFTER" ]; then
-        echo "  ✅ CLAUDE.md updated after retry"
+        tui_success "CLAUDE.md updated after retry"
       fi
     fi
     if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
       regen_failed=1
       echo ""
-      echo "  ⚠️  CLAUDE.md was not updated (exit code $EXIT_CM)."
+      tui_warn "CLAUDE.md was not updated (exit code $EXIT_CM)"
       if [ -s "$ERR_CM" ]; then
         echo "  Output: $(tail -5 "$ERR_CM")"
       fi
-      echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
+      tui_info "Fix: run 'claude' in your terminal to check authentication, then re-run"
     fi
     fi
 
@@ -325,22 +325,22 @@ EOF
     wait "$PID_AM" 2>/dev/null || EXIT_AM=$?
     AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
     if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
-      echo "  ↻ AGENTS.md unchanged after initial generation, retrying with --max-turns 6..."
+      tui_warn "AGENTS.md unchanged after initial generation - retrying"
       claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$AGENTS_MD_PROMPT" >"$ERR_AM" 2>&1
       EXIT_AM=$?
       AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
       if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" != "$AGENTS_MD_AFTER" ]; then
-        echo "  ✅ AGENTS.md updated after retry"
+        tui_success "AGENTS.md updated after retry"
       fi
     fi
     if [ "$EXIT_AM" -ne 0 ] || [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
       regen_failed=1
       echo ""
-      echo "  ⚠️  AGENTS.md was not updated (exit code $EXIT_AM)."
+      tui_warn "AGENTS.md was not updated (exit code $EXIT_AM)"
       if [ -s "$ERR_AM" ]; then
         echo "  Output: $(tail -5 "$ERR_AM")"
       fi
-      echo "  Fix: Run 'claude' in your terminal to check authentication, then re-run."
+      tui_info "Fix: run 'claude' in your terminal to check authentication, then re-run"
     fi
     fi
 
@@ -351,30 +351,30 @@ EOF
     CTX_COUNT=$(count_generated_context_files)
 
     if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -lt 3 ]; then
-      echo "  ↻ Context generation created $CTX_COUNT of 3 files, retrying with --max-turns 12..."
+      tui_warn "Context generation created $CTX_COUNT of 3 files - retrying"
       claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 12 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1
       EXIT_CTX=$?
       CTX_COUNT=$(count_generated_context_files)
       if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -eq 3 ]; then
-        echo "  ✅ All 3 context files created after retry"
+        tui_success "All 3 context files created after retry"
       fi
     fi
 
     if [ "$CTX_COUNT" -eq 3 ]; then
-      echo "  ✅ All 3 context files created in .agents/context/"
+      tui_success "All 3 context files created in .agents/context/"
     elif [ "$CTX_COUNT" -gt 0 ]; then
       regen_failed=1
-      echo "  ⚠️  $CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
+      tui_warn "$CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
       if [ -s "$ERR_CTX" ]; then
         echo "  Output: $(tail -5 "$ERR_CTX")"
       fi
     else
       regen_failed=1
-      echo "  ⚠️  Context generation failed (exit code $EXIT_CTX)."
+      tui_warn "Context generation failed (exit code $EXIT_CTX)"
       if [ -s "$ERR_CTX" ]; then
         echo "  Output: $(tail -5 "$ERR_CTX")"
       fi
-      echo "  Fix: Check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
+      tui_info "Fix: check 'claude' works, then run: npx @onedot/ai-setup --regenerate"
     fi
     fi
 
@@ -387,7 +387,7 @@ EOF
       echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
     fi
   else
-    echo "⏭️  Skipping AI context generation (not selected)."
+    tui_info "Skipping AI context generation (not selected)"
   fi
 
   set -e

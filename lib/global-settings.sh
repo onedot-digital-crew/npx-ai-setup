@@ -2,12 +2,6 @@
 # global-settings.sh — Installs global Claude settings, commands, and rules
 # Requires: SCRIPT_DIR
 
-# Colors (safe to re-define — idempotent)
-_GS_GREEN='\033[0;32m'
-_GS_YELLOW='\033[1;33m'
-_GS_BLUE='\033[0;34m'
-_GS_RESET='\033[0m'
-
 CLAUDE_HOME="${HOME}/.claude"
 
 # ==============================================================================
@@ -24,10 +18,10 @@ _gs_copy_if_missing() {
 
   if [ ! -f "$dest" ]; then
     cp "$src" "$dest"
-    echo -e "   ${_GS_GREEN}✔${_GS_RESET}  $label (installed)"
+    tui_success "$label installed"
     return 0
   else
-    echo -e "   ${_GS_YELLOW}-${_GS_RESET}  $label (already exists, kept)"
+    tui_info "$label already exists, kept"
     return 0
   fi
 }
@@ -59,13 +53,13 @@ EOF
 
   if [ ! -f "$target" ]; then
     echo "$base_settings" > "$target"
-    echo -e "   ${_GS_GREEN}✔${_GS_RESET}  ~/.claude/settings.json (created)"
+    tui_success "~/.claude/settings.json created"
     return 0
   fi
 
   # File exists — check if our permissions are already present
   if grep -q '"Bash(rtk:\*)"' "$target" 2>/dev/null; then
-    echo -e "   ${_GS_YELLOW}-${_GS_RESET}  ~/.claude/settings.json (already configured, kept)"
+    tui_info "~/.claude/settings.json already configured, kept"
     return 0
   fi
 
@@ -88,9 +82,9 @@ for (const p of toAdd) {
 }
 fs.writeFileSync(path, JSON.stringify(cfg, null, 2) + '\n');
 NODESCRIPT
-    echo -e "   ${_GS_GREEN}✔${_GS_RESET}  ~/.claude/settings.json (permissions merged)"
+    tui_success "~/.claude/settings.json permissions merged"
   else
-    echo -e "   ${_GS_YELLOW}⚠${_GS_RESET}  ~/.claude/settings.json (node not found — skipped merge)"
+    tui_warn "~/.claude/settings.json skipped merge (node not found)"
   fi
 }
 
@@ -145,7 +139,7 @@ _install_statusline_config() {
   fi
 
   if grep -q '"statusLine"' "$target" 2>/dev/null; then
-    echo -e "   ${_GS_YELLOW}-${_GS_RESET}  statusLine config (already set, kept)"
+    tui_info "statusLine config already set, kept"
     return 0
   fi
 
@@ -163,7 +157,7 @@ if (!cfg.statusLine) {
 }
 fs.writeFileSync(path, JSON.stringify(cfg, null, 2) + '\n');
 NODESCRIPT
-    echo -e "   ${_GS_GREEN}✔${_GS_RESET}  statusLine config (added)"
+    tui_success "statusLine config added"
   fi
 }
 
@@ -175,9 +169,9 @@ check_global_settings() {
     local label="$1"
     local path="$2"
     if [ -f "$path" ]; then
-      echo -e "   ${_GS_GREEN}✔${_GS_RESET}  $label"
+      tui_success "$label"
     else
-      echo -e "   ${_GS_YELLOW}✗${_GS_RESET}  $label (not installed)"
+      tui_warn "$label not installed"
     fi
   }
 
@@ -190,14 +184,14 @@ check_global_settings() {
   # Check permissions in settings.json
   if [ -f "${CLAUDE_HOME}/settings.json" ]; then
     if grep -q '"Bash(rtk:\*)"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
-      echo -e "   ${_GS_GREEN}✔${_GS_RESET}  rtk permissions in settings.json"
+      tui_success "rtk permissions in settings.json"
     else
-      echo -e "   ${_GS_YELLOW}✗${_GS_RESET}  rtk permissions not set in settings.json"
+      tui_warn "rtk permissions not set in settings.json"
     fi
     if grep -q '"statusLine"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
-      echo -e "   ${_GS_GREEN}✔${_GS_RESET}  statusLine config"
+      tui_success "statusLine config"
     else
-      echo -e "   ${_GS_YELLOW}✗${_GS_RESET}  statusLine not configured"
+      tui_warn "statusLine not configured"
     fi
   fi
 }

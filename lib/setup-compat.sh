@@ -145,7 +145,11 @@ install_claudeignore() {
 
 # Install claude-statusline globally via npx.
 install_statusline_project() {
-  echo "  Installing statusline..."
-  npx @kamranahmedse/claude-statusline
-  echo "  Statusline installed -> @kamranahmedse/claude-statusline"
+  tui_spinner_start "Installing Claude statusline"
+  if npx @kamranahmedse/claude-statusline; then
+    tui_spinner_stop ok "Statusline installed -> @kamranahmedse/claude-statusline"
+  else
+    tui_spinner_stop warn "Statusline install failed"
+    return 1
+  fi
 }

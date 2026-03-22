@@ -87,9 +87,7 @@ pull_boilerplate_files() {
   repo_name=$(get_boilerplate_repo "$system") || { echo "Unknown system: $system"; return 1; }
   local repo="${BOILERPLATE_ORG}/${repo_name}"
 
-  echo ""
-  echo "📥 Pulling ${system} config from ${repo}..."
-  echo "   ──────────────────────────────────────────────────────────"
+  tui_section "Boilerplate Pull" "Pulling ${system} config from ${repo}"
 
   local pulled=0
   local failed=0
@@ -106,10 +104,10 @@ pull_boilerplate_files() {
       local local_skill=".claude/skills/${skill_name}/SKILL.md"
 
       if _gh_fetch_file "$repo" "$remote_skill" "$local_skill"; then
-        echo "  ✅ Skill: ${skill_name}"
+        tui_success "Skill: ${skill_name}"
         pulled=$((pulled + 1))
       else
-        echo "  ⚠️  Skill not found: ${skill_name}/SKILL.md"
+        tui_warn "Skill not found: ${skill_name}/SKILL.md"
         failed=$((failed + 1))
       fi
     done <<< "$skill_dirs"
@@ -125,10 +123,10 @@ pull_boilerplate_files() {
       if [[ "$rule_file" == "${system}"* ]]; then
         local local_rule=".claude/rules/${rule_file}"
         if _gh_fetch_file "$repo" ".claude/rules/${rule_file}" "$local_rule"; then
-          echo "  ✅ Rule: ${rule_file}"
+          tui_success "Rule: ${rule_file}"
           pulled=$((pulled + 1))
         else
-          echo "  ⚠️  Rule fetch failed: ${rule_file}"
+          tui_warn "Rule fetch failed: ${rule_file}"
           failed=$((failed + 1))
         fi
       fi
@@ -139,7 +137,7 @@ pull_boilerplate_files() {
   _merge_mcp_json "$repo"
 
   echo ""
-  echo "  Done: ${pulled} file(s) pulled, ${failed} failed."
+  tui_info "Done: ${pulled} file(s) pulled, ${failed} failed"
   echo ""
 }
 
@@ -150,7 +148,7 @@ _show_manual_instructions() {
   repo_name=$(get_boilerplate_repo "$system") || repo_name="<repo-name>"
 
   echo ""
-  echo "  ℹ️  Manual pull instructions (gh CLI not available):"
+  tui_info "Manual pull instructions (gh CLI not available)"
   echo ""
   echo "  Option A — Clone and copy:"
   echo "    git clone --depth=1 https://github.com/${BOILERPLATE_ORG}/${repo_name}.git /tmp/${repo_name}"
@@ -159,7 +157,7 @@ _show_manual_instructions() {
   echo ""
   echo "  Option B — Install gh CLI:"
   echo "    brew install gh && gh auth login"
-  echo "    Then re-run: npx @onedot/ai-setup"
+  echo "    Then run the setup command again: npx @onedot/ai-setup"
   echo ""
 }
 
@@ -187,17 +185,15 @@ select_boilerplate_system() {
     return 0
   fi
 
-  echo ""
-  echo "🏗️  Pull system config from boilerplate?"
-  echo "   ──────────────────────────────────────────────────────────"
-  echo "   1) Shopify"
-  echo "   2) Shopware"
-  echo "   3) Nuxt"
-  echo "   4) Next.js"
-  echo "   5) Storyblok"
-  echo "   6) Skip"
-  echo ""
-  read -rp "   Choose [1-6]: " _choice
+  tui_section "Framework Files" "Optional framework rules and skills"
+  ask_single_choice_menu "Choose framework-specific files" --default 6 \
+    "Shopify|Add Shopify rules and skills" \
+    "Shopware|Add Shopware rules and skills" \
+    "Nuxt|Add Nuxt rules and skills" \
+    "Next.js|Add Next.js rules and skills" \
+    "Storyblok|Add Storyblok rules and skills" \
+    "Skip|Keep this project generic|Default"
+  _choice="${TUI_MENU_INDEX:-6}"
 
   case "$_choice" in
     1) SELECTED_SYSTEM="shopify" ;;
@@ -209,7 +205,7 @@ select_boilerplate_system() {
   esac
 
   if [ -z "$SELECTED_SYSTEM" ]; then
-    echo "   Skipping system config pull."
+    tui_info "Skipping framework-specific files"
     return 0
   fi
 
@@ -217,7 +213,7 @@ select_boilerplate_system() {
     pull_boilerplate_files "$SELECTED_SYSTEM"
   else
     echo ""
-    echo "  ⚠️  gh CLI not found or not authenticated."
+    tui_warn "gh CLI not found or not authenticated"
     _show_manual_instructions "$SELECTED_SYSTEM"
   fi
 }

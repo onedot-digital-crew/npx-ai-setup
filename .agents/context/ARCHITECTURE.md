@@ -1,59 +1,71 @@
 # Architecture
 
 ## Project Type
-CLI tool — bash script that bootstraps Claude Code AI infrastructure into target projects.
+CLI tool / npm package that automates Claude Code setup for new projects. Single-command installation of hooks, configuration, skills, and AI-curated context files.
 
 ## Directory Structure
 ```
-bin/            # Entry point: ai-setup.sh (main script)
-lib/            # Modules: core, setup, update, generate, tui, skills, detect, process, plugins
-templates/      # Files copied into target projects
-  CLAUDE.md     # Base Claude project instructions template
-  claude/       # hooks/, settings.json, rules/
-  commands/     # Slash command templates
-  agents/       # Subagent templates (context-refresher, code-reviewer, etc.)
-  specs/        # Spec workflow templates
-  github/       # GitHub Copilot instructions
-  skills/       # Shopify skill templates
-.agents/context/ # Auto-generated session context (this file)
-.claude/        # Claude Code config for THIS repo
-docs/           # Concept and design-decision docs (CONCEPT.md, DESIGN-DECISIONS.md)
-specs/          # Spec-driven dev specs for this project
+bin/                 # Entry points
+  ai-setup.sh       # Project setup (detects stack, copies templates, generates context)
+  global-setup.sh   # Workstation setup (developer machine config)
+
+lib/                 # Reusable bash modules
+  _loader.sh        # Module sourcing system
+  core.sh           # Core utilities (prompts, file ops, state management)
+  process.sh        # Process handling (parallel execution, worktrees)
+  detect.sh         # Tech stack detection from package.json
+  setup.sh          # Setup coordination
+  skills.sh         # Skill installation and curation
+  plugins.sh        # Plugin discovery and installation
+  json.sh           # JSON parsing
+  (+ others)
+
+templates/          # Configuration templates (copied 1:1 to projects)
+  claude/          # CLAUDE.md, settings.json, WORKFLOW-GUIDE.md
+  agents/          # Agent templates (12 subagent types)
+  rules/           # Quality/security/git/testing rules
+  commands/        # Slash commands (26 total)
+  skills/          # Curated skill manifests
+  github/          # GitHub workflows and Copilot instructions
+
+.claude/            # This project's Claude Code config
+  hooks/           # 13 safety/automation hooks
+  skills/          # Installed skills
+  commands/        # Project-specific commands
+  rules/           # Quality rules
+  agents/          # Agent templates
+  docs/            # Internal documentation
+
+specs/              # Feature specifications (spec-driven development)
+  completed/       # Finished specs
+  brainstorms/     # Early-stage ideas
+
+tests/              # Test suite
+  smoke.sh         # Basic functionality tests
+
+.agents/context/    # Generated context (this directory)
+  STACK.md         # Tech stack summary
+  ARCHITECTURE.md  # This file
+  CONVENTIONS.md   # Coding standards
 ```
 
-## Setup Flow
-```
-npx @onedot/ai-setup [--system X] [--with-*]
-  |
-  ├─ Version check (.ai-setup.json present?)
-  |    ├─ Same version → smart update menu
-  |    └─ New version → update / clean reinstall / skip
-  |
-  └─ Fresh install:
-       Phase 1: Scaffolding (bash only, no AI)
-         - CLAUDE.md, settings.json, hooks, commands, agents, specs
-         - mcp.json (optional), plugins
-       Phase 2: Auto-Init (optional, requires claude CLI)
-         - Parallel: CLAUDE.md generation + context file generation
-         - Sequential after: skill curation (detect → search → rank → install)
-```
+## Entry Points
+1. **ai-setup.sh** — Installs per-project configuration (run once per project)
+2. **global-setup.sh** — Installs workstation tools (run once per developer)
+3. **bin/ai-setup.sh --audit** — Validates existing installation
+4. **bin/ai-setup.sh --patch <pattern>** — Partial re-installation
 
-## Phase 2: Auto-Init (parallel then sequential)
-```
-Step 1+2 (parallel):
-  CLAUDE.md generation  — reads package.json, README, eslintrc, prettierrc
-  Context generation    — reads codebase → STACK.md, ARCHITECTURE.md, CONVENTIONS.md
-
-Step 3 (sequential):
-  A: keyword mapping from package.json deps
-  B: skills.sh search (parallel curl, 30s timeout)
-  C: install count fetch (parallel curl)
-  D: Claude Haiku → select top 5
-  E: install selected skills
-```
+## Data Flow
+1. **Detection:** Read package.json to infer stack (react, vue, typescript, tailwind, etc.)
+2. **Template Copy:** Copy templates/ contents to target project (.claude/, .github/, etc.)
+3. **Context Generation:** Generate STACK.md, ARCHITECTURE.md, CONVENTIONS.md based on detected stack
+4. **Skill Installation:** Install curated skills matched to detected frameworks
+5. **Hook Installation:** Install 13 safety/automation hooks into git config
+6. **Verification:** Run tests to confirm installation
 
 ## Key Patterns
-- **Template copy model**: files copied verbatim, no code generation for deterministic parts
-- **Update tracking**: `.ai-setup.json` stores checksums; user-modified files backed up before update
-- **Hooks**: circuit-breaker (edit-loop protection), context-freshness (stale context detection)
-- **Idempotent installs**: all steps check before overwriting; skip if already installed
+- **Modular bash:** Functions in lib/ modules, sourced via source_lib
+- **Hook-based safety:** Git hooks enforce security (pre-commit, post-commit)
+- **Template versioning:** All templates checked into git, versioned with package
+- **Spec-driven features:** Multi-file changes go through specs/NNN-title.md
+- **Parallel execution:** Multi-spec work uses worktrees and parallel agents

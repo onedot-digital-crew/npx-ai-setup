@@ -1,38 +1,72 @@
 # Conventions
 
-## Language
-- Primary: Bash (POSIX-compatible where possible)
-- All file content: English only, no umlauts
+## Bash Style & Naming
+- **Language:** POSIX sh compatible; avoid bashisms (arrays, =~, declare -A)
+- **Variables:** snake_case for all variables and functions
+- **Constants:** UPPERCASE_WITH_UNDERSCORES for constants
+- **Quoting:** Always quote expansions: `"$var"`, `"${var}"`, `"$@"`
+- **Scoping:** Use `local` for all function-scoped variables
+- **Shebangs:** `#!/bin/bash` for executable scripts
 
-## Naming Patterns
-- Scripts: `kebab-case.sh`
-- Template files: `kebab-case.md`
-- Spec files: `NNN-description.md` (zero-padded number prefix)
-- Commands: `verb-noun.md` pattern (e.g., `spec-work.md`, `context-freshness.sh`)
-
-## Shell Script Style
-- Functions grouped by responsibility
-- Interactive menus use arrow-key/space-toggle patterns
-- State persisted between generation phases via temp files or flags
-- Verbose user feedback during multi-step setup
-
-## Template Authoring
-- Templates are markdown files copied verbatim into target projects
-- Placeholders substituted via `sed` or heredoc patterns in `ai-setup.sh`
-- Templates must not contain project-specific assumptions
-
-## Spec Workflow (for changes to this repo)
-- Specs in `specs/NNN-description.md` before coding
-- Use `/spec "task"` to create, `/spec-work NNN` to execute
-- Completed specs move to `specs/completed/`
+## Function Structure
+```bash
+# Doc comment with purpose, args, return
+function_name() {
+  local arg1="$1"
+  local arg2="${2:-default}"
+  
+  # Logic
+  command || return 1
+  
+  # Return value or exit
+  echo "result"
+}
+```
 
 ## Error Handling
-- Not determined from available context (bash scripts use exit codes and echo)
+- Fail fast: `set -e` in scripts, `|| return 1` in functions
+- No silent failures: log errors before returning
+- Explicit exit codes: `return 1` for failure, `return 0` for success
+- Error messages: what failed, why, and (if possible) how to fix
+
+## Template Conventions
+- **Copied verbatim:** Templates in templates/ are deterministic, reviewed, versioned
+- **No generation inside templates:** Use generation logic in bin/ai-setup.sh instead
+- **Language:** All generated content in English (no umlauts, non-ASCII)
+- **Idempotency:** Template installation must be safe to run multiple times
+
+## File & Path Conventions
+- Check before creating: use Glob/Bash to verify file doesn't exist first
+- Idempotent operations: never silently clobber existing user files
+- User approval gates: major destructive ops (rm -rf) require explicit gates
+- Module sourcing: `source_lib "module.sh"` instead of relative paths
 
 ## Testing
-- Not determined from available context (no test framework found)
+- Smoke tests in tests/smoke.sh verify core functionality
+- Test new features in smoke.sh before marking done
+- No unit testing framework (bash limitations); functional tests only
 
-## What to Avoid
-- Adding runtime dependencies to this package
-- Editing CLAUDE.md mid-session (breaks prompt cache)
-- Starting complex tasks without flagging model requirement
+## Definition of Done
+
+### Bash Scripts
+- [ ] Shellcheck passes (no warnings or errors)
+- [ ] Quoting verified (`"$var"` not $var)
+- [ ] Functions use `local` for all scoped variables
+- [ ] Error cases return explicit exit codes (1 on failure, 0 on success)
+- [ ] No hardcoded paths; use $SCRIPT_DIR or passed arguments
+
+### Templates
+- [ ] Copied to templates/ from reference implementation
+- [ ] No project-specific content (only generic/parameterizable)
+- [ ] Verified copy produces expected output in target project
+- [ ] Language: English only
+
+### Features
+- [ ] Smoke tests pass (`bash tests/smoke.sh`)
+- [ ] Idempotency verified (run twice, same outcome)
+- [ ] Git workflow: spec created, changes committed, reviewed
+
+### Context Files
+- [ ] STACK.md: runtime, dependencies, build tooling, patterns
+- [ ] ARCHITECTURE.md: project type, directory structure, data flow
+- [ ] CONVENTIONS.md: naming, style, error handling, done criteria
