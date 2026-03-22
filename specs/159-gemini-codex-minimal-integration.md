@@ -43,13 +43,13 @@ Gemini CLI und Codex CLI als optionale, gleichwertige Coding-Agents neben Claude
 - [x] Verify: `.codex/skills` ist bereits in .gitignore
 
 ### Step 5: AGENTS.md als Workflow-Router
-- [ ] Commands-Sektion in `templates/AGENTS.md` komplett überarbeiten als Tool-Router:
+- [x] Commands-Sektion in `templates/AGENTS.md` komplett überarbeiten als Tool-Router:
   - **Claude Code**: `/spec`, `/spec-work NNN`, `/spec-board` etc. (native Slash-Commands)
   - **Codex**: `$spec`, `$spec-work NNN`, `$spec-board` etc. (Dollar-Prefix für Skills)
   - **Gemini**: Natürliche Sprache — "create a spec for X", "work on spec 159", "show spec board"
   - **Alle Tools**: Verfügbare Workflows auflisten (spec-create, spec-work, spec-board, spec-review, spec-validate, spec-work-all) mit Kurzbeschreibung was jeder tut
-- [ ] Hinweis dass Skills unter `.claude/skills/` liegen und via Symlinks geteilt werden
-- [ ] Generate-Logik in `lib/generate.sh` prüfen — dort wird AGENTS.md Commands-Sektion generiert, muss den neuen Router-Text enthalten
+- [x] Hinweis dass Skills unter `.claude/skills/` liegen und via Symlinks geteilt werden
+- [x] Generate-Logik in `lib/generate.sh` prüfen — dort wird AGENTS.md Commands-Sektion generiert, muss den neuen Router-Text enthalten
 
 ## Acceptance Criteria
 
