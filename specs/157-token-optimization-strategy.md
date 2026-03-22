@@ -31,8 +31,8 @@ Spec 156 covers 4 new prep scripts (build, lint, pr, changelog) — this spec co
 - [x] Step 5: Update existing prep-scripts (test-prep.sh, scan-prep.sh, review-prep.sh, commit-prep.sh) to source `prep-lib.sh` and use `rtk_or_raw` for git/test/lint commands. Backward-compatible: works without RTK installed.
 
 ### Phase 3: Defuddle Auto-Invoke (P0)
-- [ ] Step 6: Add defuddle instruction to `templates/CLAUDE.md` rules: "Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — strips noise, saves ~80% tokens."
-- [ ] Step 7: Verify defuddle is `required` in `lib/cli-tools.sh` — already there, confirm and document.
+- [x] Step 6: Add defuddle instruction to `templates/CLAUDE.md` rules: "Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — strips noise, saves ~80% tokens."
+- [x] Step 7: Verify defuddle is `required` in `lib/cli-tools.sh` — already there, confirm and document.
 
 ### Phase 4: Green-Path Hardening (P1)
 - [ ] Step 8: Add clean-worktree early-exit to `templates/scripts/review-prep.sh` — if `git status -s` is empty AND no branch diff vs main, emit `NO_CHANGES_TO_REVIEW` and exit 0.
