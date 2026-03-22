@@ -1,6 +1,6 @@
 # Spec 160: Claude Code als Multi-Agent Orchestrator
 
-**Status:** in-progress
+**Status:** completed
 **Complexity:** Medium
 **Branch:** `feat/160-multi-agent-orchestrator`
 **Depends on:** Spec 159 (Gemini/Codex Infrastruktur)
@@ -86,12 +86,12 @@ Claude Code als zentralen Orchestrator einrichten, der Tasks gezielt an Gemini C
 
 ## Acceptance Criteria
 
-- [ ] `"use gemini to research X"` in Claude Code → delegiert an Gemini CLI, zeigt Ergebnis
-- [ ] `"use codex to write tests for X"` → delegiert an Codex CLI, zeigt Ergebnis
-- [ ] Graceful Error: Wenn Engine nicht installiert → klare Fehlermeldung, kein Crash
-- [ ] Kein Datenverlust: Delegierter Output wird vollständig in Claude Code angezeigt
-- [ ] Funktioniert auch wenn nur Claude installiert ist (Skill ist no-op)
-- [ ] Delegation ist immer explizit — niemals Auto-Routing
+- [x] `"use gemini to research X"` in Claude Code → delegiert an Gemini CLI, zeigt Ergebnis
+- [x] `"use codex to write tests for X"` → delegiert an Codex CLI, zeigt Ergebnis
+- [x] Graceful Error: Wenn Engine nicht installiert → klare Fehlermeldung, kein Crash
+- [x] Kein Datenverlust: Delegierter Output wird vollständig in Claude Code angezeigt
+- [x] Funktioniert auch wenn nur Claude installiert ist (Skill ist no-op)
+- [x] Delegation ist immer explizit — niemals Auto-Routing
 
 ## Risks & Constraints
 
