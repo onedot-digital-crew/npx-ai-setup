@@ -172,6 +172,19 @@ Regenerate: re-run `npx @onedot/ai-setup` → choose **Regenerate** → select *
 
 ---
 
+## Token-Efficient Web Fetching
+
+Reading web pages with WebFetch returns raw HTML — ~5× more tokens than needed. Two better options:
+
+| Method | Usage |
+|--------|-------|
+| **defuddle** (CLI) | `defuddle parse https://example.com --md` |
+| **markdown.new** (URL prefix) | `https://markdown.new/https://example.com` |
+
+Both strip navigation, ads, and clutter — ~80% token savings. Use WebFetch only when JavaScript rendering is required.
+
+---
+
 ## Troubleshooting
 
 **Claude keeps editing the same file in a loop?**

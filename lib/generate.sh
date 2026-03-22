@@ -477,6 +477,7 @@ EOF
   SYSTEM_SKILLS+=("vercel/vercel@vercel-cli")
   SYSTEM_SKILLS+=("anthropics/skills@frontend-design")
   SYSTEM_SKILLS+=("anthropics/skills@webapp-testing")
+  SYSTEM_SKILLS+=("vercel-labs/agent-skills@web-design-guidelines")
 
   # Add curated keyword-based skills (from detected package.json dependencies)
   if [ ${#KEYWORDS[@]} -gt 0 ]; then
