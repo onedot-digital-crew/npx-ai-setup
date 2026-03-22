@@ -161,9 +161,9 @@ Each spec should reference the brainstorm document for context.
 
 ## Auto-Link in README
 
-After creating the brainstorm document, append the evaluated source to the `## Links` section in `README.md`:
-- Format: `- [Source Name](URL)` — add below the existing links
-- Only add if the URL is not already listed
+After creating the brainstorm document, append the evaluated source to the `### Evaluated` subsection under `## Links` in `README.md`:
+- Format: `- [Source Name](URL)` — add below the existing evaluated links
+- Only add if the URL is not already listed anywhere in README.md
 - Source name: use the repo name, tool name, or article title (short, descriptive)
 
 ## Next Step

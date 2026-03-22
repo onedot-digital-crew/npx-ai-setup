@@ -251,6 +251,11 @@ For additional skills on-demand: use `/find-skills` inside Claude Code.
 - [Context7](https://github.com/upstash/context7)
 - [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code)
 - [Concept & Design Decisions](.agents/context/CONCEPT.md)
+
+### Evaluated
+
+Repos and tools evaluated via `/evaluate` — patterns analyzed, best ideas adopted.
+
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code)
 - [context-hub](https://github.com/andrewyng/context-hub)
 - [Understand-Anything](https://github.com/Lum1104/Understand-Anything)
