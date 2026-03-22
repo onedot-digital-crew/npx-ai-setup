@@ -1,43 +1,13 @@
 #!/bin/bash
-# Skill search, curation, and installation
-# Requires: $TIMEOUT_CMD (optional, set at call time)
+# Skill curation and installation
+# Network discovery removed — use /find-skills for on-demand search
 
 SKILL_PATTERN='^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+'
 
-# Detect timeout command availability
+# Detect timeout command availability (used by install_skill)
 TIMEOUT_CMD=""
 command -v timeout &>/dev/null && TIMEOUT_CMD="timeout 30"
 command -v gtimeout &>/dev/null && TIMEOUT_CMD="gtimeout 30"
-
-# Search skills.sh registry with timeout
-search_skills() {
-  local kw=$1
-  local result=""
-  if [ -n "$TIMEOUT_CMD" ]; then
-    result=$($TIMEOUT_CMD npx -y skills@latest find "$kw" 2>/dev/null \
-      | sed 's/\x1b\[[0-9;]*m//g' \
-      | grep -E "$SKILL_PATTERN" || true)
-  else
-    local tmp=$(mktemp)
-    npx -y skills@latest find "$kw" > "$tmp" 2>/dev/null &
-    local pid=$!
-    local wait_s=0
-    while kill -0 "$pid" 2>/dev/null && [ "$wait_s" -lt 30 ]; do
-      sleep 1
-      wait_s=$((wait_s + 1))
-    done
-    if kill -0 "$pid" 2>/dev/null; then
-      kill "$pid" 2>/dev/null || true
-      wait "$pid" 2>/dev/null || true
-    else
-      wait "$pid" 2>/dev/null || true
-      result=$(sed 's/\x1b\[[0-9;]*m//g' "$tmp" \
-        | grep -E "$SKILL_PATTERN" || true)
-    fi
-    rm -f "$tmp"
-  fi
-  echo "$result"
-}
 
 # Returns space-separated skill IDs curated from the skills.sh directory.
 # Bash 3.2 safe (no declare -A). Update this list when new skills are published.
