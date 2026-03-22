@@ -1,6 +1,6 @@
 #!/bin/bash
-# AI generation: CLAUDE.md extension, context generation, skill discovery
-# Requires: core.sh, process.sh, skills.sh
+# AI generation: CLAUDE.md extension, context generation
+# Requires: core.sh, process.sh
 # Requires: $TEMPLATE_MAP, $REGEN_*
 
 # Count generated context files in .agents/context/.
@@ -15,7 +15,6 @@ count_generated_context_files() {
 # Main generation orchestrator
 # Called by both normal setup (Auto-Init) and --regenerate mode.
 # Requires: claude CLI is available
-# Sets: $INSTALLED (number of skills installed)
 run_generation() {
   # Disable errexit — background processes, wait, and command substitutions
   # cause silent exits with set -e (especially bash 3.2 on macOS).
@@ -29,8 +28,6 @@ run_generation() {
   : "${REGEN_CONTEXT:=yes}"
   : "${REGEN_COMMANDS:=yes}"
   : "${REGEN_AGENTS:=${REGEN_COMMANDS}}"
-  : "${REGEN_SKILLS:=yes}"
-
   # Keep a single canonical skills directory and expose it under .agents/skills as alias.
   if command -v ensure_skills_alias >/dev/null 2>&1; then
     ensure_skills_alias
@@ -392,144 +389,6 @@ EOF
   else
     echo "⏭️  Skipping AI context generation (not selected)."
   fi
-
-  # Step 3: Search and install skills (AI-curated, haiku for ranking)
-  if [ "$REGEN_SKILLS" = "yes" ]; then
-  echo ""
-  echo "🔌 Searching and installing skills..."
-  INSTALLED=0
-  SKIPPED=0
-
-  KEYWORDS=()
-  if [ -f package.json ]; then
-    if [ "$_JSON_CMD" = "jq" ]; then
-      DEPS=$(jq -r '(.dependencies // {} | keys[]) , (.devDependencies // {} | keys[])' package.json 2>/dev/null | sort -u)
-    else
-      DEPS=$(node -e "
-        try{const p=JSON.parse(require('fs').readFileSync('package.json','utf8'));
-        const d=[...Object.keys(p.dependencies||{}),...Object.keys(p.devDependencies||{})];
-        [...new Set(d)].sort().forEach(x=>console.log(x));}catch(e){}
-      " 2>/dev/null)
-    fi
-
-    for dep in $DEPS; do
-      case "$dep" in
-        # Frontend frameworks (specific patterns before general globs)
-        vue|vue-router|@vue/*) [[ ! " ${KEYWORDS[*]} " =~ " vue " ]] && KEYWORDS+=("vue") ;;
-        @nuxt/ui|@nuxt/ui-pro) [[ ! " ${KEYWORDS[*]} " =~ " nuxt-ui " ]] && KEYWORDS+=("nuxt-ui") ;;
-        nuxt|@nuxt/*) [[ ! " ${KEYWORDS[*]} " =~ " nuxt " ]] && KEYWORDS+=("nuxt") ;;
-        react|react-dom|@react/*) [[ ! " ${KEYWORDS[*]} " =~ " react " ]] && KEYWORDS+=("react") ;;
-        next|@next/*) [[ ! " ${KEYWORDS[*]} " =~ " next " ]] && KEYWORDS+=("next") ;;
-        svelte|@sveltejs/*) [[ ! " ${KEYWORDS[*]} " =~ " svelte " ]] && KEYWORDS+=("svelte") ;;
-        astro|@astrojs/*) [[ ! " ${KEYWORDS[*]} " =~ " astro " ]] && KEYWORDS+=("astro") ;;
-        # UI libraries
-        tailwindcss|@tailwindcss/*) [[ ! " ${KEYWORDS[*]} " =~ " tailwind " ]] && KEYWORDS+=("tailwind") ;;
-        @shadcn/*|shadcn-ui) [[ ! " ${KEYWORDS[*]} " =~ " shadcn " ]] && KEYWORDS+=("shadcn") ;;
-        @radix-ui/*) [[ ! " ${KEYWORDS[*]} " =~ " radix " ]] && KEYWORDS+=("radix") ;;
-        @headlessui/*) [[ ! " ${KEYWORDS[*]} " =~ " headless-ui " ]] && KEYWORDS+=("headless-ui") ;;
-        reka-ui) [[ ! " ${KEYWORDS[*]} " =~ " reka-ui " ]] && KEYWORDS+=("reka-ui") ;;
-        primevue|@primevue/*) [[ ! " ${KEYWORDS[*]} " =~ " primevue " ]] && KEYWORDS+=("primevue") ;;
-        vuetify) [[ ! " ${KEYWORDS[*]} " =~ " vuetify " ]] && KEYWORDS+=("vuetify") ;;
-        element-plus) [[ ! " ${KEYWORDS[*]} " =~ " element-plus " ]] && KEYWORDS+=("element-plus") ;;
-        quasar|@quasar/*) [[ ! " ${KEYWORDS[*]} " =~ " quasar " ]] && KEYWORDS+=("quasar") ;;
-        # Languages & runtimes
-        typescript) [[ ! " ${KEYWORDS[*]} " =~ " typescript " ]] && KEYWORDS+=("typescript") ;;
-        # Backend
-        express) [[ ! " ${KEYWORDS[*]} " =~ " express " ]] && KEYWORDS+=("express") ;;
-        @nestjs/*) [[ ! " ${KEYWORDS[*]} " =~ " nestjs " ]] && KEYWORDS+=("nestjs") ;;
-        @hono/*|hono) [[ ! " ${KEYWORDS[*]} " =~ " hono " ]] && KEYWORDS+=("hono") ;;
-        # E-commerce
-        @shopify/*|shopify-*) [[ ! " ${KEYWORDS[*]} " =~ " shopify " ]] && KEYWORDS+=("shopify") ;;
-        @angular/*|angular) [[ ! " ${KEYWORDS[*]} " =~ " angular " ]] && KEYWORDS+=("angular") ;;
-        # Databases & ORMs
-        prisma|@prisma/*) [[ ! " ${KEYWORDS[*]} " =~ " prisma " ]] && KEYWORDS+=("prisma") ;;
-        drizzle-orm|drizzle-kit) [[ ! " ${KEYWORDS[*]} " =~ " drizzle " ]] && KEYWORDS+=("drizzle") ;;
-        # BaaS
-        supabase|@supabase/*) [[ ! " ${KEYWORDS[*]} " =~ " supabase " ]] && KEYWORDS+=("supabase") ;;
-        firebase|@firebase/*|firebase-admin) [[ ! " ${KEYWORDS[*]} " =~ " firebase " ]] && KEYWORDS+=("firebase") ;;
-        # Testing
-        vitest) [[ ! " ${KEYWORDS[*]} " =~ " vitest " ]] && KEYWORDS+=("vitest") ;;
-        playwright|@playwright/*) [[ ! " ${KEYWORDS[*]} " =~ " playwright " ]] && KEYWORDS+=("playwright") ;;
-        # State management
-        pinia) [[ ! " ${KEYWORDS[*]} " =~ " pinia " ]] && KEYWORDS+=("pinia") ;;
-        @tanstack/*) [[ ! " ${KEYWORDS[*]} " =~ " tanstack " ]] && KEYWORDS+=("tanstack") ;;
-        zustand) [[ ! " ${KEYWORDS[*]} " =~ " zustand " ]] && KEYWORDS+=("zustand") ;;
-      esac
-    done
-
-    if [ ${#KEYWORDS[@]} -eq 0 ]; then
-      echo "  No technologies detected."
-    else
-      echo "  Detected: ${KEYWORDS[*]}"
-    fi
-  else
-    echo "  No package.json found."
-  fi
-
-  # Default + curated skills for this project
-  SYSTEM_SKILLS=()
-  # Universal skills installed for every project regardless of stack
-  SYSTEM_SKILLS+=("vercel-labs/agent-browser@agent-browser")
-  SYSTEM_SKILLS+=("vercel-labs/skills@find-skills")
-  SYSTEM_SKILLS+=("microsoft/playwright-cli@playwright-cli")
-  SYSTEM_SKILLS+=("github/awesome-copilot@gh-cli")
-  SYSTEM_SKILLS+=("vercel/vercel@vercel-cli")
-  SYSTEM_SKILLS+=("anthropics/skills@frontend-design")
-  SYSTEM_SKILLS+=("anthropics/skills@webapp-testing")
-  SYSTEM_SKILLS+=("vercel-labs/agent-skills@web-design-guidelines")
-  SYSTEM_SKILLS+=("coreyhaines31/marketingskills@seo-audit")
-  SYSTEM_SKILLS+=("supercent-io/skills-template@performance-optimization")
-
-  # Add curated keyword-based skills (from detected package.json dependencies)
-  if [ ${#KEYWORDS[@]} -gt 0 ]; then
-    for kw in "${KEYWORDS[@]}"; do
-      kw_skills=$(get_keyword_skills "$kw")
-      if [ -n "$kw_skills" ]; then
-        for sid in $kw_skills; do
-          SYSTEM_SKILLS+=("$sid")
-        done
-      fi
-    done
-  fi
-
-  if [ ${#SYSTEM_SKILLS[@]} -gt 0 ]; then
-    SYSTEM_SKILLS_UNIQ=()
-    while IFS= read -r sid; do
-      [ -n "$sid" ] && SYSTEM_SKILLS_UNIQ+=("$sid")
-    done <<EOF
-$(printf '%s\n' "${SYSTEM_SKILLS[@]}" | sed '/^$/d' | sort -u)
-EOF
-    SYSTEM_SKILLS=("${SYSTEM_SKILLS_UNIQ[@]}")
-
-    echo ""
-    echo "  📦 Installing skills..."
-
-    # Install system skills in parallel; tally results after all complete
-    SYS_INSTALL_TMPDIR=$(mktemp -d)
-    declare -a SYS_PIDS=()
-
-    for skill_id in "${SYSTEM_SKILLS[@]}"; do
-      (
-        install_skill "$skill_id"
-        echo $? > "$SYS_INSTALL_TMPDIR/$(printf '%s' "$skill_id" | tr -cd 'a-zA-Z0-9_-').exit"
-      ) &
-      SYS_PIDS+=($!)
-    done
-
-    for pid in "${SYS_PIDS[@]}"; do
-      wait "$pid" 2>/dev/null || true
-    done
-
-    for skill_id in "${SYSTEM_SKILLS[@]}"; do
-      SAFE_ID=$(printf '%s' "$skill_id" | tr -cd 'a-zA-Z0-9_-')
-      EXIT_CODE=$(cat "$SYS_INSTALL_TMPDIR/${SAFE_ID}.exit" 2>/dev/null || echo "1")
-      if [ "$EXIT_CODE" = "0" ]; then
-        INSTALLED=$((INSTALLED + 1))
-      fi
-    done
-    rm -rf "$SYS_INSTALL_TMPDIR"
-  fi
-  fi # REGEN_SKILLS
 
   set -e
   if [ "$regen_failed" -ne 0 ]; then

@@ -16,7 +16,7 @@ Skills are embedded in `run_generation()` alongside AI context generation. 10+ s
 
 ## Steps
 - [x] Step 1: Create `run_skill_installation()` in `lib/skills.sh` — installs only 3 global skills (agent-browser, find-skills, gh-cli), parallel install, sets `INSTALLED` count. Reuse existing `install_skill()` function
-- [ ] Step 2: Remove skill block from `run_generation()` (generate.sh:396-532) — remove keyword detection, SYSTEM_SKILLS array, parallel install loop, REGEN_SKILLS handling
+- [x] Step 2: Remove skill block from `run_generation()` (generate.sh:396-532) — remove keyword detection, SYSTEM_SKILLS array, parallel install loop, REGEN_SKILLS handling
 - [ ] Step 3: Wire `run_skill_installation` as own step in `ai-setup.sh` between plugins and Auto-Init. Wire into update flow (`lib/update.sh`) where `REGEN_SKILLS=yes`
 - [ ] Step 4: Update TUI (`lib/tui.sh`) — rename "Skills" option description to reflect reduced scope, keep REGEN_SKILLS toggle working with new function
 - [ ] Step 5: Remove dead code — `FORCE_SKILLS` from ai-setup.sh, `SKILL_PATTERN` from skills.sh, `SKIPPED` from skills.sh/generate.sh, `get_keyword_skills()` from skills.sh
