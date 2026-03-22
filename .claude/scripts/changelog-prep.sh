@@ -77,11 +77,12 @@ while IFS= read -r line; do
 done <<< "$COMMITS"
 
 # Counts
-BREAKING_COUNT=$(printf '%b' "$BREAKING" | grep -c '.' 2>/dev/null || echo 0)
-FEAT_COUNT=$(printf '%b' "$FEATS" | grep -c '.' 2>/dev/null || echo 0)
-FIX_COUNT=$(printf '%b' "$FIXES" | grep -c '.' 2>/dev/null || echo 0)
-REFACTOR_COUNT=$(printf '%b' "$REFACTORS" | grep -c '.' 2>/dev/null || echo 0)
-OTHER_COUNT=$(printf '%b' "$OTHERS" | grep -c '.' 2>/dev/null || echo 0)
+count_lines() { local c; c=$(printf '%b' "$1" | grep -c '.' 2>/dev/null) || true; echo "${c:-0}"; }
+BREAKING_COUNT=$(count_lines "$BREAKING")
+FEAT_COUNT=$(count_lines "$FEATS")
+FIX_COUNT=$(count_lines "$FIXES")
+REFACTOR_COUNT=$(count_lines "$REFACTORS")
+OTHER_COUNT=$(count_lines "$OTHERS")
 TOTAL=$((BREAKING_COUNT + FEAT_COUNT + FIX_COUNT + REFACTOR_COUNT + OTHER_COUNT))
 
 section "SUMMARY"
