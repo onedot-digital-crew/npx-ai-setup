@@ -1,6 +1,6 @@
 # Spec: Add Validation Gate to spec-work
 
-> **Spec ID**: 090 | **Created**: 2026-03-15 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 090 | **Created**: 2026-03-15 | **Status**: completed | **Branch**: —
 
 ## Goal
 Add an automatic spec validation step to spec-work that blocks execution of weak specs before any code changes happen.

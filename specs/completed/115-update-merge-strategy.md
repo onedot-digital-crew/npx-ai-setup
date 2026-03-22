@@ -1,105 +1,44 @@
-# Spec: Boilerplate-First Architecture with Release Migrations
+# Spec: Remove System-Specific Code
 
-> **Spec ID**: 115 | **Created**: 2026-03-21 | **Status**: draft | **Branch**: —
-
-<!-- Absorbs Spec 077 (Base/System Split). System-specific config moves to boilerplate repos. Updates via release migrations. System setup via gh pull from boilerplate. -->
+> **Spec ID**: 115 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
-Remove system-specific code from ai-setup. Fresh installs pull system config from boilerplate repos via `gh` CLI. Updates apply incremental migrations instead of template overwrite.
+Remove all system-specific code from ai-setup. The package becomes a pure generic base layer.
 
 ## Context
-Projects are either created from GitHub Template repos (already have system config) or are existing projects that need system config added. Instead of bundling system-specific code in ai-setup, we pull it directly from the boilerplate repos via `gh` CLI (available on all team machines). This keeps system config in one authoritative place (the boilerplate) and eliminates duplication.
-
-## Architecture
-
-### Fresh Install Flow
-```
-npx @onedot/ai-setup
-├── 1. Copy base templates (hooks, commands, agents, settings, rules)
-├── 2. Interactive system selector:
-│     "Which system? (Shopify / Shopware / Nuxt / Next / Storyblok / Skip)"
-├── 3. If system selected: pull system files from boilerplate via gh CLI
-│     gh api repos/<org>/<boilerplate>/contents/.claude/skills → copy
-│     gh api repos/<org>/<boilerplate>/contents/.claude/rules  → merge
-│     gh api repos/<org>/<boilerplate>/contents/.mcp.json      → merge
-├── 4. Write version + checksums to .ai-setup.json
-└── 5. Auto-Init (Claude generates CLAUDE.md, STACK.md, ARCHITECTURE.md)
-```
-
-### Update Flow (`.ai-setup.json` exists)
-```
-npx @onedot/ai-setup
-├── 1. Read version from .ai-setup.json
-├── 2. Find migrations > installed version
-├── 3. Apply each migration sequentially
-└── 4. Update version in .ai-setup.json
-```
-
-### Boilerplate-Project Flow (from GitHub Template)
-```
-npx @onedot/ai-setup
-├── 1. Detect .ai-setup.json → update mode
-├── 2. Apply migrations only
-└── 3. Skip system pull (already present from template)
-```
-
-### System → Boilerplate Mapping
-```bash
-SYSTEM_BOILERPLATES=(
-  "shopify:onedot-digital-crew/sp-shopify-boilerplate"
-  "shopware:onedot-digital-crew/sw-shopware-boilerplate"
-  "nuxt:onedot-digital-crew/sb-nuxt-boilerplate"
-)
-```
-
-### Files Pulled from Boilerplate
-- `.claude/skills/*/SKILL.md` — system-specific skills
-- `.claude/rules/<system>*.md` — system-specific rules (e.g. liquid-performance.md)
-- `.mcp.json` — system MCP servers (merged, not overwritten)
-
-### Migration Helpers
-- `_add_file <src> <target>` — install only if target missing
-- `_update_file <src> <target>` — overwrite only if not user-modified
-- `_patch_line <file> <old> <new>` — sed-style replace, skip if old not found
-- `_settings_add_permission <pattern>` — add to allow list if not present
-- `_settings_add_hook <event> <hook>` — add hook entry if not present
-- `_remove_file <target>` — delete if matches template checksum
+System-specific config (Shopify skills, Shopware MCP, Nuxt rules) now lives in boilerplate repos. ai-setup still bundles `lib/systems/*.sh` (6 plugins), `--system` flag, `select_system` TUI, `detect_system()`, and system-conditional logic scattered across generate.sh, update.sh, core.sh. All of this is dead weight. Also removes `--regenerate` (redundant with Auto-Init) and monorepo detection (unused). Part 1 of 3 — see Spec 134 (migrations) and Spec 135 (boilerplate pull).
 
 ## Steps
-- [ ] Step 1: Create `lib/migrations/` dir and migration runner in `lib/update.sh` with helper functions.
-- [ ] Step 2: Create `pull_boilerplate_files()` in new `lib/boilerplate.sh` — uses `gh api` to fetch `.claude/skills/`, `.claude/rules/`, `.mcp.json` from a given repo. Includes interactive system selector.
-- [ ] Step 3: Add `SYSTEM_BOILERPLATES` mapping to `lib/core.sh`. Wire `pull_boilerplate_files()` into fresh install flow in `bin/ai-setup.sh`.
-- [ ] Step 4: Delete `lib/systems/` (6 files). Remove `load_system_plugins()`, `--system` flag, system-guarded calls.
-- [ ] Step 5: Simplify `generate.sh` — remove system-specific prompt variables. Claude reads project directly.
-- [ ] Step 6: Create first migration `lib/migrations/1.4.0.sh` with all changes since v1.3.5.
-- [ ] Step 7: Modify update flow in `bin/ai-setup.sh` — when `.ai-setup.json` version < current, run migrations instead of full template copy.
-- [ ] Step 8: Clean up remaining system refs in `core.sh`, `setup-skills.sh`, `detect.sh`.
-- [ ] Step 9: Syntax-check + E2E test: fresh install with system pull + update in boilerplate project.
-- [ ] Step 10: Audit all `lib/*.sh` files — review each module for dead code, unused functions, and redundant logic left over from system removal. Reduce to minimum viable size.
+- [x] Step 1: Delete `lib/systems/` directory (6 files: shopify, nuxt, next, laravel, shopware, storyblok).
+- [x] Step 2: Remove `load_system_plugins()` from `lib/_loader.sh`. Remove `source_lib "monorepo.sh"` from `bin/ai-setup.sh`.
+- [x] Step 3: Remove `--system` and `--regenerate` flag parsing from `bin/ai-setup.sh` (lines 26-48, 68-89, 103-143). Remove `select_system` and `detect_system` calls.
+- [x] Step 4: Remove `VALID_SYSTEMS`, `SHOPIFY_SKILLS_MAP`, `TS_RULES_MAP`, `SYSTEM_BOILERPLATES` from `lib/core.sh`. Remove `detect_system()` from `lib/detect.sh`. Remove `select_system()` from `lib/tui.sh`.
+- [x] Step 5: Simplify `lib/generate.sh` — remove all `$SYSTEM`, `$SHOPWARE_*`, `$CTX_SHOPWARE` variables and system-conditional prompt sections. Context prompt becomes generic.
+- [x] Step 6: Clean up `lib/update.sh` — remove `SHOPIFY_SKILLS_MAP` references and system-conditional logic in `scan_template_changes` and `_process_update_mappings`.
+- [x] Step 7: Simplify `lib/setup-skills.sh` — remove system-specific skill install functions. Delete `lib/monorepo.sh` and `setup_repo_group_context()` from `lib/setup.sh`.
+- [x] Step 8: Run `grep -r "SYSTEM\|system_plugin\|detect_system\|select_system\|SHOPIFY\|SHOPWARE\|regenerate\|REGEN_" lib/ bin/` to find and remove all orphan references.
 
 ## Acceptance Criteria
-- [ ] Fresh install offers interactive system selection and pulls from boilerplate
-- [ ] `gh` CLI is used for pull (no git clone)
-- [ ] Update applies only migrations, never full template copy
-- [ ] `lib/systems/` does not exist
-- [ ] `--system` flag is removed
-- [ ] Boilerplate projects are detected (`.ai-setup.json` present) and only get migrations
+- [x] `lib/systems/` deleted (was already absent)
+- [x] `lib/monorepo.sh` deleted (was already absent)
+- [x] `--system` and `--regenerate` flags rejected with "unknown flag" error
+- [x] Zero references to `SYSTEM`, `SHOPIFY_SKILLS_MAP`, `detect_system`, `select_system` in `lib/` and `bin/`
+- [x] `bin/ai-setup.sh` runs successfully without any system flags
 
 ## Files to Modify
-- `lib/boilerplate.sh` — new: system selector + gh pull logic
-- `lib/migrations/` — new: migration files + runner
-- `lib/update.sh` — migration runner integration
-- `bin/ai-setup.sh` — new fresh install flow, remove --system
-- `lib/systems/*.sh` — delete all
+- `lib/systems/*.sh` — DELETE all 6 files
+- `lib/monorepo.sh` — DELETE
+- `bin/ai-setup.sh` — remove flags, system calls, regenerate mode
 - `lib/_loader.sh` — remove load_system_plugins()
-- `lib/generate.sh` — remove system prompts
-- `lib/core.sh` — add SYSTEM_BOILERPLATES, remove VALID_SYSTEMS
-- `lib/setup-skills.sh` — remove system functions
-- `lib/detect.sh` — remove/simplify system detection
+- `lib/core.sh` — remove system maps and constants
+- `lib/detect.sh` — remove detect_system()
+- `lib/tui.sh` — remove select_system()
+- `lib/generate.sh` — remove system-conditional logic
+- `lib/update.sh` — remove system-conditional logic
+- `lib/setup-skills.sh` — remove system skill functions
+- `lib/setup.sh` — remove setup_repo_group_context()
 
 ## Out of Scope
-- Boilerplate repo modifications (separate per-repo task)
-- Rollback mechanism for migrations
-- Non-gh authentication (assumes gh auth login done)
-
-## Complexity: high
+- Migration system (Spec 134)
+- Boilerplate pull via gh (Spec 135)
+- CLAUDE.md/AGENTS.md generation changes (Spec 131)

@@ -1,6 +1,6 @@
 # Spec: Enhance /grill with scope challenge, options format, and what-exists section
 
-> **Spec ID**: 045 | **Created**: 2026-02-28 | **Status**: in-review | **Branch**: spec/045-grill-review-enhancements
+> **Spec ID**: 045 | **Created**: 2026-02-28 | **Status**: completed | **Branch**: spec/045-grill-review-enhancements
 
 ## Goal
 Adapt Garry Tan's plan-exit-review patterns into `/grill` (full) and `/review` (light) to improve review depth and actionability.

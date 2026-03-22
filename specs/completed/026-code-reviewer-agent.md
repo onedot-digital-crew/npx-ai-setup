@@ -2,7 +2,7 @@
 
 > **Spec ID**: 026 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/026-code-reviewer-agent
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Create a reusable `code-reviewer` agent and integrate it into `spec-work` and `spec-review` so review logic is delegated to the agent rather than duplicated inline.

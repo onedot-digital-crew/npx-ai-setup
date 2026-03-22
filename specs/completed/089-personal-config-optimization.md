@@ -1,6 +1,6 @@
 # Spec: Personal Config Token Optimization
 
-> **Spec ID**: 089 | **Created**: 2026-03-15 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 089 | **Created**: 2026-03-15 | **Status**: completed | **Branch**: —
 
 ## Goal
 Reduce personal Claude config overhead by ~350 tokens/session and eliminate duplicate MCP registrations.

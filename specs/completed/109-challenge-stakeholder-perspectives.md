@@ -1,6 +1,6 @@
 # Spec: Add Stakeholder Perspectives to /challenge Command
 
-> **Spec ID**: 109 | **Created**: 2026-03-18 | **Status**: in-review | **Complexity**: low | **Branch**: —
+> **Spec ID**: 109 | **Created**: 2026-03-18 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 Add a Phase 6b (Stakeholder Perspectives) to `/challenge` that simulates 4 viewpoints before the verdict.

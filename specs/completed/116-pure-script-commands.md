@@ -1,6 +1,6 @@
 # Spec: Pure Script Commands (spec-board, doctor, release)
 
-> **Spec ID**: 116 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: spec/116-pure-script-commands
+> **Spec ID**: 116 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: spec/116-pure-script-commands
 
 ## Goal
 Replace `/spec-board`, `/doctor`, and `/release` with pure Bash scripts that produce output with zero LLM tokens.

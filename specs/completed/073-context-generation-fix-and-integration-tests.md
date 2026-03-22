@@ -2,7 +2,7 @@
 
 > **Spec ID**: 073 | **Created**: 2026-03-10 | **Status**: completed | **Branch**: —
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Fix insufficient `--max-turns` across all 3 generation calls and add an integration test that catches install regressions locally.

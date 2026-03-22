@@ -1,6 +1,6 @@
 # Spec: Pre-Release Validation Script
 
-> **Spec ID**: 127 | **Created**: 2026-03-21 | **Status**: in-review | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 127 | **Created**: 2026-03-21 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 

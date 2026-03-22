@@ -2,7 +2,7 @@
 
 > **Spec ID**: 074 | **Created**: 2026-03-10 | **Status**: completed | **Branch**: —
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Share installed skills with Codex CLI and OpenCode automatically by creating tool-specific symlinks during setup.

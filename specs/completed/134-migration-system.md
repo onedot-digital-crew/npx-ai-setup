@@ -1,6 +1,6 @@
 # Spec: Release Migration System
 
-> **Spec ID**: 134 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: main
+> **Spec ID**: 134 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: main
 
 ## Goal
 Replace template-overwrite updates with versioned migration files that apply incremental changes.

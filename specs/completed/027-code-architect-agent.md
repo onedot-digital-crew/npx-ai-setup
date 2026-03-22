@@ -2,7 +2,7 @@
 
 > **Spec ID**: 027 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/027-code-architect-agent
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Add a `code-architect` agent template that performs design reviews and architectural assessments before or during complex spec implementation.

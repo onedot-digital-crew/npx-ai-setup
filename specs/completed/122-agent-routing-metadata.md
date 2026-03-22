@@ -1,6 +1,6 @@
 # Spec: Add when_to_use/avoid_if to All Agent Templates
 
-> **Spec ID**: 122 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 122 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 Add `when_to_use` and `avoid_if` routing metadata to all agent template files so Claude selects the right agent for each task.

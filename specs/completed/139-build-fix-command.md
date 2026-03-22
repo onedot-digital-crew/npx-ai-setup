@@ -1,6 +1,6 @@
 # Spec 139: Build-Fix Command
 
-> **Status**: in-review
+> **Status**: completed
 > **Quelle**: specs/136-evaluate-everything-claude-code.md (Kandidat #3)
 > **Ziel**: Aktiver Build-Fixer Command der Fehler inkrementell behebt statt nur zu reporten
 

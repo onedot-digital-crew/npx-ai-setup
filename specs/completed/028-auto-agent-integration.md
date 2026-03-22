@@ -2,7 +2,7 @@
 
 > **Spec ID**: 028 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/028-auto-agent-integration
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Wire `verify-app` into `spec-work` and `staff-reviewer` into `/pr` so all installed agents run automatically at the right workflow moments without user prompting.

@@ -1,6 +1,6 @@
 # Spec: Expand .claude/rules/ template system with modular rules and memory docs
 
-> **Spec ID**: 044 | **Created**: 2026-02-28 | **Status**: in-review | **Branch**: spec/044-rules-template-expansion
+> **Spec ID**: 044 | **Created**: 2026-02-28 | **Status**: completed | **Branch**: spec/044-rules-template-expansion
 
 ## Goal
 Add modular rule templates, conditional TypeScript rules, opusplan model, and enrich template CLAUDE.md with memory docs, power-user tips, and @imports pattern.

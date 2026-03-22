@@ -1,6 +1,6 @@
 # Spec: Add Numeric Quality Scoring to /spec-validate
 
-> **Spec ID**: 112 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 112 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 Replace the 0–100 subjective scoring in /spec-validate with a weighted 0–10 per-criterion system (total 0–100) and A/B/C/F letter grades.

@@ -1,6 +1,6 @@
 # Spec: Rename /bug to /debug with Hypothesis-First Method
 
-> **Spec ID**: 120 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 120 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 Rename `/bug` to `/debug` and enhance with hypothesis-first methodology and mandatory regression test step.

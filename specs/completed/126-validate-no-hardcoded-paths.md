@@ -1,6 +1,6 @@
 # Spec: Add validate-no-hardcoded-paths CI Script
 
-> **Spec ID**: 126 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: main
+> **Spec ID**: 126 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: main
 
 ## Goal
 Add a validation script that checks all git-tracked files for hardcoded absolute paths (`/Users/*`, `/home/*`) to prevent privacy leaks and ensure portability.

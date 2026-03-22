@@ -2,7 +2,7 @@
 
 > **Spec ID**: 075 | **Created**: 2026-03-10 | **Status**: completed | **Branch**: —
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Replace the custom `statusline.sh` script with `@owloops/claude-powerline` for a visual, theme-aware powerline statusline out of the box.

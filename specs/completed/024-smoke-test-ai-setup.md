@@ -1,6 +1,6 @@
 # Spec: Smoke Test for bin/ai-setup.sh
 
-> **Spec ID**: 024 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/024-smoke-test-ai-setup
+> **Spec ID**: 024 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/024-smoke-test-ai-setup
 
 ## Goal
 Add a minimal smoke test script that catches syntax errors and flag regressions in `bin/ai-setup.sh` without requiring a live install.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: completed
 priority: medium
 complexity: low
 branch: —

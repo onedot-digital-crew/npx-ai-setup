@@ -1,6 +1,6 @@
 # Spec: Add frontend-developer Agent Template
 
-> **Spec ID**: 123 | **Created**: 2026-03-21 | **Status**: in-review | **Complexity**: medium | **Branch**: main
+> **Spec ID**: 123 | **Created**: 2026-03-21 | **Status**: completed | **Complexity**: medium | **Branch**: main
 
 ## Goal
 

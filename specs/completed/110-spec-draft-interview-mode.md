@@ -2,7 +2,7 @@
 
 > **Spec ID**: 110 | **Created**: 2026-03-19 | **Status**: completed | **Branch**: —
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Extend `/spec` to detect when `$ARGUMENTS` points to an existing .md file and enter a proactive interview loop instead of the normal clarify flow.

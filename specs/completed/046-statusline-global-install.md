@@ -1,6 +1,6 @@
 # Spec: Add optional global statusline install step to ai-setup.sh
 
-> **Spec ID**: 046 | **Created**: 2026-02-28 | **Status**: in-review | **Branch**: spec/046-statusline-global-install
+> **Spec ID**: 046 | **Created**: 2026-02-28 | **Status**: completed | **Branch**: spec/046-statusline-global-install
 
 ## Goal
 Add an optional end-of-setup step that installs a statusline script to `~/.claude/statusline.sh` and configures it in `~/.claude/settings.json`.

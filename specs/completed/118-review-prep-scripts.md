@@ -1,6 +1,6 @@
 # Spec: Review-Prep Scripts (review, spec-validate)
 
-> **Spec ID**: 118 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: spec/118-review-prep-scripts
+> **Spec ID**: 118 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: spec/118-review-prep-scripts
 
 ## Goal
 Add prep-scripts for `/review` and `/spec-validate` that pre-collect diffs, detect duplicates, and parse spec structure — giving Claude focused input instead of raw data.

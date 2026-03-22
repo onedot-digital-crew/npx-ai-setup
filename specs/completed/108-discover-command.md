@@ -1,6 +1,6 @@
 # Spec: Add /discover Command for Reverse-Engineering Specs from Code
 
-> **Spec ID**: 108 | **Created**: 2026-03-18 | **Status**: in-review | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 108 | **Created**: 2026-03-18 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Add a `/discover` command template that reverse-engineers draft specs from existing codebases for legacy projects and onboarding.

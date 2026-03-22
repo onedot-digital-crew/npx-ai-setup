@@ -1,6 +1,6 @@
 # Spec: Template Token Optimization
 
-> **Spec ID**: 088 | **Created**: 2026-03-15 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 088 | **Created**: 2026-03-15 | **Status**: completed | **Branch**: —
 
 ## Goal
 Reduce per-session token overhead in ai-setup templates by ~400 tokens through env defaults, agents.md dispatch table extraction, and CLAUDE.md trimming.

@@ -1,6 +1,6 @@
 # Spec 137: Security Reviewer Agent
 
-> **Status**: in-review
+> **Status**: completed
 > **Quelle**: specs/136-evaluate-everything-claude-code.md (Kandidat #1)
 > **Ziel**: Dedizierter Security-Agent mit OWASP Top 10, Secrets Detection, stack-spezifischen Checks
 

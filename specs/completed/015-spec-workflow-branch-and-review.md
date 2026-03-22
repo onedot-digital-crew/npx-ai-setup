@@ -11,8 +11,8 @@ The spec workflow currently lacks a branch prompt in /spec-work (users may work 
 ## Steps
 - [x] Step 1: In `templates/commands/spec-work.md`, add `AskUserQuestion` to `allowed-tools` in frontmatter
 - [x] Step 2: In `spec-work.md`, insert step 3 (after reading spec): ask user if a new branch should be created. If yes, derive `spec/NNN-title` from filename, run `git checkout -b`, update spec `**Branch**` field. If branch exists, offer to switch.
-- [x] Step 3: In `spec-work.md`, replace step 9 (mark ready for review): ask user if auto-review should run. If no, keep current behavior (set `in-review`, suggest `/spec-review`).
-- [x] Step 4: In `spec-work.md`, add step 10 (auto-review): full review pass — check spec compliance, acceptance criteria, code quality. Fix issues found. One pass only. If all good, set status `completed`, move to `specs/completed/`. If unfixable issues, keep `in-review` and report.
+- [x] Step 3: In `spec-work.md`, replace step 9 (mark ready for review): ask user if auto-review should run. If no, keep current behavior (set `completed`, suggest `/spec-review`).
+- [x] Step 4: In `spec-work.md`, add step 10 (auto-review): full review pass — check spec compliance, acceptance criteria, code quality. Fix issues found. One pass only. If all good, set status `completed`, move to `specs/completed/`. If unfixable issues, keep `completed` and report.
 - [x] Step 5: In `templates/commands/spec-review.md`, remove PR preparation from APPROVED verdict (steps 3-4: PR title/body/commands). Keep status change and file move only.
 - [x] Step 6: Update `templates/CLAUDE.md` spec workflow section to reflect that /spec-review no longer suggests PRs
 - [x] Step 7: Renumber all steps in spec-work.md to account for inserted branch step and auto-review

@@ -1,6 +1,6 @@
 # Spec: Global Developer Workstation Setup Command
 
-> **Spec ID**: 128 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: main
+> **Spec ID**: 128 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: main
 
 ## Goal
 Add a separate `npx @onedot/ai-setup-global` command that installs CLI tools, global Claude settings, and developer workstation config — independent of any project.

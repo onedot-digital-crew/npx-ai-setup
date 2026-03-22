@@ -1,6 +1,6 @@
 # Spec: Add Stall Detection to /spec-work
 
-> **Spec ID**: 125 | **Created**: 2026-03-21 | **Status**: in-review | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 125 | **Created**: 2026-03-21 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 

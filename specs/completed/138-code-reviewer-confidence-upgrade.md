@@ -1,6 +1,6 @@
 # Spec 138: Code Reviewer Confidence + AI-Code Upgrade
 
-> **Status**: in-review
+> **Status**: completed
 > **Quelle**: specs/136-evaluate-everything-claude-code.md (Kandidat #2)
 > **Ziel**: Confidence-basiertes Filtering und AI-Generated-Code-Checks im Code Reviewer
 

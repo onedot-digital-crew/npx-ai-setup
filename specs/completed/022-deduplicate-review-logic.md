@@ -1,6 +1,6 @@
 # Spec: Deduplicate Auto-Review Logic in spec-work
 
-> **Spec ID**: 022 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/022-deduplicate-review-logic
+> **Spec ID**: 022 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/022-deduplicate-review-logic
 
 ## Goal
 Remove the duplicated review criteria from `spec-work.md`'s auto-review step and reference the shared review logic instead.

@@ -1,6 +1,6 @@
 # Spec: Boilerplate Pull via gh CLI
 
-> **Spec ID**: 135 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: main
+> **Spec ID**: 135 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: main
 
 ## Goal
 Let fresh installs pull system-specific config (skills, rules, MCP) directly from boilerplate repos via `gh` CLI.

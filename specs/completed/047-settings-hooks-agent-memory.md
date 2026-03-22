@@ -1,6 +1,6 @@
 # Spec: Enhance template settings.json with hooks, env vars, and agent memory fields
 
-> **Spec ID**: 047 | **Created**: 2026-02-28 | **Status**: in-review | **Branch**: spec/047-settings-hooks-agent-memory
+> **Spec ID**: 047 | **Created**: 2026-02-28 | **Status**: completed | **Branch**: spec/047-settings-hooks-agent-memory
 
 ## Goal
 Add SessionStart compact hook, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, agent memory/isolation fields, PostToolUse failure-logging hook, Stop prompt hook, and ENABLE_TOOL_SEARCH to the template settings and agent files.

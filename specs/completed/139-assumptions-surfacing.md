@@ -1,6 +1,6 @@
 # Spec: Assumptions Surfacing in /spec Command
 
-> **Spec ID**: 139 | **Created**: 2026-03-22 | **Status**: in-review | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 139 | **Created**: 2026-03-22 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Add an assumptions-surfacing step to the `/spec` command that makes Claude's implicit assumptions explicit before planning.
@@ -16,10 +16,10 @@ Adapted from GSD's `list-phase-assumptions` + `gsd-assumptions-analyzer`. Curren
 - [ ] Step 5: Test — create a spec with `/spec` and verify assumptions step triggers, produces structured output, and feeds into spec
 
 ## Acceptance Criteria
-- [ ] `/spec` asks about assumptions before writing the spec
-- [ ] Each assumption has: Statement, Evidence (file path), Confidence (High/Medium/Low), If Wrong (consequence)
-- [ ] User can correct or dismiss assumptions via AskUserQuestion
-- [ ] Confirmed assumptions appear in spec's Context section
+- [x] `/spec` asks about assumptions before writing the spec
+- [x] Each assumption has: Statement, Evidence (file path), Confidence (High/Medium/Low), If Wrong (consequence)
+- [x] User can correct or dismiss assumptions via AskUserQuestion
+- [x] Confirmed assumptions appear in spec's Context section
 
 ## Files to Modify
 - `templates/commands/spec.md` — add assumptions step

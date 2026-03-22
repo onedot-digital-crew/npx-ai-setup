@@ -1,6 +1,6 @@
 # Spec: Hybrid Script Commands (scan, commit, test)
 
-> **Spec ID**: 117 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: spec/117-hybrid-script-commands
+> **Spec ID**: 117 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: spec/117-hybrid-script-commands
 
 ## Goal
 Add Bash prep-scripts to `/scan`, `/commit`, and `/test` that gather data with zero tokens, then pass focused input to Claude for the AI-dependent parts only.

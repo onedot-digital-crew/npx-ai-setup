@@ -1,6 +1,6 @@
 # Spec: Promote agent-browser to required tool + install skill
 
-> **Spec ID**: 141 | **Created**: 2026-03-22 | **Status**: in-review | **Branch**: main
+> **Spec ID**: 141 | **Created**: 2026-03-22 | **Status**: completed | **Branch**: main
 
 ## Goal
 Make agent-browser a required CLI tool (npm install) and auto-install its official Claude Code skill for all projects.

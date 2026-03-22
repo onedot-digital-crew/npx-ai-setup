@@ -2,7 +2,7 @@
 
 > **Spec ID**: 076 | **Created**: 2026-03-10 | **Status**: completed | **Branch**: —
 
-<!-- Status lifecycle: draft → in-progress → in-review → completed (or blocked at any stage) -->
+<!-- Status lifecycle: draft → in-progress → completed → completed (or blocked at any stage) -->
 
 ## Goal
 Add an optional `/simplify` cleanup step to `spec-work`, document `ralph-loop` and `defuddle`/`markdown.new` in `WORKFLOW-GUIDE.md`, and add a web-fetching preference rule to `general.md`.

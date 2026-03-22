@@ -1,6 +1,6 @@
 # Spec: Fix git add -A in spec-work-all Worktree Prompt
 
-> **Spec ID**: 023 | **Created**: 2026-02-24 | **Status**: in-review | **Branch**: spec/023-fix-git-add-in-worktree
+> **Spec ID**: 023 | **Created**: 2026-02-24 | **Status**: completed | **Branch**: spec/023-fix-git-add-in-worktree
 
 ## Goal
 Replace `git add -A` with `git add -u` in the `spec-work-all.md` subagent commit step to match project conventions.

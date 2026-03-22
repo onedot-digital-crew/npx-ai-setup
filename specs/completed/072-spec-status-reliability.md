@@ -10,7 +10,7 @@ Developers report specs stuck with stale status (all steps done but still `in-pr
 
 ## Steps
 - [x] Step 1: In `templates/commands/spec-work.md`, add a "Status Checkpoint" rule at top of Rules section: "Before finishing, ALWAYS update status and move the file — this is the single most important step"
-- [x] Step 2: In `templates/commands/spec-work.md`, restructure step 13 — update status to `in-review` BEFORE spawning code-reviewer, so status is saved even if agent fails
+- [x] Step 2: In `templates/commands/spec-work.md`, restructure step 13 — update status to `completed` BEFORE spawning code-reviewer, so status is saved even if agent fails
 - [x] Step 3: In `templates/commands/spec-work-all.md`, add explicit fallback in wave post-processing: "If subagent failed or returned no result, set spec status to `blocked` with reason"
 - [x] Step 4: In `templates/commands/spec-board.md`, add Step 6 "Consistency Check + Repair" — detect stale specs (all steps done but wrong status, completed but not moved), ask user to confirm fix, then update status and move files
 - [x] Step 5: Update `templates/commands/spec-board.md` YAML header: remove `mode: plan`, add `Write, Edit, AskUserQuestion` to allowed-tools

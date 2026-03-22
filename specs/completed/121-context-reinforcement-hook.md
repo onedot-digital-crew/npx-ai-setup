@@ -1,6 +1,6 @@
 # Spec: Context Reinforcement Hook After Compaction
 
-> **Spec ID**: 121 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 121 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 Add a SessionStart hook that re-injects critical rules after context compaction to prevent rule drift.

@@ -1,6 +1,6 @@
 # Spec 140: Agent YAML Frontmatter Migration
 
-> **Status**: in-review
+> **Status**: completed
 > **Quelle**: specs/136-evaluate-everything-claude-code.md (Kandidat #4)
 > **Ziel**: Alle 11 Agents auf YAML Frontmatter migrieren (offizielles Claude Code Format)
 

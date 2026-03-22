@@ -1,6 +1,6 @@
 # Spec: Merge /review + /grill into Single Command
 
-> **Spec ID**: 119 | **Created**: 2026-03-21 | **Status**: in-review | **Branch**: —
+> **Spec ID**: 119 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 Merge `/review` and `/grill` into one `/review` command with intensity levels (Quick / Standard / Adversarial) to reduce tooling surface and eliminate redundancy.

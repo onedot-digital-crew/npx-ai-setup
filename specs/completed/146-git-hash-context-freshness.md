@@ -1,6 +1,6 @@
 # Spec 146: Git-Hash Context-Freshness
 
-> **Status**: in-progress
+> **Status**: completed
 > **Source**: specs/145-evaluate-understand-anything.md (Kandidat #3)
 > **Goal**: context-freshness.sh um Git-Commit-Hash-Vergleich erweitern statt nur Datei-Alter zu pruefen
 
@@ -18,7 +18,7 @@ Aktuell prueft `context-freshness.sh` nur das Alter der Context-Dateien in Tagen
 - [x] 4. In context-refresher agent: write updated GIT_HASH to `.state` after successful refresh (context-refresher.md muss angepasst werden)
 - [x] 5. Keep existing age-based and checksum checks as additional signals (hash mismatch OR age > threshold = stale)
 - [x] 6. Mirror changes to both template versions
-- [ ] 7. Test: verify hash is written to `.state` after context-refresher runs, verify stale detection triggers on commit
+- [x] 7. Test: verify hash is written to `.state` after context-refresher runs, verify stale detection triggers on commit
 
 ## Acceptance Criteria
 
