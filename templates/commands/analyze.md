@@ -3,15 +3,35 @@ model: sonnet
 allowed-tools: Read, Glob, Grep, Bash, Agent
 ---
 
-Produces a structured codebase overview via 3 parallel agents. Use when exploring or preparing for major changes.
+Produces a structured codebase overview via parallel agents. Use when exploring or preparing for major changes.
 
 ## Process
 
-### 1. Launch 3 agents simultaneously
+### 0. Count source files
+
+Run this command to get the source file count:
+
+```bash
+git ls-files 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|py|go|rs|rb|php|java|kt|swift|vue|svelte|sh|sql)$' | grep -v -E '(\.lock|\.min\.|dist/|build/|node_modules/|vendor/|\.next/|\.nuxt/)' | wc -l
+```
+
+Store the count and the file list. This determines the analysis mode.
+
+**Source extensions**: ts, tsx, js, jsx, py, go, rs, rb, php, java, kt, swift, vue, svelte, sh, sql
+**Excluded**: lockfiles, minified files, build output, vendor directories
+
+### 1. Choose analysis mode
+
+- **Fast mode** (<=30 source files): Go to Step 2A — launch 3 agents simultaneously
+- **Batch mode** (>30 source files): Go to Step 2B — batched analysis with synthesizer
+
+---
+
+### 2A. Fast mode — 3 parallel agents
 
 Spawn all three agents at the same time using the Agent tool in parallel:
 
-**Agent 1 — Architecture**
+**Agent 1 — Architecture** (model: haiku)
 
 ```
 You are an Architecture exploration agent. Analyze this codebase and report:
@@ -28,7 +48,7 @@ Include sub-sections: Entry Points, Data Flow, Module Boundaries, Key Abstractio
 Keep it factual and dense — no padding.
 ```
 
-**Agent 2 — Hotspots**
+**Agent 2 — Hotspots** (model: haiku)
 
 ```
 You are a Hotspots exploration agent. Find the most active and complex areas of this codebase:
@@ -43,7 +63,7 @@ Return a concise report under the heading: ## Hotspots
 Include sub-sections: Most Changed Files, Largest Files, Complexity Areas.
 ```
 
-**Agent 3 — Risks**
+**Agent 3 — Risks** (model: haiku)
 
 ```
 You are a Risk exploration agent. Find quality issues and risk areas in this codebase:
@@ -58,33 +78,99 @@ Return a concise report under the heading: ## Risks
 Include sub-sections: TODOs/FIXMEs, Dead Code, Error Handling Gaps, Naming Inconsistencies.
 ```
 
-### 2. Synthesize results
+After all 3 agents return, go to **Step 3**.
 
-After all 3 agents return, combine their output into a single structured report:
+---
+
+### 2B. Batch mode — batched analysis with synthesizer
+
+**Step 2B.1**: Split the source file list into batches of 8 files each.
+
+**Step 2B.2**: Process batches in waves of up to 3 concurrent agents. Each agent (model: haiku) receives:
+
+```
+You are a Batch Analysis agent. Analyze these source files and report findings.
+
+Files to analyze:
+[list of 8 file paths]
+
+For each file:
+1. Read the file completely.
+2. Note: purpose (1 sentence), key exports/functions, dependencies (imports), complexity (low/medium/high).
+3. Identify any issues: TODOs, error handling gaps, security concerns, dead code.
+
+Also analyze cross-file patterns within this batch:
+- Which files depend on each other?
+- Are there shared patterns or inconsistencies?
+
+Return a structured JSON report:
+{
+  "files": [{"path": "...", "purpose": "...", "exports": [...], "imports": [...], "complexity": "...", "issues": [...]}],
+  "crossFilePatterns": ["..."],
+  "issues": [{"file": "...", "type": "...", "description": "..."}]
+}
+```
+
+**Step 2B.3**: After all batches complete, dispatch one **Synthesizer agent** (model: sonnet):
+
+```
+You are a Synthesis agent. You receive batch analysis results from multiple agents that each analyzed a subset of the codebase. Your job is to produce a unified analysis report.
+
+Batch results:
+[paste all batch outputs here]
+
+Total source files analyzed: [count]
+
+Produce a unified report with these sections:
+
+## Architecture
+- Entry points and bootstrapping
+- Module boundaries and responsibilities
+- Key abstractions and data flow
+- Directory structure overview
+
+## Hotspots
+- Most complex files (by reported complexity)
+- Files with most cross-dependencies
+- Areas with clustered issues
+
+## Risks
+- All issues found across batches, deduplicated
+- Cross-cutting concerns (patterns that appear in multiple batches)
+- Inconsistencies between batches
+
+## Recommendations
+- 3-5 actionable items ranked by impact
+
+Resolve contradictions between batches (e.g., one batch calls a file "clean", another flags it).
+Keep it factual and dense — no padding.
+```
+
+---
+
+### 3. Synthesize and output
+
+Combine all agent outputs into a single structured report:
 
 ```
 ## Architecture
-[Agent 1 output]
+[Architecture findings]
 
 ## Hotspots
-[Agent 2 output]
+[Hotspot findings]
 
 ## Risks
-[Agent 3 output]
+[Risk findings]
 
 ## Recommendations
-[Derive 3-5 actionable recommendations based on the findings above:
- - Address the highest-risk hotspots first
- - Resolve critical TODOs/FIXMEs
- - Fix missing error handling in high-traffic code paths
- - Standardize naming where inconsistencies were found
- - Any architectural improvements suggested by the data flow analysis]
+[3-5 actionable recommendations based on findings above]
 ```
 
 ## Rules
 
-- Launch all 3 agents simultaneously — do not wait for one before starting the next.
+- Launch agents in parallel — do not wait for one before starting the next.
 - Each agent works independently — no shared state between them.
 - The report is output only — do not write it to a file unless the user asks.
 - Keep each section dense and factual; omit padding and filler phrases.
 - If a command fails (e.g. git not available), note it and continue with available data.
+- In batch mode: if a batch agent fails, continue with remaining batches and note the gap.
