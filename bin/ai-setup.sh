@@ -4,7 +4,7 @@
 # @onedot/ai-setup - AI infrastructure for projects
 # ==============================================================================
 # Installs Claude Code hooks, project context, and AI-curated skills
-# Usage: npx @onedot/ai-setup [--force-skills] [--audit] [--patch <pattern>]
+# Usage: npx @onedot/ai-setup [--audit] [--patch <pattern>]
 # Auto-detects updates: if .ai-setup.json exists with older version, offers update/reinstall
 # ==============================================================================
 
@@ -24,11 +24,9 @@ TPL="$SCRIPT_DIR/templates"
 
 # Parse flags
 PATCH_PATTERN=""
-FORCE_SKILLS=""
 RUN_AUDIT=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --force-skills) FORCE_SKILLS="yes"; shift ;;
     --audit) RUN_AUDIT="yes"; shift ;;
     --patch)
       if [[ $# -lt 2 ]]; then
