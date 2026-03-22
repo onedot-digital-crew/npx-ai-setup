@@ -41,7 +41,7 @@ Spec 156 covers 4 new prep scripts (build, lint, pr, changelog) — this spec co
 
 ### Phase 5: CLI Health Check at Session Start (P1)
 - [x] Step 11: Create `templates/claude/hooks/cli-health.sh` — SessionStart hook that checks if required CLI tools (rtk, defuddle) are installed and RTK hooks are active (`rtk gain` returns 0). If missing, emit one-line warning to stderr. Silent when all OK. Max 100ms.
-- [ ] Step 12: Register cli-health.sh in `templates/claude/settings.json` as SessionStart hook.
+- [x] Step 12: Register cli-health.sh in `templates/claude/settings.json` as SessionStart hook.
 
 ### Phase 6: Documentation (P1)
 - [ ] Step 13: Create `templates/docs/token-optimization.md` — developer-facing guide: all 6 layers explained, how to verify RTK is active (`rtk gain`), how to write new prep-scripts, RTK command reference for common operations.
