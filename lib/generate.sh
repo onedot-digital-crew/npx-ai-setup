@@ -473,6 +473,8 @@ EOF
   SYSTEM_SKILLS+=("vercel-labs/agent-browser@agent-browser")
   SYSTEM_SKILLS+=("vercel-labs/skills@find-skills")
   SYSTEM_SKILLS+=("microsoft/playwright-cli@playwright-cli")
+  SYSTEM_SKILLS+=("github/awesome-copilot@gh-cli")
+  SYSTEM_SKILLS+=("vercel/vercel@vercel-cli")
 
   # Add curated keyword-based skills (from detected package.json dependencies)
   if [ ${#KEYWORDS[@]} -gt 0 ]; then
