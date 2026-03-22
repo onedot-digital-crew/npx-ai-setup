@@ -8,10 +8,33 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 <!-- Entries are prepended below this line, newest first -->
 
-## [Unreleased]
+## [v2.0.0] — 2026-03-22
 
-- **Spec 155**: Script source of truth — smoke test now enforces parity for overlapping `templates/scripts/*.sh` and `.claude/scripts/*.sh`, README documents the contract, and integration covers repo-local script install
-- **Spec 151**: Remove repomix completely — removed snapshot/config/install flow, cleaned agent and hook references, and dropped leftover local snapshot artifacts
+### Breaking Changes
+- **Spec 115**: Remove all system-specific code — ai-setup is now a pure generic base layer (system config via boilerplate pull)
+- **Spec 151**: Remove repomix completely — snapshot/config/install flow removed, Claude Code native tools replace it
+- **Spec 150**: Curated-only skill installation — removed network discovery (search, popularity scraping, Haiku ranking), ~260 lines deleted
+
+### New Features
+- **Spec 134**: Versioned migration system — incremental updates via `lib/migrations/*.sh` instead of template overwrite
+- **Spec 135**: Boilerplate pull via gh CLI — fresh installs can pull system config from canonical boilerplate repos
+- **Spec 137**: Security reviewer agent — OWASP Top 10 checklist, 12 pattern table, false positives section
+- **Spec 138**: Code reviewer confidence upgrade — >80% confidence filtering, AI-generated code checks
+- **Spec 138**: Context monitor hook — PostToolUse hook warns at ≤35% (WARNING) and ≤25% (CRITICAL) context remaining
+- **Spec 139**: Assumptions surfacing in /spec — structured assumptions step with Evidence/Confidence/If-Wrong
+- **Spec 139**: Build-fix command — incremental fix loop with guard rails (max 10 iterations, max 5% change)
+- **Spec 140**: YAML frontmatter migration — all 12 agents have machine-readable frontmatter
+- **Spec 140**: Pause/resume commands — structured session handoff via `.continue-here.md`
+- **Spec 141**: Agent-browser promoted to required npm tool with auto Chrome install
+- **Spec 144**: Finishing gate in spec-review — 4-option AskUserQuestion after APPROVED verdict
+
+### Improvements
+- **Spec 154**: Compact setup installers — `_install_template_dir()` helper reduces duplication in setup.sh
+- **Spec 155**: Script source of truth — parity checks enforce templates/scripts/ as canonical source
+- Context monitor hook optimized (single-pass jq, read instead of head/tail)
+- bash 3.2 compatibility fix (declare -A replaced with case function)
+
+### Previous (pre-2.0.0)
 - **Spec 130**: Docs sync — updated README (counts, tables, hooks), WORKFLOW-GUIDE (commands, agents, hooks), CHANGELOG (specs 108–128)
 - **Spec 129**: Lean review flow with complexity gate — removed 10-metric scoring from spec-review, added staff-reviewer for high-complexity specs
 - **Spec 128**: Global developer workstation setup — `npx @onedot/ai-setup-global` installs CLI tools, global Claude settings, and API key checks
