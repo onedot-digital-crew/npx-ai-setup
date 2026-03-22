@@ -1,6 +1,6 @@
 # Spec 160: Claude Code als Multi-Agent Orchestrator
 
-**Status:** Draft
+**Status:** in-progress
 **Complexity:** Medium
 **Branch:** `feat/160-multi-agent-orchestrator`
 **Depends on:** Spec 159 (Gemini/Codex Infrastruktur)
@@ -61,14 +61,14 @@ Claude Code als zentralen Orchestrator einrichten, der Tasks gezielt an Gemini C
 ## Steps
 
 ### Step 1: CLI-Wrapper-Skripte (`templates/scripts/`)
-- [ ] `templates/scripts/delegate-gemini.sh` — Wrapper für `gemini -p` mit:
+- [x] `templates/scripts/delegate-gemini.sh` — Wrapper für `gemini -p` mit:
   - CLI-Verfügbarkeit prüfen (`command -v gemini`)
   - Timeout (default 120s, konfigurierbar via Argument)
   - Error Handling (non-zero exit → stderr message)
   - Kontext-Injection: AGENTS.md Inhalt als Prefix in den Prompt
   - Output auf stdout (für Claude Code Bash-Tool consumption)
-- [ ] `templates/scripts/delegate-codex.sh` — Wrapper für `codex -q` mit gleichem Pattern
-- [ ] Beide Skripte idempotent via `install_claude_scripts` deployen
+- [x] `templates/scripts/delegate-codex.sh` — Wrapper für `codex -q` mit gleichem Pattern
+- [x] Beide Skripte idempotent via `install_claude_scripts` deployen
 
 ### Step 2: Orchestrator-Skill (`templates/skills/orchestrate/`)
 - [ ] SKILL.md mit Trigger-Description: "use gemini for X", "use codex for X", "delegate to gemini/codex"
