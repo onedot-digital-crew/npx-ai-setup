@@ -45,7 +45,7 @@ Spec 156 covers 4 new prep scripts (build, lint, pr, changelog) — this spec co
 
 ### Phase 6: Documentation (P1)
 - [x] Step 13: Create `templates/docs/token-optimization.md` — developer-facing guide: all 6 layers explained, how to verify RTK is active (`rtk gain`), how to write new prep-scripts, RTK command reference for common operations.
-- [ ] Step 14: Mirror all template changes to `.claude/` project files.
+- [x] Step 14: Mirror all template changes to `.claude/` project files.
 
 ## Acceptance Criteria
 - [ ] `rtk init --global` runs during setup when rtk is installed
