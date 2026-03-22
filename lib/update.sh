@@ -125,13 +125,15 @@ handle_version_check() {
     esac
 
   elif [ -n "$INSTALLED_VERSION" ]; then
-    # Different version — pre-scan to show change count
-    scan_template_changes
+    # Different version — check for major version jump (fallback to smart update)
+    local inst_major pkg_major
+    inst_major="${INSTALLED_VERSION%%.*}"
+    pkg_major="${PACKAGE_VERSION%%.*}"
 
     echo ""
-    echo "🔄 Update available: v${INSTALLED_VERSION} → v${PACKAGE_VERSION} (${SCAN_TOTAL_CHANGES} file(s) changed)"
+    echo "🔄 Update available: v${INSTALLED_VERSION} → v${PACKAGE_VERSION}"
     echo ""
-    echo "   1) Update       — smart update (backup modified files, update templates)"
+    echo "   1) Update       — apply versioned migrations (incremental)"
     echo "   2) Reinstall    — delete managed files, fresh install from scratch"
     echo "   3) Skip         — exit without changes"
     echo ""
@@ -140,7 +142,23 @@ handle_version_check() {
     case "$UPDATE_CHOICE" in
       1)
         update_rc=0
-        run_smart_update || update_rc=$?
+        # Major version jump: fall back to smart update (migrations may not cover it)
+        if [ "$inst_major" != "$pkg_major" ]; then
+          echo "   ⚠️  Major version jump detected — using full template update instead of migrations."
+          scan_template_changes
+          run_smart_update || update_rc=$?
+        else
+          run_migrations "$INSTALLED_VERSION" "$PACKAGE_VERSION" || update_rc=$?
+          if [ "$update_rc" -eq 0 ]; then
+            write_metadata
+            update_gitignore
+            generate_repomix_snapshot
+            echo ""
+            echo "✅ Migration complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
+          else
+            echo "⚠️  Migration finished with errors — run again or choose Reinstall."
+          fi
+        fi
         exit "$update_rc"
         ;;
       2)
