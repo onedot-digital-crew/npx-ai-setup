@@ -17,7 +17,7 @@ The prep-script architecture saves 60-90% tokens by gathering data in shell befo
 - [x] Step 6: Create `templates/commands/lint.md` — new skill that runs lint-prep.sh, reports findings, optionally auto-fixes (eslint --fix / biome check --fix)
 - [x] Step 7: Update `templates/commands/pr.md` — add `bash .claude/scripts/pr-prep.sh` as Step 0 before build validation, use prep output for PR body generation
 - [x] Step 8: Update `templates/commands/release.md` — add `bash .claude/scripts/changelog-prep.sh` as Step 0, use grouped output for CHANGELOG generation
-- [ ] Step 9: Mirror all new scripts to `.claude/scripts/` and all command changes to `.claude/commands/`
+- [x] Step 9: Mirror all new scripts to `.claude/scripts/` and all command changes to `.claude/commands/`
 - [ ] Step 10: Test each prep script standalone: verify exit codes, green paths, and output format
 
 ## Acceptance Criteria
