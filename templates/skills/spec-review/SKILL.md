@@ -20,15 +20,27 @@ Reviews a spec in `specs/NNN-*.md` after implementation and decides whether it s
    - Otherwise inspect current staged and unstaged diffs.
    - Read the most important changed files fully before judging.
 
-5. **Review against the spec**:
-   - Verify checked steps match reality
-   - Verify acceptance criteria are genuinely satisfied
-   - Flag scope creep against Out of Scope
+5. **Review against the spec** using the 3-check verification structure:
+
+   **(A) Completeness** — nothing was skipped:
+   - All steps are marked `[x]` and match reality in the codebase
+   - All files listed under "Files to Modify" were actually modified
+   - No TODOs, placeholders, or stub implementations remain
+   - Acceptance criteria checkboxes are all marked `[x]`
+
+   **(B) Correctness** — the implementation is right:
+   - Code matches every acceptance criterion (Truths / Artifacts / Key Links)
+   - No regressions introduced in existing functionality
+   - For **Truths**: run the described command and confirm the output matches
+   - For **Artifacts**: confirm the file exists with real implementation (not a stub)
+   - For **Key Links**: open the source file and confirm the import or reference is present
    - Check `.agents/context/CONVENTIONS.md` for global quality gates if present
-   - For structured acceptance criteria (Truths / Artifacts / Key Links), verify each category mechanically:
-     - **Truths**: Run the described command or check and confirm the output matches the stated behavior.
-     - **Artifacts**: Confirm the file exists, has real implementation (not a placeholder or stub), and meets any minimum line count specified.
-     - **Key Links**: Open the source file and confirm the stated import or reference is actually present.
+
+   **(C) Coherence** — the change makes sense as a whole:
+   - Changes are logically consistent with each other and the stated Goal
+   - Edge cases are handled or explicitly excluded in Out of Scope
+   - No dead code, unused variables, or leftover debug statements introduced
+   - Scope creep is flagged against the Out of Scope section
 
 6. **Choose a verdict**:
    - `APPROVED`: status becomes `completed`, move spec to `specs/completed/`

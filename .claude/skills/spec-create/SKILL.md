@@ -42,8 +42,18 @@ Creates a spec file in `specs/NNN-title.md` for an approved task before coding b
 - [ ] Step 2: ...
 
 ## Acceptance Criteria
-- [ ] [Observable, testable outcome]
-- [ ] ...
+
+### Truths
+- [ ] "[Observable, testable outcome as a quoted statement]"
+
+### Artifacts
+- [ ] `path/to/file` — what it contains or does
+
+<!-- ### Scenarios (optional)
+Use only for user-facing behavior (UI features, API endpoints, user workflows).
+Format: WHEN <trigger> THEN <outcome> [AND <additional outcome>]
+- [ ] WHEN user does X THEN system responds Y
+-->
 
 ## Files to Modify
 - `path/to/file.sh` — what changes

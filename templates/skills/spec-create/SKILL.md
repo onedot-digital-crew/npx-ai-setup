@@ -30,9 +30,12 @@ Creates a spec file in `specs/NNN-title.md` for an approved task before coding b
    - Goal
    - Context
    - Steps
-   - Acceptance Criteria
+   - Acceptance Criteria (categories: Truths, Artifacts, and optionally Scenarios)
    - Files to Modify
    - Out of Scope
+
+   **Scenarios (optional AC category):** Use WHEN/THEN/AND format only when behavior is user-facing
+   (UI features, API endpoints, user workflows). Skip for internal changes or config-only tasks.
 
 ## Rules
 - Steps must be atomic — one file or system per step
