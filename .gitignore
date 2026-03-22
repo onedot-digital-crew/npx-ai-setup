@@ -6,7 +6,6 @@ node_modules/
 .ai-setup.json
 .ai-setup-backup/
 .agents/context/.state
-.agents/repomix-snapshot.xml
 
 .idea
 .claude/worktrees/

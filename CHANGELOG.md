@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 155**: Script source of truth — smoke test now enforces parity for overlapping `templates/scripts/*.sh` and `.claude/scripts/*.sh`, README documents the contract, and integration covers repo-local script install
+- **Spec 151**: Remove repomix completely — removed snapshot/config/install flow, cleaned agent and hook references, and dropped leftover local snapshot artifacts
 - **Spec 130**: Docs sync — updated README (counts, tables, hooks), WORKFLOW-GUIDE (commands, agents, hooks), CHANGELOG (specs 108–128)
 - **Spec 129**: Lean review flow with complexity gate — removed 10-metric scoring from spec-review, added staff-reviewer for high-complexity specs
 - **Spec 128**: Global developer workstation setup — `npx @onedot/ai-setup-global` installs CLI tools, global Claude settings, and API key checks

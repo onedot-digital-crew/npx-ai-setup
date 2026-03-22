@@ -1,6 +1,6 @@
 #!/bin/bash
 # Compatibility layers and config file installation
-# Handles: OpenCode, Copilot, claudeignore, repomix, statusline
+# Handles: OpenCode, Copilot, claudeignore, statusline
 # Requires: core.sh ($TPL), setup.sh (_install_or_update_file)
 
 # Install all GitHub templates (copilot instructions + workflows)
@@ -143,98 +143,9 @@ install_claudeignore() {
 
 }
 
-# Install repomix.config.json for codebase snapshot configuration
-install_repomix_config() {
-  if [ ! -f repomix.config.json ]; then
-    cp "$TPL/repomix.config.json" repomix.config.json
-  else
-    echo "  repomix.config.json already exists, skipping."
-  fi
-}
-
 # Install claude-statusline globally via npx.
 install_statusline_project() {
   echo "  Installing statusline..."
   npx @kamranahmedse/claude-statusline
   echo "  Statusline installed -> @kamranahmedse/claude-statusline"
-}
-
-# Generate repomix codebase snapshot in background (once, if not already present)
-# Generate .repomixignore with base patterns.
-# Repomix reads .repomixignore natively (like .gitignore). Machine-local artifact.
-install_repomixignore() {
-  [ -f .repomixignore ] && return 0
-
-  cat > .repomixignore << 'REPOMIX_IGNORE_EOF'
-# Base patterns — always excluded from repomix snapshots
-node_modules/
-vendor/
-dist/
-build/
-coverage/
-.git/
-*.lock
-*.lockb
-*.map
-*.min.js
-*.min.css
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-*.woff
-*.woff2
-*.ttf
-*.pdf
-REPOMIX_IGNORE_EOF
-
-  echo "  📄 .repomixignore generated"
-}
-
-generate_repomix_snapshot() {
-  if [ -f ".agents/repomix-snapshot.xml" ]; then
-    return 0
-  fi
-  mkdir -p .agents
-  echo "📸 Generating codebase snapshot (repomix)..."
-
-  local _repomix_timeout=""
-  command -v timeout &>/dev/null && _repomix_timeout="timeout 120"
-  command -v gtimeout &>/dev/null && _repomix_timeout="gtimeout 120"
-
-  # Use repomix.config.json if present (user-customizable), otherwise fall back to defaults
-  if [ -f "repomix.config.json" ]; then
-    $_repomix_timeout npx -y repomix >/dev/null 2>&1 &
-  else
-    $_repomix_timeout npx -y repomix --compress --style xml \
-      --remove-comments --remove-empty-lines \
-      --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
-      --output .agents/repomix-snapshot.xml >/dev/null 2>&1 &
-  fi
-  REPOMIX_PID=$!
-
-  SPIN='-\|/'
-  i=0
-  while kill -0 $REPOMIX_PID 2>/dev/null; do
-    i=$(( (i+1) % 4 ))
-    printf "\r  ${SPIN:$i:1} Analyzing codebase..."
-    sleep 0.2
-  done
-
-  REPOMIX_EXIT=0
-  wait $REPOMIX_PID 2>/dev/null || REPOMIX_EXIT=$?
-
-  if [ $REPOMIX_EXIT -eq 0 ] && [ -f ".agents/repomix-snapshot.xml" ]; then
-    LINES=$(wc -l < .agents/repomix-snapshot.xml 2>/dev/null || echo "?")
-    printf "\r  ✅ Snapshot written to .agents/repomix-snapshot.xml (%s lines)%*s\n" "$LINES" 10 ""
-    # Write snapshot state for freshness detection
-    if [ -f ".agents/context/.state" ]; then
-      echo "SNAPSHOT_HASH=$(cksum .agents/repomix-snapshot.xml 2>/dev/null | cut -d' ' -f1,2)" >> .agents/context/.state
-      echo "SNAPSHOT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> .agents/context/.state
-    fi
-  else
-    printf "\r  ⏭️  repomix unavailable, skipping snapshot%*s\n" 20 ""
-    rm -f .agents/repomix-snapshot.xml
-  fi
 }

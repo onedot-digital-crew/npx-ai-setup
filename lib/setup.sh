@@ -245,7 +245,8 @@ install_commands() {
   _install_template_dir "$TPL/commands" ".claude/commands" "" "" >/dev/null
 }
 
-# Install Claude scripts (pure Bash, zero-token alternatives to Claude-driven commands)
+# Install tracked repo-local Claude scripts by copying canonical templates/scripts/*.sh
+# into .claude/scripts/ during setup.
 install_claude_scripts() {
   if [ ! -d "$TPL/scripts" ]; then return 0; fi
   echo "📜 Installing Claude scripts..."
@@ -353,7 +354,7 @@ setup_repo_group_context() {
 
 # Update .gitignore with AI setup entries
 # Team-vs-local boundary:
-#   GITIGNORED (machine-local): .state, repomix snapshot, skill cache, memory, dump outputs
+#   GITIGNORED (machine-local): .state, skill cache, memory, dump outputs
 #   COMMITTED  (team-shared):   .agents/context/*.md (STACK, ARCHITECTURE, CONVENTIONS, PATTERNS, AUDIT)
 #   Never add .agents/context/*.md files to gitignore — they are shared team knowledge.
 update_gitignore() {
@@ -367,26 +368,22 @@ update_gitignore() {
       echo ".ai-setup-backup/" >> .gitignore
       echo ".agents/context/.state" >> .gitignore
       echo ".agents/memory/" >> .gitignore
-      echo ".agents/repomix-snapshot.xml" >> .gitignore
       echo ".agents/.skill-cache.json" >> .gitignore
       echo "scripts/storyblok-dump.json" >> .gitignore
       echo "CLAUDE.local.md" >> .gitignore
       echo ".codex/skills" >> .gitignore
       echo ".opencode/skills" >> .gitignore
-      echo ".repomixignore" >> .gitignore
     else
       # Add new entries if missing from existing block
       grep -q "\.ai-setup\.json" .gitignore 2>/dev/null || echo ".ai-setup.json" >> .gitignore
       grep -q "\.ai-setup-backup" .gitignore 2>/dev/null || echo ".ai-setup-backup/" >> .gitignore
       grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
       grep -q "\.agents/memory" .gitignore 2>/dev/null || echo ".agents/memory/" >> .gitignore
-      grep -q "repomix-snapshot" .gitignore 2>/dev/null || echo ".agents/repomix-snapshot.xml" >> .gitignore
       grep -q "skill-cache" .gitignore 2>/dev/null || echo ".agents/.skill-cache.json" >> .gitignore
       grep -q "storyblok-dump\.json" .gitignore 2>/dev/null || echo "scripts/storyblok-dump.json" >> .gitignore
       grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
       grep -q "\.codex/skills" .gitignore 2>/dev/null || echo ".codex/skills" >> .gitignore
       grep -q "\.opencode/skills" .gitignore 2>/dev/null || echo ".opencode/skills" >> .gitignore
-      grep -q "\.repomixignore" .gitignore 2>/dev/null || echo ".repomixignore" >> .gitignore
     fi
   else
     echo "# Claude Code / AI Setup" > .gitignore
@@ -394,13 +391,11 @@ update_gitignore() {
     echo ".ai-setup.json" >> .gitignore
     echo ".ai-setup-backup/" >> .gitignore
     echo ".agents/context/.state" >> .gitignore
-    echo ".agents/repomix-snapshot.xml" >> .gitignore
     echo ".agents/.skill-cache.json" >> .gitignore
     echo "scripts/storyblok-dump.json" >> .gitignore
     echo "CLAUDE.local.md" >> .gitignore
     echo ".codex/skills" >> .gitignore
     echo ".opencode/skills" >> .gitignore
-    echo ".repomixignore" >> .gitignore
   fi
 
   # AGENTS.md should be tracked like CLAUDE.md (never ignored)

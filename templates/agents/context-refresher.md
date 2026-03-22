@@ -67,23 +67,8 @@ echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> .ag
 echo "GIT_HASH=$(git rev-parse HEAD 2>/dev/null)" >> .agents/context/.state
 ```
 
-6. **Generate repomix snapshot** (optional, best-effort): Run:
-```bash
-_t=""; command -v timeout &>/dev/null && _t="timeout 120"; command -v gtimeout &>/dev/null && _t="gtimeout 120"
-if [ -f "repomix.config.json" ]; then
-  $_t npx -y repomix 2>/dev/null
-else
-  $_t npx -y repomix --compress --style xml \
-    --remove-comments --remove-empty-lines \
-    --ignore "node_modules,dist,.git,.next,.nuxt,coverage,.turbo,*.lock,*.lockb" \
-    --output .agents/repomix-snapshot.xml 2>/dev/null
-fi
-```
-If this fails or times out, skip silently — the 3 context files are the primary output.
-
 ## Rules
 - Keep each file under 80 lines — terse and factual, no padding.
 - Write only what you observed, not what you assumed.
 - Overwrite existing files completely — do not append.
 - Do NOT read `.env` files.
-- The repomix snapshot is optional — never block or fail because of it.

@@ -1,6 +1,6 @@
 ---
 name: project-auditor
-description: Analyzes an existing codebase and produces PATTERNS.md and AUDIT.md in .agents/context/. Reads efficiently — context files first, then snapshot, then spot-reads. Asks before creating specs.
+description: Analyzes an existing codebase and produces PATTERNS.md and AUDIT.md in .agents/context/. Reads efficiently — context files first, then targeted spot-reads. Asks before creating specs.
 tools: Read, Write, Bash, Glob, Grep
 model: sonnet
 max_turns: 20
@@ -28,15 +28,12 @@ You are a project onboarding agent. Your job is to understand an existing codeba
    - `.agents/context/ARCHITECTURE.md`
    - `.agents/context/CONVENTIONS.md`
 
-2. **Read the repomix snapshot** (if it exists):
-   - `.agents/repomix-snapshot.xml` — signatures only, no need to read every body
-
-3. **Spot-reads** (3-5 files max):
+2. **Spot-reads** (3-5 files max):
    - `package.json` (dependencies, scripts)
    - Main entry point (inferred from ARCHITECTURE.md or package.json)
    - 1-2 representative service or component files
 
-4. **Produce findings** from what you have read. Do NOT read more files unless a specific pattern requires verification.
+3. **Produce findings** from what you have read. Do NOT read more files unless a specific pattern requires verification.
 
 ## Output
 

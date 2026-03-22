@@ -1,6 +1,6 @@
 # Spec: Remove repomix completely
 
-> **Spec ID**: 151 | **Created**: 2026-03-22 | **Status**: draft | **Branch**: —
+> **Spec ID**: 151 | **Created**: 2026-03-22 | **Status**: completed | **Branch**: —
 
 ## Goal
 Remove all repomix integration — snapshot generation, config templates, CLI tool requirement, freshness hooks, and agent references.
@@ -14,19 +14,19 @@ Repomix packs the entire repo into one XML file for LLM context. Claude Code has
 - repomix is listed as `required` in CLI tools — Evidence: `lib/cli-tools.sh:15` | Confidence: High | If Wrong: already optional
 
 ## Steps
-- [ ] Step 1: Remove `generate_repomix_snapshot()`, `install_repomix_config()`, `install_repomixignore()` from `lib/setup-compat.sh`
-- [ ] Step 2: Remove repomix calls from `bin/ai-setup.sh` (lines ~108-110) and `lib/update.sh` (lines ~155, ~437)
-- [ ] Step 3: Remove repomix from `lib/cli-tools.sh` CLI_TOOL_REGISTRY (required → delete entry)
-- [ ] Step 4: Remove `templates/repomix.config.json` and `repomix.config.json` (root)
-- [ ] Step 5: Remove repomix references from agents (`context-refresher.md`, `project-auditor.md`) and `context-freshness.sh` hook snapshot section
-- [ ] Step 6: Remove `.agents/repomix-snapshot.xml` and `.repomixignore` from gitignore generation in `lib/setup.sh`
-- [ ] Step 7: Run `grep -r repomix lib/ bin/ templates/` to catch any remaining references. Verify `bash -n` on all modified files.
+- [x] Step 1: Remove `generate_repomix_snapshot()`, `install_repomix_config()`, `install_repomixignore()` from `lib/setup-compat.sh`
+- [x] Step 2: Remove repomix calls from `bin/ai-setup.sh` (lines ~108-110) and `lib/update.sh` (lines ~155, ~437)
+- [x] Step 3: Remove repomix from `lib/cli-tools.sh` CLI_TOOL_REGISTRY (required → delete entry)
+- [x] Step 4: Remove `templates/repomix.config.json` and `repomix.config.json` (root)
+- [x] Step 5: Remove repomix references from agents (`context-refresher.md`, `project-auditor.md`) and `context-freshness.sh` hook snapshot section
+- [x] Step 6: Remove `.agents/repomix-snapshot.xml` and `.repomixignore` from gitignore generation in `lib/setup.sh`
+- [x] Step 7: Run `grep -r repomix lib/ bin/ templates/` to catch any remaining references. Verify `bash -n` on all modified files.
 
 ## Acceptance Criteria
-- [ ] Zero references to repomix in `lib/`, `bin/`, `templates/` (except specs/completed/)
-- [ ] `bin/ai-setup.sh` runs without repomix installed
-- [ ] No snapshot generation during fresh install or update
-- [ ] Agents still function without snapshot (graceful skip)
+- [x] Zero references to repomix in `lib/`, `bin/`, `templates/` (except specs/completed/)
+- [x] `bin/ai-setup.sh` runs without repomix installed
+- [x] No snapshot generation during fresh install or update
+- [x] Agents still function without snapshot (graceful skip)
 
 ## Files to Modify
 - `lib/setup-compat.sh` — remove 3 functions (~95 lines)

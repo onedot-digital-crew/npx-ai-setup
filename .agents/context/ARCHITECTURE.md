@@ -9,7 +9,6 @@ bin/            # Entry point: ai-setup.sh (main script)
 lib/            # Modules: core, setup, update, generate, tui, skills, detect, process, plugins
 templates/      # Files copied into target projects
   CLAUDE.md     # Base Claude project instructions template
-  repomix.config.json  # Repomix snapshot config template
   claude/       # hooks/, settings.json, rules/
   commands/     # Slash command templates
   agents/       # Subagent templates (context-refresher, code-reviewer, etc.)
@@ -33,7 +32,7 @@ npx @onedot/ai-setup [--system X] [--with-*]
   └─ Fresh install:
        Phase 1: Scaffolding (bash only, no AI)
          - CLAUDE.md, settings.json, hooks, commands, agents, specs
-         - repomix.config.json, mcp.json (optional), plugins
+         - mcp.json (optional), plugins
        Phase 2: Auto-Init (optional, requires claude CLI)
          - Parallel: CLAUDE.md generation + context file generation
          - Sequential after: skill curation (detect → search → rank → install)
@@ -55,7 +54,6 @@ Step 3 (sequential):
 
 ## Key Patterns
 - **Template copy model**: files copied verbatim, no code generation for deterministic parts
-- **Config-aware repomix**: uses `repomix.config.json` if present, inline flags as fallback
 - **Update tracking**: `.ai-setup.json` stores checksums; user-modified files backed up before update
 - **Hooks**: circuit-breaker (edit-loop protection), context-freshness (stale context detection)
 - **Idempotent installs**: all steps check before overwriting; skip if already installed

@@ -27,7 +27,6 @@ Both files are committed (team-shared) — Claude reads them automatically in fu
 
 2. The agent reads in this order:
    - `.agents/context/` files (STACK, ARCHITECTURE, CONVENTIONS)
-   - `.agents/repomix-snapshot.xml` for structural overview
    - 3-5 spot-reads of representative files
 
 3. After producing PATTERNS.md and AUDIT.md, the agent asks whether to create specs for the top findings.

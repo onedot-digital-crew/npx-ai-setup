@@ -12,7 +12,6 @@
 CLI_TOOL_REGISTRY=(
   "rtk:npm:@onedot/rtk:required:Rust Token Killer — token-optimized Claude Code proxy"
   "defuddle:npm:defuddle:required:Web content parser (strips noise, 80% token savings)"
-  "repomix:npm:repomix:required:Pack repo into AI-readable format for Claude context"
   "codex:npm:@openai/codex:optional:OpenAI Codex CLI (needs OPENAI_API_KEY)"
   "gemini:npm:@google/gemini-cli:optional:Google Gemini CLI (needs GEMINI_API_KEY)"
   "agent-browser:npm:agent-browser:required:Persistent browser daemon for Claude automation"

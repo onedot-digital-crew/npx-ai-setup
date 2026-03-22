@@ -101,15 +101,10 @@ install_claude_scripts
 install_spec_skills
 install_agents
 select_boilerplate_system
-detect_workspaces
-generate_workspace_repo_group
 echo "📋 Writing installation metadata..."
 write_metadata
 update_gitignore
 install_claudeignore
-install_repomix_config
-install_repomixignore
-generate_repomix_snapshot
 
 # Plugins & extensions
 echo ""

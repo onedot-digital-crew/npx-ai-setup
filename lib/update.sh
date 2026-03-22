@@ -152,7 +152,6 @@ handle_version_check() {
           if [ "$update_rc" -eq 0 ]; then
             write_metadata
             update_gitignore
-            generate_repomix_snapshot
             echo ""
             echo "✅ Migration complete! (v${INSTALLED_VERSION} → v${PACKAGE_VERSION})"
           else
@@ -434,7 +433,6 @@ run_smart_update() {
   fi
 
   update_gitignore
-  generate_repomix_snapshot
 
   echo ""
   local _version_info="v${PACKAGE_VERSION}"

@@ -200,21 +200,6 @@ Claude will work, try to exit, get intercepted by the Stop hook, and re-start wi
 
 ---
 
-### repomix — Full Codebase Snapshot
-
-Generates a compressed, token-efficient snapshot of the entire codebase. Use before large refactors or architecture reviews.
-
-```bash
-npx repomix --compress --style xml \
-  --remove-comments --remove-empty-lines \
-  --ignore "node_modules,dist,.git,.next,.nuxt,coverage,*.lock" \
-  --output .agents/repomix-snapshot.xml
-```
-
-Output is written to `.agents/repomix-snapshot.xml` (gitignored).
-
----
-
 ### defuddle + markdown.new — Token-Efficient Web Fetching
 
 Reading web pages with WebFetch returns raw HTML — ~5× more tokens than needed. Two better options:
