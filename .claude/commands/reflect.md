@@ -26,6 +26,7 @@ Review the conversation history in your context. Look for four categories of sig
 - Codebase gotchas ("this file actually controls X", "Y depends on Z")
 - Structural patterns ("all routes go through middleware X", "state lives in Y")
 - Integration boundaries ("service A talks to B via C")
+- After detecting architectural signals, also check if `decisions.md` exists in the project root. If yes, append new architectural decisions as rows using the next sequential D-number. Only append decisions not already present in the register.
 
 **STACK signals** (new deps, version decisions, tool choices discovered at runtime):
 - New dependency added or removed during session

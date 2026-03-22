@@ -2,7 +2,7 @@
 model: sonnet
 mode: plan
 argument-hint: "[spec number]"
-allowed-tools: Read, Glob, Grep, AskUserQuestion
+allowed-tools: Read, Glob, Grep, AskUserQuestion, Bash
 ---
 
 Validates spec $ARGUMENTS against 10 quality metrics before execution. Run before `/spec-work` to catch weak specs early.
@@ -12,13 +12,30 @@ Validates spec $ARGUMENTS against 10 quality metrics before execution. Run befor
 ### 1. Find the spec
 If `$ARGUMENTS` is a number (e.g. `011`), open `specs/011-*.md`. If it's a filename, open that directly. If empty, list all draft specs in `specs/` and ask which to validate.
 
-### 2. Validate status
+### 2. Run prep script
+
+Run the prep script to pre-parse the spec structure before reading it yourself:
+
+```bash
+bash .claude/scripts/spec-validate-prep.sh "$ARGUMENTS"
+```
+
+Use the prep output to populate the scoring table in step 5 — it provides:
+- Which required sections are present or missing
+- Step count and completion state
+- Acceptance criteria count
+- Files to Modify count
+- Structural score (0–100)
+
+If the script is not present, proceed without it (read the spec file directly).
+
+### 3. Validate status
 Only validate specs with `Status: draft`. If `in-progress`, `in-review`, or `completed` → report status and stop.
 
-### 3. Load context
+### 4. Load context
 Read `.agents/context/CONVENTIONS.md` if it exists — use it to calibrate expectations for test coverage, code patterns, and integration standards.
 
-### 4. Score the spec
+### 5. Score the spec
 
 Score each criterion from 0–10. Be strict — a criterion that doesn't answer the question scores ≤5. Core criteria carry 12% weight each (6 criteria × 12% = 72%), Secondary criteria carry 7% weight each (4 criteria × 7% = 28% — total 100%).
 
@@ -37,7 +54,7 @@ Score each criterion from 0–10. Be strict — a criterion that doesn't answer 
 
 Note: Weights sum to 100% (6×12% + 4×7% = 72% + 28% = 100%).
 
-### 5. Present results
+### 6. Present results
 
 Display a score breakdown table showing raw score, weight, and weighted score per criterion, then total and letter grade:
 
@@ -62,7 +79,7 @@ Spec Validation — NNN: [title]
 
 Calculate weighted score per criterion: `raw × weight`. Sum all weighted scores for the total (0–100).
 
-### 6. Verdict
+### 7. Verdict
 
 Assign letter grade based on total weighted score:
 

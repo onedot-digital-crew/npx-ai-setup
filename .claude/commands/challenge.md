@@ -28,7 +28,7 @@ Is this actually needed? Challenge it hard:
 - How much ongoing maintenance does this add?
 - Does it increase the surface area of the tool (more flags, more config, more docs)?
 - What breaks if this feature has a bug?
-- Does it add complexity that slows down the "one command" promise?
+- Does it add complexity that slows down the core promise of this project?
 
 ### Phase 5 — Complexity & Risks
 - How many files need to change?

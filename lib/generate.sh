@@ -475,6 +475,8 @@ EOF
   SYSTEM_SKILLS+=("microsoft/playwright-cli@playwright-cli")
   SYSTEM_SKILLS+=("github/awesome-copilot@gh-cli")
   SYSTEM_SKILLS+=("vercel/vercel@vercel-cli")
+  SYSTEM_SKILLS+=("anthropics/skills@frontend-design")
+  SYSTEM_SKILLS+=("anthropics/skills@webapp-testing")
 
   # Add curated keyword-based skills (from detected package.json dependencies)
   if [ ${#KEYWORDS[@]} -gt 0 ]; then

@@ -61,7 +61,13 @@ Will review customized templates, optionally regenerate AI context, and back up 
 Use AskUserQuestion: "Proceed with update?" Options: "Yes, update now" / "No, cancel"
 If user cancels, stop.
 
-### Step 6: Run update
+### Step 6: Capture pre-update SHA
+
+```bash
+git -C "${CLAUDE_PROJECT_DIR:-.}" rev-parse HEAD 2>/dev/null > /tmp/ai-setup-pre-sha.txt || true
+```
+
+### Step 7: Run update
 
 ```bash
 npx github:onedot-digital-crew/npx-ai-setup
@@ -69,14 +75,31 @@ npx github:onedot-digital-crew/npx-ai-setup
 
 This launches the interactive update flow.
 
-### Step 7: Clear update cache
+### Step 8: Clear update cache
 
 ```bash
 rm -f /tmp/ai-setup-update-*.txt /tmp/ai-setup-cli-latest-version.txt
 ```
 
-### Step 8: Display result
+### Step 9: Show changed files
+
+Read the saved SHA and diff against it to show exactly what changed:
+
+```bash
+PRE_SHA=$(cat /tmp/ai-setup-pre-sha.txt 2>/dev/null | tr -cd 'a-f0-9'); rm -f /tmp/ai-setup-pre-sha.txt
+[ -n "$PRE_SHA" ] && git -C "${CLAUDE_PROJECT_DIR:-.}" diff --name-status "$PRE_SHA" HEAD -- .claude/ templates/ CLAUDE.md 2>/dev/null | head -30 || echo "(no git history available)"
+```
+
+Display the result as a concise summary:
 ```
 ai-setup updated: vX.Y.Z -> vA.B.C
+
+Changed files:
+  M .claude/settings.json
+  A .claude/hooks/new-hook.sh
+  ...
+
 Restart Claude Code to pick up new hooks and settings.
 ```
+
+If no files changed (update was a no-op or failed silently), say so explicitly.

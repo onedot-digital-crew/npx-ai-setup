@@ -6,6 +6,13 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 
 Bumps version, updates CHANGELOG, commits, and tags the release. Use when shipping a new version.
 
+## Pre-flight
+
+0. **Pre-flight validation** (run before anything else)
+   - Run `bash scripts/validate-release.sh` from the repo root (if it exists)
+   - If it exits non-zero, stop and fix the reported issues before continuing
+   - The script checks: version/CHANGELOG consistency, clean working tree, template integrity
+
 ## Process
 
 1. **Read current state**
@@ -37,7 +44,6 @@ Bumps version, updates CHANGELOG, commits, and tags the release. Use when shippi
      ```
      ## [Unreleased]
 
-
      ## [vX.Y.Z] — YYYY-MM-DD
      <previous entries>
      ```
@@ -48,8 +54,6 @@ Bumps version, updates CHANGELOG, commits, and tags the release. Use when shippi
    - Commit: `git commit -m "release: vX.Y.Z"`
    - Tag: `git tag vX.Y.Z`
    - Report: "Tagged vX.Y.Z. Run `git push && git push --tags` when ready."
-   - AI Setup installs `.github/workflows/release-from-changelog.yml` by default: pushing `vX.Y.Z` auto-creates/updates the GitHub Release body from the matching `CHANGELOG.md` section (`## [vX.Y.Z]`), so Slack release notifications include the changelog text.
-   - Fallback safety: if no push-triggered release run appears within ~60 seconds after pushing the tag, run `gh workflow run release-from-changelog.yml -f tag=vX.Y.Z`.
 
 ## Rules
 - Never push automatically — always leave push to the user
