@@ -1,6 +1,6 @@
 # Spec: Comprehensive Token Optimization — Close All 6-Layer Gaps
 
-> **Spec ID**: 157 | **Created**: 2026-03-22 | **Status**: in-progress | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 157 | **Created**: 2026-03-22 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Close all identified token-saving gaps across the 6-layer architecture: transparent RTK activation, defuddle auto-invoke, RTK-enhanced prep-scripts, green-path hardening, and CLI-tool health checks — targeting 40-60% total token reduction for typical dev sessions.
