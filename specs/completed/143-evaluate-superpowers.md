@@ -3,7 +3,7 @@
 > **Source**: https://github.com/obra/superpowers
 > **Erstellt**: 2026-03-22
 > **Zweck**: Evaluierung welche Patterns aus obra/superpowers adaptierbar sind
-> **Status**: Completed
+> **Status**: completed
 
 ---
 

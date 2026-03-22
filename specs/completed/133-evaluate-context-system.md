@@ -1,6 +1,6 @@
 # Brainstorm: Context-System Evaluation & Optimierung
 
-> **Spec ID**: 133 | **Created**: 2026-03-21 | **Status**: brainstorm | **Branch**: —
+> **Spec ID**: 133 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 > **Zweck**: Vollständige Evaluierung des Context-Generierung-Systems — ist der aktuelle Ansatz sinnvoll, wo sind Schwächen, was kann repomix besser?
 
 ---
@@ -162,10 +162,10 @@ Selbst NACH Excludes von `specs/completed/`, `templates/skills/`, `templates/com
 | `SUPERPOWERS_SCRAPE.md` | 245 KB | Keine — temporärer Scrape |
 | `.claude/superpowers-scrape/` | 180+ KB | Keine — Scrape-Artefakte |
 | `CHANGELOG.md` | 25 KB | Minimal — Versions-History |
-| `specs/brainstorms/` | 26+ KB | Keine — Brainstorm-Docs |
+| `specs/completeds/` | 26+ KB | Keine — Brainstorm-Docs |
 | `specs/1xx-evaluate-*.md` | 37+ KB | Keine — Evaluation-Docs |
 
-**Zusätzliche Excludes nötig**: `SUPERPOWERS_SCRAPE.md`, `.claude/superpowers-scrape/`, `CHANGELOG.md`, `specs/brainstorms/`, `specs/*evaluate*`
+**Zusätzliche Excludes nötig**: `SUPERPOWERS_SCRAPE.md`, `.claude/superpowers-scrape/`, `CHANGELOG.md`, `specs/completeds/`, `specs/*evaluate*`
 
 **Nach allen Excludes**: Geschätzt ~400-500 KB raw → mit Repomix-Kompression (~50-60%) → **~200-250 KB Lean-Snapshot**. Mit `topFilesLength: 30` nochmal deutlich weniger (~80-120 KB).
 

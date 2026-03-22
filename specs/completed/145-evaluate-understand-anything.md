@@ -3,7 +3,7 @@
 > **Source**: https://github.com/Lum1104/Understand-Anything
 > **Erstellt**: 2026-03-22
 > **Zweck**: Evaluierung welche Patterns aus dem Knowledge-Graph-Plugin adaptierbar sind
-> **Status**: Complete
+> **Status**: completed
 
 ---
 

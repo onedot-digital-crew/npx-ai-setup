@@ -19,19 +19,15 @@ SESSION_ID=$(echo "$SESSION_ID" | tr -cd 'a-zA-Z0-9_-')
 BRIDGE_FILE="/tmp/claude-ctx-${SESSION_ID}.json"
 [ -f "$BRIDGE_FILE" ] || exit 0
 
-# Read bridge file
-BRIDGE=$(cat "$BRIDGE_FILE" 2>/dev/null) || exit 0
-[ -z "$BRIDGE" ] && exit 0
+# Single-pass: extract both fields from bridge file at once
+read -r TS REMAINING < <(jq -r '[(.timestamp // 0), (.remaining_percentage // 100)] | @tsv' "$BRIDGE_FILE" 2>/dev/null) || exit 0
+case "$TS" in ''|null|*[!0-9]*) TS=0 ;; esac
+case "$REMAINING" in ''|null|*[!0-9]*) exit 0 ;; esac
 
 # Check staleness (>60s old = ignore)
-TS=$(echo "$BRIDGE" | jq -r '.timestamp // 0' 2>/dev/null)
-case "$TS" in ''|null|*[!0-9]*) TS=0 ;; esac
 NOW=$(date +%s)
 AGE=$(( NOW - TS ))
 [ "$AGE" -gt 60 ] && exit 0
-
-REMAINING=$(echo "$BRIDGE" | jq -r '.remaining_percentage // 100' 2>/dev/null)
-case "$REMAINING" in ''|null|*[!0-9]*) exit 0 ;; esac
 
 # Determine severity
 SEVERITY=""
@@ -48,8 +44,7 @@ COUNTER_FILE="/tmp/claude-ctx-warn-${SESSION_ID}"
 COUNTER=0
 LAST_SEVERITY=""
 if [ -f "$COUNTER_FILE" ]; then
-  COUNTER=$(head -1 "$COUNTER_FILE" 2>/dev/null || echo 0)
-  LAST_SEVERITY=$(tail -1 "$COUNTER_FILE" 2>/dev/null || echo "")
+  { read -r COUNTER; read -r LAST_SEVERITY; } < "$COUNTER_FILE" 2>/dev/null || true
   case "$COUNTER" in ''|null|*[!0-9]*) COUNTER=0 ;; esac
 fi
 
