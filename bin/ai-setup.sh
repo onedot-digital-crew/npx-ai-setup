@@ -120,6 +120,9 @@ install_official_plugins
 install_context7
 show_plugin_summary
 
+# Global skills (stack-specific skills come from boilerplate or /find-skills)
+run_skill_installation
+
 # OpenCode compatibility (generates opencode.json from .mcp.json)
 generate_opencode_config
 

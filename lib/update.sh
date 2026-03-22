@@ -101,6 +101,7 @@ handle_version_check() {
         regen_ok=0
         if command -v claude &>/dev/null; then
           if ask_regen_parts; then
+            [ "${REGEN_SKILLS:-no}" = "yes" ] && run_skill_installation
             run_generation || regen_ok=$?
             write_metadata
             echo ""
@@ -415,6 +416,7 @@ run_smart_update() {
       # Use granular selector instead of binary y/N (Steps 3-4)
       if ask_regen_parts; then
         regen_ok=0
+        [ "${REGEN_SKILLS:-no}" = "yes" ] && run_skill_installation
         run_generation || regen_ok=$?
         write_metadata
         echo ""
