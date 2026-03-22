@@ -8,6 +8,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 <!-- Entries are prepended below this line, newest first -->
 
+## [Unreleased]
+
+- **Spec 159**: Gemini & Codex minimal integration — optional config templates, skills symlinks, and AGENTS.md as multi-tool workflow router
+
 ## [v2.0.0] — 2026-03-22
 
 ### Breaking Changes

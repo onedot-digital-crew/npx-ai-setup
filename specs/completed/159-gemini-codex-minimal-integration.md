@@ -1,6 +1,6 @@
 # Spec 159: Gemini & Codex — Minimal Integration
 
-**Status:** in-progress
+**Status:** completed
 **Complexity:** Medium (2–3 files Shell, 2 Templates)
 **Branch:** `feat/159-gemini-codex-integration`
 
@@ -53,12 +53,12 @@ Gemini CLI und Codex CLI als optionale, gleichwertige Coding-Agents neben Claude
 
 ## Acceptance Criteria
 
-- [ ] `npx @onedot/ai-setup` erstellt `.gemini/settings.json` + `.gemini/agents` Symlink wenn `gemini` installiert
-- [ ] `npx @onedot/ai-setup` erstellt `.codex/config.toml` wenn `codex` installiert
-- [ ] Ohne installierte CLIs: keine Gemini/Codex-Dateien angelegt (optional bleibt optional)
-- [ ] Skills-Symlinks zeigen auf `.claude/skills/` (Single Source of Truth)
-- [ ] AGENTS.md enthält Hinweise für beide Tools
-- [ ] Idempotent: zweiter Lauf ändert nichts
+- [x] `npx @onedot/ai-setup` erstellt `.gemini/settings.json` + `.gemini/agents` Symlink wenn `gemini` installiert
+- [x] `npx @onedot/ai-setup` erstellt `.codex/config.toml` wenn `codex` installiert
+- [x] Ohne installierte CLIs: keine Gemini/Codex-Dateien angelegt (optional bleibt optional)
+- [x] Skills-Symlinks zeigen auf `.claude/skills/` (Single Source of Truth)
+- [x] AGENTS.md enthält Hinweise für beide Tools
+- [x] Idempotent: zweiter Lauf ändert nichts
 
 ## Files to Modify
 
