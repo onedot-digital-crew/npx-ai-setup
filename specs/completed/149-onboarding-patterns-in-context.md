@@ -1,6 +1,6 @@
 # Spec 149: Onboarding Best Practices in Context-Dateien
 
-> **Status**: Draft
+> **Status**: completed
 > **Source**: specs/145-evaluate-understand-anything.md (Kandidat #5, adaptiert)
 > **Goal**: Context-Refresher-Output um onboarding-relevante Sections erweitern (keine neuen Dateien/Skills)
 > **Depends on**: Spec 148 (both modify context-refresher.md — implement 148 first)
@@ -11,12 +11,12 @@ Understand-Anything generiert Onboarding-Guides mit: Complexity Hotspots, Key Co
 
 ## Steps
 
-- [ ] 1. Read `.claude/agents/context-refresher.md` and template version
-- [ ] 2. Add to ARCHITECTURE.md generation prompt: "Entry Points" section — identify main entry files (index.*, main.*, app.*) and explain the bootstrap flow
-- [ ] 3. Add to ARCHITECTURE.md generation prompt: "Complexity Hotspots" section — flag files/modules with high complexity or many dependencies
-- [ ] 4. Add to STACK.md generation prompt: "Key Patterns" section — list design patterns actively used (e.g., middleware chain, pub/sub, repository pattern)
-- [ ] 5. Mirror changes to template version
-- [ ] 6. Test: run context-refresher on npx-ai-setup, verify new sections appear
+- [x] 1. Read `.claude/agents/context-refresher.md` and template version
+- [x] 2. Add to ARCHITECTURE.md generation prompt: "Entry Points" section (max 8 lines)
+- [x] 3. Add to ARCHITECTURE.md generation prompt: "Complexity Hotspots" section (max 8 lines)
+- [x] 4. Add to STACK.md generation prompt: "Key Patterns" section (max 8 lines)
+- [x] 5. Mirror changes to template version
+- [x] 6. Verified: prompt instructions include section headings and line limits
 
 ## Acceptance Criteria
 

@@ -51,9 +51,12 @@ If fewer than 2 patterns match, skip the Layers section entirely (non-standard s
 
 4. **Write exactly 3 files**:
 
-**`.agents/context/STACK.md`** — runtime, framework (with versions), key dependencies (categorized: UI, state, data, testing, build), package manager, build tooling, libraries/patterns to avoid.
+**`.agents/context/STACK.md`** — runtime, framework (with versions), key dependencies (categorized: UI, state, data, testing, build), package manager, build tooling, libraries/patterns to avoid. Include a **Key Patterns** section (max 8 lines): list design patterns actively used in the codebase (e.g., middleware chain, repository pattern, pub/sub, factory, observer). Only list patterns you actually found in the source files, not generic patterns.
 
-**`.agents/context/ARCHITECTURE.md`** — project type, directory structure, entry points, data flow, key patterns, how the pieces connect. Include a **Layers** section listing detected architectural layers with directory mappings and file counts (from step 3). Only include layers that actually exist.
+**`.agents/context/ARCHITECTURE.md`** — project type, directory structure, data flow, key patterns, how the pieces connect. Must include these sections:
+- **Entry Points** (max 8 lines): main entry files (index.*, main.*, app.*, bin/*), what they bootstrap, and how they connect. Explain the startup flow in 2-3 sentences.
+- **Layers** (from step 3): detected architectural layers with directory mappings and file counts. Only include layers that actually exist.
+- **Complexity Hotspots** (max 8 lines): files/modules with high complexity or many cross-module dependencies. Flag files that are large (>300 lines), have many imports (>10), or are imported by many others.
 
 **`.agents/context/CONVENTIONS.md`** — naming patterns, import style, component structure, error handling, TypeScript usage, testing patterns. Be specific — actual patterns found in code, not generic advice.
 
