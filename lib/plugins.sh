@@ -242,8 +242,8 @@ show_next_steps() {
   echo "  /spec \"task description\"    Create a structured spec before coding"
   echo "  /spec-work 001              Execute a spec step by step"
   echo ""
-  echo "To regenerate context files later:"
-  echo "  npx @onedot/ai-setup --regenerate"
+  echo "To refresh context files later:"
+  echo "  npx @onedot/ai-setup"
 
   echo ""
   echo "🔗 Links"
