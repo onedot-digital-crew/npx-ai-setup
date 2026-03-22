@@ -1,6 +1,6 @@
 # Spec: Agent YAML Frontmatter Standard
 
-> **Spec ID**: 159 | **Created**: 2026-03-22 | **Status**: draft | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 159 | **Created**: 2026-03-22 | **Status**: in-review | **Complexity**: medium | **Branch**: —
 > Referenz: specs/158-evaluate-agency-agents.md (Prio 1, Item 1 + Prio 2, Item 6)
 
 ## Goal
@@ -38,9 +38,17 @@ Unsere 12 Agent-Dateien haben bereits Frontmatter (name, description, tools, mod
 - Agent-Lint als optionalen Check in build-validator oder als eigenstaendigen CI-Schritt referenzieren
 
 ## Acceptance Criteria
-- [ ] Alle 12 Agent-Dateien (x2 Verzeichnisse = 24 Dateien) haben vollstaendiges Frontmatter
-- [ ] `scripts/lint-agents.sh` existiert und validiert alle Agents fehlerfrei
+- [x] `scripts/lint-agents.sh` existiert und validiert alle Agents fehlerfrei
+- [x] `templates/agents/README.md` dokumentiert das vollstaendige Schema (<=15 Zeilen)
+- [x] Alle 12 `templates/agents/*.md` haben `emoji` und `vibe` Felder
+- [ ] Alle 12 `.claude/agents/*.md` haben `emoji` und `vibe` Felder (blocked: sandbox denies write to .claude/agents/)
 - [ ] Lint-Script findet absichtlich kaputte Agent-Datei (Negativtest)
+
+## Notes
+
+Step 2 partial: `templates/agents/` fully updated. `.claude/agents/` writes were denied by sandbox.
+The lint script correctly reports these as warnings (optional fields) — not errors.
+To complete Step 2 fully, run: `bash scripts/lint-agents.sh` after granting write access to `.claude/agents/`.
 
 ## Files to Modify
 - `templates/agents/*.md` (12 Dateien)
