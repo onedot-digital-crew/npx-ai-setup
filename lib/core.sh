@@ -68,13 +68,17 @@ SPEC_SKILLS_MAP=(
 )
 
 # System-to-boilerplate-repo mapping (org: onedot-digital-crew)
-declare -A SYSTEM_BOILERPLATES=(
-  ["shopify"]="sp-shopify-boilerplate"
-  ["shopware"]="sw-shopware-boilerplate"
-  ["nuxt"]="sb-nuxt-boilerplate"
-  ["next"]="sb-next-boilerplate"
-  ["storyblok"]="sb-storyblok-boilerplate"
-)
+# Uses a function instead of declare -A for bash 3.2 compatibility (macOS)
+get_boilerplate_repo() {
+  case "$1" in
+    shopify)   echo "sp-shopify-boilerplate" ;;
+    shopware)  echo "sw-shopware-boilerplate" ;;
+    nuxt)      echo "sb-nuxt-boilerplate" ;;
+    next)      echo "sb-next-boilerplate" ;;
+    storyblok) echo "sb-storyblok-boilerplate" ;;
+    *)         return 1 ;;
+  esac
+}
 
 # TypeScript-specific rules (only added when *.ts or *.tsx files are detected)
 TS_RULES_MAP=(

@@ -83,7 +83,9 @@ _merge_mcp_json() {
 # Usage: pull_boilerplate_files <system>
 pull_boilerplate_files() {
   local system="$1"
-  local repo="${BOILERPLATE_ORG}/${SYSTEM_BOILERPLATES[$system]}"
+  local repo_name
+  repo_name=$(get_boilerplate_repo "$system") || { echo "Unknown system: $system"; return 1; }
+  local repo="${BOILERPLATE_ORG}/${repo_name}"
 
   echo ""
   echo "📥 Pulling ${system} config from ${repo}..."
@@ -144,7 +146,8 @@ pull_boilerplate_files() {
 # Show manual pull instructions when gh CLI is not available.
 _show_manual_instructions() {
   local system="$1"
-  local repo_name="${SYSTEM_BOILERPLATES[$system]:-<repo-name>}"
+  local repo_name
+  repo_name=$(get_boilerplate_repo "$system") || repo_name="<repo-name>"
 
   echo ""
   echo "  ℹ️  Manual pull instructions (gh CLI not available):"
