@@ -159,6 +159,13 @@ Each spec should reference the brainstorm document for context.
 - If WebFetch/defuddle fails for a URL, ask user to paste content or try raw GitHub URLs
 - The brainstorm document is the primary deliverable — it persists across sessions
 
+## Auto-Link in README
+
+After creating the brainstorm document, append the evaluated source to the `## Links` section in `README.md`:
+- Format: `- [Source Name](URL)` — add below the existing links
+- Only add if the URL is not already listed
+- Source name: use the repo name, tool name, or article title (short, descriptive)
+
 ## Next Step
 
 After the brainstorm document is saved to `specs/`, run `/spec NNN` on any selected adoption candidate to create an implementation spec, or run `/spec-board` to see the full pipeline.
