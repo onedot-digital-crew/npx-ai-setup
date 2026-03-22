@@ -3,7 +3,7 @@
 > **Source**: https://github.com/affaan-m/everything-claude-code
 > **Erstellt**: 2026-03-22
 > **Zweck**: Evaluierung welche Patterns aus ECC (Everything Claude Code) adaptierbar sind
-> **Status**: complete
+> **Status**: completed
 
 ## Bestandsaufnahme
 
@@ -100,7 +100,7 @@ OURS:            11 agents, 22 commands, 0 skills (via plugins), 4 rule files, h
 **Spezifische Zeilen aus ECC**:
 - "Only flags issues >80% certain to be real problems"
 - "AI-generated code focus: behavioral regressions, security assumptions, unnecessary complexity"
-- "Check for stub code, placeholder implementations, TODO-marked incomplete code"
+- "Check for stub code, placeholder implementations, TODO-marked incompleted code"
 **Aufwand**: Klein — Ergaenzungen im bestehenden code-reviewer.md
 **Empfehlung**: Diese 3 Patterns in unseren code-reviewer integrieren
 
@@ -143,7 +143,7 @@ OURS:            11 agents, 22 commands, 0 skills (via plugins), 4 rule files, h
 
 Auch aus "Covered" Items gibt es wertvolle Einzelzeilen:
 
-1. **Aus code-reviewer.md**: "Check for stub code, placeholder implementations, TODO-marked incomplete code" — fehlt in unserem Reviewer. Wuerde AI-generierte Stubs fangen.
+1. **Aus code-reviewer.md**: "Check for stub code, placeholder implementations, TODO-marked incompleted code" — fehlt in unserem Reviewer. Wuerde AI-generierte Stubs fangen.
 
 2. **Aus build-error-resolver.md**: "Minimal lines changed (< 5% of affected file)" — gute Success-Metrik, fehlt bei uns.
 

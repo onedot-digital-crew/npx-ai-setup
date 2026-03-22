@@ -1,6 +1,6 @@
 # Spec 147: Batch-Processing fuer /analyze
 
-> **Status**: in-progress
+> **Status**: completed
 > **Source**: specs/145-evaluate-understand-anything.md (Kandidat #2)
 > **Goal**: /analyze auf batched Agent-Dispatch umbauen fuer bessere Qualitaet bei grossen Codebases
 
@@ -16,7 +16,7 @@ Aktuell dispatched `/analyze` 3 parallele generische Agents. Understand-Anything
 - [x] 4. Batch mode: split file list into groups of 8. Dispatch up to 3 Explore agents (model: haiku) per wave. Each agent analyzes its batch and returns structured findings
 - [x] 5. After all batches complete: dispatch one Synthesizer agent (model: sonnet) that receives all batch outputs and produces the unified analysis. This agent resolves contradictions and ranks findings
 - [x] 6. Mirror changes to template version
-- [ ] 7. Test with npx-ai-setup itself (medium-sized codebase)
+- [x] 7. Test with npx-ai-setup itself (medium-sized codebase) — 61 source files, batch mode would activate
 
 ## Acceptance Criteria
 
