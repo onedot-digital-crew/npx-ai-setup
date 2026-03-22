@@ -102,11 +102,9 @@ For CI-safe output, use `--output-format json` and parse structured fields.
 Constrain execution with `--allowedTools` instead of broad permissions.
 
 ## Skills Discovery
-When current capabilities are insufficient, search the skills.sh marketplace for additional agent skills:
-- Search: `npx -y skills@latest find "<keyword>"`
-- Install: `npx -y skills@latest add <owner/repo@skill-name> --agent claude-code --agent github-copilot -y`
-
-Check `.claude/skills/` first to avoid installing duplicates. Only install when genuinely needed for the task.
+Curated skills are installed automatically during setup based on detected technologies.
+For additional skills, use `/find-skills` to search the skills.sh marketplace on-demand.
+Check `.claude/skills/` first to avoid installing duplicates.
 
 ## Spec-Driven Development
 Specs live in `specs/` — structured task plans created before coding.
