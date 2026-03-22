@@ -6,7 +6,7 @@ Production-ready AI infrastructure for Claude Code. One command installs hooks, 
 npx github:onedot-digital-crew/npx-ai-setup
 ```
 
-Supports Shopify, Nuxt, Next.js, Laravel, Shopware, Storyblok, or auto-detection.
+Includes an optional boilerplate pull for Shopify, Nuxt, Next.js, Shopware, and Storyblok projects.
 
 ---
 
@@ -107,10 +107,12 @@ Native project slash commands are available in Claude Code and compatible client
 ```bash
 npx github:onedot-digital-crew/npx-ai-setup [flags]
 
---system nuxt,storyblok   # Set framework (auto, shopify, nuxt, next, laravel, shopware, storyblok)
---regenerate              # Re-run Auto-Init without reinstalling files
+--force-skills            # Re-run skill discovery even if skills already exist
+--audit                   # Run audit mode for managed-file drift checks
 --patch <pattern>         # Fast sync: copy only templates matching pattern (e.g. --patch spec-work)
 ```
+
+Framework-specific boilerplate is selected interactively during setup. Regeneration is available from the update flow instead of a standalone flag.
 
 ---
 
@@ -151,6 +153,8 @@ Run local smoke checks before publishing:
 ```bash
 npm test
 ```
+
+`templates/scripts/` is the canonical source for tracked repo-local shell scripts. The matching files in `.claude/scripts/` are installed copies for this repository and must stay byte-identical.
 
 CI also runs `tests/smoke.sh` automatically on every pull request and push to `main`.
 

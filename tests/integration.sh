@@ -77,8 +77,8 @@ EOF
   (
     cd "$PROJECT_DIR"
     PATH="$BIN_DIR:/usr/bin:/bin:/usr/sbin:/sbin" \
-      bash "$ROOT_DIR/bin/ai-setup.sh" --system auto >/dev/null <<'EOF'
-n
+      bash "$ROOT_DIR/bin/ai-setup.sh" >/dev/null <<'EOF'
+6
 n
 EOF
   )
@@ -92,7 +92,6 @@ check_expected_install_artifacts() {
   assert_path_exists "$PROJECT_DIR/AGENTS.md" "AGENTS.md created"
   assert_path_exists "$PROJECT_DIR/.ai-setup.json" ".ai-setup.json created"
   assert_path_exists "$PROJECT_DIR/.gitignore" ".gitignore updated"
-  assert_path_exists "$PROJECT_DIR/repomix.config.json" "repomix.config.json created"
   assert_path_exists "$PROJECT_DIR/.mcp.json" ".mcp.json created"
   assert_path_exists "$PROJECT_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md created"
   assert_path_exists "$PROJECT_DIR/.claude/settings.json" ".claude/settings.json created"
@@ -100,6 +99,9 @@ check_expected_install_artifacts() {
   assert_path_exists "$PROJECT_DIR/.claude/hooks/update-check.sh" ".claude/hooks/update-check.sh created"
   assert_path_exists "$PROJECT_DIR/.claude/rules/general.md" ".claude/rules/general.md created"
   assert_path_exists "$PROJECT_DIR/.claude/agents/code-reviewer.md" ".claude/agents/code-reviewer.md created"
+  assert_path_exists "$PROJECT_DIR/.claude/scripts/doctor.sh" ".claude/scripts/doctor.sh created"
+  assert_path_exists "$PROJECT_DIR/.claude/scripts/release.sh" ".claude/scripts/release.sh created"
+  assert_path_exists "$PROJECT_DIR/.claude/scripts/spec-board.sh" ".claude/scripts/spec-board.sh created"
   assert_path_exists "$PROJECT_DIR/.claude/skills/spec-work/SKILL.md" ".claude/skills/spec-work/SKILL.md created"
   assert_path_exists "$PROJECT_DIR/specs/TEMPLATE.md" "specs/TEMPLATE.md created"
   assert_path_exists "$PROJECT_DIR/specs/README.md" "specs/README.md created"

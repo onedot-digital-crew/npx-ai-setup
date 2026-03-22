@@ -162,7 +162,24 @@ else
   fail "specs/TEMPLATE.md missing Complexity field"
 fi
 
-# Step 9: Verify skills alias migration is wired in both setup and update paths
+# Step 9: Verify tracked repo-local scripts stay in sync with templates
+echo ""
+echo "--- Script source-of-truth parity ---"
+while IFS= read -r -d '' template_script; do
+  script_name="$(basename "$template_script")"
+  repo_script=".claude/scripts/$script_name"
+  if [ ! -f "$repo_script" ]; then
+    continue
+  fi
+
+  if cmp -s "$template_script" "$repo_script"; then
+    pass "$script_name matches templates/scripts/$script_name"
+  else
+    fail "$script_name drifted from templates/scripts/$script_name"
+  fi
+done < <(find templates/scripts -maxdepth 1 -type f -name '*.sh' -print0 | sort -z)
+
+# Step 10: Verify skills alias migration is wired in both setup and update paths
 echo ""
 echo "--- Skills alias migration wiring ---"
 if grep -q 'ensure_skills_alias' bin/ai-setup.sh 2>/dev/null; then
@@ -195,7 +212,7 @@ else
   fail "ensure_skills_alias missing looping skill-link repair call"
 fi
 
-# Step 10: Verify circuit breaker has spec-active threshold override
+# Step 11: Verify circuit breaker has spec-active threshold override
 echo ""
 echo "--- Circuit breaker spec-aware thresholds ---"
 if grep -q 'in-progress' templates/claude/hooks/circuit-breaker.sh 2>/dev/null; then

@@ -140,14 +140,21 @@ fi
 
 # 11. .ai-setup.json metadata present
 if [ -f ".ai-setup.json" ]; then
+  pkg_ver=""
   if command -v python3 >/dev/null 2>&1; then
     ver="$(python3 -c "import json; d=json.load(open('.ai-setup.json')); print(d.get('version','?'))" 2>/dev/null || echo "?")"
+    pkg_ver="$(python3 -c "import json; d=json.load(open('package.json')); print(d.get('version','?'))" 2>/dev/null || echo "")"
   elif command -v jq >/dev/null 2>&1; then
     ver="$(jq -r '.version // "?"' .ai-setup.json 2>/dev/null || echo "?")"
+    pkg_ver="$(jq -r '.version // empty' package.json 2>/dev/null || echo "")"
   else
     ver="present"
   fi
-  add_row "$PASS" "Setup metadata"      "ai-setup v${ver}"
+  if [ -n "$pkg_ver" ] && [ "$ver" != "$pkg_ver" ]; then
+    add_row "$WARN" "Setup metadata"      "installed v${ver}, package v${pkg_ver} — rerun npx @onedot/ai-setup"
+  else
+    add_row "$PASS" "Setup metadata"      "ai-setup v${ver}"
+  fi
 else
   add_row "$WARN" "Setup metadata"      ".ai-setup.json missing — run npx @onedot/ai-setup"
 fi
