@@ -190,6 +190,22 @@ install_settings() {
   _install_or_update_file "$TPL/claude/settings.json" .claude/settings.json
 }
 
+# Install .gemini/settings.json if gemini CLI is available
+install_gemini_config() {
+  command -v gemini >/dev/null 2>&1 || return 0
+  echo "⚙️  Writing .gemini/settings.json..."
+  mkdir -p .gemini
+  _install_or_update_file "$TPL/gemini/settings.json" .gemini/settings.json
+}
+
+# Install .codex/config.toml if codex CLI is available
+install_codex_config() {
+  command -v codex >/dev/null 2>&1 || return 0
+  echo "⚙️  Writing .codex/config.toml..."
+  mkdir -p .codex
+  _install_or_update_file "$TPL/codex/config.toml" .codex/config.toml
+}
+
 # Install hook scripts
 install_hooks() {
   echo "🛡️  Creating hooks..."

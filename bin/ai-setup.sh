@@ -87,6 +87,8 @@ cleanup_legacy
 install_claude_md
 install_agents_md
 install_settings
+install_gemini_config
+install_codex_config
 install_hooks
 install_rules
 install_copilot
