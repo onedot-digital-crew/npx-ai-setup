@@ -1,8 +1,7 @@
-# Spec 158: Agency-Agents Pattern-Adaption
+# Spec: Agency-Agents Pattern-Adaption
 
-> Status: In Progress
+> **Spec ID**: 158 | **Created**: 2026-03-22 | **Status**: completed | **Complexity**: medium | **Branch**: —
 > Source: https://github.com/msitarzewski/agency-agents
-> Erstellt: 2026-03-22
 
 ## Goal
 

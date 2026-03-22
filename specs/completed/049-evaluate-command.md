@@ -1,6 +1,6 @@
 # Spec: Project-Local /evaluate Command for Idea Assessment
 
-> **Spec ID**: 049 | **Created**: 2026-02-28 | **Status**: in-progress
+> **Spec ID**: 049 | **Created**: 2026-02-28 | **Status**: completed
 
 ## Goal
 Create a project-local `/evaluate` command that systematically assesses external ideas (links, articles, tweets) against our existing setup and recommends adopt, adapt, replace, or reject.

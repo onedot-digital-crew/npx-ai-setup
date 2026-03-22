@@ -1,6 +1,6 @@
 # Spec: CONCEPT.md erweitern und Feature-Audit durchführen
 
-> **Spec ID**: 114 | **Created**: 2026-03-21 | **Status**: draft | **Branch**: —
+> **Spec ID**: 114 | **Created**: 2026-03-21 | **Status**: completed | **Branch**: —
 
 ## Goal
 CONCEPT.md um strategische Grenzen erweitern und alle Features gegen diese Grenzen kategorisieren (Core / Extended / Remove).
