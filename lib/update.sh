@@ -94,7 +94,6 @@ handle_version_check() {
       1)
         update_rc=0
         run_smart_update --skip-regen || update_rc=$?
-        show_update_next_steps
         exit "$update_rc"
         ;;
       2)
@@ -158,8 +157,8 @@ handle_version_check() {
           else
             tui_warn "Migration finished with errors - run again or choose Reinstall."
           fi
+          show_update_next_steps
         fi
-        show_update_next_steps
         exit "$update_rc"
         ;;
       2)
