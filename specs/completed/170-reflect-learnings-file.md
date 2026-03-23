@@ -1,6 +1,6 @@
 # Spec: Reflect Smart Merge with Dedicated LEARNINGS.md
 
-> **Spec ID**: 170 | **Created**: 2026-03-23 | **Status**: in-progress | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 170 | **Created**: 2026-03-23 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Move /reflect output from append-only writes into shared context files to a dedicated LEARNINGS.md with smart merge (ADD/UPDATE/REMOVE).
@@ -24,16 +24,16 @@ Move /reflect output from append-only writes into shared context files to a dedi
 ## Acceptance Criteria
 
 ### Truths
-- [ ] "/reflect writes new entries to .agents/context/LEARNINGS.md, not to STACK.md/ARCHITECTURE.md/CONVENTIONS.md"
-- [ ] "/reflect proposes UPDATE and REMOVE operations for existing LEARNINGS.md entries, not just ADD"
-- [ ] "generate.sh regeneration does not touch LEARNINGS.md"
+- [x] "/reflect writes new entries to .agents/context/LEARNINGS.md, not to STACK.md/ARCHITECTURE.md/CONVENTIONS.md"
+- [x] "/reflect proposes UPDATE and REMOVE operations for existing LEARNINGS.md entries, not just ADD"
+- [x] "generate.sh regeneration does not touch LEARNINGS.md"
 
 ### Artifacts
-- [ ] `.agents/context/LEARNINGS.md` — referenced in CLAUDE.md Project Context section
+- [x] `.agents/context/LEARNINGS.md` — referenced in CLAUDE.md Project Context section
 
 ### Key Links
-- [ ] `templates/commands/reflect.md` → `.agents/context/LEARNINGS.md` as write target
-- [ ] `templates/CLAUDE.md` → `.agents/context/LEARNINGS.md` in Project Context list
+- [x] `templates/commands/reflect.md` → `.agents/context/LEARNINGS.md` as write target
+- [x] `templates/CLAUDE.md` → `.agents/context/LEARNINGS.md` in Project Context list
 
 ## Files to Modify
 - `templates/commands/reflect.md` — redirect output + smart merge logic
