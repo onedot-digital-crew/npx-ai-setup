@@ -19,7 +19,7 @@ Move /reflect output from append-only writes into shared context files to a dedi
 - [x] Step 2: Implement smart merge in reflect Step 3+5 — when LEARNINGS.md exists, read it first. For each proposed entry: detect semantic overlap with existing entries. Present three operation types in Step 4 approval: `+ ADD` (new), `~ UPDATE` (refine existing), `- REMOVE` (stale/contradicted). Replace append-only rule with merge rule.
 - [x] Step 3: Mirror all changes to `.claude/commands/reflect.md` (active command file).
 - [x] Step 4: Update CLAUDE.md template (`templates/CLAUDE.md`) — add `LEARNINGS.md` to the "Project Context" reference list with description "Session learnings from /reflect (persistent across updates)".
-- [ ] Step 5: Update active `CLAUDE.md` — add same LEARNINGS.md reference.
+- [x] Step 5: Update active `CLAUDE.md` — add same LEARNINGS.md reference.
 
 ## Acceptance Criteria
 
