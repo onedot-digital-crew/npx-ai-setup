@@ -140,7 +140,7 @@ Use `AskUserQuestion` to ask: "Branch fuer diese Spec erstellen?"
 [2-3 sentences. Why needed, what approach was chosen, relevant skills if any.]
 
 ### Verified Assumptions
-<!-- Remove this section if no assumptions were confirmed in Phase 1d-bis -->
+<!-- Remove this section if no assumptions were confirmed in Phase 1e -->
 - [Statement] — Evidence: `path/to/file` | Confidence: High | If Wrong: [consequence]
 
 ## Steps
