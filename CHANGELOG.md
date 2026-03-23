@@ -10,11 +10,25 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- **Spec 169**: Slash command consolidation — `/evaluate` renamed to `/research`, `/spec` Phase 1 streamlined with Quick Triage gate that recommends `/challenge` for complex ideas, `/challenge` sharpened with When to Use/When NOT to Use sections, decision flowchart added to WORKFLOW-GUIDE
-- **feat:** `/reflect` now writes to dedicated `.agents/context/LEARNINGS.md` instead of shared context files. Smart merge (ADD/UPDATE/REMOVE) replaces append-only behavior. Session learnings persist across `ai-setup` updates since `generate.sh` never touches `LEARNINGS.md`.
-- **refactor:** Merge `project-audit` skill and `project-auditor` agent into `/analyze` command. `/analyze` now writes `PATTERNS.md` and `AUDIT.md` after analysis and asks before overwriting existing files. The `--audit` flag in `ai-setup.sh` is removed; a post-install hint recommends running `/analyze` manually.
-- **refactor:** Replace interactive framework selection menu with auto-detection. Detects Nuxt, Next.js, and Shopify from config files — no more manual selection during install.
-- **feat:** Stack-aware sandbox permissions — auto-removes framework-specific deny entries from `.claude/settings.json` so pre-commit hooks (ESLint, build tools) work inside the Claude Code sandbox. Supports Nuxt (`.nuxt/`, `.output/`) and Next.js (`.next/`). Auto-detects framework on update runs.
+## [v2.0.1] — 2026-03-23
+
+### New Features
+- **L0/L1/L2 Tiered Context Loading** — SessionStart injects only abstracts (~400 tokens vs ~2000). Full context on demand via `/context-load`. YAML frontmatter in `.agents/context/` files.
+- **Transcript Auto-Ingestion** — Stop hook extracts learnings from sessions via haiku summarization. Supports claude-mem MCP with fallback to `.agents/memory/`. Memory limits: 50 files, 200KB max.
+- **Memory-Recall Injection** — UserPromptSubmit hook searches relevant memories and injects as context. Keyword-based grep with 500-token budget. claude-mem → auto-memory → skip fallback chain.
+- **`/yolo` Autonomous Mode** — Execute tasks without confirmation gates, auto-commit after each logical unit.
+
+### Improvements
+- **Spec 169**: Slash command consolidation — `/evaluate` renamed to `/research`, `/spec` Phase 1 streamlined with Quick Triage gate, `/challenge` sharpened with When to Use/When NOT to Use
+- `/reflect` now writes to dedicated `.agents/context/LEARNINGS.md` with smart merge (ADD/UPDATE/REMOVE)
+- Merge `project-audit` into `/analyze` — writes `PATTERNS.md` + `AUDIT.md`, `--audit` flag removed
+- Replace framework selection menu with auto-detection (Nuxt, Next.js, Shopify)
+- Stack-aware sandbox permissions — auto-removes framework-specific deny entries
+
+### Bug Fixes
+- Fix TUI file links (GitHub URLs → file:// → hardcoded repo URL)
+- Default to "Update" instead of "Skip" in update menu
+- Remove duplicate Reference output after update
 
 ## [v2.0.0] — 2026-03-22
 

@@ -115,7 +115,7 @@ No spec required for hotfixes — `/debug` output serves as the investigation re
 
 ---
 
-## Subagents (12)
+## Subagents (11)
 
 Spawned automatically during `/spec-work`, `/pr`, `/debug`. Also invocable directly.
 
@@ -136,7 +136,7 @@ Spawned automatically during `/spec-work`, `/pr`, `/debug`. Also invocable direc
 
 ---
 
-## Hooks (14)
+## Hooks (17)
 
 Run automatically — no manual invocation needed.
 
@@ -148,13 +148,17 @@ Run automatically — no manual invocation needed.
 | `context-monitor` | PostToolUse | Warns at ≤35% context (WARNING) and ≤25% (CRITICAL) |
 | `context-freshness` | UserPromptSubmit | Warns when context files are >7 days old |
 | `context-reinforcement` | SessionStart | Re-injects critical rules after compaction |
+| `context-loader` | SessionStart | Loads L0 abstracts from context files (~400 tokens vs ~2000) |
 | `update-check` | UserPromptSubmit | Checks for ai-setup updates |
+| `memory-recall` | UserPromptSubmit | Injects relevant memories as context (claude-mem + fallback) |
 | `mcp-health` | SessionStart | Validates MCP server health |
 | `config-change-audit` | ConfigChange | Audits changes to settings files |
 | `task-completed-gate` | TaskCompleted | Verification gate before marking tasks done |
-| `notify` | Stop | Cross-platform notification on completion |
+| `notify` | Notification | Cross-platform notification on completion |
+| `transcript-ingest` | Stop | Auto-extracts learnings from session transcripts |
 | `cli-health` | SessionStart | Validates CLI tool availability (rtk, gh, jq) |
 | `post-tool-failure-log` | PostToolUseFailure | Logs tool failures for debugging |
+| `pre-compact` | PreCompact | Auto-commits unsaved changes before context compaction |
 
 ---
 
