@@ -4,7 +4,7 @@ mode: plan
 allowed-tools: Read, Write, Edit, Glob, AskUserQuestion, mcp__plugin_claude-mem_mcp-search__save_memory
 ---
 
-Analyze the current session for corrections, architectural discoveries, and stack decisions — convert them into permanent rules.
+Analyze the current session for corrections, architectural discoveries, and stack decisions — convert them into permanent learnings.
 
 ## Process
 
@@ -40,41 +40,52 @@ Only process CORRECTION, AFFIRMATION, ARCHITECTURAL, and STACK signals. Skip gen
 
 For each signal found, classify where it belongs:
 
-| Signal type | Target file |
-|---|---|
-| Coding style, naming, patterns, tooling choices | `.agents/context/CONVENTIONS.md` |
-| Project workflow, process rules, safety rules | `CLAUDE.md` Critical Rules section |
-| Tool usage, commands, CLI patterns | `CLAUDE.md` Commands section |
-| Component relationships, data flow, gotchas, structural patterns | `.agents/context/ARCHITECTURE.md` |
-| Dependencies, versions, runtime requirements, tool choices | `.agents/context/STACK.md` |
+| Signal type | Target | Section |
+|---|---|---|
+| Coding style, naming, patterns, tooling choices | `.agents/context/LEARNINGS.md` | `## Conventions` |
+| Component relationships, data flow, gotchas | `.agents/context/LEARNINGS.md` | `## Architecture` |
+| Dependencies, versions, runtime requirements | `.agents/context/LEARNINGS.md` | `## Stack` |
+| Corrections and approved approaches | `.agents/context/LEARNINGS.md` | `## Corrections` |
+| Project workflow, process rules, safety rules | `CLAUDE.md` | Critical Rules section |
+| Tool usage, commands, CLI patterns | `CLAUDE.md` | Commands section |
 
-### 3. Draft proposed additions
+Most signals go to `.agents/context/LEARNINGS.md`. Only workflow/process rules and CLI patterns go to `CLAUDE.md`.
 
-Read `CLAUDE.md`, `.agents/context/CONVENTIONS.md`, `.agents/context/ARCHITECTURE.md`, and `.agents/context/STACK.md` first to avoid duplicates.
+### 3. Draft proposed changes (smart merge)
 
-For each signal, draft a rule or fact addition:
+Read `.agents/context/LEARNINGS.md` and `CLAUDE.md` first to detect existing entries.
+
+For each signal, determine the **operation type**:
+
+- **`+ ADD`** — New entry, no semantic overlap with existing entries
+- **`~ UPDATE`** — Existing entry needs refinement (e.g. more specific, corrected, expanded). Reference the existing entry being replaced.
+- **`- REMOVE`** — Existing entry is now stale, contradicted, or superseded by a new signal. Reference the entry being removed.
+
+Draft rules:
 - Maximum 1-2 lines per entry
 - Corrections/affirmations: phrase as a directive ("Always X", "Never Y", "Use X instead of Y")
 - Architectural findings: phrase as a factual statement ("Component X depends on Y", "All API calls route through Z")
 - Stack findings: phrase as a factual statement ("Requires Node >= 18", "Uses pnpm as package manager")
-- Do NOT duplicate content already present in the target file
 
 If no actionable signals were found in this session, report that clearly and stop.
 
 ### 4. Show proposed changes for approval
-Use AskUserQuestion to present the proposed additions and ask for approval before writing anything.
-Format the proposal as a diff preview showing exactly what will be appended to each file.
-Example:
+
+Use AskUserQuestion to present all proposed operations and ask for approval before writing anything.
+Format the proposal showing operation type, target section, and content:
 ```
-Proposed additions from this session:
+Proposed changes from this session:
 
-File: .agents/context/CONVENTIONS.md
-+ Always use kebab-case for script filenames
+.agents/context/LEARNINGS.md — ## Conventions
++ ADD: Always use kebab-case for script filenames
+~ UPDATE: "Use snake_case for variables" → "Use snake_case for variables and function names"
+- REMOVE: "Prefer camelCase for JS functions" (contradicted by project convention)
 
-File: CLAUDE.md (Critical Rules)
-+ Never modify template files directly — use generation logic instead
+.agents/context/LEARNINGS.md — ## Architecture
++ ADD: All API calls route through middleware X
 
-Apply the same format for `.agents/context/ARCHITECTURE.md` and `.agents/context/STACK.md` when needed.
+CLAUDE.md — Critical Rules
++ ADD: Never modify template files directly — use generation logic instead
 
 Apply these changes?
 Options: [Apply all] [Skip all] [Edit manually]
@@ -83,12 +94,41 @@ Options: [Apply all] [Skip all] [Edit manually]
 ### 5. Write approved changes
 
 Only write items the user approved. For each approved item:
-- Append to the end of the relevant section (never delete or rewrite existing content)
-- If appending to CONVENTIONS.md, add under the most relevant existing section header
-- If appending to CLAUDE.md, add under "Critical Rules" or "Commands" as classified
-- If appending to ARCHITECTURE.md, add under the most relevant existing section header (or create a new one if none fits)
-- If appending to STACK.md, add under the most relevant existing section header (or create a new one if none fits)
-- Keep additions minimal and self-contained
+
+**For `.agents/context/LEARNINGS.md`:**
+- If the file does not exist, create it with the header and relevant sections
+- **ADD**: Append the entry under the matching section header
+- **UPDATE**: Replace the old entry with the new one using the Edit tool
+- **REMOVE**: Delete the entry using the Edit tool
+- Keep the file organized with these sections: `## Corrections`, `## Conventions`, `## Architecture`, `## Stack`
+- Only create sections that have entries — do not add empty sections
+
+**LEARNINGS.md format:**
+```markdown
+# Learnings
+
+> Curated session learnings from /reflect. Persistent across updates — generate.sh never touches this file.
+
+## Corrections
+- Always use X instead of Y — reason
+- Never do Z in this codebase — reason
+
+## Conventions
+- Use kebab-case for script filenames
+
+## Architecture
+- Component X depends on Y for state management
+- All API calls route through middleware Z
+
+## Stack
+- Requires Node >= 18 for native fetch
+- Uses pnpm as package manager
+```
+
+**For `CLAUDE.md`:**
+- **ADD**: Append under "Critical Rules" or "Commands" as classified
+- **UPDATE**: Replace the old entry with the Edit tool
+- **REMOVE**: Delete the entry with the Edit tool
 
 ### 6. Save deliberate decisions to claude-mem (automatic, no approval needed)
 
@@ -113,11 +153,12 @@ This enables semantic retrieval in future sessions: if Claude is about to sugges
 If `mcp__plugin_claude-mem_mcp-search__save_memory` is not available (plugin not installed), skip this step silently — do not error.
 
 ## Rules
-- Never delete or overwrite existing rules — append only.
+- Smart merge: ADD new entries, UPDATE refined entries, REMOVE stale entries — not append-only.
 - Never write low-signal observations as rules.
 - If a signal is ambiguous, skip it rather than guess.
 - If no signals were found, say so and stop — do not invent rules.
 - Changes must be explicit and git-trackable — no silent mutations.
+- LEARNINGS.md is the primary target — only workflow/process rules go to CLAUDE.md.
 
 ## Next Step
 
