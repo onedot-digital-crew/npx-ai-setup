@@ -10,6 +10,7 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **refactor:** Replace interactive framework selection menu with auto-detection. Detects Nuxt, Next.js, and Shopify from config files — no more manual selection during install.
 - **feat:** Stack-aware sandbox permissions — auto-removes framework-specific deny entries from `.claude/settings.json` so pre-commit hooks (ESLint, build tools) work inside the Claude Code sandbox. Supports Nuxt (`.nuxt/`, `.output/`) and Next.js (`.next/`). Auto-detects framework on update runs.
 
 ## [v2.0.0] — 2026-03-22

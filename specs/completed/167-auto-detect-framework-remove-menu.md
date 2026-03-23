@@ -1,6 +1,6 @@
 # Spec: Replace interactive framework menu with auto-detection
 
-> **Spec ID**: 167 | **Created**: 2026-03-23 | **Status**: in-progress | **Complexity**: low | **Branch**: —
+> **Spec ID**: 167 | **Created**: 2026-03-23 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 Remove the interactive framework selection menu from installation and replace it with automatic detection based on config files.
@@ -17,8 +17,8 @@ Remove the interactive framework selection menu from installation and replace it
 ## Steps
 - [x] Step 1: Rewrite `select_boilerplate_system()` in `lib/boilerplate.sh` — remove interactive menu, add auto-detection (`nuxt.config.*` → nuxt, `next.config.*` → next, `theme.liquid` or `shopify.` in config → shopify), set `SELECTED_SYSTEM`, call `pull_boilerplate_files` if detected and `gh` available
 - [x] Step 2: Remove the `tui_section "Framework Files"` and `ask_single_choice_menu` imports/calls — verify no other callers depend on the interactive flow
-- [ ] Step 3: Update smoke test in `tests/smoke.sh` — verify `select_boilerplate_system` function still exists (it does, just non-interactive now)
-- [ ] Step 4: Run `bash tests/smoke.sh` and verify all tests pass
+- [x] Step 3: Update smoke test in `tests/smoke.sh` — verify `select_boilerplate_system` function still exists (it does, just non-interactive now)
+- [x] Step 4: Run `bash tests/smoke.sh` and verify all tests pass
 
 ## Acceptance Criteria
 
