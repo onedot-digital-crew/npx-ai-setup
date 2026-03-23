@@ -84,11 +84,11 @@ handle_version_check() {
     else
       tui_success "Already up to date (v${PACKAGE_VERSION}) - ${SCAN_TOTAL_CHANGES} file(s) differ from templates"
     fi
-    ask_single_choice_menu "What should happen next?" --default 3 \
+    ask_single_choice_menu "What should happen next?" --default 1 \
       "Update files|Sync changed template files|Recommended" \
       "Regenerate|Rebuild docs, context, commands, and skills" \
       "Skip|Exit without changes|Default"
-    UPTODATE_CHOICE="${TUI_MENU_INDEX:-3}"
+    UPTODATE_CHOICE="${TUI_MENU_INDEX:-1}"
 
     case "$UPTODATE_CHOICE" in
       1)
@@ -133,11 +133,11 @@ handle_version_check() {
 
     echo ""
     tui_section "Project Update" "v${INSTALLED_VERSION} -> v${PACKAGE_VERSION}"
-    ask_single_choice_menu "How should this project be updated?" --default 3 \
+    ask_single_choice_menu "How should this project be updated?" --default 1 \
       "Update|Run migrations and preserve project files|Recommended" \
       "Reinstall|Replace managed files with a clean install|Destructive" \
       "Skip|Exit without changes|Default"
-    UPDATE_CHOICE="${TUI_MENU_INDEX:-3}"
+    UPDATE_CHOICE="${TUI_MENU_INDEX:-1}"
 
     case "$UPDATE_CHOICE" in
       1)
