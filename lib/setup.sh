@@ -193,6 +193,68 @@ install_settings() {
   _install_or_update_file "$TPL/claude/settings.json" .claude/settings.json
 }
 
+# Customize .claude/settings.json deny list for the detected framework.
+# Removes framework-specific deny entries that block pre-commit hooks
+# (e.g. Nuxt ESLint imports from .nuxt/eslint.config.mjs).
+# Idempotent — safe to run multiple times.
+customize_settings_for_stack() {
+  local settings=".claude/settings.json"
+  [ -f "$settings" ] || return 0
+
+  local framework="${SELECTED_SYSTEM:-}"
+
+  # Auto-detect framework from config files when SELECTED_SYSTEM is empty
+  # (e.g. update runs where user skips framework selection)
+  if [ -z "$framework" ]; then
+    if ls nuxt.config.* 1>/dev/null 2>&1; then
+      framework="nuxt"
+    elif ls next.config.* 1>/dev/null 2>&1; then
+      framework="next"
+    fi
+  fi
+
+  [ -z "$framework" ] && return 0
+
+  # Build pipe-separated list of deny patterns to remove
+  local remove_patterns=""
+  case "$framework" in
+    nuxt)
+      remove_patterns='Read(.nuxt/**)|Read(.output/**)'
+      ;;
+    next)
+      remove_patterns='Read(.next/**)'
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  tui_step "Customizing sandbox permissions for $framework"
+
+  local tmp
+  tmp=$(mktemp)
+  if [ "$_JSON_CMD" = "jq" ]; then
+    jq --arg patterns "$remove_patterns" '
+      .permissions.deny |= map(
+        select(. as $d | ($patterns | split("|")) | index($d) | not)
+      )
+    ' "$settings" > "$tmp" && mv "$tmp" "$settings" || { rm -f "$tmp"; return 1; }
+  else
+    node -e "
+      const fs = require('fs');
+      const patterns = process.argv[1].split('|');
+      const cfg = JSON.parse(fs.readFileSync('$settings', 'utf8'));
+      if (cfg.permissions && cfg.permissions.deny) {
+        cfg.permissions.deny = cfg.permissions.deny.filter(d => !patterns.includes(d));
+      }
+      fs.writeFileSync('$settings', JSON.stringify(cfg, null, 2));
+    " "$remove_patterns" 2>/dev/null || { rm -f "$tmp"; return 1; }
+  fi
+  rm -f "$tmp"
+
+  tui_success "Sandbox deny list adjusted for $framework"
+}
+
 # Install .gemini/settings.json if gemini CLI is available
 install_gemini_config() {
   command -v gemini >/dev/null 2>&1 || return 0
