@@ -109,6 +109,7 @@ install_claude_scripts
 install_spec_skills
 install_agents
 select_boilerplate_system
+customize_settings_for_stack
 tui_step "Writing installation metadata"
 write_metadata
 update_gitignore

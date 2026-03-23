@@ -22,7 +22,7 @@ remove framework-specific entries from `.claude/settings.json` deny list via `jq
 - **next:** remove `Read(.next/**)`
 - No-op for other frameworks or empty `SELECTED_SYSTEM`.
 
-### Step 2 — Call from `bin/ai-setup.sh` after `select_boilerplate_system`
+### Step 2 — Call from `bin/ai-setup.sh` after `select_boilerplate_system` ✅
 Insert `customize_settings_for_stack` call at line ~112 (after `select_boilerplate_system`).
 
 ### Step 3 — Auto-detect framework when `SELECTED_SYSTEM` is empty ✅ (merged into Step 1)
