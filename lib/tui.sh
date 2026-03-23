@@ -311,17 +311,17 @@ tui_key_value() {
   printf '   %b%-12s%b %s\n' "$TUI_DIM" "${key}:" "$TUI_RESET" "$value"
 }
 
-# Print a clickable OSC 8 terminal hyperlink (file:// protocol).
-# Cmd+Click in iTerm2/VS Code/macOS Terminal opens the file in the default editor.
-# Usage: tui_file_link <relative_path> [label]
+# Print a clickable OSC 8 terminal hyperlink pointing to the ai-setup GitHub repo.
+# Usage: tui_file_link <github_path> [label]
+# Example: tui_file_link "CHANGELOG.md" → links to github.com/onedot-digital-crew/npx-ai-setup/blob/main/CHANGELOG.md
+_TUI_GH_REPO="https://github.com/onedot-digital-crew/npx-ai-setup/blob/main"
+
 tui_file_link() {
   _tui_init
-  local path="$1"
-  local label="${2:-$path}"
+  local gh_path="$1"
+  local label="${2:-$gh_path}"
   if [ "$TUI_HAS_COLOR" = "yes" ]; then
-    local abs_path
-    abs_path="$(cd "$(dirname "$path")" 2>/dev/null && printf '%s/%s' "$(pwd)" "$(basename "$path")")"
-    printf '\033]8;;file://%s\033\\%b%s%b\033]8;;\033\\' "$abs_path" '\033[4m' "$label" "$TUI_RESET"
+    printf '\033]8;;%s/%s\033\\%b%s%b\033]8;;\033\\' "$_TUI_GH_REPO" "$gh_path" '\033[4m' "$label" "$TUI_RESET"
   else
     printf '%s' "$label"
   fi
