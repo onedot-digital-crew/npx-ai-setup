@@ -62,7 +62,7 @@ Native project slash commands are available in Claude Code and compatible client
 | `/techdebt` | Sonnet | End-of-session sweep — dead code, unused imports |
 | `/release` | Sonnet | Bump version, update CHANGELOG, commit + git tag |
 | `/scan` | Sonnet | Security vulnerability scan (snyk/npm audit/pip-audit/bundler-audit) |
-| `/analyze` | Sonnet | 3 parallel agents — architecture, hotspots, risks |
+| `/analyze` | Sonnet | 3 parallel agents — architecture, hotspots, risks — writes PATTERNS.md + AUDIT.md |
 | `/reflect` | Sonnet | Detect session corrections → write as permanent rules |
 | `/evaluate "tool"` | Opus | Evaluate external idea/tool/pattern against project |
 | `/challenge "idea"` | Opus | Critically evaluate a feature idea before building |
