@@ -20,10 +20,10 @@ Run once when joining a new codebase or before starting a major initiative.
 
 | Command | Description |
 |---------|-------------|
-| `/explore "topic"` | Read-only thinking partner — map codebase, surface tradeoffs, draw ASCII diagrams; never writes files (contrast: `/challenge` evaluates a specific idea with GO/SIMPLIFY/REJECT verdict) |
+| `/explore "topic"` | Read-only thinking partner — map codebase, surface tradeoffs, draw ASCII diagrams; never writes files |
 | `/analyze` | Codebase overview via 3 parallel agents — produces PATTERNS.md and AUDIT.md |
 | `/discover` | Reverse-engineer draft specs from existing code |
-| `/evaluate "tool"` | Deep-evaluate an external tool or pattern against the project |
+| `/research "tool"` | Deep-research an external repo/tool/pattern, produce brainstorm document |
 
 ---
 
@@ -32,7 +32,7 @@ Run once when joining a new codebase or before starting a major initiative.
 The standard cycle for any task larger than a single-file fix.
 
 ```
-/spec "task description"       # challenge idea, create structured spec
+/spec "task description"       # triage complexity, think through, create spec
 /spec-validate NNN             # score spec quality before executing
 /spec-work NNN                 # execute step by step, commit after each step
 /test                          # run tests + fix failures (up to 3 attempts)
@@ -50,7 +50,7 @@ Parallel execution: `/spec-work-all` runs all draft specs in isolated Git worktr
 
 | Command | Description |
 |---------|-------------|
-| `/spec "task"` | Challenge idea first, then create structured spec |
+| `/spec "task"` | Triage complexity, think through implementation, create spec |
 | `/spec-work NNN` | Execute spec step by step with auto-verification |
 | `/spec-work-all` | Execute all draft specs in parallel (isolated worktrees) |
 | `/spec-review NNN` | Review against acceptance criteria + finishing gate |
@@ -64,11 +64,21 @@ Parallel execution: `/spec-work-all` runs all draft specs in isolated Git worktr
 | `/scan` | Security vulnerability scan (snyk/npm audit/pip-audit) |
 | `/techdebt` | End-of-session sweep — dead code, unused imports |
 | `/explore "topic"` | Read-only thinking partner — explore tradeoffs, map codebase, surface surprises (no file writes) |
-| `/challenge "idea"` | Critically evaluate a feature idea before building (GO/SIMPLIFY/REJECT verdict) |
+| `/challenge "idea"` | Quick critical gate — GO/SIMPLIFY/REJECT before investing in a spec |
 | `/commit` | Stage changes + conventional commit message |
 | `/pr` | Build validation + staff review + PR draft |
 | `/ci` | Check CI status via gh pr checks / gh run list, suggests next step |
 | `/release` | Bump version, update CHANGELOG, tag release |
+
+### Which Pre-Planning Command?
+
+```
+New idea or feature?
+├── Simple (1-2 files, clear scope) → /spec directly
+├── Complex or uncertain → /challenge first → then /spec
+├── External tool/repo to evaluate → /research
+└── Want to explore freely (no verdict) → /explore
+```
 
 ---
 
