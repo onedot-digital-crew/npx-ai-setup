@@ -75,6 +75,7 @@ CHECKS=(
   "setup.sh:install_commands"
   "setup.sh:install_claude_scripts"
   "setup.sh:update_gitignore"
+  "setup.sh:customize_settings_for_stack"
   "setup-skills.sh:install_spec_skills"
   "setup-skills.sh:install_agents"
   "setup-skills.sh:repair_canonical_skill_links"
@@ -91,6 +92,7 @@ CHECKS=(
   "plugins.sh:install_playwright"
   "plugins.sh:show_installation_summary"
   "plugins.sh:show_next_steps"
+  "plugins.sh:show_update_next_steps"
 )
 
 for check in "${CHECKS[@]}"; do
@@ -232,6 +234,57 @@ if grep -q '_json_merge' lib/json.sh 2>/dev/null; then
 else
   fail "lib/json.sh missing _json_merge"
 fi
+
+echo "--- Stack-aware sandbox permissions ---"
+# Simulate: write template settings.json, set framework, run customize, verify deny list
+SANDBOX_TMP=$(mktemp -d)
+cp templates/claude/settings.json "$SANDBOX_TMP/settings.json"
+
+# Verify .nuxt/** is in deny list before customization
+if grep -q 'Read(.nuxt/\*\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+  pass "template settings.json contains Read(.nuxt/**) in deny"
+else
+  fail "template settings.json missing Read(.nuxt/**) in deny"
+fi
+
+# Simulate nuxt customization via jq/node
+if command -v jq >/dev/null 2>&1; then
+  jq --arg patterns 'Read(.nuxt/**)|Read(.output/**)' '
+    .permissions.deny |= map(
+      select(. as $d | ($patterns | split("|")) | index($d) | not)
+    )
+  ' "$SANDBOX_TMP/settings.json" > "$SANDBOX_TMP/settings_out.json" && \
+    mv "$SANDBOX_TMP/settings_out.json" "$SANDBOX_TMP/settings.json"
+else
+  node -e "
+    const fs = require('fs');
+    const patterns = 'Read(.nuxt/**)|Read(.output/**)'.split('|');
+    const cfg = JSON.parse(fs.readFileSync('$SANDBOX_TMP/settings.json', 'utf8'));
+    cfg.permissions.deny = cfg.permissions.deny.filter(d => !patterns.includes(d));
+    fs.writeFileSync('$SANDBOX_TMP/settings.json', JSON.stringify(cfg, null, 2));
+  "
+fi
+
+# Verify .nuxt/** removed and .env* still present
+if grep -q 'Read(.nuxt/\*\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+  fail "nuxt customization did not remove Read(.nuxt/**)"
+else
+  pass "nuxt customization removed Read(.nuxt/**) from deny"
+fi
+
+if grep -q 'Read(.output/\*\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+  fail "nuxt customization did not remove Read(.output/**)"
+else
+  pass "nuxt customization removed Read(.output/**) from deny"
+fi
+
+if grep -q 'Read(.env\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+  pass "nuxt customization preserved Read(.env*) in deny"
+else
+  fail "nuxt customization incorrectly removed Read(.env*)"
+fi
+
+rm -rf "$SANDBOX_TMP"
 
 echo "--- .claudeignore template ---"
 CLAUDEIGNORE_COUNT=$(grep -c '^[^#]' templates/.claudeignore 2>/dev/null || echo 0)

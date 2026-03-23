@@ -31,7 +31,7 @@ For update runs where the user skips framework selection, detect from existing f
 - `next.config.*` → next
 Fallback: no customization (keep static deny list).
 
-### Step 4 — Add smoke test case
+### Step 4 — Add smoke test case ✅
 Extend `tests/smoke.sh`: after a simulated nuxt setup, verify that `.claude/settings.json`
 does NOT contain `Read(.nuxt/**)` in the deny list.
 
