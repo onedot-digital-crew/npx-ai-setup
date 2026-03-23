@@ -389,12 +389,12 @@ run_smart_update() {
   if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
     echo ""
     tui_section "Update Summary"
-    [ $UPD_UPDATED -gt 0 ] && echo "   Updated:   $UPD_UPDATED"
-    [ $UPD_NEW -gt 0 ] && echo "   New:       $UPD_NEW"
-    [ $UPD_REMOVED -gt 0 ] && echo "   Removed:   $UPD_REMOVED"
-    [ $UPD_SKIPPED -gt 0 ] && echo "   Unchanged: $UPD_SKIPPED"
-    [ $UPD_BACKED_UP -gt 0 ] && echo "   Backed up: $UPD_BACKED_UP (see .ai-setup-backup/)"
-    [ $UPD_REMOVED_BACKED_UP -gt 0 ] && echo "   Backed up before removal: $UPD_REMOVED_BACKED_UP"
+    [ $UPD_UPDATED -gt 0 ] && printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "Updated:" "$TUI_RESET" "$TUI_GREEN" "$UPD_UPDATED" "$TUI_RESET"
+    [ $UPD_NEW -gt 0 ] && printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "New:" "$TUI_RESET" "$TUI_GREEN" "$UPD_NEW" "$TUI_RESET"
+    [ $UPD_REMOVED -gt 0 ] && printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "Removed:" "$TUI_RESET" "$TUI_YELLOW" "$UPD_REMOVED" "$TUI_RESET"
+    [ $UPD_SKIPPED -gt 0 ] && printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "Unchanged:" "$TUI_RESET" "$TUI_DIM" "$UPD_SKIPPED" "$TUI_RESET"
+    [ $UPD_BACKED_UP -gt 0 ] && printf '   %b%-12s%b %b%s%b %b(see .ai-setup-backup/)%b\n' "$TUI_DIM" "Backed up:" "$TUI_RESET" "$TUI_CYAN" "$UPD_BACKED_UP" "$TUI_RESET" "$TUI_DIM" "$TUI_RESET"
+    [ $UPD_REMOVED_BACKED_UP -gt 0 ] && printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "Backed up:" "$TUI_RESET" "$TUI_CYAN" "$UPD_REMOVED_BACKED_UP (before removal)" "$TUI_RESET"
   fi
 
   # Update metadata

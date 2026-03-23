@@ -229,36 +229,47 @@ show_installation_summary() {
 
 # Full onboarding tips for fresh installs
 show_next_steps() {
-  tui_section "Next Steps" "Tips, workflows, and reference links"
+  tui_section "Get Started"
 
-  printf '  %bQuick Start%b\n' "$TUI_BOLD" "$TUI_RESET"
-  echo "  Open Claude Code in this project and start working."
-  echo "  Full command reference:  .claude/WORKFLOW-GUIDE.md"
+  printf '  Open Claude Code in this project and you are ready to go.\n'
+  printf '  Run %b/analyze%b first to let Claude learn your codebase,\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '  then use %b/spec "your task"%b to plan before coding.\n' "$TUI_CYAN" "$TUI_RESET"
   echo ""
 
-  printf '  %bTop Tips%b\n' "$TUI_BOLD" "$TUI_RESET"
-  echo "  /spec \"task\"       Plan before coding (multi-file changes)"
-  echo "  /find-skills       Discover and install new skills from skills.sh"
+  printf '  %bSpec-Driven Development%b\n' "$TUI_BOLD" "$TUI_RESET"
+  echo ""
+  printf '  %b  /spec "add auth"%b\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '       %b│%b  Claude writes a structured plan\n' "$TUI_DIM" "$TUI_RESET"
+  printf '       %b▼%b\n' "$TUI_DIM" "$TUI_RESET"
+  printf '  %b  /spec-validate 171%b\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '       %b│%b  Check the plan before executing\n' "$TUI_DIM" "$TUI_RESET"
+  printf '       %b▼%b\n' "$TUI_DIM" "$TUI_RESET"
+  printf '  %b  /spec-work 171%b\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '       %b│%b  Claude implements step by step\n' "$TUI_DIM" "$TUI_RESET"
+  printf '       %b▼%b\n' "$TUI_DIM" "$TUI_RESET"
+  printf '  %b  /spec-review 171%b\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '       %b│%b  Verify against acceptance criteria\n' "$TUI_DIM" "$TUI_RESET"
+  printf '       %b▼%b\n' "$TUI_DIM" "$TUI_RESET"
+  printf '  %b  /commit%b\n' "$TUI_CYAN" "$TUI_RESET"
+  echo ""
+
+  printf '  %bEssential Commands%b\n' "$TUI_BOLD" "$TUI_RESET"
+  printf '  %b/analyze%b           Let Claude learn your codebase structure\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '  %b/review%b            Code review before committing\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '  %b/find-skills%b       Discover new skills from skills.sh\n' "$TUI_CYAN" "$TUI_RESET"
+  printf '  %b/pause + /resume%b   Save and restore session state\n' "$TUI_CYAN" "$TUI_RESET"
   if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2>/dev/null; then
-    echo "  use context7       Add to any prompt for up-to-date library docs"
+    printf '  %buse context7%b       Add to any prompt for up-to-date docs\n' "$TUI_CYAN" "$TUI_RESET"
   fi
   echo ""
 
-  printf '  %bKey Commands%b\n' "$TUI_BOLD" "$TUI_RESET"
-  echo "  /spec-work NNN     Execute a spec step by step"
-  echo "  /review            Code review before committing"
-  echo "  /commit            Stage and commit with conventional message"
-  echo "  /pause + /resume   Save and restore session state"
-  echo ""
-
-  printf '  %bLinks%b\n' "$TUI_BOLD" "$TUI_RESET"
-  echo "  Skills:     https://skills.sh/"
-  echo "  Memory:     https://claude-mem.ai"
-  echo "  Claude:     https://docs.anthropic.com/en/docs/claude-code"
-  echo "  Hooks:      https://docs.anthropic.com/en/docs/claude-code/hooks"
-  echo ""
-
-  echo "  To refresh setup later:  npx @onedot/ai-setup"
+  printf '  %bReference%b\n' "$TUI_BOLD" "$TUI_RESET"
+  printf '   %b%-12s%b ' "$TUI_DIM" "Guide:" "$TUI_RESET"
+  tui_file_link ".claude/WORKFLOW-GUIDE.md"
+  printf '\n'
+  printf '   %b%-12s%b %s\n' "$TUI_DIM" "Skills:" "$TUI_RESET" "https://skills.sh/"
+  printf '   %b%-12s%b %s\n' "$TUI_DIM" "Docs:" "$TUI_RESET" "https://docs.anthropic.com/en/docs/claude-code"
+  printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "Refresh:" "$TUI_RESET" "$TUI_CYAN" "npx @onedot/ai-setup" "$TUI_RESET"
   echo ""
 }
 
@@ -266,8 +277,12 @@ show_next_steps() {
 show_update_next_steps() {
   echo ""
   printf '  %bReference%b\n' "$TUI_BOLD" "$TUI_RESET"
-  echo "  Full command reference:  .claude/WORKFLOW-GUIDE.md"
-  echo "  Changelog:               CHANGELOG.md"
-  echo "  Refresh setup:           npx @onedot/ai-setup"
+  printf '   %b%-12s%b ' "$TUI_DIM" "Commands:" "$TUI_RESET"
+  tui_file_link ".claude/WORKFLOW-GUIDE.md"
+  printf '\n'
+  printf '   %b%-12s%b ' "$TUI_DIM" "Changelog:" "$TUI_RESET"
+  tui_file_link "CHANGELOG.md"
+  printf '\n'
+  printf '   %b%-12s%b %b%s%b\n' "$TUI_DIM" "Refresh:" "$TUI_RESET" "$TUI_CYAN" "npx @onedot/ai-setup" "$TUI_RESET"
   echo ""
 }

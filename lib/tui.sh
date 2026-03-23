@@ -311,6 +311,22 @@ tui_key_value() {
   printf '   %b%-12s%b %s\n' "$TUI_DIM" "${key}:" "$TUI_RESET" "$value"
 }
 
+# Print a clickable OSC 8 terminal hyperlink.
+# Usage: tui_file_link <relative_path>  — renders as underlined path, clickable in supported terminals
+# Falls back to plain text when color/unicode is off.
+tui_file_link() {
+  _tui_init
+  local path="$1"
+  local label="${2:-$path}"
+  if [ "$TUI_HAS_COLOR" = "yes" ]; then
+    local abs_path
+    abs_path="$(cd "$(dirname "$path")" 2>/dev/null && printf '%s/%s' "$(pwd)" "$(basename "$path")")"
+    printf '\033]8;;file://%s\033\\%b%s%b\033]8;;\033\\' "$abs_path" '\033[4m' "$label" "$TUI_RESET"
+  else
+    printf '%s' "$label"
+  fi
+}
+
 tui_prompt_text() {
   _tui_init
   printf '  %b%s%b %s' "$TUI_CYAN" "$TUI_ARROW" "$TUI_RESET" "$1"
