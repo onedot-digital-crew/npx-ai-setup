@@ -1,7 +1,7 @@
 ---
 id: 168
 title: Migrate project-audit into /analyze
-status: in-progress
+status: completed
 ---
 
 ## Goal
