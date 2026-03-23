@@ -174,9 +174,9 @@ has_system_config() {
   return 1
 }
 
-# Interactive system selector for fresh installs.
-# Prompts user to choose a boilerplate system or skip.
-# Sets SELECTED_SYSTEM (or empty string to skip).
+# Auto-detect framework from project config files and pull boilerplate.
+# Sets SELECTED_SYSTEM based on detected config files.
+# Skips silently if no framework detected or system config already present.
 select_boilerplate_system() {
   SELECTED_SYSTEM=""
 
@@ -185,35 +185,24 @@ select_boilerplate_system() {
     return 0
   fi
 
-  tui_section "Framework Files" "Optional framework rules and skills"
-  ask_single_choice_menu "Choose framework-specific files" --default 6 \
-    "Shopify|Add Shopify rules and skills" \
-    "Shopware|Add Shopware rules and skills" \
-    "Nuxt|Add Nuxt rules and skills" \
-    "Next.js|Add Next.js rules and skills" \
-    "Storyblok|Add Storyblok rules and skills" \
-    "Skip|Keep this project generic|Default"
-  _choice="${TUI_MENU_INDEX:-6}"
-
-  case "$_choice" in
-    1) SELECTED_SYSTEM="shopify" ;;
-    2) SELECTED_SYSTEM="shopware" ;;
-    3) SELECTED_SYSTEM="nuxt" ;;
-    4) SELECTED_SYSTEM="next" ;;
-    5) SELECTED_SYSTEM="storyblok" ;;
-    *) SELECTED_SYSTEM="" ;;
-  esac
+  # Auto-detect framework from config files
+  if ls nuxt.config.* 1>/dev/null 2>&1; then
+    SELECTED_SYSTEM="nuxt"
+  elif ls next.config.* 1>/dev/null 2>&1; then
+    SELECTED_SYSTEM="next"
+  elif [ -f "theme.liquid" ] || ls shopify.* 1>/dev/null 2>&1 || [ -d "sections" ] && [ -d "snippets" ]; then
+    SELECTED_SYSTEM="shopify"
+  fi
 
   if [ -z "$SELECTED_SYSTEM" ]; then
-    tui_info "Skipping framework-specific files"
     return 0
   fi
+
+  tui_info "Detected framework: $SELECTED_SYSTEM"
 
   if _gh_available; then
     pull_boilerplate_files "$SELECTED_SYSTEM"
   else
-    echo ""
-    tui_warn "gh CLI not found or not authenticated"
-    _show_manual_instructions "$SELECTED_SYSTEM"
+    tui_info "Skipping boilerplate pull (gh CLI not available)"
   fi
 }
