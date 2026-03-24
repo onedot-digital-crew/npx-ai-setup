@@ -24,7 +24,8 @@ fi
 
 # Block unresolved merge conflict markers in tracked files.
 if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
-  if git grep -n -E '^(<<<<<<<|=======|>>>>>>>)' -- . >/dev/null 2>&1; then
+  _CM=$(printf '<%.0s' {1..7})
+  if git grep -nqF "$_CM" -- . 2>/dev/null; then
     echo "Task completion blocked: unresolved merge conflict markers found." >&2
     exit 2
   fi

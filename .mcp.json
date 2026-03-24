@@ -1,11 +1,3 @@
 {
-  "mcpServers": {
-    "outline": {
-      "type": "http",
-      "url": "https://onedot.getoutline.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${OUTLINE_API_TOKEN:-}"
-      }
-    }
-  }
+  "mcpServers": {}
 }
