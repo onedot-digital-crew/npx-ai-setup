@@ -225,6 +225,55 @@ cleanup_orphans() {
   fi
 }
 
+# Reset: delete all setup-managed files so the next install runs completely fresh.
+# CLAUDE.md, specs/, memory/, and .claude/settings.local.json are intentionally excluded.
+run_reset() {
+  local TARGETS=()
+
+  # Managed directories (fully owned by setup)
+  [ -d ".claude/commands" ]  && TARGETS+=(".claude/commands/")
+  [ -d ".claude/rules" ]     && TARGETS+=(".claude/rules/")
+  [ -d ".claude/scripts" ]   && TARGETS+=(".claude/scripts/")
+  [ -d ".claude/hooks" ]     && TARGETS+=(".claude/hooks/")
+
+  # Template-managed skills only (leave custom skills untouched)
+  if [ -d ".claude/skills" ] && [ -d "$TPL/skills" ]; then
+    while IFS= read -r -d '' d; do
+      local name="${d##*/}"
+      [ -d "$TPL/skills/$name" ] && TARGETS+=(".claude/skills/$name/")
+    done < <(find ".claude/skills" -maxdepth 1 -mindepth 1 -type d -print0 2>/dev/null)
+  fi
+
+  # Managed single files
+  [ -f ".claude/settings.json" ]      && TARGETS+=(".claude/settings.json")
+  [ -f ".claude/WORKFLOW-GUIDE.md" ]  && TARGETS+=(".claude/WORKFLOW-GUIDE.md")
+  [ -f ".ai-setup.json" ]             && TARGETS+=(".ai-setup.json")
+  [ -f ".claudeignore" ]              && TARGETS+=(".claudeignore")
+  [ -f "AGENTS.md" ]                  && TARGETS+=("AGENTS.md")
+
+  if [ ${#TARGETS[@]} -eq 0 ]; then
+    tui_info "Nothing to reset — no managed files found"
+    return 0
+  fi
+
+  tui_warn "RESET: The following setup-managed files will be deleted"
+  for t in "${TARGETS[@]}"; do echo "   - $t"; done
+  tui_info "Excluded: CLAUDE.md, specs/, .agents/memory/, .claude/settings.local.json"
+  echo ""
+
+  if ask_yes_no_menu \
+    "Delete all managed files and reinstall from scratch?" \
+    "Yes" "Reset now — fresh install follows" \
+    "No" "Cancel" \
+    "no"; then
+    for t in "${TARGETS[@]}"; do rm -rf "$t"; done
+    tui_success "Reset complete (${#TARGETS[@]} items removed) — starting fresh install"
+  else
+    tui_info "Reset cancelled"
+    exit 0
+  fi
+}
+
 # Copy CLAUDE.md template
 install_claude_md() {
   tui_step "Writing CLAUDE.md"
