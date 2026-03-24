@@ -4,13 +4,6 @@
 
 PENDING_PLUGINS=""
 
-# Legacy compatibility shim.
-# GSD is intentionally optional and no longer auto-installed by ai-setup.
-install_gsd() {
-  echo "  🧩 GSD integration removed from default setup."
-  return 0
-}
-
 # Claude-Mem (Marketplace Plugin — persistent memory)
 install_claude_mem() {
   CLAUDE_MEM_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
@@ -46,8 +39,6 @@ install_official_plugins() {
   OFFICIAL_PLUGINS=(
     "code-review:Automated PR review with 4 parallel agents + confidence scoring"
     "feature-dev:7-phase feature workflow (discovery → architecture → review)"
-    "frontend-design:Anti-generic design guidance for frontend projects"
-    "commit-commands:Git workflow slash commands (/commit, /commit-push-pr, /clean_gone)"
   )
 
   INSTALLED_PLUGINS=""
