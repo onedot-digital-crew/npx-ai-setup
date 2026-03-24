@@ -12,10 +12,6 @@ Always set `model:` when spawning subagents. Haiku costs 12Ã— less than Sonnet â
 
 Never spawn an Explore or search agent without `model: haiku`.
 
-## Agent Dispatch
-
-Full trigger/model table: see `.claude/docs/agent-dispatch.md`.
-
 ## Agent Selection
 
 Each agent file contains `## When to Use` and `## Avoid If` sections. Read these before spawning an agent.
