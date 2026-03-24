@@ -20,7 +20,7 @@ All 5 Node.js fallback functions in `lib/json.sh` embed shell variables directly
 - [x] Step 3: Rewrite `_json_merge()` Node fallback — pass `$target` and `$merge` via `process.argv[1]`/`[2]`
 - [x] Step 4: Rewrite `_json_build_metadata()` Node fallback — pass `$ver`, `$inst`, `$upd` via argv
 - [x] Step 5: Rewrite `_json_set_file()` Node fallback — pass `$key` and `$val` via `process.argv`
-- [ ] Step 6: Fix `setup.sh:252-260` Node fallback — pass `$settings` via `process.argv`
+- [x] Step 6: Fix `setup.sh:252-260` Node fallback — pass `$settings` via `process.argv`
 - [ ] Step 7: Run smoke tests (`tests/smoke.sh`) and verify json operations work with both jq and node
 - [ ] Step 8: Sync templates (`cp lib/json.sh templates/lib/json.sh` etc.)
 

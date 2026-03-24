@@ -249,15 +249,16 @@ customize_settings_for_stack() {
       )
     ' "$settings" > "$tmp" && mv "$tmp" "$settings" || { rm -f "$tmp"; return 1; }
   else
-    node -e "
+    node - "$settings" "$remove_patterns" <<'NODESCRIPT' 2>/dev/null || { rm -f "$tmp"; return 1; }
       const fs = require('fs');
-      const patterns = process.argv[1].split('|');
-      const cfg = JSON.parse(fs.readFileSync('$settings', 'utf8'));
+      const settings = process.argv[1];
+      const patterns = process.argv[2].split('|');
+      const cfg = JSON.parse(fs.readFileSync(settings, 'utf8'));
       if (cfg.permissions && cfg.permissions.deny) {
         cfg.permissions.deny = cfg.permissions.deny.filter(d => !patterns.includes(d));
       }
-      fs.writeFileSync('$settings', JSON.stringify(cfg, null, 2));
-    " "$remove_patterns" 2>/dev/null || { rm -f "$tmp"; return 1; }
+      fs.writeFileSync(settings, JSON.stringify(cfg, null, 2));
+NODESCRIPT
   fi
   rm -f "$tmp"
 
