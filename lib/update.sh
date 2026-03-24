@@ -61,9 +61,9 @@ show_cli_update_notice() {
   # Only show notice when registry version is strictly newer (semver compare)
   if [ "$latest" != "$current" ] && _semver_gt "$latest" "$current"; then
     echo ""
-    tui_info "New version available: @onedot/ai-setup v${latest} (current: v${current})"
-    echo "   Update command: npx github:onedot-digital-crew/npx-ai-setup"
-    echo ""
+    tui_hint \
+      "New version available: @onedot/ai-setup v${latest} (current: v${current})" \
+      "Update: npx github:onedot-digital-crew/npx-ai-setup"
   fi
 }
 
@@ -433,8 +433,9 @@ run_smart_update() {
       fi
     else
       echo ""
-      tui_warn "Skipping regeneration (claude CLI not found)."
-      echo "  Install: npm i -g @anthropic-ai/claude-code"
+      tui_hint \
+        "Skipping regeneration — claude CLI not found." \
+        "Install: npm i -g @anthropic-ai/claude-code"
     fi
   fi
 

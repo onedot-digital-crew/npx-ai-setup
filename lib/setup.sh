@@ -119,9 +119,9 @@ check_requirements() {
   local npm_cache
   npm_cache="$(npm config get cache 2>/dev/null || echo "$HOME/.npm")"
   if [ -d "$npm_cache" ] && find "$npm_cache" -maxdepth 1 -not -user "$(id -u)" -print -quit 2>/dev/null | grep -q .; then
-    tui_warn "npm cache contains root-owned files — this can break npx"
-    echo "   Fix:  sudo chown -R \$(id -u):\$(id -g) \"$npm_cache\""
-    echo ""
+    tui_hint \
+      "npm cache contains root-owned files — this can break npx" \
+      "Fix: sudo chown -R \$(id -u):\$(id -g) \"$npm_cache\""
   fi
 
   # Template directory validation
@@ -302,12 +302,10 @@ run_reset() {
     for t in "${TARGETS[@]}"; do rm -rf "$t"; done
     tui_success "Reset complete (${#TARGETS[@]} items removed) — starting fresh install"
     echo ""
-    tui_info "For a complete wipe, delete these manually before continuing:"
-    echo "   rm CLAUDE.md"
-    echo "   rm .claude/settings.local.json"
-    echo "   rm -rf .agents/memory/"
-    echo "   rm -rf specs/"
-    echo ""
+    tui_hint \
+      "For a complete wipe, delete these manually before continuing:" \
+      "  rm CLAUDE.md  |  rm .claude/settings.local.json" \
+      "  rm -rf .agents/memory/  |  rm -rf specs/"
   else
     tui_info "Reset cancelled"
     exit 0
