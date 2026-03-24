@@ -268,6 +268,13 @@ run_reset() {
     "no"; then
     for t in "${TARGETS[@]}"; do rm -rf "$t"; done
     tui_success "Reset complete (${#TARGETS[@]} items removed) — starting fresh install"
+    echo ""
+    tui_info "For a complete wipe, delete these manually before continuing:"
+    echo "   rm CLAUDE.md"
+    echo "   rm .claude/settings.local.json"
+    echo "   rm -rf .agents/memory/"
+    echo "   rm -rf specs/"
+    echo ""
   else
     tui_info "Reset cancelled"
     exit 0
