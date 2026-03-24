@@ -1,6 +1,6 @@
 ---
 name: spec-validate
-description: Validate a draft spec before execution. Use when the user says `/spec-validate NNN`, "validate spec NNN", or "check whether a spec is ready to execute".
+description: Validate a draft spec before execution — checks quality and readiness BEFORE implementation begins. Triggers on: `/spec-validate NNN`, "validate spec NNN", "is spec 042 ready to implement", "check if spec NNN is ready", "review the spec quality", "is this spec good enough to execute". Key distinction: spec-validate is for BEFORE coding starts. Does NOT trigger for reviewing a spec AFTER implementation (use spec-review), creating a spec, or running/executing a spec.
 ---
 
 # Spec Validate — Score a Draft Before Execution

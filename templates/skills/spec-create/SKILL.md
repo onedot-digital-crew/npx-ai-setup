@@ -1,6 +1,6 @@
 ---
 name: spec-create
-description: Create a new spec for a task. Use when the user says `/spec ...`, "create a spec for X", "write a spec for X", "spec out X", or "plan X as a spec". A spec is a structured implementation plan that lives in specs/NNN-title.md.
+description: Create a new spec for a task. Use when the user says `/spec ...`, "create a spec for X", "write a spec for X", "spec out X", "plan X as a spec", or "I want to plan this before implementing". Also triggers when the user wants to document a feature plan, break a large task into structured steps, or write acceptance criteria before coding. Does NOT trigger for directly implementing something without a planning step, exploring an idea (use explore instead), or validating/running an existing spec.
 ---
 
 # Spec Create — Write a Structured Implementation Plan

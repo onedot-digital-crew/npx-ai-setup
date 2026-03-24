@@ -1,6 +1,6 @@
 ---
 name: spec-work-all
-description: Execute all draft specs in parallel waves. Use when the user says `/spec-work-all`, "run all draft specs", or "implement all ready specs in parallel".
+description: Execute all draft specs in parallel waves using isolated Git worktrees. Invoke when the user wants to batch-implement everything at once: `/spec-work-all`, "run all specs", "implement everything", "do all the drafts", "work on all pending specs", "batch implement", "run all ready specs", "go through all my specs". Also triggers when the user has multiple draft specs and wants them all done in one go. Does NOT trigger for working on a single specific spec number, listing specs, or reviewing/validating a spec.
 ---
 
 # Spec Work All — Batch Execute Draft Specs
