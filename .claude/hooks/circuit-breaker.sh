@@ -13,6 +13,7 @@ esac
 
 PROJ_HASH=$(echo "$PWD" | shasum | cut -c1-8)
 LOG="/tmp/claude-cb-${PROJ_HASH}.log"
+touch "$LOG" && chmod 600 "$LOG" 2>/dev/null
 NOW=$(date +%s)
 WINDOW=600
 WARN=5

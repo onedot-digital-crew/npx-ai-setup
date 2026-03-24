@@ -19,11 +19,11 @@ MESSAGE="${MSG:-Claude Code is ready}"
 
 case "$(uname -s)" in
   Darwin)
-    osascript -e "display notification \"$MESSAGE\" with title \"$TITLE\"" 2>/dev/null || true
+    osascript -e "display notification \"$(printf '%s' "$MESSAGE" | sed 's/["\]/\\&/g')\" with title \"$(printf '%s' "$TITLE" | sed 's/["\]/\\&/g')\"" 2>/dev/null || true
     ;;
   Linux)
     if command -v notify-send >/dev/null 2>&1; then
-      notify-send "$TITLE" "$MESSAGE" 2>/dev/null || true
+      notify-send -- "$TITLE" "$MESSAGE" 2>/dev/null || true
     fi
     ;;
   *)

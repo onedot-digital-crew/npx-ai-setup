@@ -15,6 +15,10 @@ if ! command -v defuddle >/dev/null 2>&1; then
   warnings+=("defuddle not found — install with 'npm i -g defuddle' for 80% savings on web content")
 fi
 
+if ! command -v jq >/dev/null 2>&1; then
+  warnings+=("jq not found — many hooks depend on it and will silently fail without it")
+fi
+
 if [[ ${#warnings[@]} -gt 0 ]]; then
   for w in "${warnings[@]}"; do
     echo "[cli-health] $w" >&2
