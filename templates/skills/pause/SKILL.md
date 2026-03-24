@@ -1,6 +1,7 @@
 ---
 model: haiku
 allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
+disable-model-invocation: true
 ---
 
 Captures current session state into `.continue-here.md` and commits it as a WIP checkpoint. Run before ending a session.

@@ -5,6 +5,7 @@ allowed-tools:
   - Bash
   - AskUserQuestion
   - Read
+disable-model-invocation: true
 ---
 
 Check for ai-setup updates, show what changed, and install if the user confirms.

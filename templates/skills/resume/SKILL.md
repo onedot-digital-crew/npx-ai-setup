@@ -1,6 +1,7 @@
 ---
 model: haiku
 allowed-tools: Read, Bash, Glob, Grep, AskUserQuestion
+disable-model-invocation: true
 ---
 
 Restores session state from `.continue-here.md` and routes to the next action. Run at the start of a new session.

@@ -1,5 +1,6 @@
 ---
 allowed-tools: Read, Edit, Write, Bash, Glob, Grep, Agent, WebFetch, WebSearch
+disable-model-invocation: true
 ---
 
 Autonomous execution mode. Execute the task described in **$ARGUMENTS** fully independently — no questions, no confirmations, no approval gates.

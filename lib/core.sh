@@ -7,12 +7,12 @@ TEMPLATE_EXCLUDES=("mcp.json")
 
 # Build TEMPLATE_MAP dynamically from templates/ directory.
 # Applies consistent prefix rules:
-#   claude/    -> .claude/
-#   github/    -> .github/
-#   commands/  -> .claude/commands/
-#   agents/    -> .claude/agents/
-#   specs/     -> specs/
-#   (root)     -> (root, e.g. CLAUDE.md)
+#   claude/  -> .claude/
+#   github/  -> .github/
+#   agents/  -> .claude/agents/
+#   specs/   -> specs/
+#   (root)   -> (root, e.g. CLAUDE.md)
+# Note: commands/ is empty (migrated to skills/); skills/ handled by install_skills()
 build_template_map() {
   TEMPLATE_MAP=()
   local tpl_dir="$SCRIPT_DIR/templates"
@@ -28,8 +28,9 @@ build_template_map() {
     done
     [ "$excluded" = "true" ] && continue
 
-    # Skip skills/ — handled separately via SPEC_SKILLS_MAP
+    # Skip skills/ and commands/ — both handled by install_skills()
     [[ "$rel" == skills/* ]] && continue
+    [[ "$rel" == commands/* ]] && continue
 
     # Skip typescript.md — handled conditionally by TS_RULES_MAP in install_rules()
     [[ "$rel" == "claude/rules/typescript.md" ]] && continue
@@ -39,7 +40,6 @@ build_template_map() {
     case "$rel" in
       claude/*)   target=".${rel}" ;;
       github/*)   target=".${rel}" ;;
-      commands/*) target=".claude/${rel}" ;;
       agents/*)   target=".claude/${rel}" ;;
       scripts/*)  target=".claude/${rel}" ;;
       specs/*)    target="${rel}" ;;
@@ -53,8 +53,8 @@ build_template_map() {
 # Populate TEMPLATE_MAP at startup
 build_template_map
 
-# Workflow skills shipped to every project so Codex can map slash-style spec prompts
-# to the existing spec workflow through .codex/skills -> .claude/skills.
+# Legacy: explicit skill mappings used by install_spec_skills() — kept for compat.
+# Superseded by install_skills() which installs all templates/skills/ generically.
 SPEC_SKILLS_MAP=(
   "templates/skills/spec-board/SKILL.md:.claude/skills/spec-board/SKILL.md"
   "templates/skills/spec-create/SKILL.md:.claude/skills/spec-create/SKILL.md"

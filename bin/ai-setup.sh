@@ -106,9 +106,8 @@ ensure_gemini_skills_alias
 ensure_opencode_skills_alias
 install_specs
 install_workflow_guide
-install_commands
+install_skills
 install_claude_scripts
-install_spec_skills
 install_agents
 cleanup_orphans
 select_boilerplate_system

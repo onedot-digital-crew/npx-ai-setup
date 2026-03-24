@@ -471,10 +471,21 @@ install_workflow_guide() {
   _install_or_update_file "$TPL/claude/WORKFLOW-GUIDE.md" WORKFLOW-GUIDE.md
 }
 
-# Install slash commands
-install_commands() {
-  tui_step "Installing slash commands"
-  _install_template_dir "$TPL/commands" ".claude/commands" "" "" >/dev/null
+# Install all template skills (commands + spec workflow) to .claude/skills/
+install_skills() {
+  tui_step "Installing skills"
+  [ -d "$TPL/skills" ] || return 0
+  local _count=0
+  while IFS= read -r -d '' skill_dir; do
+    local name="${skill_dir##*/}"
+    local skill_file="$skill_dir/SKILL.md"
+    [ -f "$skill_file" ] || continue
+    mkdir -p ".claude/skills/$name"
+    _install_or_update_file "$skill_file" ".claude/skills/$name/SKILL.md"
+    _count=$(( _count + 1 ))
+  done < <(find "$TPL/skills" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  [ "$_count" -gt 0 ] && tui_success "$_count skill(s) installed to .claude/skills/"
+  return 0
 }
 
 # Install tracked repo-local Claude scripts by copying canonical templates/scripts/*.sh

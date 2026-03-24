@@ -351,7 +351,7 @@ run_smart_update() {
   fi
   command -v ensure_codex_skills_alias >/dev/null 2>&1 && ensure_codex_skills_alias
   command -v ensure_opencode_skills_alias >/dev/null 2>&1 && ensure_opencode_skills_alias
-  command -v install_spec_skills >/dev/null 2>&1 && install_spec_skills
+  command -v install_skills >/dev/null 2>&1 && install_skills
 
   # Pre-scan templates to detect actual changes per category (skip if already scanned)
   if [ -z "${SCAN_TOTAL_CHANGES+x}" ]; then
