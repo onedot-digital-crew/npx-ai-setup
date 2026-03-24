@@ -95,7 +95,7 @@ check_expected_install_artifacts() {
   assert_path_exists "$PROJECT_DIR/.mcp.json" ".mcp.json created"
   assert_path_exists "$PROJECT_DIR/.github/copilot-instructions.md" ".github/copilot-instructions.md created"
   assert_path_exists "$PROJECT_DIR/.claude/settings.json" ".claude/settings.json created"
-  assert_path_exists "$PROJECT_DIR/.claude/WORKFLOW-GUIDE.md" ".claude/WORKFLOW-GUIDE.md created"
+  assert_path_exists "$PROJECT_DIR/WORKFLOW-GUIDE.md" "WORKFLOW-GUIDE.md created"
   assert_path_exists "$PROJECT_DIR/.claude/hooks/update-check.sh" ".claude/hooks/update-check.sh created"
   assert_path_exists "$PROJECT_DIR/.claude/rules/general.md" ".claude/rules/general.md created"
   assert_path_exists "$PROJECT_DIR/.claude/agents/code-reviewer.md" ".claude/agents/code-reviewer.md created"

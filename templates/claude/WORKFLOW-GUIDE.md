@@ -232,4 +232,4 @@ Sandbox permissions are auto-adjusted per framework during setup. If hooks still
 
 ---
 
-*Installed by `@onedot/ai-setup`. Not loaded into context automatically — reference `.claude/WORKFLOW-GUIDE.md` when needed.*
+*Installed by `@onedot/ai-setup`. Not loaded into context automatically — reference `WORKFLOW-GUIDE.md` when needed.*

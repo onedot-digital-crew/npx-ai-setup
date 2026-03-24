@@ -266,7 +266,7 @@ run_reset() {
 
   # Managed single files
   [ -f ".claude/settings.json" ]      && TARGETS+=(".claude/settings.json")
-  [ -f ".claude/WORKFLOW-GUIDE.md" ]  && TARGETS+=(".claude/WORKFLOW-GUIDE.md")
+  [ -f "WORKFLOW-GUIDE.md" ]           && TARGETS+=("WORKFLOW-GUIDE.md")
   [ -f ".ai-setup.json" ]             && TARGETS+=(".ai-setup.json")
   [ -f ".claudeignore" ]              && TARGETS+=(".claudeignore")
   [ -f "AGENTS.md" ]                  && TARGETS+=("AGENTS.md")
@@ -468,7 +468,7 @@ install_specs() {
 # Install developer workflow guide
 install_workflow_guide() {
   tui_step "Installing workflow guide"
-  _install_or_update_file "$TPL/claude/WORKFLOW-GUIDE.md" .claude/WORKFLOW-GUIDE.md
+  _install_or_update_file "$TPL/claude/WORKFLOW-GUIDE.md" WORKFLOW-GUIDE.md
 }
 
 # Install slash commands
