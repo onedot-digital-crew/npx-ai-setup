@@ -48,38 +48,6 @@ install_claude_mem() {
   fi
 }
 
-# CodeRabbit Claude Plugin (Marketplace Plugin — PR review companion)
-install_coderabbit_plugin() {
-  CODERABBIT_DIR="${HOME}/.claude/plugins/cache/coderabbitai/claude-plugin"
-
-  if [ -d "$CODERABBIT_DIR" ]; then
-    echo "  🐇 CodeRabbit plugin already installed, skipping."
-    return 0
-  fi
-
-  # Merge marketplace + enabled plugin hints into project settings.
-  if [ -f .claude/settings.json ]; then
-    CODERABBIT_MERGE='{"extraKnownMarketplaces":{"coderabbitai":{"source":{"source":"github","repo":"coderabbitai/claude-plugin"}}},"enabledPlugins":{"claude-plugin@coderabbitai":true}}'
-    _json_merge .claude/settings.json "$CODERABBIT_MERGE"
-    echo "  🐇 CodeRabbit marketplace registered in .claude/settings.json"
-  fi
-
-  # Try CLI install (first marketplace id, then full repo fallback).
-  if command -v claude &>/dev/null; then
-    echo "  🐇 Attempting CodeRabbit plugin install via CLI..."
-    if claude plugin install claude-plugin@coderabbitai --scope project 2>/dev/null || \
-       claude plugin install coderabbitai/claude-plugin --scope project 2>/dev/null; then
-      echo "  ✅ CodeRabbit plugin installed via CLI"
-    else
-      PENDING_PLUGINS="${PENDING_PLUGINS}coderabbit-plugin "
-      echo "  📋 CodeRabbit plugin registered — will be prompted on next Claude Code session"
-    fi
-  else
-    PENDING_PLUGINS="${PENDING_PLUGINS}coderabbit-plugin "
-    echo "  📋 CodeRabbit plugin registered — teammates will be prompted to install when they trust this project"
-  fi
-}
-
 # Official Claude Code Plugins (code-review, feature-dev, etc.)
 install_official_plugins() {
   OFFICIAL_PLUGINS=(
@@ -156,13 +124,7 @@ show_plugin_summary() {
           echo "     /plugin marketplace add thedotmack/claude-mem"
           echo "     /plugin install claude-mem"
           ;;
-        coderabbit-plugin)
-          echo "     /plugin marketplace add coderabbitai/claude-plugin"
-          echo "     /plugin install claude-plugin@coderabbitai"
-          echo "     # fallback:"
-          echo "     /plugin install coderabbitai/claude-plugin"
-          ;;
-        *)
+*)
           echo "     /plugin install ${PP}"
           ;;
       esac
@@ -204,12 +166,7 @@ show_installation_summary() {
   if [ -d "$CLAUDE_MEM_DIR" ]; then
     mem_status="installed"
   fi
-  local CODERABBIT_DIR="${HOME}/.claude/plugins/cache/coderabbitai/claude-plugin"
-  local rabbit_status="pending"
-  if [ -d "$CODERABBIT_DIR" ]; then
-    rabbit_status="installed"
-  fi
-  plugin_status="Claude-Mem ${mem_status}, CodeRabbit ${rabbit_status}"
+  plugin_status="Claude-Mem ${mem_status}"
   [ -n "${INSTALLED_PLUGINS:-}" ] && plugin_status="${plugin_status}, extras ${INSTALLED_PLUGINS}"
   if [ -n "$PENDING_PLUGINS" ]; then
     plugin_status="${plugin_status}, pending ${PENDING_PLUGINS}"

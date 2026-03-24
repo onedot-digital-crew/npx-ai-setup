@@ -117,7 +117,6 @@ install_claudeignore
 tui_section "Plugins & Extensions" "Marketplace plugins, MCP servers, and editor-side helpers"
 
 install_claude_mem
-install_coderabbit_plugin
 install_official_plugins
 install_context7
 show_plugin_summary

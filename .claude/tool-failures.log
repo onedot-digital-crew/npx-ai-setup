@@ -105,3 +105,24 @@
 2026-03-24T11:28:24Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 STATE_FILE=".agents/context/.state" [ ! -f "$STATE_FILE" ] && exit 0  STORED_PKG="" STORED_TSC="" STORED_GIT="" while IFS='=' read -r key val; do   case "$key" in     PKG_HASH) STORED_PKG="$val" ;;     TSCONFIG_HASH) STORED_TSC="$val" ;;     GIT_HASH) STORED_GIT="$val" ;;   esac done < "$STATE_FILE"  CHANGED=""  if [ -n "$STORED_GIT" ]; then   CURRENT_GIT=$(git rev-parse HEAD 2>/dev/nu
 2026-03-24T11:33:45Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.
 2026-03-24T11:36:15Z TOOL_FAIL tool=mcp__plugin_claude-mem_mcp-search__search interrupt=false error=Error calling Worker API: Worker API error (500): {"error":"Either query or filters required for search"}
+2026-03-24T11:40:27Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T11:51:30Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T12:02:57Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 2 ai-agent-web-optimizer: 3 context files uncommitted alpensattel-ai-studio: 3 context files uncommitted (eval):[:4: integer expression expected: 0\n0 Alpensattelproleadgen: 3 context files uncommitted aos-doc: 3 context files uncommitted (eval):[:4: integer expression expected: 0\n0 (eval):[:4: integer expression expected: 0\n0 (eval):[:4: integer expression expected: 0\n0 (eval):[:4: i
+2026-03-24T12:07:25Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 8 Error: stepping, attempt to write a readonly database (8)
+2026-03-24T12:07:56Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Error: getaddrinfo ENOTFOUND docs.claude-mem.ai
+2026-03-24T12:07:58Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 128 FAILED: git add Schwerwiegend: Konnte '/Users/deniskern/Sites/sp-shopify-boilerplate/.git/index.lock' nicht erstellen: Operation not permitted
+2026-03-24T12:08:07Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 128 FAILED: git add Schwerwiegend: Konnte '/Users/deniskern/Sites/sp-shopify-boilerplate/.git/index.lock' nicht erstellen: Operation not permitted
+2026-03-24T12:08:12Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T12:09:25Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 chmod: Unable to change file mode on /Users/deniskern/.claude-mem/cleanup.sh: Operation not permitted
+2026-03-24T12:18:35Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T12:19:40Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 0 matches for 'coderabbit\|CodeRabbit'
+2026-03-24T12:25:29Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T12:25:34Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T12:26:33Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T12:27:02Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1       36 /Users/deniskern/.claude/CLAUDE.md       36 total
+2026-03-24T12:28:03Z TOOL_FAIL tool=Read interrupt=false error=File content (14893 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+2026-03-24T12:28:03Z TOOL_FAIL tool=Read interrupt=false error=File content (13563 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+2026-03-24T12:30:27Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 A  .claude/settings.json  M .github/copilot-instructions.md  M .gitignore A  AGENTS.md ?? .agents/
+2026-03-24T12:32:58Z TOOL_FAIL tool=Read interrupt=false error=File content (28676 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+2026-03-24T12:33:00Z TOOL_FAIL tool=Read interrupt=false error=File content (27765 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+2026-03-24T12:33:32Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 0 matches for 'opusplan\|AUTOCOMPACT\|SUBAGENT_MODEL\|effort\|rewind\|InstructionsLoaded\|background'
