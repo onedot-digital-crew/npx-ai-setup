@@ -1,3 +1,12 @@
+---
+paths:
+  - "**/*.ts"
+  - "**/*.js"
+  - "**/*.py"
+  - "**/*.go"
+  - "**/*.sql"
+---
+
 # Quality: Performance Principles
 
 ## Database

@@ -2,13 +2,8 @@
 
 ## Memory
 
-**Built-in Auto Memory** — Claude automatically saves notes to `.agents/memory/MEMORY.md` in this project. No setup required. Claude writes to this file during sessions and reads it back at the start of each conversation to maintain continuity.
-
-**claude-mem** (optional) — structured observation database with semantic search across sessions. Install if you want cross-session search and team-shared memory:
-```
-/plugin marketplace add thedotmack/claude-mem
-/plugin install claude-mem
-```
+**Built-in**: Auto-saves to `.agents/memory/MEMORY.md`. No setup required.
+**claude-mem** (optional): Cross-session semantic search. Install: `/plugin marketplace add thedotmack/claude-mem && /plugin install claude-mem`
 
 ## Tips
 
@@ -52,10 +47,9 @@ For complex tasks needing full details, use `/context-load STACK.md` (or ARCHITE
 Never read or search inside build output directories (dist/, .output/, .nuxt/, .next/, build/, coverage/). These directories contain generated artifacts that waste tokens and pollute context.
 
 ## Token Optimization
-- **RTK** auto-compresses CLI output (git, grep, test) by 60-90%. If installed, hooks are active transparently.
 - **Prep-scripts** (`.claude/scripts/*-prep.sh`) gather data in shell before Claude analyzes — zero tokens on green paths.
 - **Defuddle** (`defuddle parse <url> --md`) replaces WebFetch for web pages — strips noise, saves ~80% tokens.
-- Run `rtk gain` to check current token savings. See `.claude/docs/token-optimization.md` for the full guide.
+- See `.claude/docs/token-optimization.md` for the full guide.
 
 ## Task Complexity Routing
 Before starting, classify and state the task tier:
@@ -79,11 +73,7 @@ Run `/compact` at 80% context. Before ending a session, run `/pause` — it capt
 After a fresh start, run `/resume` to restore state and route to the next action.
 
 ## Parallel Orchestration
-Use subagents by default for focused delegated work.
-If teammates must coordinate directly, use experimental agent teams (enable only when needed):
-- Set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in local Claude settings or environment
-- Start with 3-5 teammates for independent tasks
-- Clean up the team after completion
+Use subagents by default. For direct agent coordination: set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, use 3-5 teammates, clean up after.
 
 ## Automation (Agent SDK CLI)
 For non-interactive runs, use `claude -p "<prompt>"`.
