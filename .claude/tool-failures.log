@@ -128,3 +128,5 @@
 2026-03-24T12:33:32Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 0 matches for 'opusplan\|AUTOCOMPACT\|SUBAGENT_MODEL\|effort\|rewind\|InstructionsLoaded\|background'
 2026-03-24T13:00:48Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 128 FAILED: git add Schwerwiegend: Konnte '/Users/deniskern/Sites/sb-nuxt-servomold/.git/index.lock' nicht erstellen: Operation not permitted
 2026-03-24T14:07:37Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 === Commands === (eval):1: operation not permitted: /tmp/cmds.txt
+2026-03-24T14:20:18Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-24T14:21:45Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 rm: /Users/deniskern/Sites/npx-ai-setup/.claude/commands/spec.md: Operation not permitted rm: /Users/deniskern/Sites/npx-ai-setup/.claude/commands/spec-work.md: Operation not permitted rm: /Users/deniskern/Sites/npx-ai-setup/.claude/commands/spec-review.md: Operation not permitted rm: /Users/deniskern/Sites/npx-ai-setup/.claude/commands/spec-validate.md: Operation not permitted rm: /Us

@@ -1,6 +1,6 @@
 # Spec 576 — Spec Command/Skill Consolidation
 
-**Status**: open
+**Status**: completed
 **Goal**: Eliminate dual-implementation of spec commands. Skills become the single source of truth; commands become thin wrappers (3 lines each).
 
 ## Problem
@@ -35,20 +35,20 @@ Use the Skill tool: `Skill({skill: "spec-work", args: "$ARGUMENTS"})`.
 
 ## Steps
 
-- [ ] Step 1: Audit — diff each command vs its skill, identify which has more complete/correct content per pair
-- [ ] Step 2: Merge `spec-work` — expand SKILL.md with full command content, strip command to 5-line wrapper
-- [ ] Step 3: Merge `spec` (create) — expand `spec-create` SKILL.md, strip `spec.md` command
-- [ ] Step 4: Merge `spec-review`, `spec-validate`, `spec-board`, `spec-work-all`
-- [ ] Step 5: Sync templates — mirror all changes to `templates/commands/` and `templates/skills/`
-- [ ] Step 6: Update `lib/setup.sh` if installation logic references command content
+- [x] Step 1: Audit — diff each command vs its skill, identify which has more complete/correct content per pair
+- [x] Step 2: Merge `spec-work` — expand SKILL.md with full command content, strip command to 5-line wrapper
+- [x] Step 3: Merge `spec` (create) — expand `spec-create` SKILL.md, strip `spec.md` command
+- [x] Step 4: Merge `spec-review`, `spec-validate`, `spec-board`, `spec-work-all`
+- [x] Step 5: Sync templates — mirror all changes to `templates/commands/` and `templates/skills/`
+- [x] Step 6: Update `lib/setup.sh` if installation logic references command content
 
 ## Acceptance Criteria
 
-- [ ] Each spec command file is ≤10 lines
-- [ ] Each spec SKILL.md contains the full, merged implementation
-- [ ] `/spec-work 074` still executes correctly (via Skill tool invocation)
-- [ ] No content exists only in the command that isn't in the SKILL.md
-- [ ] Template files match installed files
+- [x] Each spec command file is ≤10 lines
+- [x] Each spec SKILL.md contains the full, merged implementation
+- [x] `/spec-work 074` still executes correctly (via Skill tool invocation)
+- [x] No content exists only in the command that isn't in the SKILL.md
+- [x] Template files match installed files
 
 ## Files to Modify
 

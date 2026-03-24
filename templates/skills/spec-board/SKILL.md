@@ -4,33 +4,46 @@ description: Overview of all specs as Kanban board. Triggers: /spec-board, 'show
 disable-model-invocation: true
 ---
 
-# Spec Board — Kanban Overview of All Specs
+Displays a Kanban board of all specs with status and step progress. Use for an overview of the current spec pipeline.
 
-Displays all specs grouped by status with step progress.
+## Step 1: Show board (zero tokens)
 
-## Process
+!.claude/scripts/spec-board.sh
 
-1. **Scan specs**: `ls specs/*.md specs/completed/*.md 2>/dev/null`
+## Step 2: Consistency Check + Repair
 
-2. **For each spec**, extract:
-   - ID and title from filename
-   - Status from `**Status**:` in the header
-   - Step progress: count `- [x]` vs total `- [ ]` + `- [x]` lines
+After the board output above, scan the specs listed for inconsistencies:
 
-3. **Display as Kanban**:
+**Type A — Stale in-progress**: spec has all steps `- [x]` but status is still `in-progress` or `in-review` (not moved to `specs/completed/`).
 
+**Type B — Wrong location**: spec has status `completed` but file is still in `specs/` (not in `specs/completed/`).
+
+If any inconsistencies are found, list them:
 ```
-DRAFT          IN-PROGRESS    IN-REVIEW      COMPLETED
-─────────      ───────────    ─────────      ─────────
-074 title      075 title      073 title      072 title
-               [3/6 steps]                   ✓
+⚠️  Inconsistencies found:
+  #NNN Title — all steps done but status is "in-progress" (Type A)
+  #MMM Title — status "completed" but file not in specs/completed/ (Type B)
 ```
 
-4. **Summary line**: `X draft, Y in-progress, Z in-review, W completed`
+Use `AskUserQuestion` to ask:
+```
+Fix these inconsistencies automatically?
+A) Fix all — update status and move files now
+B) Fix selected — I'll choose one by one
+C) Skip — leave as is
+```
 
-## Status values
-- `draft` — approved, ready to implement
-- `in-progress` — currently being worked on
-- `in-review` — implemented, awaiting review
-- `blocked` — blocked, needs user input
-- `completed` — done, moved to specs/completed/
+- **Option A**: For each inconsistency:
+  - Type A: set status to `completed`, move `specs/NNN-*.md` → `specs/completed/NNN-*.md`
+  - Type B: move `specs/NNN-*.md` → `specs/completed/NNN-*.md`
+  - Report each fix.
+- **Option B**: For each inconsistency, ask individually with AskUserQuestion (Fix / Skip).
+- **Option C**: Skip all fixes.
+
+## Rules
+- Only write or move files during step 2 and only after user confirms.
+- If `specs/` does not exist or has no spec files, report "No specs found" and stop.
+
+## Next Step
+
+To work on a spec, run `/spec-work NNN`. To validate a draft spec before starting, run `/spec-validate NNN`.
