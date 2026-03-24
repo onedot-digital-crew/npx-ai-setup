@@ -1,6 +1,6 @@
 # Spec: Claude Code Best Practices Alignment (Docs Audit)
 
-> **Spec ID**: 575 | **Created**: 2026-03-24 | **Status**: draft | **Complexity**: low | **Branch**: —
+> **Spec ID**: 575 | **Created**: 2026-03-24 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 Implement missing best practices from the official Claude Code docs audit: subagent model enforcement, auto-compact threshold, and context management commands in templates.
