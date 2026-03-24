@@ -89,7 +89,7 @@ tui_brand_banner_once "Install project rules, workflow files, and helper tools"
 tui_section "Set Up Project" "Create core instructions, settings, workflow files, and helper tools"
 
 check_requirements
-[ "$RESET_MODE" -eq 1 ] && run_reset
+if [ "$RESET_MODE" -eq 1 ]; then run_reset; fi
 cleanup_legacy
 install_claude_md
 install_agents_md
