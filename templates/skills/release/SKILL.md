@@ -84,12 +84,15 @@ Full release workflow: validate → changelog → docs sync → version bump →
       | Hooks    | 13        | 13     | 13             | OK     |
       ```
     - List any missing entries from tables
+    - Even if all counts match, proceed to Phase 3 to verify table completeness row-by-row
     - If ANY discrepancy: show the full diff and ask user how to proceed via AskUserQuestion:
       - "Fix docs automatically" — proceed to Phase 3 with fixes
       - "Fix manually first" — stop, let user fix, re-run /release
-      - "Release anyway" — skip fixes, proceed to Phase 4
+      - "Skip docs sync" — skip fixes, proceed to Phase 4
 
-### Phase 3: Documentation Sync (only if discrepancies found or tables incomplete)
+### Phase 3: Documentation Sync
+
+**Always run this phase. Skip individual steps only if the audit (Phase 2) confirmed 0 discrepancies AND all tables were 100% complete. When in doubt, run the sync — it is additive-only and safe.**
 
 13. **Update README.md**
     - Fix counts in prose text (e.g. "24 slash commands" → actual count)
