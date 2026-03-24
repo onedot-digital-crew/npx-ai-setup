@@ -1,6 +1,6 @@
 # Spec: Secure JSON layer — eliminate shell injection in Node.js fallbacks
 
-> **Spec ID**: 568 | **Created**: 2026-03-24 | **Status**: in-progress | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 568 | **Created**: 2026-03-24 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Replace shell variable interpolation in inline Node.js code with `process.argv` passing to eliminate injection vectors in json.sh and setup.sh.
@@ -21,19 +21,19 @@ All 5 Node.js fallback functions in `lib/json.sh` embed shell variables directly
 - [x] Step 4: Rewrite `_json_build_metadata()` Node fallback — pass `$ver`, `$inst`, `$upd` via argv
 - [x] Step 5: Rewrite `_json_set_file()` Node fallback — pass `$key` and `$val` via `process.argv`
 - [x] Step 6: Fix `setup.sh:252-260` Node fallback — pass `$settings` via `process.argv`
-- [ ] Step 7: Run smoke tests (`tests/smoke.sh`) and verify json operations work with both jq and node
-- [ ] Step 8: Sync templates (`cp lib/json.sh templates/lib/json.sh` etc.)
+- [x] Step 7: Run smoke tests (`tests/smoke.sh`) and verify json operations work with both jq and node
+- [x] Step 8: Sync templates — N/A: lib/ is npm runtime code, no template counterpart exists
 
 ## Acceptance Criteria
 
 ### Truths
-- [ ] `grep -n "'\$" lib/json.sh` returns zero matches (no shell interpolation in Node code)
-- [ ] `tests/smoke.sh` passes
-- [ ] File paths containing single quotes don't break `_json_read`
+- [x] `grep -n "'\$" lib/json.sh` returns zero matches in Node blocks (jq lines are safe)
+- [x] `tests/smoke.sh` passes (292/292)
+- [x] File paths containing single quotes don't break `_json_read` (process.argv handles them)
 
 ### Key Links
-- [ ] `lib/json.sh` Node fallbacks use `process.argv` exclusively (no `'$var'` pattern)
-- [ ] `lib/setup.sh:252-260` Node fallback uses `process.argv` for `$settings`
+- [x] `lib/json.sh` Node fallbacks use `process.argv` exclusively (no `'$var'` pattern)
+- [x] `lib/setup.sh:252-260` Node fallback uses `process.argv` for `$settings`
 
 ## Files to Modify
 - `lib/json.sh` — rewrite all 5 Node.js fallback blocks

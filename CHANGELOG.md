@@ -10,6 +10,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 568**: Secure JSON layer — eliminated shell injection in Node.js fallbacks by replacing variable interpolation with process.argv
+
+## [Unreleased]
+
 ## [v2.0.1] — 2026-03-23
 
 ### New Features
