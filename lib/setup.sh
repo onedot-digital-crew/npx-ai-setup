@@ -203,6 +203,7 @@ cleanup_orphans() {
   _find_orphan_files "$TPL/claude/rules"  ".claude/rules"     "*.md"
   _find_orphan_files "$TPL/scripts"       ".claude/scripts"   "*.sh"
   _find_orphan_files "$TPL/claude/hooks"  ".claude/hooks"
+  _find_orphan_files "$TPL/agents"        ".claude/agents"    "*.md"
   _find_orphan_dirs  "$TPL/skills"        ".claude/skills"
 
   if [ ${#ORPHANS[@]} -eq 0 ]; then
@@ -244,12 +245,33 @@ run_reset() {
     done < <(find ".claude/skills" -maxdepth 1 -mindepth 1 -type d -print0 2>/dev/null)
   fi
 
+  # Template-managed agents only (leave custom agents untouched)
+  if [ -d ".claude/agents" ] && [ -d "$TPL/agents" ]; then
+    while IFS= read -r -d '' f; do
+      local name="${f##*/}"
+      [ -f "$TPL/agents/$name" ] && TARGETS+=(".claude/agents/$name")
+    done < <(find ".claude/agents" -maxdepth 1 -type f -print0 2>/dev/null)
+  fi
+
   # Managed single files
   [ -f ".claude/settings.json" ]      && TARGETS+=(".claude/settings.json")
   [ -f ".claude/WORKFLOW-GUIDE.md" ]  && TARGETS+=(".claude/WORKFLOW-GUIDE.md")
   [ -f ".ai-setup.json" ]             && TARGETS+=(".ai-setup.json")
   [ -f ".claudeignore" ]              && TARGETS+=(".claudeignore")
   [ -f "AGENTS.md" ]                  && TARGETS+=("AGENTS.md")
+  [ -f "opencode.json" ]              && TARGETS+=("opencode.json")
+
+  # Conditional installs (only if they exist)
+  [ -f ".gemini/settings.json" ]  && TARGETS+=(".gemini/settings.json")
+  [ -f ".codex/config.toml" ]     && TARGETS+=(".codex/config.toml")
+
+  # GitHub templates (copilot instructions + workflows)
+  if [ -d ".github" ] && [ -d "$TPL/github" ]; then
+    while IFS= read -r -d '' f; do
+      local rel="${f#$TPL/github/}"
+      [ -f ".github/$rel" ] && TARGETS+=(".github/$rel")
+    done < <(find "$TPL/github" -type f -print0 2>/dev/null)
+  fi
 
   if [ ${#TARGETS[@]} -eq 0 ]; then
     tui_info "Nothing to reset — no managed files found"
