@@ -9,6 +9,7 @@ node_modules/
 
 .idea
 .claude/worktrees/
+.claude/agent-metrics.log
 CLAUDE.local.md
 .agents/memory/
 .agents/.skill-cache.json

@@ -263,3 +263,5 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [agency-agents](https://github.com/msitarzewski/agency-agents)
 - [code-review-graph](https://github.com/tirth8205/code-review-graph)
 - [OpenViking](https://github.com/volcengine/OpenViking)
+- [gastown](https://github.com/steveyegge/gastown)
+- [just-ship](https://github.com/yves-s/just-ship)

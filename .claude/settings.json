@@ -246,6 +246,28 @@
           }
         ]
       }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'HOOK_EVENT=start bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/agent-metrics.sh'",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'HOOK_EVENT=stop bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/agent-metrics.sh'",
+            "timeout": 3
+          }
+        ]
+      }
     ]
   }
 }
