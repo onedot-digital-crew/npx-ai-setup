@@ -10,6 +10,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 579**: Opus in Routine-Sessions — `reflect` und `review` Skills von `model: opus` auf `model: sonnet` geändert, `review` Mode C (Adversarial) als optionaler Opus-Aufruf dokumentiert
+- **Spec 578**: Haiku-Routing — `model: haiku` explizit in discover/research Skills ergänzt, agents.md um "No default means Sonnet" erweitert
+- **Spec 577**: templates/CLAUDE.md — leere Sektionen `## Commands` und `## Critical Rules` entfernt (~120 Token/Session gespart)
+
 - **Spec 575**: Token optimization — added `specs/`, `templates/`, `CHANGELOG.md`, `.claude/*.log` to project `.claudeignore` (~236K token risk closed); added `.claude/*.log` to template `.claudeignore`; trimmed orchestrate skill description to ≤200 chars
 
 - **Spec 568**: Secure JSON layer — eliminated shell injection in Node.js fallbacks by replacing variable interpolation with process.argv
