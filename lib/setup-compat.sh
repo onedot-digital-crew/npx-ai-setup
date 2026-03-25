@@ -143,13 +143,32 @@ install_claudeignore() {
 
 }
 
-# Install claude-statusline globally via npx.
+# Install statusline script globally from bundled template.
 install_statusline_project() {
-  tui_spinner_start "Installing Claude statusline"
-  if npx @kamranahmedse/claude-statusline; then
-    tui_spinner_stop ok "Statusline installed -> @kamranahmedse/claude-statusline"
-  else
-    tui_spinner_stop warn "Statusline install failed"
+  local src="$TPL/scripts/statusline.sh"
+  local dest="${CLAUDE_HOME}/statusline.sh"
+
+  if [ ! -f "$src" ]; then
+    tui_warn "statusline template not found: $src"
     return 1
   fi
+
+  mkdir -p "${CLAUDE_HOME}"
+  cp "$src" "$dest" && chmod +x "$dest"
+
+  # Register in settings.json
+  local settings="${CLAUDE_HOME}/settings.json"
+  if [ -f "$settings" ] && command -v node &>/dev/null; then
+    node - "$settings" "$dest" <<'NODESCRIPT'
+const fs = require('fs');
+const cfg_path = process.argv[2];
+const script = process.argv[3];
+let cfg = {};
+try { cfg = JSON.parse(fs.readFileSync(cfg_path, 'utf8')); } catch(e) { process.exit(1); }
+cfg.statusLine = script;
+fs.writeFileSync(cfg_path, JSON.stringify(cfg, null, 2) + '\n');
+NODESCRIPT
+  fi
+
+  tui_success "Statusline installed -> ${dest}"
 }
