@@ -280,3 +280,4 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [OpenViking](https://github.com/volcengine/OpenViking)
 - [gastown](https://github.com/steveyegge/gastown)
 - [just-ship](https://github.com/yves-s/just-ship)
+- [Claude Code Best Practices: Auto Mode](https://code.claude.com/docs/en/best-practices#run-autonomously-with-auto-mode)

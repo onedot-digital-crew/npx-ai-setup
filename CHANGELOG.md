@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 582**: CLAUDE.md Autonomie-Doku — `--bare` CI-Empfehlung, Budget/Turn-Controls, neue Permission Modes Section (~80 Tokens)
+- **Spec 581**: yolo Safety Guards — `--max-budget-usd`, `--max-turns` und Stall-Detection im yolo-Skill dokumentiert
 - **Spec 579**: Opus in Routine-Sessions — `reflect` und `review` Skills von `model: opus` auf `model: sonnet` geändert, `review` Mode C (Adversarial) als optionaler Opus-Aufruf dokumentiert
 - **Spec 578**: Haiku-Routing — `model: haiku` explizit in discover/research Skills ergänzt, agents.md um "No default means Sonnet" erweitert
 - **Spec 577**: templates/CLAUDE.md — leere Sektionen `## Commands` und `## Critical Rules` entfernt (~120 Token/Session gespart)
