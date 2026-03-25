@@ -18,11 +18,14 @@ After the board output above, scan the specs listed for inconsistencies:
 
 **Type B — Wrong location**: spec has status `completed` but file is still in `specs/` (not in `specs/completed/`).
 
+**Type C — Stale in-review**: spec has status `in-review` but 0 steps are checked `- [x]`. Indicates a verify-fail abort or manual status change without implementation. Needs investigation.
+
 If any inconsistencies are found, list them:
 ```
 ⚠️  Inconsistencies found:
   #NNN Title — all steps done but status is "in-progress" (Type A)
   #MMM Title — status "completed" but file not in specs/completed/ (Type B)
+  #PPP Title — status "in-review" but 0 steps checked (Type C — needs attention)
 ```
 
 Use `AskUserQuestion` to ask:
@@ -36,8 +39,9 @@ C) Skip — leave as is
 - **Option A**: For each inconsistency:
   - Type A: set status to `completed`, move `specs/NNN-*.md` → `specs/completed/NNN-*.md`
   - Type B: move `specs/NNN-*.md` → `specs/completed/NNN-*.md`
+  - Type C: reset status to `draft` so the spec re-enters the queue for implementation
   - Report each fix.
-- **Option B**: For each inconsistency, ask individually with AskUserQuestion (Fix / Skip).
+- **Option B**: For each inconsistency, ask individually with AskUserQuestion (Fix / Skip). For Type C, offer two fix options: "Reset to draft" or "Keep in-review (manual review needed)".
 - **Option C**: Skip all fixes.
 
 ## Rules

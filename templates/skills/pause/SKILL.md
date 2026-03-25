@@ -19,6 +19,8 @@ Captures current session state into `.continue-here.md` and commits it as a WIP 
 
 3. **Gather open specs**: List all specs in `specs/` that are NOT `completed`. For each, note the spec ID, title, status, and how many steps are checked vs total.
 
+3a. **Validate spec consistency**: Flag any spec where `status: in-review` but 0 steps are checked — these are stale status entries and go into `## Blockers`.
+
 4. **Gather recent decisions**: Check `decisions.md` if it exists — note the last 3 entries.
 
 5. **Write `.continue-here.md`** with exactly these 5 sections:
@@ -42,7 +44,7 @@ Generated: <ISO date and time>
 <Last 3 entries from decisions.md, or "No decisions recorded">
 
 ## Blockers
-<Any blocked specs or known issues, or "None">
+<Specs with status mismatch (e.g. in-review but 0 steps checked), blocked specs, or known issues. "None" if clean.>
 ```
 
 6. **Commit the handoff file**:

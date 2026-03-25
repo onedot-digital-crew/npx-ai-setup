@@ -113,7 +113,7 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 
     Apply the investigator's suggested fix as a **single targeted edit**, then run verify-app once more.
     - If the second verify-app returns **PASS**: continue normally.
-    - If the second verify-app returns **FAIL**: set status to `in-review`, report the investigator's diagnosis and remaining error, **stop**. Do NOT proceed to step 18 (code-reviewer). Do NOT run the investigator again. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
+    - If the second verify-app returns **FAIL**: before changing status, append a `> **Note (verify-fail):**` blockquote to the spec with the investigator's diagnosis and timestamp. Then set status to `in-review`. Report the diagnosis and remaining error, **stop**. Do NOT proceed to step 18 (code-reviewer). Do NOT run the investigator again. Suggest: `Fix the reported issues and re-run /spec-work NNN`.
 
 16. **Optional cleanup**: Offer to run `/simplify` to improve code quality before review. If the user confirms (or execution is non-interactive), invoke it. Skip if the user declines or if no significant code was changed.
 
