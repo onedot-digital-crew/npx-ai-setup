@@ -1,6 +1,6 @@
 # Spec 578: Haiku-Routing für Explore/Search-Agents erzwingen
 
-> **Spec ID**: 578 | **Created**: 2026-03-25 | **Status**: in-review | **Complexity**: medium | **Branch**: spec/575-fix-haiku-model-routing
+> **Spec ID**: 578 | **Created**: 2026-03-25 | **Status**: in-review | **Complexity**: medium | **Branch**: spec/578-fix-haiku-model-routing
 
 ## Goal
 
