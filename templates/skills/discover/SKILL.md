@@ -24,7 +24,7 @@ If B: ask for the path. Store as `SCAN_ROOT` (default: `.`).
 
 Spawn all three agents simultaneously using the Agent tool in parallel:
 
-**Agent 1 — Entry Points**
+**Agent 1 — Entry Points** (model: haiku)
 
 ```
 You are an Entry Points agent. Scan the codebase rooted at SCAN_ROOT and report:
@@ -37,7 +37,7 @@ Return a concise report under: ## Entry Points
 Include: file path, role, key dependencies. Max 30 lines.
 ```
 
-**Agent 2 — Module Boundaries**
+**Agent 2 — Module Boundaries** (model: haiku)
 
 ```
 You are a Module Boundaries agent. Scan the codebase rooted at SCAN_ROOT and report:
@@ -51,7 +51,7 @@ Return a concise report under: ## Module Boundaries
 Include: module name, path, responsibility, notable dependencies. Max 30 lines.
 ```
 
-**Agent 3 — Data Flows**
+**Agent 3 — Data Flows** (model: haiku)
 
 ```
 You are a Data Flows agent. Scan the codebase rooted at SCAN_ROOT and report:

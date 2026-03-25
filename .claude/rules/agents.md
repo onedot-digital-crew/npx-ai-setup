@@ -10,7 +10,7 @@ Always set `model:` when spawning subagents. Haiku costs 12× less than Sonnet �
 | `sonnet` | Implementation, code generation, test writing |
 | `opus` | Architecture review, complex analysis, spec creation |
 
-Never spawn an Explore or search agent without `model: haiku`.
+Never spawn an Explore or search agent without `model: haiku`. No default means Sonnet — always be explicit.
 
 ## Agent Selection
 
