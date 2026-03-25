@@ -43,8 +43,8 @@ If `.agents/context/CONVENTIONS.md` contains a `## Definition of Done` section, 
 
 #### 5c — Code quality (complexity-gated)
 Read the `**Complexity**` field from the spec header.
-- **Low / Medium / unset**: Spawn `code-reviewer` agent only via Agent tool.
-- **High**: Spawn `code-reviewer` AND `staff-reviewer` agents in parallel via Agent tool. Both must return PASS or CONCERNS.
+- **Low / Medium / unset**: Spawn `code-reviewer` agent only via Agent tool (`model: sonnet`).
+- **High**: Spawn `code-reviewer` AND `staff-reviewer` agents in parallel via Agent tool (`model: sonnet`). Both must return PASS or CONCERNS.
 Pass the full spec content and branch name. Use each agent's verdict (PASS / CONCERNS / FAIL) and issue list as code quality input. Do NOT duplicate their analysis inline.
 
 ### 6. Verdict
