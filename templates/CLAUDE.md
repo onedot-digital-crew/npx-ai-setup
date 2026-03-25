@@ -20,6 +20,7 @@ Non-interactive runs: `claude -p "<prompt>"`. Structured output: `--output-forma
 `--fallback-model <model>` — model fallback on rate limits. `--no-session-persistence` — stateless runs.
 
 ## Permission Modes
-`Shift+Tab` cycles: `default` → `acceptEdits` → `plan` → `auto` (Classifier) → `dontAsk` (pre-approved only).
-`bypassPermissions` — only in isolated VMs/containers. Settings: `{ "permissions": { "defaultMode": "..." } }`
+`Shift+Tab` cycles: `default` → `acceptEdits` → `plan` → `dontAsk` (pre-approved only).
+`auto` (Classifier) — Team plan only. `bypassPermissions` — isolated VMs/containers only.
+Settings: `{ "permissions": { "defaultMode": "dontAsk" } }`
 
