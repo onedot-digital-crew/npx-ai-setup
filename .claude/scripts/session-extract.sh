@@ -1,43 +1,65 @@
 #!/usr/bin/env bash
 # session-extract.sh — Extract metrics from Claude Code session JSONL files
-# Usage: bash .claude/scripts/session-extract.sh [project-path-slug] [--last N]
+# Usage: bash .claude/scripts/session-extract.sh [project-path-slug] [--last N] [--all]
 #
 # Examples:
 #   bash .claude/scripts/session-extract.sh                    # current project, last 5 sessions
 #   bash .claude/scripts/session-extract.sh --last 10          # current project, last 10
+#   bash .claude/scripts/session-extract.sh --all --last 10    # all projects, last 10 per project
 #   bash .claude/scripts/session-extract.sh -Users-deniskern-Sites-npx-ai-setup --last 3
 
 set -euo pipefail
 
-SLUG="${1:--Users-deniskern-Sites-npx-ai-setup}"
-[[ "$SLUG" == "--last" ]] && SLUG="-Users-deniskern-Sites-npx-ai-setup" && shift
-LAST="${2:-5}"
-[[ "${1:-}" == "--last" ]] && LAST="${2:-5}"
+ALL_PROJECTS=false
+SLUG="-Users-deniskern-Sites-npx-ai-setup"
+LAST=5
 
-SESSION_DIR="$HOME/.claude/projects/$SLUG"
+# Parse args
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --all) ALL_PROJECTS=true; shift ;;
+    --last) LAST="${2:-5}"; shift 2 ;;
+    *) SLUG="$1"; shift ;;
+  esac
+done
 
-if [[ ! -d "$SESSION_DIR" ]]; then
-  echo "ERROR: No sessions at $SESSION_DIR"
-  exit 1
-fi
+PROJECTS_DIR="$HOME/.claude/projects"
 
-# Get most recent N session files (exclude subagent dirs)
-SESSION_FILES=()
-while IFS= read -r f; do
-  SESSION_FILES+=("$f")
-done < <(find "$SESSION_DIR" -maxdepth 1 -name "*.jsonl" -type f -print0 | xargs -0 ls -t | head -n "$LAST")
-
-if [[ ${#SESSION_FILES[@]} -eq 0 ]]; then
-  echo "No session files found."
-  exit 0
+if $ALL_PROJECTS; then
+  DIRS=()
+  while IFS= read -r d; do
+    DIRS+=("$d")
+  done < <(find "$PROJECTS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+else
+  DIRS=("$PROJECTS_DIR/$SLUG")
 fi
 
 echo "SESSION_EXTRACT_START $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
-echo "=== SESSIONS (last $LAST) ==="
-echo ""
 
-python3 - "${SESSION_FILES[@]}" <<'PYEOF'
+for SESSION_DIR in "${DIRS[@]}"; do
+  [[ ! -d "$SESSION_DIR" ]] && continue
+
+  _slug=$(basename "$SESSION_DIR")
+  # Extract project name from slug: -Users-foo-Sites-my-project → my-project
+  if echo "$_slug" | grep -q -- '-Sites-'; then
+    PROJECT_LABEL=$(echo "$_slug" | sed 's/.*-Sites-//')
+  else
+    PROJECT_LABEL=$_slug
+  fi
+
+  # Get most recent N session files (exclude subagent dirs)
+  SESSION_FILES=()
+  while IFS= read -r f; do
+    SESSION_FILES+=("$f")
+  done < <(find "$SESSION_DIR" -maxdepth 1 -name "*.jsonl" -type f -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -n "$LAST")
+
+  [[ ${#SESSION_FILES[@]} -eq 0 ]] && continue
+
+  echo "=== PROJECT: $PROJECT_LABEL (last $LAST) ==="
+  echo ""
+
+  python3 - "${SESSION_FILES[@]}" <<'PYEOF'
 import json, sys, os
 from datetime import datetime
 from collections import Counter
@@ -162,5 +184,7 @@ for filepath in files:
     print()
 
 PYEOF
+
+done
 
 echo "SESSION_EXTRACT_END"

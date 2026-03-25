@@ -5,17 +5,17 @@ model: sonnet
 allowed-tools: Read, Bash, Glob, Grep, mcp__plugin_claude-mem_mcp-search__search, mcp__plugin_claude-mem_mcp-search__get_observations, mcp__plugin_claude-mem_mcp-search__timeline
 ---
 
-Analyzes the last 30 days of sessions for this project — combining semantic observations (claude-mem) with raw session metrics (JSONL) — and outputs a prioritized list of setup improvements focused on **Qualität, Effizienz und Tokenersparnis**.
+Analyzes the last 30 days of sessions **across all projects** — combining semantic observations (claude-mem) with raw session metrics (JSONL) — and outputs a prioritized list of setup improvements focused on **Qualität, Effizienz und Tokenersparnis**.
 
 ## Process
 
 ### 1. Extract raw session metrics (zero LLM tokens)
 
 ```
-! bash .claude/scripts/session-extract.sh --last 10
+! bash .claude/scripts/session-extract.sh --all --last 5
 ```
 
-This produces per-session: turns, tool usage counts, model distribution, skills invoked, subagent count, duration, and estimated output tokens.
+This produces per-session across all projects: turns, tool usage counts, model distribution, skills invoked, subagent count, duration, and estimated output tokens. Use project labels to spot version gaps (fixes applied here but not yet installed in user projects).
 
 ### 2. Gather semantic data from claude-mem (parallel)
 
@@ -26,7 +26,7 @@ Run these 4 searches in parallel via `mcp__plugin_claude-mem_mcp-search__search`
 - Query: `"repeated asked same question twice"` — finds recurring friction
 - Query: `"workaround manual fallback missing"` — finds capability gaps
 
-All with `project: npx-ai-setup`, `limit: 10`, `dateStart: 30 days ago`.
+All **without** `project:` filter (cross-project), `limit: 10`, `dateStart: 30 days ago`.
 
 ### 3. Fetch key observations
 
