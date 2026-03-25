@@ -1,6 +1,6 @@
 # Spec: Apply Learnings to Project Context
 
-> **Spec ID**: 585 | **Created**: 2026-03-25 | **Status**: in-review | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 585 | **Created**: 2026-03-25 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 
