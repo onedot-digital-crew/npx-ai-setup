@@ -41,6 +41,7 @@ Combine both data sources. Look for:
 - Model distribution: Opus/Sonnet used where Haiku would suffice (search/explore)
 - Sessions with 0 subagents but >200 tool calls — missing parallelization
 - High turn count relative to duration — indicates back-and-forth friction
+- Skill files over 5KB (`wc -c .claude/skills/*/SKILL.md | sort -rn | head -5`) — bloated skills load all tokens on trigger; flag any >200 lines as candidate for trimming
 
 **Q (Qualität):**
 - Skills invoked frequently that appear in failure observations
@@ -54,7 +55,9 @@ Combine both data sources. Look for:
 
 ### 5. Verify findings still apply
 
-For each finding that references a specific skill or config file, read the current file to confirm the issue still exists. Drop findings already fixed.
+**Pre-filter**: Read `.claude/findings-log.md`. Extract all entries under `## Addressed`. If a candidate finding matches an addressed entry (by topic or title), drop it immediately — do not include it in the report.
+
+For each remaining finding that references a specific skill or config file, read the current file to confirm the issue still exists. Drop findings already fixed.
 
 ### 6. Output report
 
@@ -89,9 +92,11 @@ Sort by priority descending. Max 8 findings — cut noise below ⚪.
 - Never make changes — report only.
 - If a finding references a file, verify the issue still exists before including it.
 - If both data sources return nothing, report: "No signal in last 30 days — setup looks clean."
-- Skip findings that duplicate what's already in `.agents/context/LEARNINGS.md`.
+- Read `.claude/findings-log.md` as pre-filter before Step 5 — drop any finding that matches an entry in `## Addressed`.
 - **Model routing**: Use `model: haiku` for all MCP searches (Steps 2–3). Use `model: sonnet` only for pattern synthesis (Step 4 onwards). Never use Opus in this skill.
 
 ## Next Step
 
 Review findings and pick top items to address. For each fix: open a spec (`/spec-create`) or apply directly if it's a single-line change.
+
+After the report: add all new findings to `.claude/findings-log.md` under `## Open`. When a finding is resolved, move it to `## Addressed` with date and fix reference.
