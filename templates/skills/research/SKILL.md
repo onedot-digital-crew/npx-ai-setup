@@ -24,7 +24,7 @@ Deep-researches an external repository, tool, or pattern against the existing pr
    `.claude/commands/`, `.claude/agents/`, `.claude/skills/`, `.claude/hooks/`, `.claude/rules/`,
    `scripts/`, `hooks/`, `agents/`, `mcp-server/`, `src/`
 
-2. **Spawn parallel Agent workers** (model: haiku for listing, sonnet for content) to scrape each directory:
+2. **Spawn parallel Agent workers** (model: haiku for all scraping agents) to scrape each directory:
    - Agent 1: List + read all command files
    - Agent 2: List + read all agent/persona files
    - Agent 3: List + read all skill files
