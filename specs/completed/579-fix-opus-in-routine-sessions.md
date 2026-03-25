@@ -1,6 +1,6 @@
 # Spec 579: Opus-Anteil in Routine-Sessions eliminieren
 
-> **Spec ID**: 579 | **Created**: 2026-03-25 | **Status**: in-review | **Complexity**: medium | **Branch**: spec/579-fix-opus-in-routine-sessions
+> **Spec ID**: 579 | **Created**: 2026-03-25 | **Status**: completed | **Complexity**: medium | **Branch**: spec/579-fix-opus-in-routine-sessions
 
 ## Goal
 
