@@ -8,20 +8,73 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 <!-- Entries are prepended below this line, newest first -->
 
-## [Unreleased]
+## [v2.0.2] — 2026-03-25
 
-- **Spec 585**: apply-learnings Skill — LEARNINGS.md wird Transit-Log statt Endlager; neuer `/apply-learnings` Skill verteilt Einträge in korrekte Zieldateien und markiert sie als applied
-- **Spec 582**: CLAUDE.md Autonomie-Doku — `--bare` CI-Empfehlung, Budget/Turn-Controls, neue Permission Modes Section (~80 Tokens)
-- **Spec 581**: yolo Safety Guards — `--max-budget-usd`, `--max-turns` und Stall-Detection im yolo-Skill dokumentiert
-- **Spec 579**: Opus in Routine-Sessions — `reflect` und `review` Skills von `model: opus` auf `model: sonnet` geändert, `review` Mode C (Adversarial) als optionaler Opus-Aufruf dokumentiert
-- **Spec 578**: Haiku-Routing — `model: haiku` explizit in discover/research Skills ergänzt, agents.md um "No default means Sonnet" erweitert
-- **Spec 577**: templates/CLAUDE.md — leere Sektionen `## Commands` und `## Critical Rules` entfernt (~120 Token/Session gespart)
+### Was ist neu für dich
 
-- **Spec 575**: Token optimization — added `specs/`, `templates/`, `CHANGELOG.md`, `.claude/*.log` to project `.claudeignore` (~236K token risk closed); added `.claude/*.log` to template `.claudeignore`; trimmed orchestrate skill description to ≤200 chars
+**Learnings fließen jetzt automatisch an den richtigen Ort.**
+`/apply-learnings` liest offene Einträge aus `LEARNINGS.md` und schreibt sie direkt in `CLAUDE.md`, `ARCHITECTURE.md` oder `CONVENTIONS.md` — kein manuelles Kopieren mehr. Einträge werden als `applied` markiert, damit nichts doppelt landet.
 
-- **Spec 568**: Secure JSON layer — eliminated shell injection in Node.js fallbacks by replacing variable interpolation with process.argv
+**Clean Reinstall mit einem Klick.**
+Das Update-Menü hat jetzt eine "Reset"-Option: entfernt alle installierten Dateien und installiert frisch. Nützlich wenn sich das Setup in einen inkonsistenten Zustand manövriert hat.
 
-## [Unreleased]
+**Günstigere Kosten durch konsequentes Haiku-Routing.**
+Alle Explore-, Discover- und Research-Agents laufen jetzt auf Haiku (war: Sonnet/Opus). `reflect` und `review` nutzen Sonnet statt Opus. Spart 12-60x Kosten je nach Task — ohne Qualitätsverlust.
+
+**yolo mit Sicherheitsnetz.**
+`/yolo` unterstützt jetzt `--max-budget-usd` und `--max-turns` als Kostenbremse. Stall-Detection stoppt bei hängenden Loops. Gut für unbeaufsichtigte Runs.
+
+**CI-freundliche Autonomie-Doku.**
+`CLAUDE.md` Template dokumentiert jetzt Permission Modes (`--bare`, `bypassPermissions`, `acceptEdits`) — hilfreich wenn Claude in CI-Pipelines läuft.
+
+**Spec Commands laufen jetzt als Skills.**
+`/spec-board`, `/spec-work`, `/spec-done` sind auf den Claude Code 2.x Skills-Standard migriert — keine separaten Command-Dateien mehr, alles einheitlich.
+
+**session-optimize deutlich präziser.**
+Der Skill nutzt jetzt JSONL-Metriken statt nur MCP-Suche, erkennt veraltete Spec-Statuses automatisch und schlägt Korrekturen vor.
+
+**Schlankeres CLAUDE.md Template.**
+Von 89 auf 20 Zeilen getrimmt — jedes neue Projekt startet mit deutlich weniger Token-Overhead pro Session.
+
+**Skills zeigen Tips als Callouts.**
+Hinweise und Next-Steps in Skills erscheinen jetzt als farbige `tui_hint`-Blöcke statt als Plaintext — besser lesbar, weniger Rauschen.
+
+**Saubere Updates ohne Altlasten.**
+Orphan-Dateien aus älteren Versionen werden beim Update automatisch erkannt und entfernt. Context-Staleness-Detection greift zuverlässiger an.
+
+### Technische Details
+
+**Spec 585** — `/apply-learnings` Skill: LEARNINGS.md als Transit-Log, Kategorie-Mapping auf Zieldateien (Process/CLI → CLAUDE.md, Architecture → ARCHITECTURE.md), Applied-Section mit Timestamp-Tracking, reflect Skill verlinkt auf apply-learnings als Next Step, skill in `templates/skills/` für Neuinstallationen verfügbar.
+
+**Spec 582** — CLAUDE.md Template: `--bare` CI-Empfehlung ergänzt, Budget/Turn-Controls dokumentiert, neue "Permission Modes" Section (~80 Tokens), Autonomie-Flags mit Beispielen.
+
+**Spec 581** — yolo Safety Guards: `--max-budget-usd`, `--max-turns`, Stall-Detection nach 3 identischen Tool-Calls dokumentiert. Skill nutzt jetzt model-Override und todo-Loop.
+
+**Spec 579** — Model Routing: `reflect` und `review` von `model: opus` → `model: sonnet`. `review` Mode C (Adversarial) bleibt als optionaler Opus-Aufruf dokumentiert.
+
+**Spec 578** — Haiku-Routing: `model: haiku` explizit in discover/research/spec-review Skills, agents.md erweitert um "No default means Sonnet — always be explicit".
+
+**Spec 577** — templates/CLAUDE.md: leere Sektionen `## Commands` und `## Critical Rules` entfernt (~120 Token/Session gespart).
+
+**Spec 576** — Spec-Commands in Skills konsolidiert: `spec-board`, `spec-work`, `spec-done` als Skills statt Commands — Claude Code 2.x Unified Standard.
+
+**Spec 575** — Token Optimization: `specs/`, `templates/`, `CHANGELOG.md`, `.claude/*.log` in `.claudeignore` (~236K Token-Risiko geschlossen). orchestrate-Skill-Description auf ≤200 Zeichen getrimmt.
+
+**Spec 583** — spec-review Agents auf Sonnet umgestellt (war Opus/Sonnet gemischt), spart ~5x pro Review-Run.
+
+**Infra**
+- verify-app Agent auf Haiku umgestellt
+- CLAUDE.md Template von 89 → 20 Zeilen getrimmt (größtes Token-Saving im Template)
+- 4 separate quality rules → 1 konsolidierte `quality.md`
+- Playwright komplett aus Setup entfernt
+- Dead plugin stubs + nicht mehr genutzte default plugins bereinigt
+- Diff-basiertes Orphan-Cleanup nach Installs
+- Context-Staleness-Detection verbessert
+- `tui_hint` Callout-System für Tips und Next-Step-Hints
+- session-optimize Skill mit JSONL-Metriken + `session-extract.sh`
+- agent-browser Skill-Description getrimmt
+
+**Update:** `npx github:onedot-digital-crew/npx-ai-setup`
 
 ## [v2.0.1] — 2026-03-23
 
