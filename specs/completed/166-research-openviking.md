@@ -1,5 +1,7 @@
 # Brainstorm: OpenViking Adaptionen für npx-ai-setup
 
+> **Spec ID**: 166 | **Status**: completed | **Complexity**: low | **Branch**: —
+
 > **Source**: https://github.com/volcengine/OpenViking
 > **Erstellt**: 2026-03-23
 > **Zweck**: Research welche Patterns aus ByteDances Context-Database adaptierbar sind

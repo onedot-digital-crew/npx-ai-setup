@@ -1,6 +1,6 @@
 # Spec 168: Transcript Auto-Ingestion (Stop Hook)
 
-> **Status**: In-Progress
+> **Status**: completed
 > **Source**: [OpenViking Research](specs/166-research-openviking.md)
 > **Goal**: Automatische Extraktion von Learnings/Decisions aus Claude-Transkripten nach jeder Session.
 

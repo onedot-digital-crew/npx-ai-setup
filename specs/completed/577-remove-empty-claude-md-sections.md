@@ -1,6 +1,6 @@
 # Spec 577: Leere Sektionen aus templates/CLAUDE.md entfernen
 
-> **Spec ID**: 577 | **Created**: 2026-03-25 | **Status**: in-review | **Complexity**: low | **Branch**: —
+> **Spec ID**: 577 | **Created**: 2026-03-25 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 

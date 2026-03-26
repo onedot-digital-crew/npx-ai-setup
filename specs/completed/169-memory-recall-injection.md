@@ -1,6 +1,6 @@
 # Spec 169: Memory-Recall Injection (UserPromptSubmit Hook)
 
-> **Status**: In-Progress
+> **Status**: completed
 > **Source**: [OpenViking Research](specs/166-research-openviking.md)
 > **Goal**: Relevante Memories automatisch als Context injizieren wenn der User einen Prompt eingibt.
 

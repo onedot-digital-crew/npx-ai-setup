@@ -1,6 +1,6 @@
 # Spec 167: L0/L1/L2 Tiered Context Loading
 
-> **Status**: In-Progress
+> **Status**: completed
 > **Source**: [OpenViking Research](specs/166-research-openviking.md)
 > **Goal**: Context-Dateien stufenweise laden statt alles auf einmal. Token-Ersparnis: 500-1500 Tokens/Request.
 

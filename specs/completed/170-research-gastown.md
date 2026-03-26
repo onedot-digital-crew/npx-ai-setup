@@ -1,5 +1,7 @@
 # Brainstorm: Gas Town Adaptionen für npx-ai-setup
 
+> **Spec ID**: 170 | **Status**: completed | **Complexity**: low | **Branch**: —
+
 > **Source**: https://github.com/steveyegge/gastown
 > **Erstellt**: 2026-03-24
 > **Zweck**: Research welche Patterns aus Stevey's Multi-Agent-Orchestrierung für unser Single-Project-Setup adaptierbar sind

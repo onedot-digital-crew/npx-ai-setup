@@ -1,6 +1,6 @@
 # Spec: Generate PATTERNS.md + AUDIT.md during setup via analyze-prep.sh
 
-> **Spec ID**: 592 | **Created**: 2026-03-26 | **Status**: rejected | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 592 | **Created**: 2026-03-26 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Generate PATTERNS.md and AUDIT.md during setup installation using a Shell prep-script (Map) + Haiku (Reduce), so every project starts with codebase analysis from day one.

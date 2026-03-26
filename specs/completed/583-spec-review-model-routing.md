@@ -1,6 +1,6 @@
 # Spec 583: spec-review Agent-Spawning ohne explizites Model
 
-> **Spec ID**: 583 | **Created**: 2026-03-25 | **Status**: in-review | **Complexity**: low | **Branch**: —
+> **Spec ID**: 583 | **Created**: 2026-03-25 | **Status**: completed | **Complexity**: low | **Branch**: —
 
 ## Goal
 

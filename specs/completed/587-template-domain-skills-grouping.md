@@ -1,7 +1,7 @@
 ---
 id: 587
 title: Template Domain-Skills optionale Install-Gruppen
-status: draft
+status: completed
 priority: medium
 created: 2026-03-25
 ---

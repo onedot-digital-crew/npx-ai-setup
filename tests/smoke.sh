@@ -298,9 +298,9 @@ for spec_file in specs/completed/[0-9]*.md; do
   # Extract status from standard markdown header or YAML frontmatter
   spec_status=""
   # Match status from: **Status**: value OR **Status:** value OR ^status: value (YAML)
-  status_line=$(grep -E '(\*\*Status\*\*:|^\*\*Status:\*\*|^status:)' "$spec_file" 2>/dev/null | head -1)
+  status_line=$(grep -E '(\*\*Status\*\*:|^\*\*Status:\*\*|^status:)' "$spec_file" 2>/dev/null | head -1 || true)
   if [ -n "$status_line" ]; then
-    spec_status=$(echo "$status_line" | grep -oE '(completed|draft|in-progress|blocked|superseded)' | head -1)
+    spec_status=$(echo "$status_line" | grep -ioE '(completed|draft|in-progress|blocked|superseded)' | head -1 | tr '[:upper:]' '[:lower:]' || true)
   elif grep -q '^status:' "$spec_file" 2>/dev/null; then
     spec_status=$(grep -m1 '^status:' "$spec_file" | sed 's/status: *//')
   fi

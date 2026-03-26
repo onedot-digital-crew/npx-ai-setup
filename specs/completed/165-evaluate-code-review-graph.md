@@ -1,5 +1,7 @@
 # Brainstorm: code-review-graph Adaptionen für npx-ai-setup
 
+> **Spec ID**: 165 | **Status**: completed | **Complexity**: low | **Branch**: —
+
 > **Source**: https://github.com/tirth8205/code-review-graph
 > **Erstellt**: 2026-03-23
 > **Zweck**: Evaluierung welche Patterns aus code-review-graph adaptierbar sind
