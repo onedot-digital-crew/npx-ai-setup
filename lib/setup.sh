@@ -91,10 +91,11 @@ _install_or_update_file() {
     if [ "$_JSON_CMD" = "jq" ]; then
       stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
     else
-      stored_cs=$(node -e "
+      stored_cs=$(node - "$target" <<'NODESCRIPT' 2>/dev/null
         try{const d=JSON.parse(require('fs').readFileSync('.ai-setup.json','utf8'));
-        const v=(d.files||{})['$target'];if(v)process.stdout.write(v);}catch(e){}
-      " 2>/dev/null)
+        const v=(d.files||{})[process.argv[1]];if(v)process.stdout.write(v);}catch(e){}
+NODESCRIPT
+      )
     fi
     if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
       # User modified this file — attempt smart merge, fall back to skip
