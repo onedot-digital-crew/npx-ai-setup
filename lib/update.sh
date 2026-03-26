@@ -157,14 +157,21 @@ handle_version_check() {
         else
           run_migrations "$INSTALLED_VERSION" "$PACKAGE_VERSION" || update_rc=$?
           if [ "$update_rc" -eq 0 ]; then
-            write_metadata
-            update_gitignore
-            echo ""
-            tui_success "Migration complete (v${INSTALLED_VERSION} -> v${PACKAGE_VERSION})"
+            # After migrations, sync templates that changed between versions
+            scan_template_changes
+            if [ "$SCAN_TOTAL_CHANGES" -gt 0 ]; then
+              run_smart_update --skip-regen || update_rc=$?
+            else
+              write_metadata
+              update_gitignore
+              echo ""
+              tui_success "Migration complete (v${INSTALLED_VERSION} -> v${PACKAGE_VERSION})"
+              show_update_next_steps
+            fi
           else
             tui_warn "Migration finished with errors - run again or choose Reinstall."
+            show_update_next_steps
           fi
-          show_update_next_steps
         fi
         exit "$update_rc"
         ;;
