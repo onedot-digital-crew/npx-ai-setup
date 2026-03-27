@@ -1,6 +1,6 @@
 # Spec: Spec-Skill Code-Flow-Analyse vor Step-Generierung
 
-> **Spec ID**: 595 | **Created**: 2026-03-27 | **Status**: in-progress | **Complexity**: simple | **Branch**: —
+> **Spec ID**: 595 | **Created**: 2026-03-27 | **Status**: completed | **Complexity**: simple | **Branch**: —
 
 ## Goal
 `/spec` soll vor Step-Generierung die Laufzeit-Logik der betroffenen Funktionen analysieren, damit Steps keine existierende Logik duplizieren und Guards/Fehlerfälle als explizite Steps erscheinen.
