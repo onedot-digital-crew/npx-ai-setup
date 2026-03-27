@@ -398,6 +398,9 @@ run_smart_update() {
     cleanup_obsolete_managed_files
   fi
 
+  # Sync boilerplate files from stack-specific repos (if system detected)
+  sync_boilerplate
+
   # Only show summary when there was work to do
   if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
     echo ""
