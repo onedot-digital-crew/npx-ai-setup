@@ -29,7 +29,7 @@ Optional boilerplate pull for Shopify, Nuxt, Next.js, Shopware, and Storyblok pr
 | **CLAUDE.md** | Communication protocol, task routing (simple/medium/complex), verification gate |
 | **AGENTS.md** | Universal passive context for Cursor, Windsurf, Cline, and AGENTS.md-compatible tools |
 | **Settings** | Granular bash permissions, AUTOCOMPACT at 80%, tool search enabled |
-| **Hooks** | 16 hooks — circuit-breaker, protect-files, post-edit-lint, context-monitor, context-freshness, context-reinforcement, context-loader, update-check, memory-recall, mcp-health, cli-health, notify, config-change-audit, task-completed-gate, post-tool-failure-log, transcript-ingest |
+| **Hooks** | 11 hooks — context-loader, protect-and-breaker, post-edit-lint, update-check, memory-recall, notify, config-change-audit, task-completed-gate, post-tool-failure-log, transcript-ingest, pre-compact |
 | **Rules** | `.claude/rules/` — general, testing, git, agents, quality, typescript (6 files, typescript conditional) |
 | **Skills** | 32 slash commands — spec workflow, reviews, releases, security, debugging, session management |
 | **Agents** | 11 subagent templates — verification, review, architecture, security, performance, frontend, backend, testing |

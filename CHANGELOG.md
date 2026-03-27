@@ -8,6 +8,43 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 <!-- Entries are prepended below this line, newest first -->
 
+## [Unreleased]
+
+## [v2.0.5] — 2026-03-27
+
+<!-- slack-announcement -->
+:package: *@onedot/ai-setup v2.0.5*
+
+*Was ist neu:*
+:sparkles: *Skills* — `/spec-run` — Unified Pipeline: validate, implement, review, commit in einem Befehl mit Self-healing
+:gear: *Spec-Qualitaet* — `/spec` macht jetzt Code-Flow-Analyse vor Step-Generierung, verhindert redundante Steps
+:zap: *Token-Optimierung* — 3 Commands opus zu sonnet, `/reflect` migriert, Release-Duplikat entfernt
+:wrench: *Hooks* — 16 zu 11 konsolidiert, protect-and-breaker gemerged
+
+*Zahlen:* 22 Commands | 12 Agents | 11 Hooks | 19 Skills
+*Update:* `npx github:onedot-digital-crew/npx-ai-setup`
+<!-- /slack-announcement -->
+
+### Spec-Workflow verbessert
+
+- **`/spec-run` Skill** — Neuer unified Pipeline-Skill: validate → implement → review → commit in einem Befehl. Self-healing bei Grade C und CHANGES REQUESTED, automatischer Retry mit konfigurierbaren Limits.
+- **Code-Flow-Analyse in `/spec`** — Specs analysieren jetzt Laufzeit-Logik (Guards, Conditions, Variables) bevor Steps generiert werden. Verhindert redundante Steps und übersehene Guard-Logik (Spec 595).
+- **Review-Gate vor Commits** — `/spec-work` committet nicht mehr pro Step. Stattdessen: implementieren → `/spec-review` → `/commit`. Verhindert unreviewed Code im Repo.
+
+### Boilerplate Auto-Sync
+
+- **`detect_installed_system()` + `sync_boilerplate()`** — Bei `npx ai-setup` Updates wird das installierte Boilerplate-System erkannt und automatisch nachsynchronisiert (Spec 594).
+
+### Kostenoptimierung
+
+- **3 Commands opus → sonnet** — `/discover`, `/research`, `/review` liefen unnötig auf Opus. Sonnet reicht für Code-Reading und Pattern-Matching.
+- **`/reflect` migriert** — Von altem Command-Format (opus) zu Skills-Format (sonnet). Spart pro Aufruf ~5x Kosten.
+- **Release-Duplikat entfernt** — Command war reiner Delegator zum Skill (~48 Zeilen Token-Overhead pro Session weg).
+
+### Hooks konsolidiert
+
+- **16 → 11 Hooks** — 6 redundante Hooks entfernt, `protect-files` + `circuit-breaker` zu `protect-and-breaker` gemerged. API timeout guards für transcript-ingest.
+
 ## [v2.0.4] — 2026-03-27
 
 ### Subagent-Architektur optimiert
