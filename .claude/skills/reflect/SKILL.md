@@ -1,5 +1,7 @@
 ---
-model: opus
+name: reflect
+description: "Analyze the current session for corrections, architectural discoveries, and stack decisions — convert them into permanent learnings. Triggers: /reflect, 'save learnings', 'capture session insights'."
+model: sonnet
 mode: plan
 allowed-tools: Read, Write, Edit, Glob, AskUserQuestion, mcp__plugin_claude-mem_mcp-search__save_memory
 ---
@@ -148,8 +150,6 @@ For each approved correction, call save_memory with:
   Reason: [why, one sentence]
   ```
 
-This enables semantic retrieval in future sessions: if Claude is about to suggest the rejected approach, the search match surfaces the saved decision before the suggestion is made.
-
 If `mcp__plugin_claude-mem_mcp-search__save_memory` is not available (plugin not installed), skip this step silently — do not error.
 
 ## Rules
@@ -162,4 +162,4 @@ If `mcp__plugin_claude-mem_mcp-search__save_memory` is not available (plugin not
 
 ## Next Step
 
-After saving learnings, run `/commit` to checkpoint the updated context files, or `/pause` to end the session cleanly.
+After saving learnings, run `/apply-learnings` to distribute new entries from LEARNINGS.md into the correct project context files (`rules/`, `ARCHITECTURE.md`, `CONVENTIONS.md`, etc.). Then run `/commit` to checkpoint all changes, or `/pause` to end the session cleanly.

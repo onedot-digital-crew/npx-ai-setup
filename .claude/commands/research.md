@@ -1,5 +1,5 @@
 ---
-model: opus
+model: sonnet
 mode: plan
 argument-hint: "<github-url or article-url>"
 allowed-tools: Read, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, Bash
