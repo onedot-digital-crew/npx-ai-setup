@@ -214,7 +214,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/transcript-ingest.sh",
-            "timeout": 120
+            "timeout": 30
           }
         ]
       }

@@ -12,6 +12,13 @@ MEMORY_DIR="$PROJECT_DIR/.agents/memory"
 TRANSCRIPT_FILE="${CLAUDE_TRANSCRIPT:-}"
 MAX_MEMORY_FILES=50
 MAX_MEMORY_SIZE_KB=200
+API_TIMEOUT=15
+
+# Guard: claude CLI must exist
+command -v claude >/dev/null 2>&1 || exit 0
+
+# Preflight: test API reachability with minimal prompt (10s max)
+echo "ping" | timeout 10 claude -p --model haiku --output-format text >/dev/null 2>&1 || exit 0
 
 # Guard: need transcript data
 if [ -z "$TRANSCRIPT_FILE" ] || [ ! -f "$TRANSCRIPT_FILE" ]; then
@@ -51,7 +58,7 @@ Rules:
 Transcript (last portion):
 $TRANSCRIPT"
 
-LEARNINGS=$(echo "$PROMPT" | claude -p --model haiku --output-format text 2>/dev/null) || exit 0
+LEARNINGS=$(echo "$PROMPT" | timeout "$API_TIMEOUT" claude -p --model haiku --output-format text 2>/dev/null) || exit 0
 
 # Skip if nothing useful
 if [ "$LEARNINGS" = "NONE" ] || [ -z "$LEARNINGS" ]; then
@@ -95,7 +102,7 @@ if command -v claude >/dev/null 2>&1; then
   # Check if claude-mem MCP is available by looking for config
   if [ -f "$PROJECT_DIR/.mcp.json" ] && grep -q "claude-mem" "$PROJECT_DIR/.mcp.json" 2>/dev/null; then
     # Save via claude-mem MCP (best option — semantic search)
-    echo "$LEARNINGS" | claude -p --model haiku --output-format text \
+    echo "$LEARNINGS" | timeout "$API_TIMEOUT" claude -p --model haiku --output-format text \
       "Save these session learnings to claude-mem. Use the save_memory MCP tool with type 'session-learning' and today's date $DATE. Content: $LEARNINGS" 2>/dev/null && exit 0
   fi
 fi
