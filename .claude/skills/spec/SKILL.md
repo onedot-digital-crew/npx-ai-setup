@@ -32,6 +32,14 @@ Sketch full implementation mentally before writing. Use `AskUserQuestion` at any
 - Hidden complexity; hard-to-test parts; 6-month maintenance pain
 - **Complexity = impact surface + risk** (e.g. "3 files, new dep — Risk: memory, scroll state"). NEVER time estimates.
 
+**Code-Flow-Analyse** (mandatory before step generation): For each function the spec will modify or call, read the source and trace:
+1. Who calls it, what guards/conditions gate execution
+2. What variables/state it already sets
+3. What error/failure paths exist
+Present as a short list in the chat (max 5 functions). This prevents redundant steps and surfaces blockers.
+
+**Step Dedup Check**: Each spec step must introduce a NEW code change. If existing code already does it → no step. If a guard/condition blocks the new flow → that removal/bypass IS a step. If an error path needs handling → explicit step.
+
 **Scope guardrail**: Spec boundary is FIXED once defined. New capabilities → "That belongs in its own spec."
 
 ### 1e — Surface Assumptions
