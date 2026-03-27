@@ -1,9 +1,9 @@
 ---
-name: spec-work-all
-description: Execute all draft specs in parallel using isolated worktrees. Triggers: /spec-work-all, 'run all specs', 'implement everything', 'do all the drafts'.
+name: spec-run-all
+description: Run full pipeline for all draft specs in parallel. Triggers: /spec-run-all, 'run all specs', 'implement everything', 'do all the drafts'.
 ---
 
-# Spec Work All — Batch Execute Draft Specs
+# Spec Run All — Full Pipeline for All Draft Specs
 
 Executes all draft specs in `specs/` in dependency-aware waves using isolated Git worktrees.
 
@@ -25,7 +25,7 @@ A spec depends on another if Out of Scope names a spec number. Group into parall
 1. `git branch -m spec/NNN-title`
 2. Copy .env from main repo: `MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')` then copy all `.env*` except `.env.example` and `.env.template`
 3. Install deps: check for `bun.lockb` → `bun install --frozen-lockfile`, else `package-lock.json` → `npm ci`, else `pnpm-lock.yaml` → `pnpm install --frozen-lockfile`, else `yarn.lock` → `yarn install --frozen-lockfile`
-4. Execute spec steps, verify criteria, commit: `git add -A && git commit -m "spec(NNN): [title]"`
+4. Run full pipeline: invoke `/spec-run NNN` — validates, implements, reviews (self-healing), and commits
 
 Low-complexity specs (1-2 files, no build) can run directly in main repo.
 
@@ -34,10 +34,8 @@ Low-complexity specs (1-2 files, no build) can run directly in main repo.
 Failed: set `blocked`, add `## Review Feedback`, remove worktree, report.
 
 Succeeded:
-1. Check off all steps and criteria in spec
-2. Status → `in-review`
-3. Add CHANGELOG entry under `## [Unreleased]`
-4. Remove worktree (branch preserved for `/spec-review`)
+1. Verify spec status is `completed` (set by `/spec-run`)
+2. Remove worktree (branch preserved for merge)
 
 ### 4. Final summary
 ```bash

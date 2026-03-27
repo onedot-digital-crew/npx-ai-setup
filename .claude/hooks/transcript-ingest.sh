@@ -7,8 +7,6 @@
 # Requirements: claude CLI (for haiku summarization)
 # Token cost: ~500 tokens per invocation (haiku summarization)
 
-set -euo pipefail
-
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MEMORY_DIR="$PROJECT_DIR/.agents/memory"
 TRANSCRIPT_FILE="${CLAUDE_TRANSCRIPT:-}"

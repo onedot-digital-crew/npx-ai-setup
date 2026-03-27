@@ -1,26 +1,39 @@
 # Hook Configuration Guide
 
-See `AGENTS.md` for the full active-hook inventory and customization overview.
 Hook scripts use these exit codes: `0` = pass, `1` = fail with feedback, `2` = blocked
 
-## Dead-Loop Prevention Notes
+## Active Hooks (10 events, 12 scripts)
 
-- `circuit-breaker.sh` warning output is intentionally strict even on `exit 0`, so the model is told not to keep editing the same file before the hard block triggers.
-- `context-monitor.sh` uses advisory wording only. It should suggest saving state and wrapping up, but it must not issue imperative workflow commands that can trigger unnecessary tool calls.
-- `post-edit-lint.sh` suppresses normal formatter/linter output to avoid fix-loop prompts from non-fatal lint noise.
+| Event | Script | Purpose |
+|-------|--------|---------|
+| SessionStart | context-loader.sh | L0 abstracts from .agents/context/ |
+| SessionStart | mcp-health.sh | Validates .mcp.json syntax and commands |
+| SessionStart | cli-health.sh | Warns about missing tools (rtk, defuddle, jq) |
+| PreToolUse Edit\|Write | protect-and-breaker.sh | Protected file guard + edit loop detection |
+| PostToolUse Edit\|Write | post-edit-lint.sh | Auto-format/lint (silent output) |
+| PostToolUse Bash\|Edit\|Write\|NE | context-monitor.sh | Context exhaustion warning |
+| PostToolUseFailure | post-tool-failure-log.sh | Failure logging to .claude/tool-failures.log |
+| ConfigChange | config-change-audit.sh | Audit log + blocks disableAllHooks/Bash(*) |
+| UserPromptSubmit | context-freshness.sh | CB reset + stale context warning |
+| Notification | notify.sh | macOS/Linux desktop notifications |
+| TaskCompleted | task-completed-gate.sh | Blocks WIP/TBD/merge-conflict closures |
+| Stop | transcript-ingest.sh | Auto-extract session learnings via haiku |
+| PreCompact | (inline) | Auto-commit tracked changes before compaction |
+
+## Dead-Loop Prevention
+
+- `protect-and-breaker.sh` warns at 5 edits/10min, blocks at 8. Resets on user message.
+- `context-monitor.sh` suggests saving state — advisory only, no imperative commands.
+- `post-edit-lint.sh` suppresses normal lint output to avoid fix-loop prompts.
 
 ## Debugging
 
 ```bash
-# Test a hook manually
-echo '{"tool_input":{"file_path":"test.js"}}' | ./.claude/hooks/protect-files.sh
+# Test protect-and-breaker
+echo '{"tool_input":{"file_path":"test.js"}}' | ./.claude/hooks/protect-and-breaker.sh
 echo $?  # 0 = allowed, 2 = blocked
 
 # View/clear circuit breaker log
 cat /tmp/claude-cb-*.log
 rm /tmp/claude-cb-*.log
 ```
-
-## Disabling Hooks
-
-Remove the hook block from `.claude/settings.json`, or add `exit 0` at the top of the script.

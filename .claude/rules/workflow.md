@@ -13,6 +13,7 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 | Bug investigation | 🐛 `/debug` falls noch nicht geladen |
 | New feature request (3+ files) | 📋 `/spec` — erst planen, dann bauen |
 | Spec created (draft) | ✅ `/spec-validate NNN` — Draft-Qualität prüfen |
+| `/spec-validate` passes | ⚡ `/spec-run NNN` — Full Pipeline (validate → work → review → commit) |
 | `/spec-work NNN` done | ☑️ `/spec-review NNN` — Acceptance Criteria prüfen, dann `/commit` |
 | Session start + `.continue-here.md` exists | ▶️ `/resume` — State wiederherstellen |
 | Session >30 tool calls | 💡 `/reflect` — Learnings sichern, dann `/pause` |
