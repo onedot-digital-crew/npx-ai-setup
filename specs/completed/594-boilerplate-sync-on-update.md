@@ -1,6 +1,6 @@
 # Spec: Boilerplate-Sync bei ai-setup Update
 
-> **Spec ID**: 594 | **Created**: 2026-03-27 | **Status**: in-progress | **Complexity**: medium | **Branch**: main
+> **Spec ID**: 594 | **Created**: 2026-03-27 | **Status**: completed | **Complexity**: medium | **Branch**: main
 
 ## Goal
 Boilerplate-Skills/Agents/Rules werden bei `ai-setup update` automatisch re-synced, nicht nur bei Erstinstallation.
