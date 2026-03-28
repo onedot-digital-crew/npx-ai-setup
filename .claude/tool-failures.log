@@ -205,3 +205,21 @@
 2026-03-27T03:01:44Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 2 === README counts === grep: invalid option -- P usage: grep [-abcdDEFGHhIiJLlMmnOopqRSsUVvwXxZz] [-A num] [-B num] [-C[num]] 	[-e pattern] [-f file] [--binary-files=value] [--color=when] 	[--context[=num]] [--directories=action] [--label] [--line-buffered] 	[--null] [pattern] [file ...]
 2026-03-27T03:04:41Z TOOL_FAIL tool=Skill interrupt=false error=EPERM: operation not permitted, open '/Users/deniskern/.claude.json'
 2026-03-27T03:06:46Z TOOL_FAIL tool=Skill interrupt=false error=EPERM: operation not permitted, open '/Users/deniskern/.claude.json'
+2026-03-27T09:44:32Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 sed: /Users/deniskern/Sites/sp-alpensattel-next/.claude/settings.json: Operation not permitted
+2026-03-27T09:57:09Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ls: /Users/deniskern/Sites/npx-ai-setup/templates/claude/scripts/: No such file or directory
+2026-03-28T02:33:54Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-28T02:35:56Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 4
+2026-03-28T02:35:58Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 You are not logged into any GitHub hosts. To log in, run: gh auth login
+2026-03-28T02:37:41Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 {"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}
+2026-03-28T02:38:47Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 2 rg: regex parse error:     (?:deploy:clear_paths|task('deploy')     ^ error: unclosed group 0 matches for 'deploy:clear_paths\|task('deploy''
+2026-03-28T02:42:52Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-03-28T03:38:42Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Post "https://api.github.com/graphql": tls: failed to verify certificate: x509: OSStatus -26276
+2026-03-28T03:38:46Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 the owner handle "one-dot-de" was not recognized as either a GitHub user or an organization
+2026-03-28T08:34:10Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 127 (eval):1: command not found: !
+2026-03-28T08:40:52Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 mkdir: /Users/deniskern/Sites/npx-ai-setup/.claude/skills/context-refresh: Operation not permitted
+2026-03-28T08:44:42Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 === Layer Detection === . (2 files) ./assets (37 files) ./blocks (33 files) ./layout (5 files) ./scripts (2 files) ./sections (97 files) ./snippets (108 files) ./src/entrypoints (19 files) ./src/js (10 files) ./templates (1 files)
+2026-03-28T08:44:44Z TOOL_FAIL tool=Read interrupt=false error=EISDIR: illegal operation on a directory, read '/Users/deniskern/Sites/sp-alpensattel-next/src/entrypoints'
+2026-03-28T08:45:29Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 (eval):1: operation not permitted: /Users/deniskern/Sites/sp-alpensattel-next/.agents/context/STACK.md
+2026-03-28T08:46:40Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 (eval):1: operation not permitted: /tmp/context_state.txt
+2026-03-28T08:46:47Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 === CONTEXT FILES === .agents/context/ARCHITECTURE.md  7.8K .agents/context/AUDIT.md  6.3K .agents/context/CONVENTIONS.md  6.1K .agents/context/PATTERNS.md  3.1K .agents/context/STACK.md  3.9K  5 files, 0 dirs (5 .md)  === ABSTRACTS === /usr/bin/read: line 4: read: `.agents/context/STACK.md': not a valid identifier
+2026-03-28T09:10:36Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 /Users/deniskern/Sites/npx-ai-setup/templates/scripts/context-shopify.sh: line 76: /Users/deniskern/Sites/sp-alpensattel-next/.agents/context/SHOPIFY.md: Operation not permitted

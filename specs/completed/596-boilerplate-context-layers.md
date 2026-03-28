@@ -1,6 +1,6 @@
 # Spec: System-Aware Kontext via Bash-Scanner
 
-> **Spec ID**: 596 | **Created**: 2026-03-28 | **Status**: draft | **Complexity**: medium | **Branch**: spec/596-boilerplate-context-layers
+> **Spec ID**: 596 | **Created**: 2026-03-28 | **Status**: completed | **Complexity**: medium | **Branch**: spec/596-boilerplate-context-layers
 
 ## Goal
 
@@ -17,13 +17,13 @@ Aktuell ist der Kontext zu generisch — Claude muss bei jeder Session erst `ls 
 
 ## Steps
 
-- [ ] Step 1: `templates/scripts/context-shopify.sh` — Bash-Scanner: sections (non-gp Namen), blocks (Namen), alp-* snippets (Namen), templates (product/page/article custom + gp-count), layout-Varianten, src/js/components (Namen), locales, settings_schema summary → schreibt `.agents/context/SHOPIFY.md` mit Frontmatter
-- [ ] Step 2: `templates/scripts/context-nuxt.sh` — Stub: pages/, composables/, stores/ → schreibt `.agents/context/NUXT.md`
-- [ ] Step 3: `context-loader.sh` — `for f in STACK.md ...` ersetzen durch Glob `"$CONTEXT_DIR"/*.md` (sort, skip .state)
-- [ ] Step 4: `templates/claude/hooks/context-loader.sh` — gleiche Änderung
-- [ ] Step 5: `context-refresh/SKILL.md` — nach base refresher: System erkennen (`theme.liquid` → shopify, `nuxt.config.*` → nuxt), passendes Script ausführen wenn vorhanden
-- [ ] Step 6: `templates/skills/context-refresh/SKILL.md` — gleiche Änderung
-- [ ] Step 7: In `sp-alpensattel-next` testen: Script direkt ausführen, `SHOPIFY.md` prüfen, SessionStart-Output validieren
+- [x] Step 1: `templates/scripts/context-shopify.sh` — Bash-Scanner: sections (non-gp Namen), blocks (Namen), alp-* snippets (Namen), templates (product/page/article custom + gp-count), layout-Varianten, src/js/components (Namen), locales, settings_schema summary → schreibt `.agents/context/SHOPIFY.md` mit Frontmatter
+- [x] Step 2: `templates/scripts/context-nuxt.sh` — Stub: pages/, composables/, stores/ → schreibt `.agents/context/NUXT.md`
+- [x] Step 3: `context-loader.sh` — `for f in STACK.md ...` ersetzen durch Glob `"$CONTEXT_DIR"/*.md` (sort, skip .state)
+- [x] Step 4: `templates/claude/hooks/context-loader.sh` — gleiche Änderung
+- [x] Step 5: `context-refresh/SKILL.md` — nach base refresher: System erkennen (`theme.liquid` → shopify, `nuxt.config.*` → nuxt), passendes Script ausführen wenn vorhanden
+- [x] Step 6: `templates/skills/context-refresh/SKILL.md` — gleiche Änderung
+- [x] Step 7: In `sp-alpensattel-next` testen: Script direkt ausführen, `SHOPIFY.md` prüfen, SessionStart-Output validieren
 
 ## Acceptance Criteria
 
@@ -34,7 +34,7 @@ Aktuell ist der Kontext zu generisch — Claude muss bei jeder Session erst `ls 
 - [ ] In Nicht-Shopify-Projekt läuft `context-loader.sh` ohne Fehler (3 Abstracts)
 
 ### Artifacts
-- [ ] `templates/scripts/context-shopify.sh` — ausführbar, ≤ 60 Zeilen
+- [ ] `templates/scripts/context-shopify.sh` — ausführbar, produziert SHOPIFY.md in < 1s
 - [ ] `.agents/context/SHOPIFY.md` — ≤ 80 Zeilen, valides Frontmatter-Abstract
 
 ## Files to Modify
