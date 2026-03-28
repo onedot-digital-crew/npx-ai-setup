@@ -60,19 +60,19 @@ else
     printf '%s\n' "$BROKEN_LINKS" >&2
 fi
 
-# ── 6. Command / agent counts ────────────────────────────────────────────────
-CMD_COUNT=0
-if [ -d "${TEMPLATES_DIR}/commands" ]; then
-    CMD_COUNT="$(find "${TEMPLATES_DIR}/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')"
+# ── 6. Skill / agent counts ──────────────────────────────────────────────────
+SKILL_COUNT=0
+if [ -d "${TEMPLATES_DIR}/skills" ]; then
+    SKILL_COUNT="$(find "${TEMPLATES_DIR}/skills" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
 fi
 AGENT_COUNT=0
 if [ -d "${TEMPLATES_DIR}/agents" ]; then
     AGENT_COUNT="$(find "${TEMPLATES_DIR}/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')"
 fi
-if [ "$CMD_COUNT" -lt 1 ]; then
-    _fail "templates/commands/ is empty (expected at least 1 command)"
+if [ "$SKILL_COUNT" -lt 1 ]; then
+    _fail "templates/skills/ is empty (expected at least 1 skill)"
 else
-    _pass "templates/commands/ contains ${CMD_COUNT} command(s)"
+    _pass "templates/skills/ contains ${SKILL_COUNT} skill(s)"
 fi
 if [ "$AGENT_COUNT" -lt 1 ]; then
     _fail "templates/agents/ is empty (expected at least 1 agent)"
