@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 597**: bash-defensive-patterns/SKILL.md trimmen — 533 → 64 Zeilen (88% Reduktion), ~2.400 Token gespart pro Trigger, alle 8 kritischen Patterns erhalten
+
 ## [v2.0.6] — 2026-03-28
 
 <!-- slack-announcement -->

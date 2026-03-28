@@ -7,6 +7,9 @@
 
 <!-- Add new findings here after each /session-optimize run -->
 <!-- Format: - [ ] [Category] Title — Fix applied: `file:line` or Spec NNN -->
+- [ ] [T] sp-alpensattel-next CLAUDE.md fehlt Model-Routing-Sektion — Opus läuft für /spec-run-all Orchestrierung obwohl alle Code-Work auf Sonnet-Subagents delegiert wird; Default auf Sonnet setzen
+- [ ] [T] bash-defensive-patterns/SKILL.md 533 Zeilen (11.5KB) → trim auf ~60 Zeilen — `.claude/skills/bash-defensive-patterns/SKILL.md`
+- [ ] [T] reflect/SKILL.md 7.7KB bei 165 Zeilen — auf Beispiel-Outputs/Code-Blöcke prüfen, trim wenn möglich
 - [x] [T] spec-validate 6.1→2.2KB, spec-review 5.7→2.6KB, spec-work-all 5.5→2.0KB — Spec 588 (2026-03-26)
 - [x] [T] Model-Routing in Spec-Skills beim Trimming ergänzt (spec-review + spec-work-all) — Spec 589 (2026-03-26)
 - [x] [Q] apply-learnings Mapping für Process/CLI → CLAUDE.md war bereits vorhanden (Zeile 19) — Spec 590 (2026-03-26)
