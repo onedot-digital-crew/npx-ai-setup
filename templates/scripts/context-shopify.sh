@@ -71,11 +71,21 @@ store=$(find "$PROJECT_DIR/.shopify" -name "*.json" 2>/dev/null \
 # --- Build abstract ---
 abstract="Shopify: ${section_count} sections | ${block_count} blocks | ${alp_count} alp-* snippets | GP-*: ${gp_section_count} sections + ${gp_tpl_count} templates — NEVER TOUCH"
 
+# --- Frontmatter sections (loaded at SessionStart) ---
+fm_entries=""
+[ -n "$sections" ]      && fm_entries="${fm_entries}  - \"sections: ${sections}\"\n"
+[ -n "$alp_snippets" ]  && fm_entries="${fm_entries}  - \"alp-*: ${alp_snippets}\"\n"
+[ -n "$blocks" ]        && fm_entries="${fm_entries}  - \"blocks: ${blocks}\"\n"
+[ -n "$js_components" ] && fm_entries="${fm_entries}  - \"js: ${js_components}\"\n"
+fm_sections=""
+[ -n "$fm_entries" ] && fm_sections=$(printf "sections:\n%b" "$fm_entries")
+
 # --- Write output ---
 mkdir -p "$(dirname "$OUTPUT")"
 cat > "$OUTPUT" << SHOPIFY_EOF
 ---
 abstract: "${abstract}"
+${fm_sections}
 ---
 
 # Shopify Theme Context

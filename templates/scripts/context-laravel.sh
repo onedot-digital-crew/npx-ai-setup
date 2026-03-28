@@ -57,11 +57,20 @@ fi
 # --- Build abstract ---
 abstract="Laravel${laravel_version:+ ${laravel_version}}: ${model_count} models | ${controller_count} controllers | web: ${route_count_web} + api: ${route_count_api} routes | ${view_count} views${action_count:+ | ${action_count} actions}${service_count:+ | ${service_count} services}"
 
+# --- Frontmatter sections (loaded at SessionStart) ---
+fm_entries=""
+[ -n "$models" ]      && fm_entries="${fm_entries}  - \"models: ${models}\"\n"
+[ -n "$controllers" ] && fm_entries="${fm_entries}  - \"controllers: ${controllers}\"\n"
+[ -n "$env_keys" ]    && fm_entries="${fm_entries}  - \"custom-env: ${env_keys}\"\n"
+fm_sections=""
+[ -n "$fm_entries" ] && fm_sections=$(printf "sections:\n%b" "$fm_entries")
+
 # --- Write output ---
 mkdir -p "$(dirname "$OUTPUT")"
 cat > "$OUTPUT" << LARAVEL_EOF
 ---
 abstract: "${abstract}"
+${fm_sections}
 ---
 
 # Laravel Project Context

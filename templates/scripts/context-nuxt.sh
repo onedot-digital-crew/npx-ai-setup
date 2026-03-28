@@ -74,11 +74,22 @@ fi
 store_count=$(echo "$stores" | tr ',' '\n' | grep -c . 2>/dev/null || echo 0)
 abstract="Nuxt: ${page_count} pages | ${component_count} components${component_dirs:+ (${component_dirs})}${store_count:+ | ${store_count} stores}${storyblok_count:+ | ${storyblok_count} storyblok components}${server_routes:+ | server/api}"
 
+# --- Frontmatter sections (loaded at SessionStart) ---
+fm_entries=""
+[ -n "$pages" ]         && fm_entries="${fm_entries}  - \"pages: ${pages}\"\n"
+[ -n "$composables" ]   && fm_entries="${fm_entries}  - \"composables: ${composables}\"\n"
+[ -n "$stores" ]        && fm_entries="${fm_entries}  - \"stores: ${stores}\"\n"
+[ -n "$server_routes" ] && fm_entries="${fm_entries}  - \"server/api: ${server_routes}\"\n"
+[ -n "$middleware" ]    && fm_entries="${fm_entries}  - \"middleware: ${middleware}\"\n"
+fm_sections=""
+[ -n "$fm_entries" ] && fm_sections=$(printf "sections:\n%b" "$fm_entries")
+
 # --- Write output ---
 mkdir -p "$(dirname "$OUTPUT")"
 cat > "$OUTPUT" << NUXT_EOF
 ---
 abstract: "${abstract}"
+${fm_sections}
 ---
 
 # Nuxt Project Context

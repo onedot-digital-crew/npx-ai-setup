@@ -65,11 +65,19 @@ sb_def_label=""
 [ "${sb_def_count:-0}" -gt 0 ] && sb_def_label=" | ${sb_def_count} schema components"
 abstract="Storyblok: ${sb_component_count} Vue components${sb_def_label}${space_id:+ | space ${space_id}}${sb_packages:+ | ${sb_packages}}"
 
+# --- Frontmatter sections (loaded at SessionStart) ---
+fm_entries=""
+[ -n "$sb_components" ] && fm_entries="${fm_entries}  - \"components: ${sb_components}\"\n"
+[ -n "$sb_packages" ]   && fm_entries="${fm_entries}  - \"packages: ${sb_packages}\"\n"
+fm_sections=""
+[ -n "$fm_entries" ] && fm_sections=$(printf "sections:\n%b" "$fm_entries")
+
 # --- Write output ---
 mkdir -p "$(dirname "$OUTPUT")"
 cat > "$OUTPUT" << SB_EOF
 ---
 abstract: "${abstract}"
+${fm_sections}
 ---
 
 # Storyblok Context
