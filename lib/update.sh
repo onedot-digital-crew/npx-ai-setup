@@ -246,6 +246,28 @@ scan_template_changes() {
       SCAN_TOTAL_CHANGES=$((SCAN_TOTAL_CHANGES + 1))
     fi
   done
+
+  # Scan skills separately (excluded from TEMPLATE_MAP but still managed)
+  if [ -d "$SCRIPT_DIR/templates/skills" ]; then
+    while IFS= read -r -d '' skill_dir; do
+      local skill_file="$skill_dir/SKILL.md"
+      [ -f "$skill_file" ] || continue
+      local name="${skill_dir##*/}"
+      local target=".claude/skills/$name/SKILL.md"
+      if [ ! -f "$target" ]; then
+        SCAN_OTHER_NEW=$((SCAN_OTHER_NEW + 1))
+        SCAN_TOTAL_CHANGES=$((SCAN_TOTAL_CHANGES + 1))
+      else
+        local tpl_cs cur_cs
+        tpl_cs=$(compute_checksum "$skill_file")
+        cur_cs=$(compute_checksum "$target")
+        if [ "$tpl_cs" != "$cur_cs" ]; then
+          SCAN_OTHER_CHANGED=$((SCAN_OTHER_CHANGED + 1))
+          SCAN_TOTAL_CHANGES=$((SCAN_TOTAL_CHANGES + 1))
+        fi
+      fi
+    done < <(find "$SCRIPT_DIR/templates/skills" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  fi
 }
 
 # Process a set of template mappings: install new, update changed, skip unchanged (silently).

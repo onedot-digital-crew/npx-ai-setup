@@ -181,6 +181,16 @@ write_metadata() {
     done < <(find .claude/scripts -type f -print0 | sort -z)
   fi
 
+  # Include skills installed via install_skills
+  if [ -d ".claude/skills" ]; then
+    while IFS= read -r -d '' _skill; do
+      local _target="${_skill#./}"
+      local cs
+      cs=$(compute_checksum "$_target")
+      json=$(echo "$json" | _json_set_file "$_target" "$cs")
+    done < <(find .claude/skills -name "SKILL.md" -print0 | sort -z)
+  fi
+
   echo "$json" > .ai-setup.json
 }
 

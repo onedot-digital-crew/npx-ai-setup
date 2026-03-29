@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Delegate a task to Gemini or Codex CLI. Triggers: 'use gemini for X', 'delegate to gemini', 'ask gemini', 'use codex for X'. Only on explicit delegation — never auto-routes.
+description: "Delegate a task to Gemini or Codex CLI. Triggers: 'use gemini for X', 'delegate to gemini', 'ask gemini', 'use codex for X'. Only on explicit delegation — never auto-routes."
 ---
 
 # Orchestrate — Delegate Tasks to External AI Engines

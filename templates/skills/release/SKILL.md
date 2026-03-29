@@ -1,6 +1,6 @@
 ---
 name: release
-description: Complete release workflow — version bump, CHANGELOG, Slack. Triggers: 'release', 'ship', 'publish', '/release', version strings like 'v2.0.0'.
+description: "Complete release workflow — version bump, CHANGELOG, Slack. Triggers: 'release', 'ship', 'publish', '/release', version strings like 'v2.0.0'."
 ---
 
 # Release — Version Bump, Changelog, Slack Message
