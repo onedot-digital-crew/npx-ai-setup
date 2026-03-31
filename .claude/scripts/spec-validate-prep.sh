@@ -20,7 +20,7 @@ SPEC_FILE=""
 if printf '%s' "$SPEC_ARG" | grep -qE '^[0-9]+$'; then
   # Zero-pad to 3 digits and glob
   PADDED="$(printf '%03d' "$SPEC_ARG")"
-  for _f in specs/${PADDED}-*.md; do
+  for _f in specs/${PADDED}-*.md specs/completed/${PADDED}-*.md; do
     [ -f "$_f" ] && SPEC_FILE="$_f" && break
   done
   if [ -z "$SPEC_FILE" ]; then
