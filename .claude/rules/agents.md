@@ -2,7 +2,7 @@
 
 ## CRITICAL: Model Routing
 
-Always set `model:` when spawning subagents. Haiku is the default — Sonnet only for substantial work.
+Always set `model:` when spawning subagents. Sonnet is the default for implementation subagents — Haiku only for read-only explore agents.
 
 | Model | Use for |
 |-------|---------|
