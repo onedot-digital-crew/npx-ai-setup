@@ -80,6 +80,15 @@ if [ -f .ai-setup.json ] && jq -e . .ai-setup.json >/dev/null 2>&1; then
 fi
 
 # ==============================================================================
+# PROJECT CONFIG: read aiSetup flags from package.json
+# ==============================================================================
+SKIP_SKILLS=false
+if [ -f package.json ]; then
+  _skip_val=$(_json_read package.json '.aiSetup.skipSkills' 2>/dev/null || true)
+  [ "$_skip_val" = "true" ] && SKIP_SKILLS=true
+fi
+
+# ==============================================================================
 # NORMAL SETUP MODE
 # ==============================================================================
 tui_brand_banner_once "Install project rules, workflow files, and helper tools"
@@ -102,7 +111,11 @@ ensure_gemini_skills_alias
 ensure_opencode_skills_alias
 install_specs
 install_workflow_guide
-install_skills
+if [ "$SKIP_SKILLS" = "true" ]; then
+  tui_info "Skills skipped (aiSetup.skipSkills: true in package.json)"
+else
+  install_skills
+fi
 install_claude_scripts
 install_agents
 install_global_agents
@@ -123,7 +136,9 @@ install_context7
 show_plugin_summary
 
 # Global skills (stack-specific skills come from boilerplate or /find-skills)
-run_skill_installation
+if [ "$SKIP_SKILLS" != "true" ]; then
+  run_skill_installation
+fi
 
 # OpenCode compatibility (generates opencode.json from .mcp.json)
 generate_opencode_config
