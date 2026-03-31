@@ -20,6 +20,7 @@ Analyzes sessions for setup improvements focused on **Qualität, Effizienz und T
 - If the request includes a concrete export path like `/Users/.../session-*.txt`: switch to **Deep-dive mode**
 - Otherwise: stay in **Portfolio mode**
 - If both are available: do the deep dive first, then compare against portfolio patterns
+- In Deep-dive mode, prefer running `bash .claude/scripts/session-deep-dive.sh /path/to/session-*.txt` first, then verify or refine the script output with targeted file reads
 
 ### 2. Extract raw session metrics (zero LLM tokens)
 
@@ -44,6 +45,7 @@ In Deep-dive mode, read the export file directly and extract:
 - count of correction markers such as `geht nicht`, `nein`, `immer noch`, `rückgängig`, `anders`, `falsch`, `nochmal`
 - obvious topic shifts inside one session (for example implementation -> bugfix -> performance -> tooling)
 - skill drop-off: skill used in opening turns, then long manual phase without another skill
+- config drift signals: project is on current ai-setup version, but local `CLAUDE.md` or workflow files still miss current routing and delegation guidance
 
 ### 3. Choose analysis mode
 
@@ -76,6 +78,7 @@ Use both sources in full mode, or JSONL metrics alone in local fallback. Look fo
 - High turn count relative to `active` duration — indicates back-and-forth friction
 - Deep-dive exports with huge cache reads plus many mid-session pivots — likely missing task segmentation or reset point
 - Sessions with only 1 initial skill but long manual follow-up (>20 user turns after first skill) — automation opportunity after kickoff
+- Sessions with >300 messages or >10M cache-read tokens plus correction loops — recommend a reset/handoff point instead of continuing in the same thread
 - Skill files over 5KB (`wc -c .claude/skills/*/SKILL.md | sort -rn | head -5`) — bloated skills load all tokens on trigger; flag any >200 lines as candidate for trimming. **Quality gate**: For each trimming candidate, spawn a Haiku subagent (model: haiku) that reads the skill and lists its critical elements (decision tables, output format templates, agent spawn configs with model/tools, conditional logic with specific values, exact CLI flags/options). Include these in the finding as `**Critical elements:**` so the trimming spec knows what to preserve.
 
 **Q (Qualität):**
@@ -83,6 +86,7 @@ Use both sources in full mode, or JSONL metrics alone in local fallback. Look fo
 - Sessions with many Edit calls but few Bash (test) calls — missing verification
 - Observations about broken workflows, status inconsistencies
 - Reversal language inside one session (`mach das rückgängig`, `nein`, `immer noch`) — indicates weak confirmation, missing intermediate verification, or wrong abstraction
+- Correction density threshold: if a session contains >=3 correction turns on the same theme or >=5 total correction turns, recommend reproduction/instrumentation before more edits
 - Multiple topic shifts in one long session — likely context drift causing lower implementation precision
 
 **E (Effizienz):**
@@ -90,7 +94,9 @@ Use both sources in full mode, or JSONL metrics alone in local fallback. Look fo
 - High tool diversity per session — indicates unclear routing
 - Sessions with no skills used — manual work that could be automated
 - Many user correction turns after a single initial spec/plan — missing mid-session re-planning hook
+- Re-plan threshold: if a session crosses >=8 user turns after the first skill with no new skill, or >=3 correction turns after the last plan, recommend a forced re-plan
 - Repeated bugfix wording around the same UI element in one export — missing local reproduction or instrumentation
+- Project on latest ai-setup version but missing current routing/delegation text locally — config drift, not a core workflow bug
 
 ### 7. Verify findings still apply
 
@@ -105,6 +111,7 @@ For ai-setup-related findings, also verify version status:
 - If the project is on an older version, report the finding as `Update candidate` rather than `Broken current setup`
 - If the project is already on a version that should contain the fix, keep the finding only if current-file verification shows it still applies
 - In deep-dive reports, distinguish clearly between `historical session issue` and `current reproducible issue`
+- If the project is on the current ai-setup version but local guidance files miss expected routing/delegation text, classify this as `config drift`
 
 ### 8. Output report
 
@@ -125,6 +132,7 @@ Skills: N | Agents: N | User corrections: N
 Topic shifts: N | Automation drop-off: Yes/No
 Primary drift pattern: <1 line>
 Version lens: historical-only / still relevant / fixed in newer ai-setup
+Config drift: none / possible / confirmed
 
 ## Summary
 <1-2 sentences on dominant pattern found. Use `active` duration for efficiency conclusions; `wall` duration is context only.>
@@ -156,6 +164,7 @@ Sort by priority descending. Max 8 findings — cut noise below ⚪.
 - If `claude-devtools` is available, use it only to strengthen evidence for loops, slow tool phases, or repeated UI interactions; do not rely on it as the sole source.
 - Do not report ai-setup findings without checking version context first when `.ai-setup.json` exists.
 - Prefer "fixed by update to vX.Y.Z" over "needs redesign" when the evidence points to a known released fix.
+- Use these thresholds consistently in Deep-dive mode: `>=5` correction turns, `>=3` same-theme corrections, `>=8` turns since last plan, `>300` messages, `>10M` cache-read tokens.
 - **Model routing**: Use `model: haiku` for all MCP searches (Steps 2–3) and quality-gate subagents. Use `model: sonnet` only for pattern synthesis (Step 4 onwards). Never use Opus in this skill.
 - **Token savings ≠ quality loss**: Every trimming recommendation MUST include a `**Critical elements:**` list (from Haiku subagent analysis). Trimming without this list is incomplete — the downstream spec-work quality gate depends on it.
 

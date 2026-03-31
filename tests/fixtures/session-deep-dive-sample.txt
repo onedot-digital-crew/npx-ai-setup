@@ -1,0 +1,36 @@
+════════════════════════════════════════════════════════════
+SESSION EXPORT
+════════════════════════════════════════════════════════════
+Session:  sample-session-id
+Project:  /tmp/demo-project
+Branch:   main
+Date:     2026-03-31 10:54:15 UTC
+
+────────────────────────────────────────
+METRICS
+────────────────────────────────────────
+Duration:       25m 0s
+Total Tokens:   123,456
+Input Tokens:   100
+Output Tokens:  8,000
+Cache Read:     50,000
+Cache Created:  2,000
+Messages:       40
+Cost:           N/A
+
+════════════════════════════════════════════════════════════
+CONVERSATION
+════════════════════════════════════════════════════════════
+
+────────────────────────────────────────
+USER: Bitte bau den Picker
+
+────────────────────────────────────────
+THINKING:
+ASSISTANT: Tool: Skill
+
+────────────────────────────────────────
+USER: Nein, das geht nicht
+
+────────────────────────────────────────
+USER: Immer noch abgeschnitten

@@ -43,6 +43,7 @@ Never read or search inside build output directories (dist/, .output/, .nuxt/, .
 ## Model Routing
 
 See `.claude/rules/agents.md` for model routing rules (Haiku/Sonnet/Opus).
+Use Haiku only for direct tool use and dedicated explore/search agents. Use Sonnet for implementation and review by default. Reserve Opus for architecture or unusually high-ambiguity work.
 
 ## Task Complexity Routing
 Before starting, classify and state the task tier:
@@ -65,8 +66,8 @@ Required: automated checks pass + "Verification complete: [what was checked]".
 Auto-compact at 80%. Use `/compact Focus on <topic>` for targeted compaction.
 Before ending: `/pause`. After fresh start: `/resume`.
 After sessions with >30 tool calls: `/reflect` and `/commit`.
+If a session crosses `>30` tool calls with no subagents, stop and reconsider delegation before continuing.
 
 ## Parallel Orchestration
 
 See `.claude/rules/agents.md` for agent delegation thresholds and orchestration rules.
-

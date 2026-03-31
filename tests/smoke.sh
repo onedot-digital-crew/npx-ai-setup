@@ -42,6 +42,12 @@ for mod in "${ALL_MODULES[@]}"; do
   fi
 done
 
+if bash -n .claude/scripts/session-deep-dive.sh 2>&1; then
+  pass ".claude/scripts/session-deep-dive.sh syntax"
+else
+  fail ".claude/scripts/session-deep-dive.sh syntax"
+fi
+
 # Step 3: Key function presence in expected modules
 echo ""
 echo "--- Function location checks ---"
@@ -205,6 +211,21 @@ if printf '%s' "$SPEC_PREP_OUTPUT" | grep -q 'Total criteria:     4'; then
   pass "spec-validate-prep counts acceptance criteria correctly"
 else
   fail "spec-validate-prep acceptance criteria counts are broken"
+fi
+
+echo ""
+echo "--- Session deep dive ---"
+SESSION_DEEP_DIVE_OUTPUT="$(bash .claude/scripts/session-deep-dive.sh tests/fixtures/session-deep-dive-sample.txt 2>&1 || true)"
+if printf '%s' "$SESSION_DEEP_DIVE_OUTPUT" | grep -q 'Session Deep-Dive Report'; then
+  pass "session-deep-dive.sh prints a report header"
+else
+  fail "session-deep-dive.sh missing report header"
+fi
+
+if printf '%s' "$SESSION_DEEP_DIVE_OUTPUT" | grep -q 'Correction turns:'; then
+  pass "session-deep-dive.sh reports correction counts"
+else
+  fail "session-deep-dive.sh missing correction count"
 fi
 
 # Step 9: Verify tracked repo-local scripts stay in sync with templates
