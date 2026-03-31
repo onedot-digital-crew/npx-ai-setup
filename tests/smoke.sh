@@ -379,10 +379,16 @@ else
   fail ".claude/rules/agents.md missing haiku default model label"
 fi
 
-if grep -q 'model: haiku' .claude/skills/spec-work/SKILL.md 2>/dev/null; then
+if grep -q 'medium.*haiku\|haiku.*bounded' .claude/skills/spec-work/SKILL.md 2>/dev/null; then
   pass "spec-work/SKILL.md uses haiku for bounded medium-complexity tasks"
 else
   fail "spec-work/SKILL.md missing haiku routing for medium-complexity tasks"
+fi
+
+if grep -q 'medium.*haiku\|haiku.*bounded' templates/skills/spec-work/SKILL.md 2>/dev/null; then
+  pass "templates/skills/spec-work/SKILL.md uses haiku for bounded medium-complexity tasks"
+else
+  fail "templates/skills/spec-work/SKILL.md missing haiku routing for medium-complexity tasks"
 fi
 
 # Summary
