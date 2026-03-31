@@ -141,10 +141,10 @@ fi
 
 echo ""
 echo "--- Routing guidance ---"
-if grep -q 'Default: Haiku' CLAUDE.md 2>/dev/null; then
-  pass "CLAUDE.md sets Haiku as the routine default"
+if grep -qi 'haiku.*direct tool\|haiku.*explore' CLAUDE.md 2>/dev/null; then
+  pass "CLAUDE.md restricts Haiku to direct tool use and explore agents"
 else
-  fail "CLAUDE.md missing Haiku-default routing guidance"
+  fail "CLAUDE.md missing Haiku routing scope"
 fi
 
 if grep -q 'Threshold: spawn agents only for tasks requiring ≥3 distinct tool calls' .claude/rules/agents.md 2>/dev/null; then
@@ -405,28 +405,34 @@ done
 # Routing guidance assertions
 echo ""
 echo "--- Model routing rules ---"
-if grep -q 'Default: Haiku\|Default.*haiku\|haiku.*default' CLAUDE.md 2>/dev/null; then
-  pass "CLAUDE.md documents Haiku as default model"
+if grep -qi 'haiku' CLAUDE.md 2>/dev/null; then
+  pass "CLAUDE.md documents Haiku routing guidance"
 else
-  fail "CLAUDE.md missing Haiku-default model routing guidance"
+  fail "CLAUDE.md missing Haiku routing guidance"
 fi
 
 if grep -q 'haiku' .claude/rules/agents.md 2>/dev/null; then
-  pass ".claude/rules/agents.md contains haiku as default model label"
+  pass ".claude/rules/agents.md contains haiku routing label"
 else
-  fail ".claude/rules/agents.md missing haiku default model label"
+  fail ".claude/rules/agents.md missing haiku routing label"
 fi
 
-if grep -q 'medium.*haiku\|haiku.*bounded' .claude/skills/spec-work/SKILL.md 2>/dev/null; then
-  pass "spec-work/SKILL.md uses haiku for bounded medium-complexity tasks"
+if grep -q 'medium.*sonnet\|sonnet' .claude/skills/spec-work/SKILL.md 2>/dev/null; then
+  pass "spec-work/SKILL.md uses sonnet for medium-complexity implementation"
 else
-  fail "spec-work/SKILL.md missing haiku routing for medium-complexity tasks"
+  fail "spec-work/SKILL.md missing sonnet routing for medium-complexity tasks"
 fi
 
-if grep -q 'medium.*haiku\|haiku.*bounded' templates/skills/spec-work/SKILL.md 2>/dev/null; then
-  pass "templates/skills/spec-work/SKILL.md uses haiku for bounded medium-complexity tasks"
+if grep -q 'medium.*sonnet\|sonnet' templates/skills/spec-work/SKILL.md 2>/dev/null; then
+  pass "templates/skills/spec-work/SKILL.md uses sonnet for medium-complexity implementation"
 else
-  fail "templates/skills/spec-work/SKILL.md missing haiku routing for medium-complexity tasks"
+  fail "templates/skills/spec-work/SKILL.md missing sonnet routing for medium-complexity tasks"
+fi
+
+if grep -q 'haiku.*explore\|explore.*haiku\|dedicated explore' .claude/rules/agents.md 2>/dev/null; then
+  pass ".claude/rules/agents.md restricts haiku to dedicated explore agents"
+else
+  fail ".claude/rules/agents.md missing haiku-for-explore-only restriction"
 fi
 
 # Summary

@@ -6,8 +6,8 @@ Always set `model:` when spawning subagents. Haiku is the default — Sonnet onl
 
 | Model | Use for |
 |-------|---------|
-| `haiku` | **DEFAULT** — Explore, search, codebase questions, simple edits, config changes, single-file fixes |
-| `sonnet` | **Only** multi-file implementation, complex code generation, full test suites |
+| `haiku` | Dedicated explore agents (read-only: search, codebase questions, file lookup) — never for implementation |
+| `sonnet` | **DEFAULT for subagents** — implementation, code generation, reviews, test suites, any write operation |
 | `opus` | Architecture review, complex analysis, spec creation |
 
 Before spawning: Can Haiku handle this? If yes, use Haiku. Sonnet is the scarcest budget.

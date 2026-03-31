@@ -52,11 +52,11 @@ Never read or search inside build output directories (dist/, .output/, .nuxt/, .
 
 ## Model Routing
 
-**Default: Haiku** for exploration, search, file reads, single-file edits, and config work.
-**Sonnet** when the task requires writing correct logic, generating code, or producing test suites — regardless of file count.
+**Haiku** for direct tool use (Glob/Grep/Read) and dedicated explore agents — never for implementation subagents.
+**Sonnet** for all implementation subagents (spec execution, code generation, test suites, reviews).
 **Opus** requires explicit escalation — architecture decisions, spec creation, complex analysis.
 
-Before every subagent spawn: can Haiku handle this? If yes, use Haiku.
+Real savings come from avoiding unnecessary subagent spawns, not from downgrading models on execution tasks.
 
 ## Task Complexity Routing
 Before starting, classify and state the task tier:
