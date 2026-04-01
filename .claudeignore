@@ -66,6 +66,7 @@ __pycache__/
 .agents/repomix-snapshot.xml
 .agents/.skill-cache.json
 .agents/context/.state
+.claude/compact-state.json
 
 # ── Large project directories (read explicitly when needed) ───────────────────
 specs/

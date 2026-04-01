@@ -1,61 +1,59 @@
-# Spec 605: TDD Enforcement Hook (file_checker)
+# Spec: TDD Enforcement Hook
 
-> **Status**: Draft
-> **Source**: Brainstorm 604 (pilot-shell research)
-> **Effort**: M
-> **Value**: ★★★★
+> **Spec ID**: 605 | **Created**: 2026-04-01 | **Status**: completed | **Complexity**: medium | **Branch**: main
 
-## Problem
+## Goal
+Add a lightweight PostToolUse hook that warns when production code is edited without a nearby matching test file.
 
-Our `testing.md` rules mandate TDD, but nothing enforces them automatically. Claude can modify Python/TypeScript/Go files without test files and no warning fires. The issue is only caught in review, not at the point of edit.
+## Context
+`testing.md` now defines stricter TDD expectations, but the setup still relies on the model following those rules voluntarily. The missing enforcement gap is specifically "code changed, no corresponding test exists, no immediate warning fired". This spec closes that gap with a Bash hook that stays advisory and fast.
 
-## Solution
+### Verified Assumptions
+- Active project hooks currently run from `.claude/hooks/` and are configured in `.claude/settings.json`. — Evidence: `.claude/hooks/README.md`, `.claude/settings.json` | Confidence: High | If Wrong: the hook would be registered in the wrong place
+- Template hooks for generated projects live under `templates/claude/hooks/` and are wired via `templates/claude/settings.json`. — Evidence: `templates/claude/hooks/`, `templates/claude/settings.json` | Confidence: High | If Wrong: generated projects would miss the new hook
+- Existing PostToolUse hooks already target `Edit|Write`, so the new hook should align with the current event strategy instead of inventing a new flow. — Evidence: `.claude/settings.json`, `templates/claude/settings.json` | Confidence: High | If Wrong: matcher behavior would need revisiting
 
-A PostToolUse Bash hook (`tdd-checker.sh`) that runs after Write/Edit/MultiEdit. It checks whether a corresponding test file exists for the modified code file. Non-blocking: issues a warning via stdout but does not block the tool.
-
-## Trigger
-
-`PostToolUse` — matcher: `Write|Edit|MultiEdit`
-
-## Logic
-
-```
-file_path = tool_input.file_path
-if file is a test file → skip
-if file extension not in [.py, .ts, .tsx, .js, .jsx, .go] → skip
-derive expected test path (language-specific patterns):
-  Python: tests/test_<module>.py or <dir>/test_<name>.py
-  TypeScript/JS: <base>.test.ts, <base>.spec.ts, __tests__/<name>.test.ts
-  Go: <base>_test.go
-if none of the expected paths exist:
-  print warning (non-blocking, exit 0)
-```
-
-## Files to Create/Modify
-
-- **Create**: `templates/claude/hooks/tdd-checker.sh`
-- **Modify**: `templates/claude/settings.json` — add PostToolUse hook entry
-- **Copy**: `templates/claude/hooks/tdd-checker.sh` → `.claude/hooks/tdd-checker.sh` (install_hooks handles this)
-
-## Constraints
-
-- Must complete in < 50ms — no API calls, no LLM
-- Non-blocking (exit 0) — a warning, not a hard block
-- Skip test files themselves
-- Skip generated files (dist/, node_modules/, .next/, etc.)
-- Use jq for JSON parsing (consistent with other hooks)
-
-## Out of Scope
-
-- Language-specific linting or test running
-- Blocking the edit entirely
-- Covering all languages (only Py/TS/JS/Go initially)
+## Steps
+- [x] Step 1: Create `templates/claude/hooks/tdd-checker.sh` as a Bash-only, non-blocking PostToolUse hook that reads the edited file path from hook JSON input.
+- [x] Step 2: Teach the hook to skip test files, docs/config files, generated directories, and unsupported extensions; only inspect likely source files (`.py`, `.js`, `.jsx`, `.ts`, `.tsx`, `.go`).
+- [x] Step 3: Implement language-aware test path heuristics:
+  Python: `tests/test_<name>.py`, `<dir>/test_<name>.py`
+  JS/TS: `<base>.test.*`, `<base>.spec.*`, `__tests__/<name>.test.*`
+  Go: `<base>_test.go`
+- [x] Step 4: Print a short advisory warning when no expected test path exists, but always exit `0` so the edit itself is never blocked.
+- [x] Step 5: Register the hook in `templates/claude/settings.json` and `.claude/settings.json` under `PostToolUse` for the same edit matcher family as `post-edit-lint.sh`.
+- [x] Step 6: Update `.claude/hooks/README.md` to document the new hook, its advisory behavior, and its matcher scope.
 
 ## Acceptance Criteria
 
-- [ ] Hook exists in `templates/claude/hooks/tdd-checker.sh`
-- [ ] Hook registered in `templates/claude/settings.json` PostToolUse
-- [ ] Editing a .py file without test → warning printed
-- [ ] Editing a test file → no output
-- [ ] Editing a .md or .json file → no output
-- [ ] Hook completes in < 50ms on typical files
+### Truths
+- [x] Editing a supported source file with no matching test file emits a warning from `tdd-checker.sh`.
+- [x] Editing a test file, markdown file, JSON file, or generated/build artifact emits no warning.
+- [x] The hook never blocks the edit path; it always exits `0`.
+- [x] The hook runs locally with shell utilities only and does not call any external API or model.
+
+### Artifacts
+- [x] `templates/claude/hooks/tdd-checker.sh` — new advisory TDD hook (min 25 lines)
+- [x] `templates/claude/settings.json` — PostToolUse registration for generated projects
+- [x] `.claude/hooks/tdd-checker.sh` — installed copy for this repo
+- [x] `.claude/settings.json` — active project registration for local verification
+
+### Key Links
+- [x] `templates/claude/settings.json` → `templates/claude/hooks/tdd-checker.sh`
+- [x] `.claude/settings.json` → `.claude/hooks/tdd-checker.sh`
+- [x] `.claude/rules/testing.md` → `templates/claude/hooks/tdd-checker.sh`
+
+## Files to Modify
+- `templates/claude/hooks/tdd-checker.sh` - new advisory TDD enforcement hook for generated projects
+- `templates/claude/settings.json` - register the hook in the template hook pipeline
+- `.claude/hooks/tdd-checker.sh` - installed copy for this repository
+- `.claude/settings.json` - register the hook in the active local setup
+- `.claude/hooks/README.md` - document the new hook and expected behavior
+
+**Canonical source**: `templates/claude/` is source of truth. Local `.claude/` copies are synced to match for repo verification.
+
+## Out of Scope
+- Running the test suite automatically after every edit
+- Blocking edits when no test exists
+- Supporting every language in one iteration
+- Deep semantic mapping between source files and tests beyond filename/path heuristics

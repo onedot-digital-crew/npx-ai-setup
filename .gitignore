@@ -10,6 +10,7 @@ node_modules/
 .idea
 .claude/worktrees/
 .claude/agent-metrics.log
+.claude/compact-state.json
 CLAUDE.local.md
 .agents/memory/
 .agents/.skill-cache.json
