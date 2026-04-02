@@ -66,6 +66,37 @@ __pycache__/
 .agents/repomix-snapshot.xml
 .agents/.skill-cache.json
 .agents/context/.state
+.agents/context/AUDIT.md
+.agents/context/DESIGN-DECISIONS.md
+.agents/context/LEARNINGS.md
+.agents/context/PATTERNS.md
+.agents/memory/
+skill-creator-workspace/
+.claude/compact-state.json
+.claude/review-state.json
+.claude/spec-progress.json
+.claude/plans/
+.claude/tmp/
+.claude/transcripts/
+specs/
+templates/
+CHANGELOG.md
+30/
+tmp/
 
 # ── Claude Code log files ──────────────────────────────────────────────────────
 .claude/*.log
+.claude/logs/
+
+# ── Local reports & scratch files ─────────────────────────────────────────────
+*.tmp
+*.bak
+*.rej
+*.orig
+*.diff
+*.patch
+*.trace
+*.trace.json
+*.snapshot
+*.audit
+*.report
