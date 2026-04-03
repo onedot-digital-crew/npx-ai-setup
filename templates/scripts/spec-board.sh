@@ -106,9 +106,20 @@ process_spec_file() {
   esac
 }
 
+# Process open specs (skip completed — those come from the windowed completed collector)
 while IFS= read -r f; do
   [ -n "$f" ] || continue
-  process_spec_file "$f"
+  local_base="$(basename "$f")"
+  case "$local_base" in README.md|TEMPLATE.md|template.md) continue ;; esac
+  row="$(parse_spec "$f")"
+  status_field="$(echo "$row" | cut -d'|' -f3)"
+  [ "$status_field" = "completed" ] && continue
+  case "$status_field" in
+    draft)       BACKLOG+=("$row") ;;
+    in-progress) INPROG+=("$row") ;;
+    in-review)   REVIEW+=("$row") ;;
+    blocked)     BLOCKED+=("$row") ;;
+  esac
 done < <(collect_open_specs)
 
 while IFS= read -r f; do
