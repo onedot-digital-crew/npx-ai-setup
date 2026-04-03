@@ -3,7 +3,7 @@
 Dieses Setup macht Claude Code zum strukturierten Entwicklungswerkzeug statt einer Chat-Box. Statt "mach mal Feature X" gibt es einen klaren Prozess: Idee bewerten, Plan erstellen, ausfuehren, reviewen, committen. Jeder Schritt ist ein Slash-Command, jede Aenderung nachvollziehbar.
 
 **Was laeuft automatisch im Hintergrund:**
-- **11 Hooks** verhindern typische Fehler — Endlosschleifen (Circuit-Breaker nach 3 Edits), Lock-File-Edits, Build-Output-Aenderungen
+- **Hooks + Settings** verhindern typische Fehler: Hooks geben Warnungen oder blocken riskante Edits, waehrend `permissions.deny` in `settings.json` harte Read-Blocks fuer Build-Output, Secrets und andere teure Dateien setzt
 - **Context-Dateien** geben Claude sofort Wissen ueber Stack, Architektur und Conventions — ohne jedes Mal erklaeren zu muessen
 - **Prep-Scripts** sammeln Daten in Shell bevor Claude sie sieht — spart 60-90% Tokens
 
@@ -73,7 +73,7 @@ Neue Idee oder Feature?
 |---------|------------|
 | `/spec "task"` | Komplexitaet einschaetzen, Implementation durchdenken, Spec erstellen |
 | `/spec-validate NNN` | Spec-Qualitaet scoren bevor sie ausgefuehrt wird |
-| `/spec-work NNN` | Spec Schritt fuer Schritt ausfuehren, nach jedem Schritt committen |
+| `/spec-work NNN` | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
 | `/spec-run NNN` | Full Pipeline: validate → implement → review → commit (self-healing) |
 | `/spec-run-all` | Full Pipeline fuer alle Draft-Specs parallel in Git Worktrees |
 | `/spec-work-all` | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren |
@@ -150,6 +150,36 @@ Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
 
 ---
 
+## Permission Governance
+
+Dieses Setup unterscheidet bewusst zwischen Repo-Baseline und Operator-Entscheidungen.
+
+- **Projekt-Baseline**: `.claude/settings.json` im Repo. Das ist die teamfaehige Standard-Policy.
+- **Workstation-Settings**: `~/.claude/settings.json`. Das sind lokale Operator- oder Maschinenentscheidungen.
+- **Hooks**: lokale Warn- und Safety-Netze
+- **`permissions.deny`**: harte technische Read-/Command-Blocks
+
+Permission-Modes sind keine versteckten Defaults:
+
+- `default` und `plan` sind die sichere Standard-Empfehlung
+- `acceptEdits` ist eine bewusste Komfortentscheidung fuer trusted lokale Arbeit
+- `dontAsk` ist eine lokale Power-User-Entscheidung, nicht der Team-Baseline-Mode
+- `auto` und `bypassPermissions` sind fortgeschrittene Betriebsmodi fuer klar verstandene Umgebungen
+
+---
+
+## Session Handoff
+
+Es gibt jetzt drei bewusst getrennte Ebenen:
+
+- `.claude/session-state.json`: kanonische machine-readable Handoff-Schicht fuer `/pause`, `/resume` und Compact-Recovery
+- `.continue-here.md`: menschlich lesbare Zusammenfassung fuer Entscheidungen, Restarbeiten und Blocker
+- Spec-Markdown in `specs/*.md`: fachliche Source of Truth fuer Fortschritt und Acceptance Criteria
+
+Die JSON-Datei ersetzt die Specs nicht. Sie beantwortet nur: Was ist gerade aktiv, in welcher Phase bin ich, und was ist der naechste Schritt?
+
+---
+
 ## Context-Dateien
 
 In `.agents/context/` — automatisch beim Setup generiert, committed, teamweit geteilt. Claude kennt dadurch euren Stack und eure Conventions von der ersten Session an.
@@ -189,6 +219,9 @@ Circuit-Breaker greift nach 3 Edits. Stop, Problem anders beschreiben.
 
 **Spec-Schritte nach Crash teilweise abgehakt?**
 `/spec-work NNN` erneut ausfuehren — erkennt `[x]` Schritte und setzt beim ersten offenen fort.
+
+**Wer blockt eigentlich was?**
+`permissions.deny` in `.claude/settings.json` blockt harte Reads wie `.env*`, `dist/` oder Lockfiles. Hooks wie `protect-files.sh` und `context-monitor.sh` sind dagegen lokale Sicherheitsnetze fuer Edit-Flows, Warnings und Runtime-Hinweise.
 
 **Build schlaegt nach spec-work fehl?**
 `/build-fix` — parsed den ersten Error, fixt minimal, rebuildet, wiederholt.

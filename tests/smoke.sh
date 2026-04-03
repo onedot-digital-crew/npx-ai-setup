@@ -403,6 +403,101 @@ else
   fail "templates/.claudeignore only has ${CLAUDEIGNORE_COUNT} patterns (expected >= 30)"
 fi
 
+echo "--- Governance docs ---"
+if [ -f docs/claude-governance.md ]; then
+  pass "docs/claude-governance.md exists"
+else
+  fail "docs/claude-governance.md missing"
+fi
+if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"project-baseline"' templates/claude/settings.json 2>/dev/null; then
+  pass "template settings.json declares project-baseline governance profile"
+else
+  fail "template settings.json missing governance profile metadata"
+fi
+if grep -q 'AI_SETUP_ENABLE_GLOBAL_BROAD_PERMS' lib/global-settings.sh 2>/dev/null; then
+  pass "global settings gates broad shell grants behind explicit opt-in"
+else
+  fail "global settings missing explicit broad-grant opt-in"
+fi
+
+echo "--- Experimental hook registrations ---"
+if grep -q '"PostCompact"' templates/claude/settings.json 2>/dev/null; then
+  pass "template settings.json registers PostCompact"
+else
+  fail "template settings.json missing PostCompact registration"
+fi
+if awk '
+  /"command"[[:space:]]*:[[:space:]]*".*context-monitor\.sh"/ { print block "\n" $0; found=1; exit }
+  { block = block $0 "\n" }
+  /^[[:space:]]*}[[:space:]]*,?[[:space:]]*$/ { block="" }
+' templates/claude/settings.json | grep -q '"matcher"[[:space:]]*:[[:space:]]*"Edit|Write|NotebookEdit"'; then
+  pass "template context-monitor matcher stays off generic Bash"
+else
+  fail "template context-monitor matcher regressed to generic Bash"
+fi
+if grep -q '"SubagentStart"' templates/claude/settings.json 2>/dev/null && grep -q '"SubagentStop"' templates/claude/settings.json 2>/dev/null; then
+  pass "template settings.json registers subagent hooks"
+else
+  fail "template settings.json missing subagent hook registration"
+fi
+if grep -q '"PermissionDenied"' templates/claude/settings.json 2>/dev/null; then
+  pass "template settings.json registers PermissionDenied"
+else
+  fail "template settings.json missing PermissionDenied registration"
+fi
+for hook_file in templates/claude/hooks/subagent-start.sh templates/claude/hooks/subagent-stop.sh templates/claude/hooks/permission-denied-log.sh; do
+  if [ -f "$hook_file" ]; then
+    pass "$(basename "$hook_file") exists"
+  else
+    fail "$(basename "$hook_file") missing"
+  fi
+done
+
+echo "--- CLI health hook ---"
+CLI_HEALTH_STDERR="$SANDBOX_TMP/cli-health.stderr"
+FAKEBIN="$SANDBOX_TMP/fakebin"
+mkdir -p "$FAKEBIN"
+cat > "$FAKEBIN/rtk" <<'EOF'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--version" ]; then
+  echo "rtk 0.34.2"
+  exit 0
+fi
+if [ "${1:-}" = "gain" ]; then
+  echo "Error: Failed to initialize tracking database" >&2
+  echo >&2
+  echo "Caused by:" >&2
+  echo "    0: unable to open database file" >&2
+  echo "    1: Error code 14: Unable to open the database file" >&2
+  exit 1
+fi
+exit 0
+EOF
+chmod +x "$FAKEBIN/rtk"
+PATH="$FAKEBIN:/usr/bin:/bin" bash templates/claude/hooks/cli-health.sh > /dev/null 2>"$CLI_HEALTH_STDERR"
+if grep -q 'tracking DB is unavailable' "$CLI_HEALTH_STDERR" 2>/dev/null; then
+  pass "cli-health.sh distinguishes RTK DB failures from inactive hooks"
+else
+  fail "cli-health.sh did not classify RTK DB failure correctly"
+fi
+
+echo "--- Unified session handoff ---"
+if grep -q 'session-state.json' templates/claude/hooks/pre-compact-state.sh 2>/dev/null && grep -q 'session-state.json' templates/claude/hooks/post-compact-restore.sh 2>/dev/null; then
+  pass "compact hooks use unified session-state.json"
+else
+  fail "compact hooks do not consistently use session-state.json"
+fi
+if grep -q 'session-state.json' templates/skills/pause/SKILL.md 2>/dev/null && grep -q 'session-state.json' templates/skills/resume/SKILL.md 2>/dev/null; then
+  pass "pause and resume skills reference unified session-state.json"
+else
+  fail "pause/resume skills missing unified session-state.json guidance"
+fi
+if grep -q 'session-state.json' templates/skills/spec-work/SKILL.md 2>/dev/null && grep -q 'session-state.json' templates/skills/spec-run/SKILL.md 2>/dev/null; then
+  pass "spec workflow skills refresh unified session-state.json"
+else
+  fail "spec workflow skills missing unified session-state.json references"
+fi
+
 echo "--- Spec status consistency ---"
 for spec_file in specs/completed/[0-9]*.md; do
   [ -f "$spec_file" ] || continue

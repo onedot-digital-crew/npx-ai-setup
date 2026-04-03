@@ -66,10 +66,10 @@ RTK hooks are activated via `rtk init --global` (runs during setup). They transp
 
 Hooks in `.claude/hooks/` intercept tool calls:
 
-- `cli-health.sh` — warns at session start if rtk/defuddle missing
+- `cli-health.sh` — warns at session start if rtk/defuddle are missing and distinguishes RTK hook issues from RTK DB/permission failures
 - `protect-files.sh` — blocks reads of .env, lock files, build output
 - `circuit-breaker.sh` — stops after 8 edits to the same file in 10 minutes
-- `context-monitor.sh` — warns at 35% remaining context
+- `context-monitor.sh` — warns at 35% remaining context on write-oriented tool flows
 
 ## Layer 4: Deny Patterns
 

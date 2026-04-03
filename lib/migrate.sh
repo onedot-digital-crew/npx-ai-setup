@@ -62,6 +62,47 @@ run_migrations() {
 # All functions are idempotent — safe to run twice.
 # ---------------------------------------------------------------------------
 
+_settings_json_mutate() {
+  local settings_file="$1"
+  local jq_filter="$2"
+  local node_script="$3"
+
+  [ -f "$settings_file" ] || return 0
+
+  local tmp
+  tmp=$(mktemp)
+
+  if command -v jq >/dev/null 2>&1; then
+    jq "$jq_filter" "$settings_file" > "$tmp" && mv "$tmp" "$settings_file" || {
+      rm -f "$tmp"
+      return 1
+    }
+    return 0
+  fi
+
+  rm -f "$tmp"
+
+  if command -v node >/dev/null 2>&1; then
+    node - "$settings_file" <<NODESCRIPT
+const fs = require('fs');
+const settingsFile = process.argv[2];
+let cfg = {};
+try {
+  cfg = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+} catch (e) {
+  process.stderr.write('ERROR: ' + settingsFile + ' is not valid JSON: ' + e.message + '\n');
+  process.exit(1);
+}
+${node_script}
+fs.writeFileSync(settingsFile, JSON.stringify(cfg, null, 2) + '\n');
+NODESCRIPT
+    return $?
+  fi
+
+  echo "  ⚠️  settings mutation skipped for $settings_file (jq/node missing)" >&2
+  return 1
+}
+
 # Copy a template file to target if the target does not already exist.
 # Usage: _add_file <template_rel_path> <target_path>
 #   template_rel_path: relative to SCRIPT_DIR (e.g. templates/claude/rules/foo.md)
@@ -156,21 +197,16 @@ _patch_line() {
 _settings_add_permission() {
   local perm="$1"
   local settings_file=".claude/settings.json"
-  if [ ! -f "$settings_file" ]; then
+  [ -f "$settings_file" ] || return 0
+
+  if command -v jq >/dev/null 2>&1 && jq -e --arg p "$perm" '.permissions.allow // [] | index($p) != null' "$settings_file" >/dev/null 2>&1; then
     return 0
   fi
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "  ⚠️  _settings_add_permission: jq required" >&2
-    return 1
-  fi
-  # Idempotent: skip if already present
-  if jq -e --arg p "$perm" '.permissions.allow // [] | index($p) != null' "$settings_file" >/dev/null 2>&1; then
-    return 0
-  fi
-  local tmp
-  tmp=$(mktemp)
-  jq --arg p "$perm" '.permissions.allow = ((.permissions.allow // []) + [$p] | unique)' \
-    "$settings_file" > "$tmp" && mv "$tmp" "$settings_file" || { rm -f "$tmp"; return 1; }
+
+  _settings_json_mutate "$settings_file" \
+    '.permissions.allow = ((.permissions.allow // []) + ["'"$perm"'"] | unique)' \
+    "cfg.permissions = cfg.permissions || {}; cfg.permissions.allow = cfg.permissions.allow || []; if (!cfg.permissions.allow.includes(${perm@Q})) cfg.permissions.allow.push(${perm@Q});" || return 1
+
   echo "  ✅ $settings_file (added permission: $perm)"
 }
 
@@ -180,24 +216,18 @@ _settings_add_permission() {
 _settings_add_hook() {
   local event="$1" cmd="$2"
   local settings_file=".claude/settings.json"
-  if [ ! -f "$settings_file" ]; then
-    return 0
-  fi
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "  ⚠️  _settings_add_hook: jq required" >&2
-    return 1
-  fi
-  # Idempotent: skip if command already present for this event
-  if jq -e --arg e "$event" --arg c "$cmd" \
-    '.hooks[$e] // [] | map(.hooks // []) | flatten | index($c) != null' \
+  [ -f "$settings_file" ] || return 0
+
+  if command -v jq >/dev/null 2>&1 && jq -e --arg e "$event" --arg c "$cmd" \
+    '.hooks[$e] // [] | map(.hooks // []) | flatten | map(.command // "") | index($c) != null' \
     "$settings_file" >/dev/null 2>&1; then
     return 0
   fi
-  local tmp
-  tmp=$(mktemp)
-  jq --arg e "$event" --arg c "$cmd" \
-    '.hooks[$e] = ((.hooks[$e] // []) + [{"hooks": [$c]}])' \
-    "$settings_file" > "$tmp" && mv "$tmp" "$settings_file" || { rm -f "$tmp"; return 1; }
+
+  _settings_json_mutate "$settings_file" \
+    '.hooks = (.hooks // {}) | .hooks["'"$event"'"] = ((.hooks["'"$event"'"] // []) + [{"hooks":[{"type":"command","command":"'"$cmd"'"}]}])' \
+    "cfg.hooks = cfg.hooks || {}; cfg.hooks[${event@Q}] = cfg.hooks[${event@Q}] || []; cfg.hooks[${event@Q}].push({ hooks: [{ type: 'command', command: ${cmd@Q} }] });" || return 1
+
   echo "  ✅ $settings_file (added hook: $event → $cmd)"
 }
 

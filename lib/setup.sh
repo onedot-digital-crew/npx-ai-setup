@@ -402,6 +402,7 @@ install_settings() {
   tui_step "Writing .claude/settings.json"
   mkdir -p .claude
   _install_or_update_file "$TPL/claude/settings.json" .claude/settings.json
+  tui_info "Project baseline profile comes from templates/claude/settings.json; stack customization may narrow denies but should not broaden baseline governance."
 }
 
 # Customize .claude/settings.json deny list for the detected framework.

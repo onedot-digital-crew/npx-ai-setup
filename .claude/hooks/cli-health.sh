@@ -7,8 +7,17 @@ warnings=()
 
 if ! command -v rtk >/dev/null 2>&1; then
   warnings+=("rtk not found — install with 'brew install rtk' for 60-90% token savings")
-elif ! rtk gain >/dev/null 2>&1; then
-  warnings+=("rtk installed but hooks not active — run 'rtk init --global' to enable")
+else
+  rtk_gain_output="$(rtk gain 2>&1 || true)"
+  if [ -n "$rtk_gain_output" ]; then
+    if printf '%s' "$rtk_gain_output" | grep -qiE 'Failed to initialize tracking database|unable to open database file|Error code 14'; then
+      warnings+=("rtk installed but tracking DB is unavailable — check RTK write permissions or local RTK config")
+    elif printf '%s' "$rtk_gain_output" | grep -qiE 'hook|init'; then
+      warnings+=("rtk installed but hooks not active — run 'rtk init --global' to enable")
+    else
+      warnings+=("rtk installed but health check failed — run 'rtk gain' manually to inspect")
+    fi
+  fi
 fi
 
 if ! command -v defuddle >/dev/null 2>&1; then

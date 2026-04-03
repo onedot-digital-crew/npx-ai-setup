@@ -4,6 +4,7 @@
 # written by statusline.sh on every render.
 #
 # Outputs additionalContext JSON at <=35% remaining (WARNING) and <=25% (CRITICAL).
+# `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` in settings.json is the source of truth.
 # Debounces via a counter file — 5 tool calls between warnings at same severity.
 # Severity escalation (WARNING -> CRITICAL) bypasses debounce.
 # Silent exit 0 when bridge file missing, stale (>60s), or jq unavailable.
@@ -67,9 +68,9 @@ printf '%s\n%s\n' "0" "$SEVERITY" > "$COUNTER_FILE" 2>/dev/null || true
 
 # Build message
 if [ "$SEVERITY" = "CRITICAL" ]; then
-  MESSAGE="CRITICAL: Context window at ${REMAINING}% remaining. Compaction is imminent. Consider saving state to HANDOFF.md. Wrapping up should begin before context is truncated."
+  MESSAGE="CRITICAL: Context window at ${REMAINING}% remaining. Compaction is imminent. Consider refreshing .claude/session-state.json and .continue-here.md. Wrapping up should begin before context is truncated."
 else
-  MESSAGE="WARNING: Context window at ${REMAINING}% remaining. Context compaction will fire at 20%. Consider saving state to HANDOFF.md soon."
+  MESSAGE="WARNING: Context window at ${REMAINING}% remaining. The configured auto-compact target is 68% used (about 32% remaining). Consider refreshing .claude/session-state.json and .continue-here.md soon."
 fi
 
 # Output additionalContext JSON to stdout (via jq for safe escaping)

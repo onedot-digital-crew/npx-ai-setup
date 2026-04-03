@@ -9,33 +9,16 @@
       "layout": {
         "type": "split",
         "direction": "right",
-        "position": 0.5,
+        "position": 0.6,
         "children": [
           {
-            "type": "split",
-            "direction": "down",
-            "position": 0.5,
-            "children": [
+            "type": "pane",
+            "surfaces": [
               {
-                "type": "pane",
-                "surfaces": [
-                  {
-                    "name": "claude",
-                    "type": "terminal",
-                    "command": "claude",
-                    "focus": true
-                  }
-                ]
-              },
-              {
-                "type": "pane",
-                "surfaces": [
-                  {
-                    "name": "claude #2",
-                    "type": "terminal",
-                    "command": "claude"
-                  }
-                ]
+                "name": "claude",
+                "type": "terminal",
+                "command": "claude",
+                "focus": true
               }
             ]
           },

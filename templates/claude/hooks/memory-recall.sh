@@ -7,6 +7,8 @@
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MEMORY_DIR="$PROJECT_DIR/.agents/memory"
 PROMPT="${CLAUDE_USER_PROMPT:-}"
+SETTINGS_FILE="$PROJECT_DIR/.claude/settings.json"
+CLAUDE_MEM_PLUGIN_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
 MAX_CONTEXT_CHARS=2000  # ~500 tokens
 
 # Guard: skip short prompts
@@ -39,8 +41,25 @@ extract_keywords() {
 KEYWORDS=$(extract_keywords "$PROMPT")
 [ -z "$KEYWORDS" ] && exit 0
 
+claude_mem_enabled_in_settings() {
+  [ -f "$SETTINGS_FILE" ] || return 1
+
+  if command -v jq >/dev/null 2>&1; then
+    jq -e '.enabledPlugins["claude-mem@thedotmack"] == true' "$SETTINGS_FILE" >/dev/null 2>&1
+    return $?
+  fi
+
+  grep -q '"claude-mem@thedotmack"[[:space:]]*:[[:space:]]*true' "$SETTINGS_FILE" 2>/dev/null
+}
+
+claude_mem_available() {
+  [ -d "$CLAUDE_MEM_PLUGIN_DIR" ] && return 0
+  claude_mem_enabled_in_settings && return 0
+  return 1
+}
+
 # Try claude-mem first (semantic search — best results)
-if [ -f "$PROJECT_DIR/.mcp.json" ] && grep -q "claude-mem" "$PROJECT_DIR/.mcp.json" 2>/dev/null; then
+if claude_mem_available; then
   # claude-mem is configured — Claude will use MCP tools directly
   # We just hint that memory search is available
   printf '{"additionalContext": "Memory search available: claude-mem MCP is active. Consider searching for relevant past observations if this prompt relates to prior work."}\n'

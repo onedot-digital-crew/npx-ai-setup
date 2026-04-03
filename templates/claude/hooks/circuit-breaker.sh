@@ -8,7 +8,7 @@ FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Whitelist: spec progress files and handoff docs are edited frequently by design
 case "$FILE_PATH" in
-  */specs/*.md|*/HANDOFF.md) exit 0 ;;
+  */specs/*.md|*/.continue-here.md|*/HANDOFF.md) exit 0 ;;
 esac
 
 PROJ_HASH=$(echo "$PWD" | shasum | cut -c1-8)

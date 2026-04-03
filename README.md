@@ -323,3 +323,5 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [gastown](https://github.com/steveyegge/gastown)
 - [just-ship](https://github.com/yves-s/just-ship)
 - [Claude Code Best Practices: Auto Mode](https://code.claude.com/docs/en/best-practices#run-autonomously-with-auto-mode)
+- [pilot-shell](https://github.com/maxritter/pilot-shell)
+- [claude-code-source-code](https://github.com/sanbuphy/claude-code-source-code)

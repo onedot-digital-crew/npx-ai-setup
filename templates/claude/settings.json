@@ -3,6 +3,9 @@
   "model": "claude-opus-4-6",
   "plansDirectory": ".claude/plans",
   "autoMemoryDirectory": ".agents/memory",
+  "_governanceDoc": "docs/claude-governance.md",
+  "_governanceProfile": "project-baseline",
+  "_governanceOwnership": "Project settings own repo-local permissions, hooks, and context limits. Global settings stay workstation-local and optional.",
   "_cacheNote": "Keep tool/permission order stable \u2014 reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
   "respectGitignore": true,
   "attribution": {
@@ -10,10 +13,10 @@
     "template": "Co-Authored-By: Claude <noreply@anthropic.com>"
   },
   "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "68",
     "ENABLE_TOOL_SEARCH": "auto:5",
     "MAX_MCP_OUTPUT_TOKENS": "10000",
-    "BASH_MAX_OUTPUT_LENGTH": "20000"
+    "BASH_MAX_OUTPUT_LENGTH": "12000"
   },
   "sandbox": {
     "enabled": true,
@@ -27,6 +30,7 @@
     ]
   },
   "permissions": {
+    "_profileIntent": "Baseline project-local allow/deny policy. Operator mode changes are explicit choices, not hidden defaults.",
     "allow": [
       "Read(src/**)",
       "Read(.planning/**)",
@@ -138,6 +142,17 @@
         ]
       }
     ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/post-compact-restore.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -155,6 +170,7 @@
         ]
       },
       {
+        "matcher": "Edit|Write|NotebookEdit",
         "hooks": [
           {
             "type": "command",
@@ -232,6 +248,39 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/notify.sh"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/subagent-start.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/subagent-stop.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/permission-denied-log.sh",
+            "timeout": 5
           }
         ]
       }

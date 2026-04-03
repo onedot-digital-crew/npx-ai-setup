@@ -3,6 +3,8 @@
 # Requires: SCRIPT_DIR
 
 CLAUDE_HOME="${HOME}/.claude"
+GLOBAL_BASELINE_PERMS=("Bash(rtk:*)")
+GLOBAL_OPTIONAL_BROAD_PERMS=("Bash(git:*)" "Bash(npm:*)" "Bash(npx:*)")
 
 # ==============================================================================
 # INTERNAL HELPERS
@@ -28,63 +30,95 @@ _gs_copy_if_missing() {
 
 # ==============================================================================
 # GLOBAL settings.json
-# Grants allow-list permissions for rtk, git, npm (idempotent merge)
+# Installs a narrow workstation baseline and only adds broader shell grants
+# when the operator explicitly opts in.
 # ==============================================================================
+_gs_json_merge_permissions() {
+  local target="$1"
+  local broad_opt_in="$2"
+
+  if ! command -v node &>/dev/null; then
+    tui_warn "~/.claude/settings.json skipped merge (node not found)"
+    return 1
+  fi
+
+  node - "$target" "$broad_opt_in" <<'NODESCRIPT'
+const fs = require('fs');
+const path = process.argv[2];
+const broadOptIn = process.argv[3] === '1';
+let cfg = {};
+try { cfg = JSON.parse(fs.readFileSync(path, 'utf8')); } catch (e) {
+  process.stderr.write('ERROR: ' + path + ' is not valid JSON: ' + e.message + '\n');
+  process.exit(1);
+}
+cfg.permissions = cfg.permissions || {};
+cfg.permissions.allow = cfg.permissions.allow || [];
+cfg.permissions.deny = cfg.permissions.deny || [];
+cfg._governanceOwnership = cfg._governanceOwnership || 'Global settings stay workstation-local. Broad shell grants are optional operator choices.';
+cfg._governanceProfile = cfg._governanceProfile || 'global-baseline';
+cfg._governanceOptionalBroadShellGrants = broadOptIn;
+
+const baseline = ['Bash(rtk:*)'];
+const optionalBroad = ['Bash(git:*)', 'Bash(npm:*)', 'Bash(npx:*)'];
+
+for (const p of baseline) {
+  if (!cfg.permissions.allow.includes(p)) cfg.permissions.allow.push(p);
+}
+if (broadOptIn) {
+  for (const p of optionalBroad) {
+    if (!cfg.permissions.allow.includes(p)) cfg.permissions.allow.push(p);
+  }
+}
+
+if (!cfg.statusLine) {
+  cfg.statusLine = '{cwd} | {gitBranch} | claude';
+}
+
+fs.writeFileSync(path, JSON.stringify(cfg, null, 2) + '\n');
+NODESCRIPT
+}
+
 _install_global_settings_json() {
   local target="${CLAUDE_HOME}/settings.json"
+  local broad_opt_in="${AI_SETUP_ENABLE_GLOBAL_BROAD_PERMS:-0}"
   mkdir -p "$CLAUDE_HOME"
 
   # Build the baseline settings object
   local base_settings
-  base_settings=$(cat <<'EOF'
+  base_settings=$(cat <<EOF
 {
+  "_governanceProfile": "global-baseline",
+  "_governanceOwnership": "Global settings stay workstation-local. Broad shell grants are optional operator choices.",
+  "_governanceOptionalBroadShellGrants": $( [ "$broad_opt_in" = "1" ] && echo true || echo false ),
   "permissions": {
     "allow": [
-      "Bash(rtk:*)",
-      "Bash(git:*)",
-      "Bash(npm:*)",
-      "Bash(npx:*)"
+      "Bash(rtk:*)"
     ],
     "deny": []
-  }
+  },
+  "statusLine": "{cwd} | {gitBranch} | claude"
 }
 EOF
 )
 
   if [ ! -f "$target" ]; then
     echo "$base_settings" > "$target"
-    tui_success "~/.claude/settings.json created"
+    if [ "$broad_opt_in" = "1" ]; then
+      _gs_json_merge_permissions "$target" "$broad_opt_in" >/dev/null || true
+      tui_success "~/.claude/settings.json created with optional broad shell grants"
+    else
+      tui_success "~/.claude/settings.json created"
+      tui_info "Global broad shell grants skipped — opt in with AI_SETUP_ENABLE_GLOBAL_BROAD_PERMS=1"
+    fi
     return 0
   fi
 
-  # File exists — check if our permissions are already present
-  if grep -q '"Bash(rtk:\*)"' "$target" 2>/dev/null; then
-    tui_info "~/.claude/settings.json already configured, kept"
-    return 0
-  fi
-
-  # Merge: add our allow entries using node (avoids jq dependency)
-  if command -v node &>/dev/null; then
-    node - "$target" <<'NODESCRIPT'
-const fs = require('fs');
-const path = process.argv[2];
-let cfg = {};
-try { cfg = JSON.parse(fs.readFileSync(path, 'utf8')); } catch(e) {
-  process.stderr.write('ERROR: ' + path + ' is not valid JSON: ' + e.message + '\\n');
-  process.exit(1);
-}
-cfg.permissions = cfg.permissions || {};
-cfg.permissions.allow = cfg.permissions.allow || [];
-cfg.permissions.deny  = cfg.permissions.deny  || [];
-const toAdd = ['Bash(rtk:*)', 'Bash(git:*)', 'Bash(npm:*)', 'Bash(npx:*)'];
-for (const p of toAdd) {
-  if (!cfg.permissions.allow.includes(p)) cfg.permissions.allow.push(p);
-}
-fs.writeFileSync(path, JSON.stringify(cfg, null, 2) + '\n');
-NODESCRIPT
-    tui_success "~/.claude/settings.json permissions merged"
+  _gs_json_merge_permissions "$target" "$broad_opt_in" || return 0
+  tui_success "~/.claude/settings.json baseline merged"
+  if [ "$broad_opt_in" = "1" ]; then
+    tui_info "Optional broad shell grants enabled for this workstation"
   else
-    tui_warn "~/.claude/settings.json skipped merge (node not found)"
+    tui_info "Optional broad shell grants left disabled"
   fi
 }
 
@@ -129,7 +163,8 @@ _install_global_rules() {
 
 # ==============================================================================
 # STATUSLINE CONFIG
-# Adds statusLine entry to ~/.claude/settings.json if not already present
+# Adds statusLine entry to ~/.claude/settings.json if not already present.
+# Governance metadata is handled by _install_global_settings_json.
 # ==============================================================================
 _install_statusline_config() {
   local target="${CLAUDE_HOME}/settings.json"
@@ -184,9 +219,14 @@ check_global_settings() {
   # Check permissions in settings.json
   if [ -f "${CLAUDE_HOME}/settings.json" ]; then
     if grep -q '"Bash(rtk:\*)"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
-      tui_success "rtk permissions in settings.json"
+      tui_success "global baseline permissions in settings.json"
     else
-      tui_warn "rtk permissions not set in settings.json"
+      tui_warn "global baseline permissions not set in settings.json"
+    fi
+    if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"global-baseline"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
+      tui_success "global governance metadata"
+    else
+      tui_warn "global governance metadata missing"
     fi
     if grep -q '"statusLine"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
       tui_success "statusLine config"

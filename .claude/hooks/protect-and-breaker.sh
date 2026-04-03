@@ -29,7 +29,7 @@ fi
 # --- Circuit breaker ---
 # Spec files and handoff docs are edited frequently by design
 case "$FILE_PATH" in
-  */specs/*.md|*/HANDOFF.md) exit 0 ;;
+  */specs/*.md|*/.continue-here.md|*/HANDOFF.md) exit 0 ;;
 esac
 
 PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"

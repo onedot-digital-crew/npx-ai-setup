@@ -13,6 +13,9 @@ fi
 if ! command -v python3 >/dev/null 2>&1 && ! command -v node >/dev/null 2>&1; then
   echo "ERROR: python3 (or node) required for package.json and CHANGELOG manipulation" >&2; exit 1
 fi
+if ! command -v npm >/dev/null 2>&1; then
+  echo "ERROR: npm not found in PATH" >&2; exit 1
+fi
 
 # ── Dirty check ────────────────────────────────────────────────────────────────
 if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
@@ -82,6 +85,19 @@ TODAY="$(date +%Y-%m-%d)"
 
 echo "New version:     **${NEW_VERSION}** (${BUMP} bump)"
 echo ""
+
+# ── Release verification gate ─────────────────────────────────────────────────
+echo "## Release Verification"
+echo ""
+if npm run verify:release; then
+  echo ""
+  echo "Release verification passed."
+  echo ""
+else
+  echo ""
+  echo "ERROR: Release verification failed. Fix the issues before releasing." >&2
+  exit 1
+fi
 
 # ── Docs audit ────────────────────────────────────────────────────────────────
 DOCS_AUDIT_SCRIPT="$SCRIPT_DIR/docs-audit.sh"

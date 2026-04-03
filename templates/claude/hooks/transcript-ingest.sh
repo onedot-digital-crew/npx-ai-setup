@@ -2,7 +2,7 @@
 # transcript-ingest.sh — Stop hook (async)
 # Automatically extracts learnings from Claude session transcripts.
 # Runs async (fire-and-forget) — does not block Claude's response.
-# Supports claude-mem (MCP) with fallback to .agents/memory/.
+# Supports claude-mem plugin installs with fallback to .agents/memory/.
 #
 # Requirements: claude CLI (for haiku summarization)
 # Token cost: ~500 tokens per invocation (haiku summarization)
@@ -12,6 +12,8 @@ set -euo pipefail
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MEMORY_DIR="$PROJECT_DIR/.agents/memory"
 TRANSCRIPT_FILE="${CLAUDE_TRANSCRIPT:-}"
+SETTINGS_FILE="$PROJECT_DIR/.claude/settings.json"
+CLAUDE_MEM_PLUGIN_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
 MAX_MEMORY_FILES=50
 MAX_MEMORY_SIZE_KB=200
 
@@ -98,14 +100,27 @@ enforce_memory_limits() {
   fi
 }
 
-# Try claude-mem first
-if command -v claude >/dev/null 2>&1; then
-  # Check if claude-mem MCP is available by looking for config
-  if [ -f "$PROJECT_DIR/.mcp.json" ] && grep -q "claude-mem" "$PROJECT_DIR/.mcp.json" 2>/dev/null; then
-    # Save via claude-mem MCP (best option — semantic search)
-    echo "$LEARNINGS" | claude -p --model haiku --output-format text \
-      "Save these session learnings to claude-mem. Use the save_memory MCP tool with type 'session-learning' and today's date $DATE. Content: $LEARNINGS" 2>/dev/null && exit 0
+claude_mem_enabled_in_settings() {
+  [ -f "$SETTINGS_FILE" ] || return 1
+
+  if command -v jq >/dev/null 2>&1; then
+    jq -e '.enabledPlugins["claude-mem@thedotmack"] == true' "$SETTINGS_FILE" >/dev/null 2>&1
+    return $?
   fi
+
+  grep -q '"claude-mem@thedotmack"[[:space:]]*:[[:space:]]*true' "$SETTINGS_FILE" 2>/dev/null
+}
+
+claude_mem_available() {
+  [ -d "$CLAUDE_MEM_PLUGIN_DIR" ] && return 0
+  claude_mem_enabled_in_settings && return 0
+  return 1
+}
+
+# Try claude-mem first when the supported plugin install path is present.
+if command -v claude >/dev/null 2>&1 && claude_mem_available; then
+  echo "$LEARNINGS" | claude -p --model haiku --output-format text \
+    "Save these session learnings to claude-mem. Use the save_memory MCP tool with type 'session-learning' and today's date $DATE. Content: $LEARNINGS" 2>/dev/null && exit 0
 fi
 
 # Fallback: write to .agents/memory/

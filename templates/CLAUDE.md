@@ -26,6 +26,7 @@ Set `model:` explicitly on every subagent spawn. Default (no model set) inherits
 ## Build Artifact Rules
 
 Never read or search inside: `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`.
+These hard blocks come from `permissions.deny` in `.claude/settings.json`; hooks only add advisory warnings or edit-time safeguards around narrower cases.
 
 ## Automation (Agent SDK CLI)
 Non-interactive runs: `claude -p "<prompt>"`. Structured output: `--output-format json`.
@@ -38,3 +39,5 @@ Non-interactive runs: `claude -p "<prompt>"`. Structured output: `--output-forma
 `auto` (Classifier) — Team plan only. `bypassPermissions` — isolated VMs/containers only.
 Settings: `{ "permissions": { "defaultMode": "dontAsk" } }`
 
+Baseline policy in this setup is the project-local profile from `.claude/settings.json`.
+Treat `acceptEdits`, `dontAsk`, `auto`, and `bypassPermissions` as operator choices layered on top of that baseline, not as assumed team defaults.

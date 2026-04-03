@@ -20,6 +20,8 @@
   "scripts": {
     "test:smoke": "bash tests/smoke.sh",
     "test:integration": "bash tests/integration.sh",
+    "test:claude-runtime": "bash tests/claude-runtime.sh",
+    "verify:release": "npm run test && bash tests/routing-check.sh && REQUIRE_CLAUDE_RUNTIME=1 bash tests/claude-runtime.sh",
     "test": "npm run test:smoke && npm run test:integration",
     "routing-check": "bash tests/routing-check.sh",
     "hooks:install": "git config core.hooksPath .githooks",
