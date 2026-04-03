@@ -225,7 +225,7 @@ tui_brand_banner() {
     return 0
   fi
 
-  if [ "$cols" -ge 44 ] && [ "$rows" -ge 28 ]; then
+  if [ "$cols" -ge 44 ] && [ "$rows" -ge 24 ]; then
     tui_center_block "${TUI_CYAN}" <<'EOF'
 ###################################
 ###################################
