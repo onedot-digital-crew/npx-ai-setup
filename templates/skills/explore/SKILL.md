@@ -58,3 +58,7 @@ Do not start writing code or modifying files. Hand off to `/spec`.
 - Short paragraphs, bullet lists, ASCII diagrams
 - "Here's what I found" over "You should do X"
 - Surface surprises: unexpected dependencies, hidden complexity, implicit constraints
+
+## Next Step
+
+> 📋 Naechster Schritt: `/spec "description"` — Erkenntnisse in einen strukturierten Plan umsetzen

@@ -1,6 +1,7 @@
 ---
 name: explore
 description: "Read-only thinking partner before committing to a spec. Triggers: /explore, 'help me think through', 'brainstorm', 'what are the tradeoffs', 'should I use X or Y'."
+model: haiku
 effort: low
 ---
 
@@ -58,3 +59,7 @@ Do not start writing code or modifying files. Hand off to `/spec`.
 - Short paragraphs, bullet lists, ASCII diagrams
 - "Here's what I found" over "You should do X"
 - Surface surprises: unexpected dependencies, hidden complexity, implicit constraints
+
+## Next Step
+
+> 📋 Naechster Schritt: `/spec "description"` — Erkenntnisse in einen strukturierten Plan umsetzen

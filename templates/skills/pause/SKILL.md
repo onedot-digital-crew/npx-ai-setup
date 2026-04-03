@@ -1,11 +1,11 @@
 ---
 name: pause
-description: "Captures current session state into `.continue-here.md` and commits it as a WIP checkpoint. Run before ending a session."
+description: "Captures session state into `.continue-here.md` plus `.claude/session-state.json` and commits the Markdown handoff. Run before ending a session."
 model: haiku
 allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
 ---
 
-Captures current session state into `.continue-here.md` and commits it as a WIP checkpoint. Run before ending a session.
+Captures current session state into `.continue-here.md` and `.claude/session-state.json`, then commits the Markdown handoff as a WIP checkpoint. Run before ending a session.
 
 ## Process
 
@@ -48,17 +48,39 @@ Generated: <ISO date and time>
 <Specs with status mismatch (e.g. in-review but 0 steps checked), blocked specs, or known issues. "None" if clean.>
 ```
 
-6. **Commit the handoff file**:
+6. **Write `.claude/session-state.json`** as the canonical machine-readable handoff:
+
+```json
+{
+  "updated_at": "<ISO date and time>",
+  "source": "manual-pause",
+  "phase": "paused",
+  "active_spec": "<spec path or empty string>",
+  "active_specs": ["<spec path>", "..."],
+  "next_action": "<short next step>",
+  "handoff_markdown": ".continue-here.md",
+  "has_active_spec": true
+}
+```
+
+Rules:
+- `active_spec` is the primary spec from `## Position`
+- `active_specs` includes every open spec still relevant to the handoff
+- `next_action` should match the first actionable item from `## Remaining`
+- Keep this file small and machine-readable; `.continue-here.md` remains the human narrative
+
+7. **Commit the handoff file**:
    ```
    git add .continue-here.md
    git commit -m "chore: WIP session handoff"
    ```
 
-7. **Confirm**: Report "Session paused. Run `/resume` to restore state in the next session."
+8. **Confirm**: Report "Session paused. Run `/resume` to restore state in the next session."
 
 ## Rules
 - Never stage files other than `.continue-here.md` in the WIP commit.
 - If `.continue-here.md` already exists, overwrite it — only the latest handoff is kept.
+- Always refresh `.claude/session-state.json` together with the Markdown handoff.
 - If `git commit` fails (nothing to commit), still write the file but skip the commit step.
 
 ## Next Step

@@ -14,9 +14,8 @@ If `.claude/skills/` exists, glob all skill directories and read each `SKILL.md`
 
 ### 1b — Detect Input Type & Clarify
 
-**If `$ARGUMENTS` is an existing `.md` file** → Draft Interview Mode: read the draft, ask exhaustive `AskUserQuestion` rounds (min 3) covering technical impl, edge cases, tradeoffs, dependencies, UX — only gaps not already answered in the draft. Update draft with insights, then continue with 1c.
-
-**If `$ARGUMENTS` is plain text** → ask 1-3 focused questions if ambiguous. Skip if clear.
+- If `$ARGUMENTS` is an existing `.md` file: read it, ask only for missing implementation details, then continue.
+- If `$ARGUMENTS` is plain text: ask 1-3 focused questions only if ambiguity blocks a good spec.
 
 ### 1c — Quick Triage
 
@@ -25,17 +24,25 @@ Read `.agents/context/CONCEPT.md` if it exists → REJECT if clearly misaligned 
 **Complexity check**: If >5 files touched, new dep/system, or architectural change → `AskUserQuestion`: "Hohe Komplexitaet ([reason]). Empfehlung: /challenge zuerst." Options: "Weiter mit Spec", "Erst /challenge", "Scope reduzieren". Stop if /challenge chosen; ask clarifying questions if scope reduction chosen.
 
 ### 1d — Think It Through
-Sketch full implementation mentally before writing. Use `AskUserQuestion` at any decision point.
+Sketch the full implementation before writing. Use `AskUserQuestion` only at real decision points.
 - Files/systems touched; exact change in each
 - Integration path; data/state flow; what calls what
 - Edge cases; failure behavior; recoverability
 - Hidden complexity; hard-to-test parts; 6-month maintenance pain
 - **Complexity = impact surface + risk** (e.g. "3 files, new dep — Risk: memory, scroll state"). NEVER time estimates.
 
+**Code-Flow-Analyse** (mandatory before step generation): For each function the spec will modify or call, read the source and trace:
+1. Who calls it, what guards/conditions gate execution
+2. What variables/state it already sets
+3. What error/failure paths exist
+Present as a short list in the chat (max 5 functions). This prevents redundant steps and surfaces blockers.
+
+**Step Dedup Check**: Each spec step must introduce a NEW code change. If existing code already does it → no step. If a guard/condition blocks the new flow → that removal/bypass IS a step. If an error path needs handling → explicit step.
+
 **Scope guardrail**: Spec boundary is FIXED once defined. New capabilities → "That belongs in its own spec."
 
 ### 1e — Surface Assumptions
-Scan 3-5 relevant source files. For each implicit assumption: **Statement** / **Evidence** (file path) / **Confidence** (High/Med/Low) / **If Wrong** (consequence). Present via `AskUserQuestion` for confirmation. Add confirmed assumptions to spec's Context as "Verified Assumptions".
+Scan 3-5 relevant source files. For each implicit assumption capture **Statement / Evidence / Confidence / If Wrong**. Only ask for confirmation when the assumption materially changes scope or implementation.
 
 ---
 
@@ -55,6 +62,11 @@ Translate Phase 1d sketch into spec steps with actual file paths. After drafting
 - **Trigger B**: steps span fundamentally different architectural layers
 
 If either fires: split into two specs (NNN and NNN+1), cross-reference each, note dependencies. Otherwise write a single spec.
+
+**Step dedup validation** (after drafting): For each step, verify against the Code-Flow-Analyse from 1d:
+- Does existing code already do this? → remove step
+- Does a guard/condition block this flow? → add step for guard removal/bypass
+- Is an error/failure path unhandled? → add explicit step
 
 ### Step 4 — Present the spec
 Show spec to user for review and refinement.

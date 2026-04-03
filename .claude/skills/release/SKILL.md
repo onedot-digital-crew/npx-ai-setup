@@ -1,5 +1,6 @@
 ---
 name: release
+model: sonnet
 description: "Complete release workflow — version bump, CHANGELOG, docs sync, Slack. Triggers: 'release', 'ship', 'publish', '/release', version strings like 'v2.0.0'."
 ---
 
@@ -12,8 +13,10 @@ Full release workflow: validate → changelog → docs sync → version bump →
 ### Phase 1: Pre-flight Validation
 
 1. `git status` + `git diff --cached` — abort if uncommitted/staged changes
-2. `bash scripts/validate-release.sh` — abort on non-zero exit
-3. Collect scope: `git describe --tags --abbrev=0`, `git log --oneline <tag>..HEAD`, read `CHANGELOG.md [Unreleased]`, read `package.json` version
+2. `npm run verify:release` — abort on non-zero exit
+3. Treat a skipped `test:claude-runtime` as a release failure in this phase; Claude runtime validation must pass, not skip.
+4. If `verify:release` fails, fix the issue before any version bump, docs sync, commit, tag, or publish step.
+5. Collect scope: `git describe --tags --abbrev=0`, `git log --oneline <tag>..HEAD`, read `CHANGELOG.md [Unreleased]`, read `package.json` version
 
 ### Phase 2: Inventory Audit — Count Everything
 
@@ -82,8 +85,14 @@ Report: "Tagged vX.Y.Z. Run `git push && git push --tags` when ready."
 ## Rules
 
 - **Never push automatically** — leave push to user
+- **Never skip release verification** — `npm run verify:release` must pass before proceeding
 - **Never skip the docs audit** — stale counts are the #1 source of confusion
 - **Count from filesystem** — run actual ls/wc/grep, never guess
 - **Template parity** — if `WORKFLOW-GUIDE.md` changes, `templates/WORKFLOW-GUIDE.md` must match
 - **Additive only** — docs sync adds, never removes (removal = manual review)
+- **Fix immediately on failure** — release work stops until verification is green again
 - Stop if uncommitted changes or missing `[Unreleased]` in CHANGELOG
+
+## Next Step
+
+> 📤 Naechster Schritt: `git push && git push --tags` — Release veroeffentlichen

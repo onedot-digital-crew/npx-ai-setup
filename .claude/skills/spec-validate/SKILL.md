@@ -1,6 +1,7 @@
 ---
 name: spec-validate
 description: "Validate a draft spec before execution. Triggers: /spec-validate NNN, 'validate spec NNN', 'is spec NNN ready to implement', 'check spec quality'."
+model: haiku
 ---
 
 Validates spec $ARGUMENTS against 10 quality metrics. Run before `/spec-work` to catch weak specs early.
@@ -57,6 +58,12 @@ Spec Validation — NNN: [title]
 | B | ≥ 70 | "Run `/spec-work NNN`." |
 | C | ≥ 55 | List criteria <7 with fixes. "Revision recommended." |
 | F | < 55 | List criteria <7 with fixes. "Fix and re-run `/spec-validate NNN`." |
+
+## Next Step
+
+- Grade A/B: `> ⚡ Naechster Schritt: /spec-work NNN — Spec implementieren`
+- Grade C: `> 🔧 Naechster Schritt: Kriterien <7 fixen, dann /spec-validate NNN erneut`
+- Grade F: `> 🔧 Naechster Schritt: Spec ueberarbeiten, dann /spec-validate NNN erneut`
 
 ## Rules
 - **Read-only** — never modify the spec or any file.

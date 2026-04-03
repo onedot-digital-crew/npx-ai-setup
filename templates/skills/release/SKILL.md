@@ -12,8 +12,10 @@ Full release workflow: validate → changelog → version bump → slack → com
 ### Phase 1: Pre-flight Validation
 
 1. `git status` + `git diff --cached` — abort if uncommitted/staged changes
-2. Collect scope: `git describe --tags --abbrev=0`, `git log --oneline <tag>..HEAD`, read `CHANGELOG.md [Unreleased]`
-3. Detect version source: `package.json`, `Cargo.toml`, `pyproject.toml`, `version.txt`, or ask user
+2. Run `npm run verify:release` when `package.json` exists. Treat this as a hard gate.
+3. If `verify:release` fails or runtime validation is skipped because Claude is not authenticated, stop the release and fix the issue first.
+4. Collect scope: `git describe --tags --abbrev=0`, `git log --oneline <tag>..HEAD`, read `CHANGELOG.md [Unreleased]`
+5. Detect version source: `package.json`, `Cargo.toml`, `pyproject.toml`, `version.txt`, or ask user
 
 ### Phase 2: Version Bump
 
@@ -60,4 +62,10 @@ Report: "Tagged vX.Y.Z. Run `git push && git push --tags` when ready."
 
 - **Never push automatically** — leave push to user
 - **Detect version source** — don't assume package.json, check what exists
+- **Release verification is mandatory** — no version bump, tag, or publish step before `verify:release` passes
+- **Fix immediately on failure** — do not continue the release with skips, warnings, or known runtime gaps
 - Stop if uncommitted changes or missing `[Unreleased]` in CHANGELOG
+
+## Next Step
+
+> 📤 Naechster Schritt: `git push && git push --tags` — Release veroeffentlichen

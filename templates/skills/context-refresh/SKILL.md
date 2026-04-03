@@ -36,3 +36,7 @@ The agent may silently skip the `.state` write. Running it here guarantees `.sta
 ## System scanners
 
 Installed to `.claude/scripts/` by `ai-setup`. Run in < 1s, zero LLM cost. Write a system-specific `.agents/context/*.md` with frontmatter abstract — loaded automatically by `context-loader.sh` at SessionStart.
+
+## Next Step
+
+> ▶️ Naechster Schritt: Weiterarbeiten — Context ist aktuell. `/context-load all` fuer Details.

@@ -56,10 +56,9 @@ gh pr create --title "..." --body "..."
 
 Do NOT push or create the PR — the user does this manually.
 
-## Post-PR
+## Next Step
 
-After presenting the PR commands to the user, suggest:
-> "Run `/reflect` to capture any learnings from this session before they leave context."
+> 🔄 Naechster Schritt: `/ci` — CI-Status pruefen, dann `/reflect` fuer Learnings
 
 ## Rules
 - Never push (`git push` is denied by settings).

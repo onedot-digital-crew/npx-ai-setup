@@ -1,5 +1,6 @@
 ---
 name: spec-review
+model: sonnet
 description: "Review a completed spec after implementation. Triggers: /spec-review NNN, 'review spec NNN', 'did we complete spec NNN', 'verify spec implementation'."
 ---
 
@@ -36,6 +37,13 @@ For structured criteria: verify Truths (run commands), Artifacts (file exists wi
 - High: spawn `code-reviewer` AND `staff-reviewer` in parallel (model: sonnet)
 - Review stays on Sonnet for all tiers; do not escalate to Opus for routine spec review.
 
+**4d — Conditional reviewers** (spawn in parallel with 4c if applicable):
+- Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
+- Spec touches DB queries, loops, rendering, data fetching, or bundle imports → also spawn `performance-reviewer`
+
+**4e — Doctor check** (run in parallel with 4c/4d):
+Run `bash .claude/scripts/doctor.sh`. Any FAIL blocks APPROVED verdict — must be fixed first.
+
 ### 5. Verdict
 
 **APPROVED** — All criteria met, agents returned PASS/CONCERNS:
@@ -57,6 +65,13 @@ Ask user via `AskUserQuestion`:
 4. **Discard** — confirm first, then `git checkout main && git branch -D BRANCH`
 
 Clean up worktree after merge/push/discard if one exists.
+
+## Next Step
+
+- APPROVED + merged: `> 📦 Naechster Schritt: /commit — Changes committen`
+- APPROVED + PR: `> 📤 Naechster Schritt: /pr — Pull Request erstellen`
+- CHANGES REQUESTED: `> 🔧 Naechster Schritt: Feedback umsetzen, dann /spec-review NNN erneut`
+- REJECTED: `> 🔧 Naechster Schritt: Kritische Issues fixen, dann /spec-review NNN erneut`
 
 ## Rules
 - **Read-only** — no code changes, only spec status/feedback updates.

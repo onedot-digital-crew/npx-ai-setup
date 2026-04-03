@@ -1,5 +1,6 @@
 ---
 name: orchestrate
+model: sonnet
 description: "Delegate a task to Gemini or Codex CLI. Use when the user says \"use gemini for X\", \"use codex for X\", \"delegate to gemini\", \"delegate to codex\", \"ask gemini\", or \"ask codex\". Only triggers on explicit delegation requests — never auto-routes."
 ---
 
@@ -61,3 +62,7 @@ Sends a prompt to Gemini CLI or Codex CLI and returns the result inside Claude C
 - API key missing → tell user which env var to set (`GEMINI_API_KEY` or `OPENAI_API_KEY`)
 - Timeout → report the timeout and suggest increasing it or simplifying the task
 - Non-zero exit → show the error message from stderr
+
+## Next Step
+
+> ▶️ Naechster Schritt: Ergebnis pruefen und weiterarbeiten. `/commit` wenn Code-Aenderungen uebernommen wurden.

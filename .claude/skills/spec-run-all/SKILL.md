@@ -1,5 +1,6 @@
 ---
 name: spec-run-all
+model: sonnet
 description: "Run full pipeline for all draft specs in parallel. Triggers: /spec-run-all, 'run all specs', 'implement everything', 'do all the drafts'."
 ---
 
@@ -52,3 +53,7 @@ When a spec modifies SKILL.md files: after subagent completes but before marking
 - Follow specs exactly — no scope creep
 - Blocked steps: mark unchecked, continue remaining
 - Always report failures with reason
+
+## Next Step
+
+> 📋 Naechster Schritt: `/spec-board` — Ergebnisse pruefen und offene Specs reviewen

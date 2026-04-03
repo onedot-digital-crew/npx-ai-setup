@@ -24,10 +24,11 @@ Stages changes and creates a conventional commit message. Uses `commit-prep.sh` 
 
 5. Commit. Do NOT push. Do NOT use `--no-verify`.
 
-## Post-Commit
+## Next Step
 
-After a successful commit, suggest:
-> "Run `/reflect` to capture any learnings from this session before they leave context."
+- Feature-Branch: `> 📤 Naechster Schritt: /pr — Pull Request erstellen`
+- Main-Branch: `> 🏷️ Naechster Schritt: /release — Version bump + Tag`
+- Session >30 tool calls: `> 💡 Naechster Schritt: /reflect — Learnings sichern`
 
 ## Rules
 - Never stage `.env`, credentials, or large binaries.

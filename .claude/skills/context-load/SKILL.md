@@ -1,5 +1,6 @@
 ---
 name: context-load
+model: haiku
 description: "Load context files on demand — STACK.md, ARCHITECTURE.md, CONVENTIONS.md, decisions.md. Triggers: /context-load, 'load architecture', 'show stack details', 'load conventions'."
 ---
 
@@ -33,3 +34,7 @@ Load full `.agents/context/` files when the L0 abstracts from SessionStart are n
 
 - Simple tasks where the L0 abstract is sufficient
 - When you can just read the file directly with the Read tool (this skill is a convenience shortcut)
+
+## Next Step
+
+> ▶️ Naechster Schritt: Weiterarbeiten — Context ist geladen. `/spec` fuer neue Features, `/debug` fuer Bugs.

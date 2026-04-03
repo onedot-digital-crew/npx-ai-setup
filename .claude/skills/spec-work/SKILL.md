@@ -1,6 +1,7 @@
 ---
 name: spec-work
 description: "Execute a single spec step by step. Triggers: /spec-work NNN, 'work on spec NNN', 'implement spec NNN', 'run spec NNN'. NNN is a 3-digit spec number."
+model: sonnet
 ---
 
 Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to implement a single approved spec.
@@ -26,6 +27,7 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
 8. **Architectural review** (only if `**Complexity**: high`): Spawn `code-architect` agent with spec content. REDESIGN → stop. PROCEED WITH CHANGES → report concerns, continue. PROCEED → continue.
 
 9. **Start work**: Set `**Status**: in-progress`.
+   Refresh `.claude/session-state.json` with the active spec path, phase `implementation`, and the current next action.
 
 10. **Progress checklist**: Print all steps as `[ ] Step N: <title>`. Check off each as completed.
 
@@ -35,6 +37,11 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     - `low` — execute directly (no subagent)
     - `medium` or unset — spawn subagent with `model: sonnet`
     - `high` — spawn subagent with `model: opus`
+
+11b. **Specialist routing** (for implementation steps only):
+    - If step modifies Vue/React components, styling, or accessibility → spawn `frontend-developer` agent
+    - If step modifies API routes, server middleware, or third-party integrations → spawn `backend-developer` agent
+    - Only if the corresponding agent exists in `.claude/agents/`. Skip silently if not installed.
 
 12. **Execute each step**:
     - Implement the change
@@ -48,6 +55,7 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     - **Retry limit**: Same step fails 3× → mark as blocked (`- [~]`), set `**Status**: blocked`, stop.
     - **No-change detection**: 2 consecutive steps with no file changes → ask user via AskUserQuestion: "Two steps with no changes. Expected?" Options: [Yes, continue] [No, investigate] [Abort]
     - **Completion stats**: After all steps, print steps completed/blocked and files changed.
+    - **Handoff refresh:** After each meaningful checkpoint (step completion, blocked state, verify failure), refresh `.claude/session-state.json` so compact recovery and manual `/resume` stay aligned.
 
 13. **Verify acceptance criteria**: Check each criterion in the spec. For Truths: run commands. For Artifacts: read files. For Key Links: verify imports exist.
 
@@ -57,13 +65,19 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to i
     - **PASS**: continue.
     - **FAIL**: Spawn Haiku Investigator once (model: haiku, tools: Read/Glob/Grep/Bash read-only, no Write/Edit). Pass error output. Apply suggested fix, re-run verify-app once. Second FAIL → set `in-review`, stop.
 
+15a. **Test coverage check** (after verify-app PASS): Check if changed source files have corresponding test files. If coverage gaps exist, spawn `test-generator` agent (model: sonnet). Skip if spec is test-only or no test framework detected.
+
 16. **Optional cleanup**: Offer `/simplify` before review. Skip if user declines.
 
 17. **Update status**: Set `in-review` before spawning reviewers.
+    Refresh `.claude/session-state.json` with phase `in-review` and next action `/spec-review NNN`.
 
 18. **Auto-review** (complexity-gated):
     - Low/Medium/unset: spawn `code-reviewer` only.
     - High: spawn `code-reviewer` + `staff-reviewer` in parallel.
+    - **Conditional reviewers** (spawn in parallel with code-reviewer if applicable):
+      - Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
+      - Spec touches DB queries, loops, rendering, data fetching, or bundle imports → also spawn `performance-reviewer`
     - FAIL → leave `in-review`, report issues. PASS/CONCERNS → set `completed`, move to `specs/completed/`.
 
 ## Skill-Trimming Quality Gate
@@ -81,7 +95,7 @@ When a spec modifies SKILL.md files (trimming, condensing, refactoring): after a
 ## Rules
 - **ALWAYS update status and move the file when done.**
 - Follow the spec exactly — nothing outside Steps and scope.
-- Check off each step as completed. Do NOT commit — `/spec-review` is the gate before committing.
+- Check off each step as completed. Do NOT commit during `/spec-work` — `/spec-review` remains the gate before any commit or PR flow.
 - If blocked: leave unchecked, set `blocked`, ask user.
 - **Skill-First**: If a step references a skill, invoke via `Skill` tool.
 - `--complete` flag: skip steps 14–16, set `completed` directly.
@@ -89,4 +103,4 @@ When a spec modifies SKILL.md files (trimming, condensing, refactoring): after a
 
 ## Next Step
 
-After implementation: `/spec-review NNN` to validate, then `/pr` or `/spec-board`.
+After implementation: `/spec-review NNN` to validate, then `/commit`, `/pr`, or `/spec-board` depending on the review outcome.

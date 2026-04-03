@@ -82,3 +82,7 @@ Zieldateien geändert: [Liste]
 - Duplikate still überspringen, nicht melden (außer im Abschlussbericht)
 - Bei Unsicherheit über Zieldatei: fragen, nicht raten
 - LEARNINGS.md-Einträge die Worktree-Files referenzieren: erst prüfen ob File existiert (Glob), bevor angewandt wird
+
+## Next Step
+
+> 📦 Naechster Schritt: `/commit` — Geaenderte Context-Dateien committen

@@ -1,5 +1,6 @@
 ---
 name: spec-run
+model: sonnet
 description: "Run full spec pipeline — validate, implement, review, commit. Triggers: /spec-run NNN, 'run spec pipeline NNN', 'execute spec NNN end to end'."
 ---
 
@@ -32,3 +33,7 @@ Invoke `/commit`.
 - Grade F and REJECTED always stop — too broken to auto-fix.
 - If resumed after manual fix, detect spec status and skip completed phases (e.g. `in-progress` skips Phase 1).
 - Pass `--skip-validate` to spec-work since Phase 1 already validated.
+
+## Next Step
+
+> 📋 Naechster Schritt: `/spec-board` — Spec-Uebersicht pruefen, oder `/release` wenn main-Branch
