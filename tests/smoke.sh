@@ -563,6 +563,40 @@ else
   fail "tests/routing-check.sh has syntax errors"
 fi
 
+echo "--- Claude Code 2.1.89+ alignment ---"
+# tdd-checker: exclusion patterns must handle absolute paths (*/node_modules/*, etc.)
+if grep -q '\*/node_modules/\*' templates/claude/hooks/tdd-checker.sh 2>/dev/null; then
+  pass "tdd-checker uses absolute-path-safe exclusion patterns"
+else
+  fail "tdd-checker still uses relative-only exclusion patterns (breaks with absolute file_path)"
+fi
+
+# permission-denied-log: retry logic for auto_classifier
+if grep -q 'retry.*true\|{retry' templates/claude/hooks/permission-denied-log.sh 2>/dev/null; then
+  pass "permission-denied-log emits retry:true for auto_classifier safe commands"
+else
+  fail "permission-denied-log missing retry logic for 2.1.89 PermissionDenied hook"
+fi
+
+# task-created-log.sh exists and is registered
+if [ -f templates/claude/hooks/task-created-log.sh ]; then
+  pass "task-created-log.sh exists"
+else
+  fail "task-created-log.sh missing"
+fi
+if grep -q '"TaskCreated"' templates/claude/settings.json 2>/dev/null; then
+  pass "template settings.json registers TaskCreated hook"
+else
+  fail "template settings.json missing TaskCreated registration"
+fi
+
+# disableSkillShellExecution warning in CLAUDE.md
+if grep -q 'disableSkillShellExecution' templates/CLAUDE.md 2>/dev/null; then
+  pass "templates/CLAUDE.md documents disableSkillShellExecution risk"
+else
+  fail "templates/CLAUDE.md missing disableSkillShellExecution warning"
+fi
+
 # Summary
 echo ""
 echo "Results: ${PASS} passed, ${FAIL} failed"

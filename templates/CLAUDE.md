@@ -23,6 +23,11 @@ Set `model:` explicitly on every subagent spawn. Default (no model set) inherits
 | `sonnet` | Writing correct logic, code generation, test suites |
 | `opus` | Architecture review, complex analysis, spec creation |
 
+## Skill Shell Execution
+
+Do NOT set `disableSkillShellExecution: true` in settings.json for this project.
+Skills `doctor`, `spec-board`, `review`, `ci`, `test-setup`, and `session-optimize` use `!` inline shell execution — disabling it breaks health checks and the full review workflow.
+
 ## Build Artifact Rules
 
 Never read or search inside: `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`.

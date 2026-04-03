@@ -285,6 +285,17 @@
         ]
       }
     ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/task-created-log.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "TaskCompleted": [
       {
         "hooks": [

@@ -14,10 +14,10 @@ case "$FILE_PATH" in
   *.md|*.json|*.yaml|*.yml|*.toml|*.sh|*.css|*.scss|*.less|*.svg)
     exit 0
     ;;
-  node_modules/*|dist/*|build/*|coverage/*|.next/*|.nuxt/*|.output/*|storybook-static/*|vendor/*)
+  node_modules/*|*/node_modules/*|dist/*|*/dist/*|build/*|*/build/*|coverage/*|*/coverage/*|.next/*|*/.next/*|.nuxt/*|*/.nuxt/*|.output/*|*/.output/*|storybook-static/*|*/storybook-static/*|vendor/*|*/vendor/*)
     exit 0
     ;;
-  *.test.*|*.spec.*|*/__tests__/*|*/tests/*|test_*.py|*_test.go)
+  *.test.*|*.spec.*|*/__tests__/*|*/tests/*|*/test_*.py|*_test.go)
     exit 0
     ;;
 esac

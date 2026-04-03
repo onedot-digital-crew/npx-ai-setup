@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Spec 619**: Claude Code 2.1.89+ Alignment — tdd-checker absolute path fix, permission-denied retry logic, TaskCreated hook, disableSkillShellExecution warning
+
 ## [v2.0.8] — 2026-04-03
 
 <!-- slack-announcement -->

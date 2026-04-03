@@ -36,4 +36,21 @@ esac
 
 [ -n "$DETAIL" ] && printf '[permission-denied] %s\n' "$DETAIL" >&2
 
+# Auto-retry for safe read-only commands denied by auto mode classifier (2.1.89+)
+# Emit {"retry": true} on stdout to tell Claude it can retry the tool call.
+# Only retries single, non-chained commands — shell operators (;|&><) disqualify.
+if [ "$SOURCE" = "auto_classifier" ] || [ "$SOURCE" = "auto" ]; then
+  COMMAND=$(printf '%s' "$INPUT" | jq -r '.command // .tool_input.command // ""' 2>/dev/null)
+  [ "$COMMAND" = "null" ] && COMMAND=""
+  # Reject any command containing shell chaining or redirect operators.
+  if printf '%s' "$COMMAND" | grep -qE '[;|&><]'; then
+    : # chained command — do not retry
+  else
+    SAFE_PATTERN='^[[:space:]]*(grep|cat|ls|find|head|tail|wc|sort|uniq|stat|diff|echo|pwd|git[[:space:]]*(status|log|diff|show|branch|tag)?[[:space:]]*|jq|rg|fd)[[:space:]]*'
+    if printf '%s' "$COMMAND" | grep -qE "$SAFE_PATTERN"; then
+      printf '{"retry":true}\n'
+    fi
+  fi
+fi
+
 exit 0
