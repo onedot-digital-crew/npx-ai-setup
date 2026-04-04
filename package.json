@@ -18,7 +18,6 @@
     "onedot"
   ],
   "scripts": {
-    "skills:catalog": "bash .claude/scripts/skills-catalog.sh",
     "test:smoke": "bash tests/smoke.sh",
     "test:integration": "bash tests/integration.sh",
     "test:claude-runtime": "bash tests/claude-runtime.sh",

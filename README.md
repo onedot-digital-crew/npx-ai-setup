@@ -111,7 +111,6 @@ Available in Claude Code and compatible clients. In Codex, use `$spec`, `$spec-w
 Terminal catalogs:
 
 - `bash .claude/scripts/spec-board.sh` — visual spec overview
-- `npm run skills:catalog` — terminal catalog of skills by category, model, and availability
 
 ## Subagents
 

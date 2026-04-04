@@ -280,3 +280,17 @@
 2026-04-03T05:40:10Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 127 (eval):1: command not found: !
 2026-04-03T05:49:14Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 128 FAILED: git add Schwerwiegend: Pfadspezifikation ' ' stimmt mit keinen Dateien überein
 2026-04-03T05:49:36Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1  M .claude/config-changes.log  M .claude/tool-failures.log ?? .claude/hooks/permission-denied-log.sh ?? .claude/permission-denied.log ?? .claude/subagent-usage.log ?? 30 ?? docs/ ?? specs/603-claude-plugin-first-foundation.md ?? specs/611-research-claude-code-source-internals.md ?? specs/617-targeted-worktree-expansion.md ?? specs/618-long-task-visibility-and-notifications.md ?? templa
+2026-04-03T07:17:12Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-04-03T07:20:31Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 128 FAILED: git add Schwerwiegend: Pfadspezifikation 'specs/621-spec-board-fast-completed-window.md' stimmt mit keinen Dateien überein
+2026-04-03T08:34:13Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Spec Board
+2026-04-03T08:34:27Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Spec Board
+2026-04-03T08:34:40Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Error: Failed to read file: /tmp/claude/specboard-err.txt  Caused by:     stream did not contain valid UTF-8
+2026-04-04T07:59:00Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Traceback (most recent call last):   File "<string>", line 53, in <module>     with open(fpath, 'w') as f:          ~~~~^^^^^^^^^^^^ PermissionError: [Errno 1] Operation not permitted: '/Users/deniskern/Sites/npx-ai-setup/.claude/skills/spec-run/SKILL.md'
+2026-04-04T08:03:46Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-04-04T08:07:53Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 2 lib/setup.sh: line 664: syntax error: unexpected end of file
+2026-04-04T08:13:43Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ==> templates/skills/commit/SKILL.md <== --- name: ais:commit description: Stages changes and creates a conventional commit message. Uses `commit-prep.sh` to collect diff context before Claude generates the message — focused input, fewer tokens. model: haiku allowed-tools: Read, Bash, Glob, Grep  ==> templates/skills/test/SKILL.md <== --- name: ais:test description: "Runs the project t
+2026-04-04T08:25:48Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 127 (eval):1: command not found: !
+2026-04-04T08:25:52Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 2 TEST_PREP_START 2026-04-04T08:25:51Z TEST_CMD: npm run test  === TEST FAILURES === Exit code: 1    --- Session extract active duration ---  === FULL OUTPUT (last 80 lines) === OUTPUT (last 5 lines):     PASS: lib/json.sh exports _json_merge   --- Session extract active duration ---   mktemp: mkdtemp failed on /var/folders/fl/z63867dx1tnb52m85754q5dr0000gn/T/tmp.1ypnwzMsh6: Operation no
+2026-04-04T08:29:00Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-04-04T08:42:06Z TOOL_FAIL tool=Read interrupt=false error=EISDIR: illegal operation on a directory, read '/Users/deniskern/Sites/npx-ai-setup/.claude'
+2026-04-04T08:46:31Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 (eval):1: no matches found: templates/skills/*/SKILL.md
