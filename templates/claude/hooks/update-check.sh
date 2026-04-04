@@ -45,25 +45,22 @@ fi
 (
   LATEST=""
 
-  # Preferred when package is published on npm.
-  if command -v npm >/dev/null 2>&1; then
-    LATEST=$(npm view @onedot/ai-setup version 2>/dev/null | head -n1 | tr -d '[:space:]' | sed 's/^v//')
-  fi
-
-  # Fallback for GitHub-only installs.
-  if [ -z "$LATEST" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  # GitHub releases (no jq — release body can contain control chars that break jq)
+  if [ -z "$LATEST" ] && command -v curl >/dev/null 2>&1; then
     LATEST=$(curl -fsSL --max-time 5 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/releases/latest" 2>/dev/null \
-      | jq -r '.tag_name // empty' \
-      | head -n1 \
+      | grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' \
+      | head -1 \
+      | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"//;s/"//' \
       | tr -d '[:space:]' \
       | sed 's/^v//')
   fi
 
-  # Fallback if there is no release yet.
-  if [ -z "$LATEST" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  # Fallback: tags (if no releases exist yet)
+  if [ -z "$LATEST" ] && command -v curl >/dev/null 2>&1; then
     LATEST=$(curl -fsSL --max-time 5 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/tags?per_page=1" 2>/dev/null \
-      | jq -r '.[0].name // empty' \
-      | head -n1 \
+      | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' \
+      | head -1 \
+      | sed 's/.*"name"[[:space:]]*:[[:space:]]*"//;s/"//' \
       | tr -d '[:space:]' \
       | sed 's/^v//')
   fi

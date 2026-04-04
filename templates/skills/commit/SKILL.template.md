@@ -26,7 +26,7 @@ Stages changes and creates a conventional commit message. Uses `commit-prep.sh` 
 
 ## Next Step
 
-- Feature-Branch: `> 📤 Naechster Schritt: /pr — Pull Request erstellen`
+- Feature-Branch: `> 📤 Naechster Schritt: gh pr create — Pull Request via CLI`
 - Main-Branch: `> 🏷️ Naechster Schritt: /release — Version bump + Tag`
 - Session >30 tool calls: `> 💡 Naechster Schritt: /reflect — Learnings sichern`
 

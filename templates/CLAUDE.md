@@ -23,6 +23,15 @@ Set `model:` explicitly on every subagent spawn. Default (no model set) inherits
 | `sonnet` | Writing correct logic, code generation, test suites |
 | `opus` | Architecture review, complex analysis, spec creation |
 
+## CLI Shortcuts (zero tokens)
+For green-path checks, run directly instead of invoking skills:
+- CI status: `! gh pr checks`
+- Lint check: `! bash .claude/scripts/lint-prep.sh`
+- Test check: `! bash .claude/scripts/test-prep.sh`
+- Health check: `! bash .claude/scripts/doctor.sh`
+
+Use the skill (`/test`, `/lint`) only when you need Claude to analyze failures or auto-fix.
+
 ## Skill Shell Execution
 
 Do NOT set `disableSkillShellExecution: true` in settings.json for this project.

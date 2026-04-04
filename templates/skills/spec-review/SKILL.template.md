@@ -67,7 +67,7 @@ Clean up worktree after merge/push/discard if one exists.
 ## Next Step
 
 - APPROVED + merged: `> 📦 Naechster Schritt: /commit — Changes committen`
-- APPROVED + PR: `> 📤 Naechster Schritt: /pr — Pull Request erstellen`
+- APPROVED + PR: `> 📤 Naechster Schritt: gh pr create — Pull Request via CLI`
 - CHANGES REQUESTED: `> 🔧 Naechster Schritt: Feedback umsetzen, dann /spec-review NNN erneut`
 - REJECTED: `> 🔧 Naechster Schritt: Kritische Issues fixen, dann /spec-review NNN erneut`
 

@@ -332,6 +332,7 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [superpowers](https://github.com/obra/superpowers)
 - [agency-agents](https://github.com/msitarzewski/agency-agents)
 - [code-review-graph](https://github.com/tirth8205/code-review-graph)
+- [manage-skills](https://github.com/Getty/manage-skills)
 - [OpenViking](https://github.com/volcengine/OpenViking)
 - [gastown](https://github.com/steveyegge/gastown)
 - [just-ship](https://github.com/yves-s/just-ship)

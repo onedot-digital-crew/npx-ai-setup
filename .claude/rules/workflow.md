@@ -9,7 +9,7 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 | Code changes (edit/write) | 🧪 `/test` — Tests laufen lassen |
 | `/test` passes | 🔍 `/review` — Changes reviewen |
 | `/review` passes | 📦 `/commit` — Stagen + committen |
-| `/commit` done | 📤 `/pr` auf Feature-Branches, oder `/release` auf `main` / `master` |
+| `/commit` done | 📤 `gh pr create` auf Feature-Branches, oder `/release` auf `main` / `master` |
 | Bug investigation | 🐛 `/debug` falls noch nicht geladen |
 | New feature request (3+ files) | 📋 `/spec` — erst planen, dann bauen |
 | Spec created (draft) | ✅ `/spec-validate NNN` — Draft prüfen, oder ⚡ `/spec-run NNN` — validate, implement, review, commit |

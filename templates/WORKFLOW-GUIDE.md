@@ -30,7 +30,6 @@ Einmalig ausfuehren wenn du in eine neue Codebase einsteigst oder ein groesseres
 |---------|------------|-------------|
 | `/analyze` | Parallele Agents analysieren die Codebase, erzeugen PATTERNS.md (Architektur-Patterns) und AUDIT.md (Hotspots, Risks, Recommendations) | Direkt nach Erstinstallation und wenn sich die Codebase stark veraendert hat |
 | `/explore "topic"` | Read-Only Thinking Partner — Codebase erkunden, Tradeoffs aufzeigen, ASCII-Diagramme. Aendert keine Dateien | Wenn du verstehen willst wie etwas funktioniert, ohne Code anzufassen |
-| `/discover` | Reverse-Engineered Draft-Specs aus bestehendem Code | Bei Legacy-Projekten: automatisch erkennen was verbessert werden kann |
 | `/research "tool"` | Deep-Research eines externen Repos/Tools/Patterns, produziert Brainstorm-Dokument | Bevor ein neues Tool oder Pattern eingefuehrt wird |
 | `/context-load` | Context-Dateien on-demand laden (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) | Wenn Claude Kontext verloren hat oder du gezielt Stack-Details brauchst |
 
@@ -49,7 +48,7 @@ Der Standard-Ablauf fuer jede Aenderung die mehr als ein einzelnes File betrifft
 4. /test                          ← Tests laufen lassen + Failures fixen
 5. /review                        ← Uncommitted Changes reviewen
 6. /commit                        ← Stagen + Conventional Commit Message
-7. /pr                            ← Build-Validierung + PR-Draft
+7. gh pr create                   ← PR direkt via CLI
 8. /release                       ← Version bump, CHANGELOG, Tag
 ```
 
@@ -120,7 +119,7 @@ Fuer Production-Bugs die den normalen Spec-Cycle umgehen.
 /debug "symptom"               # Root Cause isolieren
 /test                          # Fix mit Tests verifizieren
 /commit                        # Conventional Commit: fix(scope): description
-/pr                            # Fast-Track PR
+gh pr create                   # Fast-Track PR via CLI
 ```
 
 Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
@@ -144,8 +143,6 @@ Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
 
 | Command | Was es tut |
 |---------|------------|
-| `/token-optimizer` | Token-Verbrauch auditieren — zeigt wo 25-38% des Kontexts hingehen und wie man optimiert. |
-| `/orchestrate` | Task an Gemini oder Codex CLI delegieren — nur wenn explizit gewuenscht. |
 | `/context-load` | Context-Dateien on-demand laden (STACK, ARCHITECTURE, CONVENTIONS). |
 
 ---
