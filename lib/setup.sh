@@ -203,9 +203,44 @@ check_requirements() {
   fi
   tui_success "Requirements OK (AI CLI: ${AI_CLI:-none detected})"
 
-  # Claude Code minimum version check (hooks require >= 2.1.89)
+  # Claude Code installation method check (brew has limitations)
   if [ "$AI_CLI" = "claude" ]; then
+    _check_claude_code_install_method
     _check_claude_code_version
+  fi
+}
+
+# Detect Homebrew-installed Claude Code and offer npm migration
+_check_claude_code_install_method() {
+  local claude_path
+  claude_path=$(command -v claude 2>/dev/null) || return 0
+
+  # Check if installed via brew cask
+  local is_brew=false
+  if brew list --cask claude-code &>/dev/null 2>&1; then
+    is_brew=true
+  elif [[ "$claude_path" == */homebrew/* ]] || [[ "$claude_path" == */Caskroom/* ]]; then
+    is_brew=true
+  fi
+  [ "$is_brew" = "true" ] || return 0
+
+  tui_warn "Claude Code ist via Homebrew installiert (eingeschraenkte Update-Kontrolle)"
+  tui_info "npm-Installation empfohlen: volle Versionskontrolle, schnellere Updates"
+  if ask_yes_no_menu \
+    "Zu npm-Installation wechseln?" \
+    "Ja" "brew uninstall claude-code && npm i -g @anthropic-ai/claude-code" \
+    "Nein" "Weiter mit Homebrew-Installation" \
+    "no"; then
+    tui_step "Wechsel zu npm..."
+    if brew uninstall --cask claude-code 2>&1 | tail -3; then
+      if npm install -g @anthropic-ai/claude-code@latest 2>&1 | tail -3; then
+        tui_success "Claude Code via npm installiert"
+      else
+        tui_warn "npm-Installation fehlgeschlagen. Manuell: npm i -g @anthropic-ai/claude-code@latest"
+      fi
+    else
+      tui_warn "Brew-Deinstallation fehlgeschlagen. Manuell: brew uninstall --cask claude-code"
+    fi
   fi
 }
 
