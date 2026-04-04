@@ -5,115 +5,62 @@ model: sonnet
 allowed-tools: Read, Bash, Glob, Grep, mcp__plugin_claude-mem_mcp-search__search, mcp__plugin_claude-mem_mcp-search__get_observations, mcp__plugin_claude-mem_mcp-search__timeline
 ---
 
-Analyzes sessions for setup improvements focused on **Qualität, Effizienz und Tokenersparnis**.
+Analyzes sessions for setup improvements focused on **Qualitat, Effizienz und Tokenersparnis**.
 
 ## Modes
 
-- **Portfolio mode (default):** analyze the last 30 days **across all projects** via JSONL metrics plus claude-mem when available.
-- **Deep-dive mode:** if the user provides a specific exported session file (`session-*.txt`) or asks about one session explicitly, analyze that session first before generalizing. Use the export as primary evidence even when claude-mem is unavailable.
-- **Devtools assist:** if the user mentions a running `claude-devtools` app, use it only as an extra source for live tool timing, repeated UI actions, or event traces. Do not block on it.
+- **Portfolio (default):** last 30 days across all projects via JSONL + claude-mem
+- **Deep-dive:** specific export file (`session-*.txt`) — run `bash .claude/scripts/session-deep-dive.sh <path>` first, then refine
+- **Devtools assist:** extra source only for tool timing/loops — never sole source
 
 ## Process
 
 ### 1. Detect scope
+- Concrete export path → Deep-dive; otherwise → Portfolio; both → deep-dive first, then compare
 
-- If the request includes a concrete export path like `/Users/.../session-*.txt`: switch to **Deep-dive mode**
-- Otherwise: stay in **Portfolio mode**
-- If both are available: do the deep dive first, then compare against portfolio patterns
-- In Deep-dive mode, prefer running `bash .claude/scripts/session-deep-dive.sh /path/to/session-*.txt` first, then verify or refine the script output with targeted file reads
-
-### 2. Extract raw session metrics (zero LLM tokens)
-
+### 2. Extract metrics
 ```
 ! bash .claude/scripts/session-extract.sh --all --last 5
 ```
+- Check `.ai-setup.json` for `version`/`updated_at`; compare with repo `package.json`/`CHANGELOG.md`
+- Session predates project's `updated_at` → findings are `version-bound`, not current bugs
+- Deep-dive: also extract USER/ASSISTANT/THINKING/Skill/Agent block counts, correction markers (`geht nicht`, `nein`, `immer noch`, `ruckgangig`, `anders`, `falsch`, `nochmal`), topic shifts, skill drop-off, config drift
 
-This produces per-session across all projects: turns, tool usage counts, model distribution, skills invoked, subagent count, `active` and `wall` duration, and estimated output tokens. `active` duration caps long idle gaps so open-but-idle sessions do not look artificially inefficient.
+### 3. claude-mem (skip if unavailable → LOCAL FALLBACK, label report)
+4 parallel searches (`limit: 10`, `dateStart: 30d ago`, no `project:` filter):
+- `"skill broken incomplete failed blocked"` | `"token expensive slow model routing"` | `"repeated asked same question twice"` | `"workaround manual fallback missing"`
 
-Before interpreting findings for an ai-setup-managed project, detect installed setup version:
+Fetch 5-8 most signal-rich observations via `get_observations`.
 
-- Read `.ai-setup.json` if present and extract `version`, `installed_at`, `updated_at`
-- Read `package.json` and `CHANGELOG.md` in this repo to know the current ai-setup version and which fixes landed in which release
-- If the analyzed session predates the installed project's `updated_at`, treat setup-related findings as potentially stale until confirmed
-- If a finding maps to a fix documented in a newer ai-setup version than the analyzed project had at that time, classify it as `version-bound`, not as a current workflow bug
-- Prefer findings that still reproduce on the project's current installed ai-setup version
-
-In Deep-dive mode, read the export file directly and extract:
-
-- session duration, total/cache/input/output tokens, messages
-- number of `USER`, `ASSISTANT`, `THINKING`, `Tool: Skill`, and `Tool: Agent` blocks
-- count of correction markers such as `geht nicht`, `nein`, `immer noch`, `rückgängig`, `anders`, `falsch`, `nochmal`
-- obvious topic shifts inside one session (for example implementation -> bugfix -> performance -> tooling)
-- skill drop-off: skill used in opening turns, then long manual phase without another skill
-- config drift signals: project is on current ai-setup version, but local `CLAUDE.md` or workflow files still miss current routing and delegation guidance
-
-### 3. Choose analysis mode
-
-- If claude-mem MCP tools are available: run the full workflow below.
-- If they are unavailable: switch to **LOCAL FALLBACK** mode, skip semantic steps 3-4, and base findings only on JSONL metrics plus current-file verification. Label the report clearly as local-only.
-
-### 4. Gather semantic data from claude-mem (parallel)
-
-Run these 4 searches in parallel via `mcp__plugin_claude-mem_mcp-search__search`:
-
-- Query: `"skill broken incomplete failed blocked"` — finds skill/workflow failures
-- Query: `"token expensive slow model routing"` — finds token-waste patterns
-- Query: `"repeated asked same question twice"` — finds recurring friction
-- Query: `"workaround manual fallback missing"` — finds capability gaps
-
-All **without** `project:` filter (cross-project), `limit: 10`, `dateStart: 30 days ago`.
-
-### 5. Fetch key observations
-
-From the results, identify the 5–8 most signal-rich observations (type: bugfix, decision, refactor preferred). Fetch with `mcp__plugin_claude-mem_mcp-search__get_observations`.
-
-### 6. Cross-analyze metrics + observations
-
-Use both sources in full mode, or JSONL metrics alone in local fallback. Look for:
+### 4. Cross-analyze — look for these patterns
 
 **T (Tokenersparnis):**
-- Sessions with high Bash call count (>50) — may indicate missing prep scripts
-- Model distribution: Opus/Sonnet used where Haiku would suffice (search/explore)
-- Sessions with 0 subagents but >200 tool calls — missing parallelization
-- High turn count relative to `active` duration — indicates back-and-forth friction
-- Deep-dive exports with huge cache reads plus many mid-session pivots — likely missing task segmentation or reset point
-- Sessions with only 1 initial skill but long manual follow-up (>20 user turns after first skill) — automation opportunity after kickoff
-- Sessions with >300 messages or >10M cache-read tokens plus correction loops — recommend a reset/handoff point instead of continuing in the same thread
-- Skill files over 5KB (`wc -c .claude/skills/*/SKILL.md | sort -rn | head -5`) — bloated skills load all tokens on trigger; flag any >200 lines as candidate for trimming. **Quality gate**: For each trimming candidate, spawn a Haiku subagent (model: haiku) that reads the skill and lists its critical elements (decision tables, output format templates, agent spawn configs with model/tools, conditional logic with specific values, exact CLI flags/options). Include these in the finding as `**Critical elements:**` so the trimming spec knows what to preserve.
+- Bash >50 → missing prep scripts
+- Opus/Sonnet where Haiku suffices (search/explore)
+- 0 subagents + >200 tools → missing parallelization
+- >300 messages or >10M cache-read + corrections → recommend reset
+- 1 initial skill + >20 manual turns → automation gap
+- Skills >5KB (`wc -c .claude/skills/*/SKILL.md | sort -rn | head -5`) → trimming candidate; >200 lines → spawn Haiku subagent for critical elements list (decision tables, output templates, model configs, thresholds, CLI flags). **Include `Critical elements:` in finding — required for downstream trimming.**
 
-**Q (Qualität):**
-- Skills invoked frequently that appear in failure observations
-- Sessions with many Edit calls but few Bash (test) calls — missing verification
-- Observations about broken workflows, status inconsistencies
-- Reversal language inside one session (`mach das rückgängig`, `nein`, `immer noch`) — indicates weak confirmation, missing intermediate verification, or wrong abstraction
-- Correction density threshold: if a session contains >=3 correction turns on the same theme or >=5 total correction turns, recommend reproduction/instrumentation before more edits
-- Multiple topic shifts in one long session — likely context drift causing lower implementation precision
+**Q (Qualitat):**
+- Frequent skills in failure observations
+- Many Edits + few Bash(test) → missing verification
+- >=3 same-theme corrections or >=5 total → recommend instrumentation
+- Multiple topic shifts in long session → context drift
 
 **E (Effizienz):**
-- Same skill invoked across multiple sessions without progress — stalled workflow
-- High tool diversity per session — indicates unclear routing
-- Sessions with no skills used — manual work that could be automated
-- Many user correction turns after a single initial spec/plan — missing mid-session re-planning hook
-- Re-plan threshold: if a session crosses >=8 user turns after the first skill with no new skill, or >=3 correction turns after the last plan, recommend a forced re-plan
-- Repeated bugfix wording around the same UI element in one export — missing local reproduction or instrumentation
-- Project on latest ai-setup version but missing current routing/delegation text locally — config drift, not a core workflow bug
+- Same skill across sessions without progress → stalled
+- No skills used → manual work candidates
+- >=8 turns after last skill with no new skill, or >=3 corrections after last plan → forced re-plan
+- Current ai-setup version but missing routing text → config drift
 
-### 7. Verify findings still apply
+### 5. Verify findings
+- Pre-filter: read `.claude/findings-log.md` `## Addressed` — drop matches
+- Read referenced files to confirm issue still exists
+- Version check: `.ai-setup.json` vs `CHANGELOG.md` — older version → `Update candidate`; current version + still broken → keep; current + config mismatch → `config drift`
+- Deep-dive: distinguish `historical session issue` vs `current reproducible issue`
 
-**Pre-filter**: Read `.claude/findings-log.md`. Extract all entries under `## Addressed`. If a candidate finding matches an addressed entry (by topic or title), drop it immediately — do not include it in the report.
-
-For each remaining finding that references a specific skill or config file, read the current file to confirm the issue still exists. Drop findings already fixed.
-
-For ai-setup-related findings, also verify version status:
-
-- If the target project has `.ai-setup.json`, compare its installed version to the release that introduced the relevant fix
-- Use `CHANGELOG.md` or completed specs as the source of truth for "fixed in vX.Y.Z"
-- If the project is on an older version, report the finding as `Update candidate` rather than `Broken current setup`
-- If the project is already on a version that should contain the fix, keep the finding only if current-file verification shows it still applies
-- In deep-dive reports, distinguish clearly between `historical session issue` and `current reproducible issue`
-- If the project is on the current ai-setup version but local guidance files miss expected routing/delegation text, classify this as `config drift`
-
-### 8. Output report
+### 6. Output report
 
 ```
 # Session Optimize Report — <date>
@@ -126,50 +73,41 @@ Top skills: Skill1 (N sessions), Skill2 (N sessions)
 Mode: Full | Local fallback
 ai-setup context: project vX.Y.Z | latest repo vA.B.C | status: current / behind / unknown
 
-## Deep-Dive Snapshot (if a specific export was provided)
-Session: <id> | Duration: X | Messages: Y
-Skills: N | Agents: N | User corrections: N
-Topic shifts: N | Automation drop-off: Yes/No
-Primary drift pattern: <1 line>
+## Deep-Dive Snapshot (if export provided)
+Session: <id> | Duration: X | Messages: Y | Skills: N | Agents: N | Corrections: N
+Topic shifts: N | Automation drop-off: Yes/No | Primary drift: <1 line>
 Version lens: historical-only / still relevant / fixed in newer ai-setup
 Config drift: none / possible / confirmed
 
 ## Summary
-<1-2 sentences on dominant pattern found. Use `active` duration for efficiency conclusions; `wall` duration is context only.>
+<1-2 sentences. Use `active` duration for efficiency; `wall` is context only.>
 
-## Findings
+## Findings (max 8, sorted by priority)
 
 ### [Priority] [Q/E/T] <Title>
-**Evidence:** <metric from JSONL + observation from claude-mem>
-**Version:** <project ai-setup version context; fixed in vX.Y.Z? yes/no>
+**Evidence:** <metric + observation>
+**Version:** <ai-setup version context>
 **Impact:** <what breaks or costs tokens>
 **Fix:** <concrete 1-line change>
 **File:** <path>
----
 ```
 
-Priority: 🔴 High (recurring + high impact) / 🟡 Medium / ⚪ Low
+Priority: P1 High (recurring + high impact) / P2 Medium / P3 Low
 
-Sort by priority descending. Max 8 findings — cut noise below ⚪.
+## Fix Routing
+
+When the user asks to implement findings: **always fix in `templates/` first**, then sync to the target project.
+Fixes only in individual projects verpuffen beim naechsten Setup — Templates sind die Source of Truth.
 
 ## Rules
 
-- Never make changes — report only.
-- If a finding references a file, verify the issue still exists before including it.
-- If metrics and semantic data both return nothing, report: "No signal in last 30 days — setup looks clean."
-- In local fallback mode, do not invent semantic evidence; say explicitly that claude-mem was unavailable.
-- Read `.claude/findings-log.md` as pre-filter before Step 5 — drop any finding that matches an entry in `## Addressed`.
-- In Deep-dive mode, prefer concrete transcript evidence over generic heuristics.
-- Treat repeated correction phrases inside one session as first-class evidence, not anecdote.
-- If `claude-devtools` is available, use it only to strengthen evidence for loops, slow tool phases, or repeated UI interactions; do not rely on it as the sole source.
-- Do not report ai-setup findings without checking version context first when `.ai-setup.json` exists.
-- Prefer "fixed by update to vX.Y.Z" over "needs redesign" when the evidence points to a known released fix.
-- Use these thresholds consistently in Deep-dive mode: `>=5` correction turns, `>=3` same-theme corrections, `>=8` turns since last plan, `>300` messages, `>10M` cache-read tokens.
-- **Model routing**: Use `model: haiku` for all MCP searches (Steps 2–3) and quality-gate subagents. Use `model: sonnet` only for pattern synthesis (Step 4 onwards). Never use Opus in this skill.
-- **Token savings ≠ quality loss**: Every trimming recommendation MUST include a `**Critical elements:**` list (from Haiku subagent analysis). Trimming without this list is incomplete — the downstream spec-work quality gate depends on it.
+- Report only — never make changes (unless user explicitly asks to fix)
+- Verify file state before including any finding
+- Local fallback: no invented semantic evidence
+- Deep-dive thresholds: >=5 corrections, >=3 same-theme, >=8 turns since plan, >300 messages, >10M cache-read
+- Model routing: `haiku` for MCP searches + quality-gate subagents; `sonnet` for synthesis; never Opus
+- Trimming findings without `Critical elements:` list = incomplete
 
 ## Next Step
 
-Review findings and pick top items to address. For each fix: open a spec (`/spec`) or apply directly if it's a single-line change.
-
-After the report: add all new findings to `.claude/findings-log.md` under `## Open`. When a finding is resolved, move it to `## Addressed` with date and fix reference.
+After report: add new findings to `.claude/findings-log.md` under `## Open`. Resolved → `## Addressed` with date.

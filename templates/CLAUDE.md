@@ -37,6 +37,17 @@ Use the skill (`/test`, `/lint`) only when you need Claude to analyze failures o
 Do NOT set `disableSkillShellExecution: true` in settings.json for this project.
 Skills `doctor`, `spec-board`, `review`, `ci`, `test-setup`, and `session-optimize` use `!` inline shell execution — disabling it breaks health checks and the full review workflow.
 
+## Web Fetching
+
+Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — strips noise, saves ~80% tokens.
+Use WebFetch only when defuddle is unavailable or the page requires JavaScript rendering.
+
+## Session Hygiene
+
+Auto-compact at 80%. After >30 tool calls: consider `/reflect` + `/pause`.
+Sessions >300 messages drift — start fresh with `/pause` + `/resume` statt weiterzuarbeiten.
+One task per conversation — prevents context bleed.
+
 ## Build Artifact Rules
 
 Never read or search inside: `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`.

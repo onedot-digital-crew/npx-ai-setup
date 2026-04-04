@@ -238,8 +238,15 @@ _check_claude_code_install_method() {
     fi
   fi
 
-  # Native install — nothing to do
-  [ -n "$install_method" ] || return 0
+  # If no known method detected, check if a wrapper (e.g. cmux) is hiding the real binary
+  if [ -z "$install_method" ]; then
+    if [ -x "$HOME/.local/bin/claude" ]; then
+      # Native binary exists behind the wrapper — no migration needed
+      return 0
+    fi
+    # Unknown installation method — skip migration prompt
+    return 0
+  fi
 
   local label
   case "$install_method" in
