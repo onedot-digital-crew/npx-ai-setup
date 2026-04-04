@@ -9,6 +9,9 @@ Before creating a new file, check if one already exists:
 - Run `ls` or Glob to find existing files matching the concept
 - Run `git ls-files` to see tracked files that may not be visible
 
+## Verify, Don't Fabricate
+Never fabricate configuration formats or assume config file schemas exist — check docs or existing examples first.
+
 ## Human Approval Gates
 Before finalizing any deliverable, present a summary and ask for confirmation.
 Never proceed to the next workflow phase without explicit user approval.
@@ -21,6 +24,9 @@ Use WebFetch only when defuddle is unavailable or the page requires JavaScript r
 ## Research & Spec Gate
 Before /research creates specs: validate candidates against CONCEPT.md and project philosophy first — 3 of 4 specs in one session were cancelled post-creation for violating existing decisions.
 Before creating a spec from session-optimize findings: verify the finding still applies by reading the current file state — findings may describe issues already fixed.
+
+## Destructive Operations
+Before confirming deletion, revert, or disable operations as "correct behavior", trace through the actual code path that would be affected. Show the specific lines, not just reasoning.
 
 ## Sandbox Safety
 Never set `dangerouslyDisableSandbox: true` on a Bash tool call without first:

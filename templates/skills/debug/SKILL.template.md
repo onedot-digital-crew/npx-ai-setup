@@ -10,6 +10,11 @@ Investigates and fixes bug: $ARGUMENTS. Use when a defect needs hypothesis-drive
 
 ## Process
 
+### 0. Check Prior Investigations
+- Search for existing debug specs, findings, or claude-mem observations about this bug
+- If prior sessions investigated this, summarize what was tried and ruled out — do not restart from scratch
+- If no prior work exists, proceed normally
+
 ### 1. Reproduce
 - Identify the exact condition that triggers the bug
 - If steps to reproduce are unclear, ask before proceeding
@@ -66,6 +71,7 @@ Spawn `code-reviewer` via Agent tool. Pass the changed files and a one-line desc
 - Fix only what is broken. No scope creep.
 - If the bug is unclear or cannot be reproduced, ask the user before writing any code.
 - If the root cause requires architectural changes, stop and recommend `/spec` instead.
+- **Bounded investigation**: If the fix is not found within this session, write a brief investigation log (what was confirmed, what was ruled out, next hypothesis) to `specs/debug-<issue>.md` before ending.
 
 ## Next Step
 

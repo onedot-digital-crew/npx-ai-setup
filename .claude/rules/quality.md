@@ -43,7 +43,11 @@
 3. One-liner minimal targeted fix only.
 3+ failed fixes = architectural problem — question the approach, not the fix.
 
+**Investigation budget**: Max 3 diagnostic attempts per hypothesis. If no new information after 3 tries, switch strategy or ask the user. Never repeat the same approach with minor variations.
+
 **Systematic phases**: Root Cause → Pattern Analysis → Hypothesis (specific, falsifiable) → Implement.
 Treat your own code as foreign. Your mental model is a guess — the code's behavior is truth.
+
+**When challenged**: If the user disputes your conclusion, re-investigate the actual code before defending your answer. The initial analysis may be wrong.
 
 **Constraint Classification**: Hard (non-negotiable), Soft (negotiable if stated), Ghost (past constraints that no longer apply). Ghost constraints lock out options nobody knows are available — ask "why can't we do X?"

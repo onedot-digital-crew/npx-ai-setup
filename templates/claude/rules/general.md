@@ -11,6 +11,7 @@ Before creating a new file, check if one already exists:
 
 ## Verify, Don't Guess
 Never assume import paths, function names, or API routes. Verify by reading the relevant file.
+Never fabricate configuration formats or assume config file schemas exist — check docs or existing examples first.
 When unsure about current state, run `git diff` to see what has actually changed this session.
 
 ## Human Approval Gates
@@ -29,6 +30,9 @@ This applies everywhere: direct chat, spec steps, and delegated agents.
 Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — it strips navigation and clutter, saving ~80% tokens.
 Alternative: prepend `https://markdown.new/` to any URL for instant markdown conversion without a CLI.
 Use WebFetch only when defuddle is unavailable or the page requires JavaScript rendering.
+
+## Destructive Operations
+Before confirming deletion, revert, or disable operations as "correct behavior", trace through the actual code path that would be affected. Show the specific lines, not just reasoning. Past pattern: Claude confirmed destructive behavior as correct twice before users found the real bug.
 
 ## Sandbox Safety
 Never set `dangerouslyDisableSandbox: true` on a Bash tool call without first:

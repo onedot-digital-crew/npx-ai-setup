@@ -11,12 +11,14 @@ Analyzes sessions for setup improvements focused on **Qualitat, Effizienz und To
 
 - **Portfolio (default):** last 30 days across all projects via JSONL + claude-mem
 - **Deep-dive:** specific export file (`session-*.txt`) — run `bash .claude/scripts/session-deep-dive.sh <path>` first, then refine
+- **Insights:** parse `~/.claude/usage-data/report.html` (from `/insights` command) for aggregated cross-session metrics, friction patterns, and CLAUDE.md suggestions. Use as enrichment layer on top of Portfolio or Deep-dive.
 - **Devtools assist:** extra source only for tool timing/loops — never sole source
 
 ## Process
 
 ### 1. Detect scope
 - Concrete export path → Deep-dive; otherwise → Portfolio; both → deep-dive first, then compare
+- Always check if `~/.claude/usage-data/report.html` exists — if yes, extract Insights data as enrichment
 
 ### 2. Extract metrics
 ```
@@ -25,6 +27,19 @@ Analyzes sessions for setup improvements focused on **Qualitat, Effizienz und To
 - Check `.ai-setup.json` for `version`/`updated_at`; compare with repo `package.json`/`CHANGELOG.md`
 - Session predates project's `updated_at` → findings are `version-bound`, not current bugs
 - Deep-dive: also extract USER/ASSISTANT/THINKING/Skill/Agent block counts, correction markers (`geht nicht`, `nein`, `immer noch`, `ruckgangig`, `anders`, `falsch`, `nochmal`), topic shifts, skill drop-off, config drift
+
+### 2b. Extract Insights (if report.html exists)
+Read `~/.claude/usage-data/report.html` and extract:
+- **Stats**: messages, sessions, lines changed, files touched, msgs/day
+- **Tool distribution**: top tools with counts (bar-value divs)
+- **Friction categories**: title + description from `.friction-category` blocks
+- **Outcomes**: Fully/Mostly/Partially/Not Achieved counts
+- **Satisfaction**: Frustrated/Dissatisfied/Likely Satisfied/Satisfied counts
+- **CLAUDE.md suggestions**: text from `.cmd-code` elements
+- **Multi-Clauding**: overlap events, sessions involved, percentage
+- **Big wins**: titles from `.big-win-title` elements
+
+Cross-reference Insights friction with claude-mem observations — matching patterns get priority boost.
 
 ### 3. claude-mem (skip if unavailable → LOCAL FALLBACK, label report)
 4 parallel searches (`limit: 10`, `dateStart: 30d ago`, no `project:` filter):
@@ -78,6 +93,12 @@ Session: <id> | Duration: X | Messages: Y | Skills: N | Agents: N | Corrections:
 Topic shifts: N | Automation drop-off: Yes/No | Primary drift: <1 line>
 Version lens: historical-only / still relevant / fixed in newer ai-setup
 Config drift: none / possible / confirmed
+
+## Insights Snapshot (if report.html found)
+Period: <date range> | Sessions: N | Messages: N | Satisfaction: X%
+Top friction: <category> (N instances) | Outcomes: N fully / N partial / N not
+CLAUDE.md suggestions: N new / N already addressed
+Multi-Clauding: N overlap events (X% of messages)
 
 ## Summary
 <1-2 sentences. Use `active` duration for efficiency; `wall` is context only.>
