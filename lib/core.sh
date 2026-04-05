@@ -70,7 +70,7 @@ SPEC_SKILLS_MAP=(
 get_boilerplate_repo() {
   case "$1" in
     shopify)   echo "sp-shopify-boilerplate" ;;
-    shopware)  echo "sw-shopware-boilerplate" ;;
+    shopware)  echo "sw-shop-boilerplate" ;;
     nuxt)      echo "sb-nuxt-boilerplate" ;;
     next)      echo "sb-next-boilerplate" ;;
     storyblok) echo "sb-storyblok-boilerplate" ;;

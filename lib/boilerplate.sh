@@ -262,6 +262,10 @@ select_boilerplate_system() {
     SELECTED_SYSTEM="next"
   elif [ -f "theme.liquid" ] || ls shopify.* 1>/dev/null 2>&1 || { [ -d "sections" ] && [ -d "snippets" ]; }; then
     SELECTED_SYSTEM="shopify"
+  elif [ -f "shopware.yaml" ] || [ -f "config/packages/shopware.yaml" ] || \
+       ([ -f "composer.json" ] && grep -q '"shopware/' composer.json 2>/dev/null) || \
+       ([ -f "bin/console" ] && [ -d "src" ]); then
+    SELECTED_SYSTEM="shopware"
   fi
 
   if [ -z "$SELECTED_SYSTEM" ]; then
