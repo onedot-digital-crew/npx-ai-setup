@@ -12,11 +12,20 @@ Full release workflow: validate → changelog → docs sync → version bump →
 
 ### Phase 1: Pre-flight Validation
 
-1. `git status` + `git diff --cached` — abort if uncommitted/staged changes
-2. `npm run verify:release` — abort on non-zero exit
-3. Treat a skipped `test:claude-runtime` as a release failure in this phase; Claude runtime validation must pass, not skip.
-4. If `verify:release` fails, fix the issue before any version bump, docs sync, commit, tag, or publish step.
-5. Collect scope: `git describe --tags --abbrev=0`, `git log --oneline <tag>..HEAD`, read `CHANGELOG.md [Unreleased]`, read `package.json` version
+Run the prep script first — it collects all Phase 1 data in one shell pass (zero LLM tokens):
+
+```bash
+bash .claude/scripts/release-prep.sh
+```
+
+The output contains: dirty state, verify:release result, last tag, commits since tag, CHANGELOG [Unreleased], package.json version, and inventory counts.
+
+**Abort conditions** (check from prep output):
+- `UNCOMMITTED_CHANGES` → abort, commit or stash first
+- `Verify: FAIL` → fix before proceeding
+- Treat a skipped `test:claude-runtime` as a release failure; Claude runtime validation must pass, not skip.
+
+Do NOT re-run `git status`, `npm run verify:release`, or read CHANGELOG — all data is in the prep output.
 
 ### Phase 2: Inventory Audit — Count Everything
 

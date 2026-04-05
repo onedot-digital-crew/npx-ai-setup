@@ -216,6 +216,11 @@ _check_claude_code_install_method() {
   local claude_path
   claude_path=$(command -v claude 2>/dev/null) || return 0
 
+  # Native binary present — no migration needed regardless of other installations
+  if [ -x "$HOME/.local/bin/claude" ]; then
+    return 0
+  fi
+
   local install_method=""
 
   # Check if installed via Homebrew
@@ -238,13 +243,8 @@ _check_claude_code_install_method() {
     fi
   fi
 
-  # If no known method detected, check if a wrapper (e.g. cmux) is hiding the real binary
+  # No known non-native method detected — skip migration prompt
   if [ -z "$install_method" ]; then
-    if [ -x "$HOME/.local/bin/claude" ]; then
-      # Native binary exists behind the wrapper — no migration needed
-      return 0
-    fi
-    # Unknown installation method — skip migration prompt
     return 0
   fi
 

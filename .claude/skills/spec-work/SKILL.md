@@ -29,7 +29,7 @@ Specialist routing: Vue/React/styling → `frontend-developer`; API/middleware �
 8. **Execute each step**: Implement → check off (`- [x]`) → append `decisions.md` if architectural. No commits — `/spec-review` is the gate.
    - Stall: 3× same failure → `- [~]`, set `blocked`, stop. 2 no-change steps → ask user.
    - Refresh `session-state.json` at each checkpoint. Update progress before compaction.
-9. **Verify acceptance criteria**: Truths → run commands. Artifacts → read files. Key Links → verify imports.
+9. **Verify acceptance criteria**: Run commands to check each criterion. Read modified files to confirm changes landed.
 10. **CHANGELOG**: Insert under `## [Unreleased]`.
 11. **Verify**: Spawn `verify-app`. FAIL → spawn investigator (model: haiku, read-only), fix, re-verify once. Second FAIL → `in-review`, stop.
 12. **Test coverage**: Spawn `test-generator` (model: sonnet) if gaps exist. Skip if test-only or no framework.

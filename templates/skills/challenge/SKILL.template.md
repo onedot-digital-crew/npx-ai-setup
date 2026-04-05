@@ -87,6 +87,7 @@ Choose exactly one. Incorporate concerns raised in Phase 6b into the rationale.
 - Do NOT modify any files.
 - Cite specific lines from `.agents/context/CONCEPT.md` when evaluating concept fit (only if file exists).
 - The verdict must be unambiguous — no "it depends" conclusions.
+- **One round only.** After the verdict, proceed to `/spec` (GO/SIMPLIFY) or shelve (REJECT). Do not re-challenge the same idea — diminishing returns after the first pass.
 
 ## Next Step
 

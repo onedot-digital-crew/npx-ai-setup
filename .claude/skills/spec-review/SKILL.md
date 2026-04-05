@@ -15,11 +15,17 @@ If `$ARGUMENTS` is a number, open `specs/NNN-*.md`. If empty, list specs with st
 Understand Goal, Steps, Acceptance Criteria, Files to Modify, Out of Scope. Note checked items.
 
 ### 3. Inspect code changes
-Read `**Branch**` from spec header:
-- Branch exists: `git diff main...BRANCH`
-- No branch: `git diff` + `git diff --staged`
 
-Read full files for the 5 most changed files; review only diff hunks for the rest.
+Run the prep script — it collects diff, doctor check, and spec status in one shell pass:
+
+```bash
+bash .claude/scripts/spec-review-prep.sh $ARGUMENTS
+```
+
+The output contains: branch detection, full diff (branch or working tree), top 5 changed files, doctor.sh results, and acceptance criteria progress.
+
+Read full files for the 5 most changed files (listed in prep output); review only diff hunks for the rest.
+Do NOT re-run `git diff` or `doctor.sh` — all data is in the prep output.
 
 ### 4. Review against spec
 
@@ -28,7 +34,7 @@ Read full files for the 5 most changed files; review only diff hunks for the res
 - Verify acceptance criteria against diff
 - Flag Out of Scope violations
 
-For structured criteria: verify Truths (run commands), Artifacts (file exists with real content), Key Links (imports present).
+Verify each acceptance criterion: run commands, read modified files, confirm behavior matches.
 
 **4b — Definition of Done**: Check `.agents/context/CONVENTIONS.md` DoD section if it exists.
 
@@ -41,8 +47,8 @@ For structured criteria: verify Truths (run commands), Artifacts (file exists wi
 - Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
 - Spec touches DB queries, loops, rendering, data fetching, or bundle imports → also spawn `performance-reviewer`
 
-**4e — Doctor check** (run in parallel with 4c/4d):
-Run `bash .claude/scripts/doctor.sh`. Any FAIL blocks APPROVED verdict — must be fixed first.
+**4e — Doctor check** (already in prep output):
+Check the `DOCTOR CHECK` section from step 3 prep output. Any FAIL blocks APPROVED verdict — must be fixed first.
 
 ### 5. Verdict
 

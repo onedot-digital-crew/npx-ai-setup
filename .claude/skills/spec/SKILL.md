@@ -93,15 +93,7 @@ Show spec to user for review and refinement.
 - [ ] Step 2: description
 
 ## Acceptance Criteria
-
-### Truths
 - [ ] "[observable behavior verifiable by running a command]"
-
-### Artifacts
-- [ ] `path/to/file.ts` — [what it exports/contains] (min [N] lines)
-
-### Key Links
-- [ ] `file-a.ts` → `file-b.ts` via import of `[function/type]`
 
 ## Files to Modify
 - `path/to/file` - reason

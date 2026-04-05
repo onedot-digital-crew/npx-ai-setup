@@ -294,3 +294,28 @@
 2026-04-04T08:29:00Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
 2026-04-04T08:42:06Z TOOL_FAIL tool=Read interrupt=false error=EISDIR: illegal operation on a directory, read '/Users/deniskern/Sites/npx-ai-setup/.claude'
 2026-04-04T08:46:31Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 (eval):1: no matches found: templates/skills/*/SKILL.md
+2026-04-04T09:01:27Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 2 TEST_PREP_START 2026-04-04T09:01:26Z TEST_CMD: npm run test  === TEST FAILURES === Exit code: 1    --- Session extract active duration ---  === FULL OUTPUT (last 80 lines) === OUTPUT (last 5 lines):     PASS: lib/json.sh exports _json_merge   --- Session extract active duration ---   mktemp: mkdtemp failed on /var/folders/fl/z63867dx1tnb52m85754q5dr0000gn/T/tmp.SEQHoozXCw: Operation no
+2026-04-04T09:58:46Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-04-04T09:59:17Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 rtk: rtk find does not support compound predicates or actions (e.g. -not, -exec). Use `find` directly.
+2026-04-04T10:26:33Z TOOL_FAIL tool=Read interrupt=false error=EISDIR: illegal operation on a directory, read '/Users/deniskern/Sites/npx-ai-setup/.claude/hooks'
+2026-04-04T10:28:03Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 5 jq: parse error: Invalid numeric literal at line 2, column 9
+2026-04-04T10:28:25Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 Cache file: /tmp/ai-setup-update-4281064920.txt ls: /tmp/ai-setup-update-4281064920.txt: No such file or directory cat: /tmp/ai-setup-update-4281064920.txt: No such file or directory
+2026-04-04T10:28:36Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ls: /tmp/ai-setup-update-4281064920.txt: No such file or directory cat: /tmp/ai-setup-update-4281064920.txt: No such file or directory
+2026-04-04T10:52:33Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.
+2026-04-04T10:54:52Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 rtk: rtk find does not support compound predicates or actions (e.g. -not, -exec). Use `find` directly.
+2026-04-04T10:55:06Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 rmdir: /Users/deniskern/Sites/npx-ai-setup/templates/skills/token-optimizer/scripts: Directory not empty rmdir: /Users/deniskern/Sites/npx-ai-setup/templates/skills/token-optimizer/examples: Directory not empty rmdir: /Users/deniskern/Sites/npx-ai-setup/templates/skills/token-optimizer/assets: Directory not empty rmdir: /Users/deniskern/Sites/npx-ai-setup/templates/skills/token-optimiz
+2026-04-04T10:55:18Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 rmdir: /Users/deniskern/Sites/npx-ai-setup/templates/skills/token-optimizer/references: No such file or directory
+2026-04-04T11:06:19Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 127 (eval):1: command not found: !
+2026-04-04T11:31:30Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ls: /Users/deniskern/Sites/npx-ai-setup/test/: No such file or directory
+2026-04-04T11:33:14Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.
+2026-04-04T11:34:49Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 cp: /Users/deniskern/Sites/nuxt-onedot/.claude/hooks/session-length.sh: Operation not permitted
+2026-04-04T11:52:52Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 /Users/deniskern/Sites/npx-ai-setup/templates/claude/hooks/session-length.sh: line 20: /tmp/claude-session-len-test123: Operation not permitted --- cat: /tmp/claude-session-len-test123: No such file or directory
+2026-04-04T14:44:31Z TOOL_FAIL tool=Read interrupt=false error=File content (20296 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+2026-04-04T14:45:20Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1
+2026-04-04T14:45:23Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ls: /Users/deniskern/Sites/npx-ai-setup/template/.claude/skills/: No such file or directory
+2026-04-04T14:45:29Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ls: /Users/deniskern/Sites/npx-ai-setup/template/: No such file or directory
+2026-04-04T14:46:01Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 ls: /Users/deniskern/Sites/npx-ai-setup/templates/claude/skills/: No such file or directory
+2026-04-04T16:07:55Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.
+2026-04-04T16:07:55Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.
+2026-04-05T03:01:28Z TOOL_FAIL tool=Read interrupt=false error=File does not exist. Note: your current working directory is /Users/deniskern/Sites/npx-ai-setup.
+2026-04-05T03:03:10Z TOOL_FAIL tool=Bash interrupt=false error=Exit code 1 cp: /Users/deniskern/Sites/npx-ai-setup/.claude/skills/spec-work/SKILL.md: Operation not permitted

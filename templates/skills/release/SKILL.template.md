@@ -11,11 +11,20 @@ Full release workflow: validate → changelog → version bump → slack → com
 
 ### Phase 1: Pre-flight Validation
 
-1. `git status` + `git diff --cached` — abort if uncommitted/staged changes
-2. Run `npm run verify:release` when `package.json` exists. Treat this as a hard gate.
-3. If `verify:release` fails or runtime validation is skipped because Claude is not authenticated, stop the release and fix the issue first.
-4. Collect scope: `git describe --tags --abbrev=0`, `git log --oneline <tag>..HEAD`, read `CHANGELOG.md [Unreleased]`
-5. Detect version source: `package.json`, `Cargo.toml`, `pyproject.toml`, `version.txt`, or ask user
+Run the prep script first — it collects all Phase 1 data in one shell pass (zero LLM tokens):
+
+```bash
+bash .claude/scripts/release-prep.sh
+```
+
+The output contains: dirty state, verify:release result, last tag, commits since tag, CHANGELOG [Unreleased], version info, and inventory counts.
+
+**Abort conditions** (check from prep output):
+- `UNCOMMITTED_CHANGES` → abort, commit or stash first
+- `Verify: FAIL` → fix before proceeding. If runtime validation is skipped because Claude is not authenticated, stop the release.
+- Detect version source: `package.json`, `Cargo.toml`, `pyproject.toml`, `version.txt`, or ask user
+
+Do NOT re-run `git status`, `verify:release`, or read CHANGELOG — all data is in the prep output.
 
 ### Phase 2: Version Bump
 
