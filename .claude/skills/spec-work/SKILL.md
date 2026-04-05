@@ -4,103 +4,46 @@ description: "Execute a single spec step by step. Triggers: /spec-work NNN, 'wor
 model: sonnet
 ---
 
-Executes spec $ARGUMENTS step by step and verifies acceptance criteria. Use to implement a single approved spec.
+Executes spec $ARGUMENTS step by step and verifies acceptance criteria.
 
 ## Process
 
-1. **Find the spec**: If `$ARGUMENTS` is a number (e.g. `001`), open `specs/001-*.md`. If it's a filename, open that directly. If empty, list all draft specs and ask.
+1. **Find spec**: `$ARGUMENTS` as number → `specs/NNN-*.md`. Filename → open directly. Empty → list drafts, ask.
+2. **Read spec** — understand Goal, Steps, Files to Modify.
+3. **Validation gate** (skip if `--skip-validate` or `in-progress`): Score 10 criteria. Critical gap → STOP.
+4. **High complexity only**: Show Goal/Approach/Files summary, ask confirmation. Spawn `code-architect` (model: opus). REDESIGN → stop.
+5. **Branch setup**: Ask user → `spec/NNN-title`. Read `CONVENTIONS.md` + `STACK.md`. Load skills from spec Context.
+6. **Start work**: Set `in-progress`. Refresh `session-state.json` with spec path + phase.
+7. **Progress checklist**: Print `[ ] Step N: <title>`. Resume from first unchecked `- [x]`.
 
-2. **Read the spec** — understand Goal, Steps, and Files to Modify.
+### Model routing (per Complexity field)
 
-3. **Validation gate** (skip if `--skip-validate` or status is `in-progress`):
-   Score on 10 criteria (goal clarity, step decomposition, dependencies, coverage, acceptance criteria, scope, risks, file coverage, out-of-scope, integration). If any critical gap: **STOP** and tell user to fix first.
+| Complexity | Model |
+|-----------|-------|
+| low | direct (no subagent) |
+| medium/unset | `model: sonnet` |
+| high | `model: opus` |
 
-4. **Understanding confirmation** (only if `**Complexity**: high`):
-   Show Goal/Approach/Files summary, ask "Does this match?" via AskUserQuestion. Stop if user says no.
+Specialist routing: Vue/React/styling → `frontend-developer`; API/middleware → `backend-developer`. Only if agent exists in `.claude/agents/`.
 
-5. **Branch setup**: Ask user whether to create branch `spec/NNN-title`. Update spec header with branch name.
-
-6. **Read project context**: Skim `CONVENTIONS.md` and `STACK.md` from `.agents/context/`.
-
-7. **Load relevant skills**: If spec's Context mentions skills, read and apply them.
-
-8. **Architectural review** (only if `**Complexity**: high`): Spawn `code-architect` agent with spec content. REDESIGN → stop. PROCEED WITH CHANGES → report concerns, continue. PROCEED → continue.
-
-9. **Start work**: Set `**Status**: in-progress`.
-   Refresh `.claude/session-state.json` with the active spec path, phase `implementation`, and the current next action.
-
-10. **Progress checklist**: Print all steps as `[ ] Step N: <title>`. Check off each as completed.
-
-11. **Resume check**: Scan for `- [x]` steps. Skip completed steps, continue from first unchecked.
-
-11a. **Model routing**: Read `**Complexity**` field:
-    - `low` — execute directly (no subagent)
-    - `medium` or unset — spawn subagent with `model: sonnet`
-    - `high` — spawn subagent with `model: opus`
-
-11b. **Specialist routing** (for implementation steps only):
-    - If step modifies Vue/React components, styling, or accessibility → spawn `frontend-developer` agent
-    - If step modifies API routes, server middleware, or third-party integrations → spawn `backend-developer` agent
-    - Only if the corresponding agent exists in `.claude/agents/`. Skip silently if not installed.
-
-12. **Execute each step**:
-    - Implement the change
-    - Check off in spec: `- [ ]` → `- [x]`
-    - **No commit** — spec-review is the gate before committing
-    - If blocked/unclear: stop and ask
-    - If a meaningful architectural/convention decision was made: append to `decisions.md`
-    - **Context budget:** If compaction seems imminent, update spec progress markers before continuing
-
-    **Stall detection:**
-    - **Retry limit**: Same step fails 3× → mark as blocked (`- [~]`), set `**Status**: blocked`, stop.
-    - **No-change detection**: 2 consecutive steps with no file changes → ask user via AskUserQuestion: "Two steps with no changes. Expected?" Options: [Yes, continue] [No, investigate] [Abort]
-    - **Completion stats**: After all steps, print steps completed/blocked and files changed.
-    - **Handoff refresh:** After each meaningful checkpoint (step completion, blocked state, verify failure), refresh `.claude/session-state.json` so compact recovery and manual `/resume` stay aligned.
-
-13. **Verify acceptance criteria**: Check each criterion in the spec. For Truths: run commands. For Artifacts: read files. For Key Links: verify imports exist.
-
-14. **Update CHANGELOG.md**: Insert under `## [Unreleased]`: `- **Spec NNN**: [title] — [summary]`.
-
-15. **Verify implementation**: Spawn `verify-app` agent.
-    - **PASS**: continue.
-    - **FAIL**: Spawn Haiku Investigator once (model: haiku, tools: Read/Glob/Grep/Bash read-only, no Write/Edit). Pass error output. Apply suggested fix, re-run verify-app once. Second FAIL → set `in-review`, stop.
-
-15a. **Test coverage check** (after verify-app PASS): Check if changed source files have corresponding test files. If coverage gaps exist, spawn `test-generator` agent (model: sonnet). Skip if spec is test-only or no test framework detected.
-
-16. **Optional cleanup**: Offer `/simplify` before review. Skip if user declines.
-
-17. **Update status**: Set `in-review` before spawning reviewers.
-    Refresh `.claude/session-state.json` with phase `in-review` and next action `/spec-review NNN`.
-
-18. **Auto-review** (complexity-gated):
-    - Low/Medium/unset: spawn `code-reviewer` only.
-    - High: spawn `code-reviewer` + `staff-reviewer` in parallel.
-    - **Conditional reviewers** (spawn in parallel with code-reviewer if applicable):
-      - Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
-      - Spec touches DB queries, loops, rendering, data fetching, or bundle imports → also spawn `performance-reviewer`
-    - FAIL → leave `in-review`, report issues. PASS/CONCERNS → set `completed`, move to `specs/completed/`.
+8. **Execute each step**: Implement → check off (`- [x]`) → append `decisions.md` if architectural. No commits — `/spec-review` is the gate.
+   - Stall: 3× same failure → `- [~]`, set `blocked`, stop. 2 no-change steps → ask user.
+   - Refresh `session-state.json` at each checkpoint. Update progress before compaction.
+9. **Verify acceptance criteria**: Truths → run commands. Artifacts → read files. Key Links → verify imports.
+10. **CHANGELOG**: Insert under `## [Unreleased]`.
+11. **Verify**: Spawn `verify-app`. FAIL → spawn investigator (model: haiku, read-only), fix, re-verify once. Second FAIL → `in-review`, stop.
+12. **Test coverage**: Spawn `test-generator` (model: sonnet) if gaps exist. Skip if test-only or no framework.
+13. **Review**: Set `in-review`. Low/Medium → `code-reviewer`. High → + `staff-reviewer`. Auth/secrets → + `security-reviewer`. DB/perf → + `performance-reviewer`. FAIL → report. PASS → `completed`, move to `specs/completed/`.
 
 ## Skill-Trimming Quality Gate
 
-When a spec modifies SKILL.md files (trimming, condensing, refactoring): after all steps, before step 13, spawn a **quality-diff subagent** (model: haiku):
-
-**Prompt**: "Compare the original and trimmed versions of these SKILL.md files. For each file:
-1. Run `git diff HEAD -- <file>` to see what changed
-2. List every REMOVED functional element (commands, decision tables, agent spawn instructions, output format templates, conditional logic, file paths, specific flags/options)
-3. For each removed element: classify as REDUNDANT (obvious to Claude, derivable from context) or CRITICAL (specific values, formats, or logic that Claude would not infer)
-4. Report: file, removed element, classification, risk if missing"
-
-**Gate**: If any element is classified CRITICAL → stop, report to user, do NOT mark spec as completed. Re-add the critical elements before proceeding.
+When spec modifies SKILL.md files: before step 9, spawn Haiku subagent to diff original vs trimmed. Classify each removed element as REDUNDANT or CRITICAL. Any CRITICAL → stop, re-add before completing.
 
 ## Rules
-- **ALWAYS update status and move the file when done.**
-- Follow the spec exactly — nothing outside Steps and scope.
-- Check off each step as completed. Do NOT commit during `/spec-work` — `/spec-review` remains the gate before any commit or PR flow.
-- If blocked: leave unchecked, set `blocked`, ask user.
-- **Skill-First**: If a step references a skill, invoke via `Skill` tool.
-- `--complete` flag: skip steps 14–16, set `completed` directly.
-- `--skip-validate` flag: skip step 3.
+- Follow spec exactly. Check off each step. No commits during `/spec-work`.
+- Blocked → set `blocked`, ask user. Skill references → invoke via `Skill` tool.
+- `--complete`: skip steps 10-13. `--skip-validate`: skip step 3.
 
 ## Next Step
 
-After implementation: `/spec-review NNN` to validate, then `/commit`, `/pr`, or `/spec-board` depending on the review outcome.
+> 📋 `/spec-review NNN` — validate, then `/commit`

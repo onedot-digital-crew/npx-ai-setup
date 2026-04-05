@@ -8,6 +8,10 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 
 Investigates and fixes bug: $ARGUMENTS. Use when a defect needs hypothesis-driven root-cause analysis and a minimal targeted fix.
 
+## Prep (zero tokens on green)
+
+Run `bash .claude/scripts/debug-prep.sh` first. It gathers recent commits, uncommitted changes, test failures, build status, error logs, and prior investigations. Only proceed to analysis if output shows failures or context.
+
 ## Process
 
 ### 0. Check Prior Investigations

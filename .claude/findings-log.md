@@ -8,6 +8,9 @@
 <!-- Add new findings here after each /session-optimize run -->
 <!-- Format: - [ ] [Category] Title — Fix applied: `file:line` or Spec NNN -->
 - [x] [T] session-optimize/SKILL.md 11.8KB/175 Zeilen → getrimmt auf ~95 Zeilen (2026-04-04)
+- [x] [T] spec-work/SKILL.md 6.7KB → 2.9KB (57% Reduktion) — Routing-Refactor-Bloat entfernt (2026-04-05)
+- [x] [E] debug-prep.sh erstellt — Debugging = Top-Task-Typ, Bash dominiert mit 1187 Calls (2026-04-05)
+- [x] [T] Haiku verifiziert: 9-14% in Opus-Sessions mit Subagents — Routing funktioniert (2026-04-05)
 - [x] [Q] setup.sh cmux false positive — Fallback auf ~/.local/bin/claude ergänzt, lib/setup.sh:243 (2026-04-04)
 - [x] [T] nuxt-onedot CLAUDE.md fehlte defuddle-Regel und Session-Hygiene — ergänzt (2026-04-04)
 - [ ] [T] npx-ai-setup v2.0.2 → v2.0.8 Update ausstehend
@@ -19,7 +22,7 @@
 - [x] [Q] apply-learnings Mapping für Process/CLI → CLAUDE.md war bereits vorhanden (Zeile 19) — Spec 590 (2026-03-26)
 - [x] [T] templates/claude/rules/agents.md hat bereits Model-Routing — Spec 591 (2026-03-26)
 - [x] [E] Specs 577+578 in specs/ nicht zu completed/ verschoben — verschoben (2026-03-25)
-- [ ] [T] Haiku 0% — Verifikation nach Spec 578 ausständig; Sonnet-Limit aktuell voll, Validierung ab ~2026-03-30 möglich
+- [x] [T] Haiku 0% — verifiziert: 9-14% in Opus-Sessions mit Subagents, Routing funktioniert (2026-04-05)
 - [x] [T] Opus für Non-Code-Projekte (Obsidian, Finanzplanung) — ~/.claude/CLAUDE.md: Sonnet als globaler Default gesetzt (2026-04-04)
 - [ ] [T] Große Opus-Sessions ohne Parallelisierung — sp-alpensattel a53d2ed8: 225min, 234 Tools, 88 Bash, 68 Read, 48 Grep, nur 3 SA
 - [ ] [E] Projekte ohne ai-setup haben 0 Subagents — crew-buddy, mcp-platform, Obsidian Vaults fehlt Parallelisierungs-Guidance
