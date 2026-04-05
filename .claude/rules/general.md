@@ -12,6 +12,9 @@ Before creating a new file, check if one already exists:
 ## Verify, Don't Fabricate
 Never fabricate configuration formats or assume config file schemas exist — check docs or existing examples first.
 
+## Verify Existence Before Claiming Absence
+Before stating something is missing (an API tool, a hook, a config), search thoroughly (Glob + Grep, min 2 attempts with different patterns). Only report absence after confirming it.
+
 ## Human Approval Gates
 Before finalizing any deliverable, present a summary and ask for confirmation.
 Never proceed to the next workflow phase without explicit user approval.

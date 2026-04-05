@@ -1,6 +1,7 @@
 ---
 name: ais:spec
 description: "Create a new spec for a task. Triggers: /spec, 'create spec for X', 'write a spec for X', 'spec out X', 'plan X as a spec'."
+model: opus
 ---
 
 Creates a structured spec for the task: $ARGUMENTS. Use before implementing any multi-file or architectural change.

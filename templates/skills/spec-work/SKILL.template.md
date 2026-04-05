@@ -1,7 +1,7 @@
 ---
 name: ais:spec-work
 description: "Execute a single spec step by step. Triggers: /spec-work NNN, 'work on spec NNN', 'implement spec NNN', 'run spec NNN'. NNN is a 3-digit spec number."
-model: sonnet
+model: opus
 ---
 
 Executes spec $ARGUMENTS step by step and verifies acceptance criteria.

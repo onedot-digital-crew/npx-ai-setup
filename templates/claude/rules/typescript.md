@@ -1,5 +1,8 @@
 ---
-globs: ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.vue"
 ---
 # TypeScript Rules
 

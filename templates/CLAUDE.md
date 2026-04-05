@@ -13,9 +13,7 @@ For full details: `/context-load STACK.md` (or ARCHITECTURE.md, CONVENTIONS.md, 
 
 ## Model Routing
 
-**Session start:** Task-Typ bestimmt das Modell. CSS/Liquid-Fixes, Single-File-Edits, Explores: `claude --model haiku`. Feature-Dev, Spec-Work, Orchestrierung: `claude --model sonnet`. Architektur/ADR: `claude --model opus`. Wechsel im Chat via `/model`.
-
-Set `model:` explicitly on every subagent spawn. Default (no model set) inherits the parent model.
+Default: Sonnet. Opus nur für Architektur/Specs via `claude --model opus`. Haiku für Explore-Agents.
 
 | Model | Use for |
 |-------|---------|
@@ -44,9 +42,7 @@ Use WebFetch only when defuddle is unavailable or the page requires JavaScript r
 
 ## Session Hygiene
 
-Auto-compact at 80%. After >30 tool calls: consider `/reflect` + `/pause`.
-Sessions >300 messages drift — start fresh with `/pause` + `/resume` statt weiterzuarbeiten.
-One task per conversation — prevents context bleed.
+Auto-compact at 80%. One task per conversation — prevents context bleed.
 
 ## Build Artifact Rules
 
@@ -54,15 +50,8 @@ Never read or search inside: `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, 
 These hard blocks come from `permissions.deny` in `.claude/settings.json`; hooks only add advisory warnings or edit-time safeguards around narrower cases.
 
 ## Automation (Agent SDK CLI)
-Non-interactive runs: `claude -p "<prompt>"`. Structured output: `--output-format json`.
-`--bare` — CI-recommended: disables Hooks/Skills/MCP, reproducible runs (becomes default for `-p`).
-`--max-budget-usd 0.50` / `--max-turns 20` — cost controls for automated agents.
-`--fallback-model <model>` — model fallback on rate limits. `--no-session-persistence` — stateless runs.
+Non-interactive: `claude -p "<prompt>" --output-format json`. CI: add `--bare` (disables Hooks/Skills/MCP).
+Cost controls: `--max-budget-usd 0.50` / `--max-turns 20`. Stateless: `--no-session-persistence`.
 
 ## Permission Modes
-`Shift+Tab` cycles: `default` → `acceptEdits` → `plan` → `dontAsk` (pre-approved only).
-`auto` (Classifier) — Team plan only. `bypassPermissions` — isolated VMs/containers only.
-Settings: `{ "permissions": { "defaultMode": "dontAsk" } }`
-
-Baseline policy in this setup is the project-local profile from `.claude/settings.json`.
-Treat `acceptEdits`, `dontAsk`, `auto`, and `bypassPermissions` as operator choices layered on top of that baseline, not as assumed team defaults.
+Shift+Tab cycles modes. Baseline policy: `.claude/settings.json`.
