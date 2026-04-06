@@ -3,6 +3,13 @@
 > Curated session learnings from /reflect. Persistent across updates — generate.sh never touches this file.
 > After /reflect: run `/apply-learnings` to distribute entries into the correct project files. Applied entries move to `## Applied`.
 
+## Architecture
+- Direkte Edits an `.claude/skills/*/SKILL.md` überleben `/update` nicht — Änderungen immer in `templates/skills/*/SKILL.template.md` vornehmen
+- `nuxt` ist ein erkanntes System ohne Boilerplate-Repo — `get_boilerplate_repo()` kennt nur `shopify`, `shopware`, `nuxt-storyblok`, `next`, `storyblok`
+
+## Corrections
+- `sync_boilerplate()` muss `get_boilerplate_repo()` prüfen bevor `pull_boilerplate_files()` aufgerufen wird — fehlendes Mapping ergibt sonst "Unknown system" statt graceful skip
+
 ## Applied
 _Entries moved here after /apply-learnings has incorporated them into their target files._
 
