@@ -21,6 +21,25 @@ Read `.agents/context/CONCEPT.md` if it exists → REJECT if clearly misaligned 
 
 **Complexity check**: If >5 files touched, new dep/system, or architectural change → `AskUserQuestion`: "Hohe Komplexitaet ([reason]). Empfehlung: /challenge zuerst." Options: "Weiter mit Spec", "Erst /challenge", "Scope reduzieren". Stop if /challenge chosen; ask clarifying questions if scope reduction chosen.
 
+### 1b.5 — Challenge Gate (mandatory)
+
+Scan 2-3 relevante Source-Files bevor die Spec geschrieben wird. Stelle konkret:
+
+1. **Dopplung**: Gibt es Code der das schon macht oder teilweise löst? → Zeige `path/to/file:NN`
+2. **Pattern-Konflikt**: Widerspricht der Ansatz einem bestehenden Pattern in der Codebase? → Nenne das Pattern und wo es definiert ist
+3. **Simpler Weg**: Was ist die einfachste Alternative — und warum reicht sie nicht?
+4. **6-Monats-Schmerz**: Wo wird das schwer zu warten, zu debuggen, zu erweitern?
+
+Format in Chat:
+```
+Challenge: [konkrete Aussage]
+Quelle: path/to/file:NN
+Empfehlung: [Weiter / Scope ändern / Ansatz überdenken]
+```
+
+`AskUserQuestion`: "Challenge-Ergebnis: [1-Satz-Summary]. Weiter?" — Options: "Ja, Spec schreiben", "Ansatz anpassen", "Spec abbrechen".
+Stoppe wenn "abbrechen". Überarbeite Phase 1 sketch wenn "anpassen".
+
 ### 1c — Think It Through
 Sketch the full implementation before writing. Use `AskUserQuestion` only at real decision points.
 - Files/systems touched; exact change in each
