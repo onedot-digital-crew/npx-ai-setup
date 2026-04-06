@@ -2,13 +2,7 @@
 
 ## CRITICAL: Model Routing
 
-Always set `model:` when spawning subagents. Sonnet is the default for implementation subagents — Haiku only for read-only explore agents.
-
-| Model | Use for |
-|-------|---------|
-| `haiku` | Dedicated explore agents (read-only: search, codebase questions, file lookup) — never for implementation |
-| `sonnet` | **DEFAULT for subagents** — implementation, code generation, reviews, test suites, any write operation |
-| `opus` | Architecture review, complex analysis, spec creation |
+Always set `model:` when spawning subagents. Sonnet is the default for implementation subagents — Haiku only for read-only explore agents. Routing table: see global CLAUDE.md "Model Routing" section.
 
 Before spawning: Can Haiku handle this? If yes, use Haiku. Sonnet is the scarcest budget.
 Prefer direct Glob/Grep/Read over agent spawns when < 3 tool calls needed.
