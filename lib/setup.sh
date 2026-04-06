@@ -394,6 +394,16 @@ cleanup_orphans() {
   _find_orphan_files "$TPL/claude/hooks"  ".claude/hooks"
   _find_orphan_files "$TPL/agents"        ".claude/agents"    "*.md"
   _find_orphan_dirs  "$TPL/skills"        ".claude/skills"
+  # Check for orphaned reference files within each installed skill
+  while IFS= read -r -d '' skill_dir; do
+    local name="${skill_dir##*/}"
+    local installed_refs=".claude/skills/$name/references"
+    [ -d "$installed_refs" ] || continue
+    while IFS= read -r -d '' ref; do
+      local ref_name="${ref##*/}"
+      [ -f "$skill_dir/references/$ref_name" ] || ORPHANS+=("$installed_refs/$ref_name")
+    done < <(find "$installed_refs" -type f -name "*.md" -print0 2>/dev/null)
+  done < <(find "$TPL/skills" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
   _find_orphan_files_recursive "$TPL/github" ".github"
 
   if [ ${#ORPHANS[@]} -eq 0 ]; then
@@ -662,6 +672,14 @@ install_skills() {
     [[ "$name" == "test-setup" ]] && continue
     mkdir -p ".claude/skills/$name"
     _install_or_update_file "$skill_file" ".claude/skills/$name/SKILL.md"
+    # Install supporting reference files if present
+    if [ -d "$skill_dir/references" ]; then
+      mkdir -p ".claude/skills/$name/references"
+      while IFS= read -r -d '' ref; do
+        local ref_name="${ref##*/}"
+        _install_or_update_file "$ref" ".claude/skills/$name/references/$ref_name"
+      done < <(find "$skill_dir/references" -type f -name "*.md" -print0 | sort -z)
+    fi
     _count=$(( _count + 1 ))
   done < <(find "$TPL/skills" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
   [ "$_count" -gt 0 ] && tui_success "$_count skill(s) installed to .claude/skills/"

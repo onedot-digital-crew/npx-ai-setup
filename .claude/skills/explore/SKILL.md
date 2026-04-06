@@ -1,7 +1,6 @@
 ---
-name: ais:explore
-description: "Read-only thinking partner before committing to a spec. Triggers: /explore, 'help me think through', 'brainstorm', 'what are the tradeoffs', 'should I use X or Y'."
-model: haiku
+name: explore
+description: "Read-only thinking partner before committing to a spec."
 effort: low
 ---
 

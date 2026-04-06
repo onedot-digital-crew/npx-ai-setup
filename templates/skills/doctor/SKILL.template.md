@@ -1,6 +1,7 @@
 ---
-name: ais:doctor
+name: doctor
 description: "Run AI setup health check (12 checks: hooks, settings, context files, CLAUDE.md size, MCP, skills, scripts, git config, metadata, specs)."
+effort: low
 ---
 
 Run AI setup health check (12 checks: hooks, settings, context files, CLAUDE.md size, MCP, skills, scripts, git config, metadata, specs).

@@ -527,7 +527,7 @@ else
   fail "CLAUDE.md missing Haiku routing guidance"
 fi
 
-if grep -q 'haiku' .claude/rules/agents.md 2>/dev/null; then
+if grep -qi 'haiku' .claude/rules/agents.md 2>/dev/null; then
   pass ".claude/rules/agents.md contains haiku routing label"
 else
   fail ".claude/rules/agents.md missing haiku routing label"
@@ -545,7 +545,7 @@ else
   fail "templates/skills/spec-work/SKILL.template.md missing sonnet routing for medium-complexity tasks"
 fi
 
-if grep -q 'haiku.*explore\|explore.*haiku\|dedicated explore' .claude/rules/agents.md 2>/dev/null; then
+if grep -qi 'haiku.*explore\|explore.*haiku\|dedicated explore' .claude/rules/agents.md 2>/dev/null; then
   pass ".claude/rules/agents.md restricts haiku to dedicated explore agents"
 else
   fail ".claude/rules/agents.md missing haiku-for-explore-only restriction"

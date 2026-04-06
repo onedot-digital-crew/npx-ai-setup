@@ -40,6 +40,8 @@ Before starting, classify the task tier:
 - **Medium** (new feature, 2-3 files, component): use plan mode
 - **Complex** (architecture, refactor, new system): stop and flag model requirement first
 
+Subagent model: Haiku for read-only explore, Sonnet for code generation. See `agents.md`.
+
 ## Verification
 **Iron Law**: Run verification in THIS message before claiming it passes.
 

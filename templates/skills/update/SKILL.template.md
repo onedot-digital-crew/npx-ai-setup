@@ -1,5 +1,5 @@
 ---
-name: ais:update
+name: update
 description: Check for ai-setup updates and install from within Claude Code
 allowed-tools:
   - Bash

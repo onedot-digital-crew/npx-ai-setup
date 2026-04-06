@@ -1,7 +1,8 @@
 ---
-name: ais:spec-run-all
+name: spec-run-all
+description: "Run full pipeline for all draft specs in parallel."
 model: sonnet
-description: "Run full pipeline for all draft specs in parallel. Triggers: /spec-run-all, 'run all specs', 'implement everything', 'do all the drafts'."
+disable-model-invocation: true
 ---
 
 # Spec Run All — Full Pipeline for All Draft Specs

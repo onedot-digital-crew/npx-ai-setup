@@ -1,7 +1,7 @@
 ---
-name: ais:spec-review
-model: sonnet
-description: "Review a completed spec after implementation. Triggers: /spec-review NNN, 'review spec NNN', 'did we complete spec NNN', 'verify spec implementation'."
+name: spec-review
+description: "Review a completed spec after implementation."
+argument-hint: "<NNN spec number>"
 ---
 
 Reviews spec $ARGUMENTS and its code changes against acceptance criteria. Use after spec-work to validate and close.
@@ -41,7 +41,6 @@ Verify each acceptance criterion: run commands, read modified files, confirm beh
 **4c — Code quality** (by complexity):
 - Low/Medium: spawn `code-reviewer` agent (model: sonnet)
 - High: spawn `code-reviewer` AND `staff-reviewer` in parallel (model: sonnet)
-- Review stays on Sonnet for all tiers; do not escalate to Opus for routine spec review.
 
 **4d — Conditional reviewers** (spawn in parallel with 4c if applicable):
 - Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
@@ -75,7 +74,7 @@ Clean up worktree after merge/push/discard if one exists.
 ## Next Step
 
 - APPROVED + merged: `> 📦 Naechster Schritt: /commit — Changes committen`
-- APPROVED + PR: `> 📤 Naechster Schritt: /pr — Pull Request erstellen`
+- APPROVED + PR: `> 📤 Naechster Schritt: gh pr create — Pull Request via CLI`
 - CHANGES REQUESTED: `> 🔧 Naechster Schritt: Feedback umsetzen, dann /spec-review NNN erneut`
 - REJECTED: `> 🔧 Naechster Schritt: Kritische Issues fixen, dann /spec-review NNN erneut`
 

@@ -1,7 +1,8 @@
 ---
-name: ais:pause
+name: pause
 description: "Captures session state into `.continue-here.md` plus `.claude/session-state.json` and commits the Markdown handoff. Run before ending a session."
 model: haiku
+disable-model-invocation: true
 allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
 ---
 

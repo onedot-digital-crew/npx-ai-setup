@@ -1,12 +1,12 @@
 ---
-name: ais:release
-model: sonnet
-description: "Complete release workflow — version bump, CHANGELOG, docs sync, Slack. Triggers: 'release', 'ship', 'publish', '/release', version strings like 'v2.0.0'."
+name: release
+description: "Complete release workflow — version bump, CHANGELOG, Slack."
+disable-model-invocation: true
 ---
 
-# Release — Version Bump, Changelog, Docs Sync, Slack Message
+# Release — Version Bump, Changelog, Slack Message
 
-Full release workflow: validate → changelog → docs sync → version bump → slack message → commit + tag.
+Full release workflow: validate → changelog → version bump → slack → commit + tag.
 
 ## Process
 
@@ -18,72 +18,49 @@ Run the prep script first — it collects all Phase 1 data in one shell pass (ze
 bash .claude/scripts/release-prep.sh
 ```
 
-The output contains: dirty state, verify:release result, last tag, commits since tag, CHANGELOG [Unreleased], package.json version, and inventory counts.
+The output contains: dirty state, verify:release result, last tag, commits since tag, CHANGELOG [Unreleased], version info, and inventory counts.
 
 **Abort conditions** (check from prep output):
 - `UNCOMMITTED_CHANGES` → abort, commit or stash first
-- `Verify: FAIL` → fix before proceeding
-- Treat a skipped `test:claude-runtime` as a release failure; Claude runtime validation must pass, not skip.
+- `Verify: FAIL` → fix before proceeding. If runtime validation is skipped because Claude is not authenticated, stop the release.
+- Detect version source: `package.json`, `Cargo.toml`, `pyproject.toml`, `version.txt`, or ask user
 
-Do NOT re-run `git status`, `npm run verify:release`, or read CHANGELOG — all data is in the prep output.
+Do NOT re-run `git status`, `verify:release`, or read CHANGELOG — all data is in the prep output.
 
-### Phase 2: Inventory Audit — Count Everything
-
-**Count from filesystem, not memory.** For commands, agents, hooks, skills, rules:
-- Count files via `ls .claude/{commands,agents,rules,skills}/ | wc -l` and `jq` hook entries from settings.json
-- Extract stated counts from README.md and WORKFLOW-GUIDE.md
-- Compare filesystem vs README vs WORKFLOW-GUIDE for each category
-- Verify table completeness row-by-row: list all filenames, grep each in README + WORKFLOW-GUIDE
-
-Show discrepancy summary. If ANY mismatch: ask via AskUserQuestion:
-- "Fix docs automatically" / "Fix manually first" / "Skip docs sync"
-
-### Phase 3: Documentation Sync
-
-Run unless Phase 2 confirmed 0 discrepancies AND tables 100% complete.
-
-- **README.md**: Fix counts in prose, add missing commands/agents to tables (with model + description from frontmatter)
-- **WORKFLOW-GUIDE.md** (both `.claude/` and `templates/claude/`): Fix section header counts, add missing rows to command/agent/hook tables
-- **templates/CLAUDE.md**: Only if explicit counts are stated
-- Additive only — never remove entries
-
-### Phase 4: Version Bump
+### Phase 2: Version Bump
 
 Ask via AskUserQuestion (show commits + CHANGELOG [Unreleased]):
 - `patch` — bug fixes, docs, small improvements
-- `minor` — new features, new commands/agents/hooks
+- `minor` — new features, new APIs, new capabilities
 - `major` — breaking changes
 
-Update `package.json` version. Update `CHANGELOG.md`: rename `[Unreleased]` → `[vX.Y.Z] — YYYY-MM-DD`, add new empty `[Unreleased]` above. If [Unreleased] is empty, auto-generate from commits grouped by type.
+Update version file. Update `CHANGELOG.md`: rename `[Unreleased]` → `[vX.Y.Z] — YYYY-MM-DD`, add new empty `[Unreleased]` above. If [Unreleased] is empty, auto-generate from commits grouped by type (feat/fix/chore).
 
-### Phase 5: Slack Announcement
+### Phase 3: Slack Announcement
 
-Generate dev team message and write it into `CHANGELOG.md` directly below the version heading, wrapped in `<!-- slack-announcement -->` / `<!-- /slack-announcement -->` markers. This block is automatically posted to Slack.
+Generate a release message and write it into `CHANGELOG.md` directly below the version heading, wrapped in `<!-- slack-announcement -->` / `<!-- /slack-announcement -->` markers. This block is automatically posted to Slack.
 
-Only include categories with entries:
+Derive the project name from `package.json` name, repo name, or ask. Only include categories with entries:
 
 ```
 <!-- slack-announcement -->
-:rocket: *@onedot/ai-setup vX.Y.Z*
+:rocket: *<project-name> vX.Y.Z*
 
 *Was ist neu:*
-:wrench: *Neue Tools* — `/command` — Was es tut
-:brain: *Agents* — `name` — Was der Agent macht
-:zap: *Token-Optimierung* — Konkrete Einsparung
-:sparkles: *Skills* — `name` — Stack + Funktion
+:sparkles: *Features* — Kurze Beschreibung
+:wrench: *Fixes* — Was gefixt wurde
 :gear: *Verbesserungen* — Wichtigste Änderung
 
-*Zahlen:* N Commands | N Agents | N Hooks | N Skills
-*Update:* `npx github:onedot-digital-crew/npx-ai-setup`
+*Update:* `<install-command>`
 <!-- /slack-announcement -->
 ```
 
 Show the generated message and ask: "Passt so" / "Anpassen" / "Ohne Slack"
 
-### Phase 6: Commit and Tag
+### Phase 4: Commit and Tag
 
 ```bash
-git add package.json CHANGELOG.md README.md  # + WORKFLOW-GUIDE if changed
+git add <version-file> CHANGELOG.md README.md
 git diff --staged --stat
 git commit -m "release: vX.Y.Z"
 git tag vX.Y.Z
@@ -94,12 +71,9 @@ Report: "Tagged vX.Y.Z. Run `git push && git push --tags` when ready."
 ## Rules
 
 - **Never push automatically** — leave push to user
-- **Never skip release verification** — `npm run verify:release` must pass before proceeding
-- **Never skip the docs audit** — stale counts are the #1 source of confusion
-- **Count from filesystem** — run actual ls/wc/grep, never guess
-- **Template parity** — if `WORKFLOW-GUIDE.md` changes, `templates/WORKFLOW-GUIDE.md` must match
-- **Additive only** — docs sync adds, never removes (removal = manual review)
-- **Fix immediately on failure** — release work stops until verification is green again
+- **Detect version source** — don't assume package.json, check what exists
+- **Release verification is mandatory** — no version bump, tag, or publish step before `verify:release` passes
+- **Fix immediately on failure** — do not continue the release with skips, warnings, or known runtime gaps
 - Stop if uncommitted changes or missing `[Unreleased]` in CHANGELOG
 
 ## Next Step

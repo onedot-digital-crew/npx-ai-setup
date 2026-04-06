@@ -1,7 +1,9 @@
 ---
-name: ais:spec-run
-description: "Run full spec pipeline — validate, implement, review, commit. Triggers: /spec-run NNN, 'run spec pipeline NNN', 'execute spec NNN end to end'."
+name: spec-run
+description: "Run full spec pipeline — validate, implement, review, commit."
 model: sonnet
+disable-model-invocation: true
+argument-hint: "<NNN spec number>"
 ---
 
 Runs the complete spec lifecycle for spec $ARGUMENTS. Self-healing: fixes issues found during review automatically.
