@@ -197,7 +197,7 @@ detect_installed_system() {
   # Fallback: detect from rule files
   local rules_dir=".claude/rules"
   if [ -d "$rules_dir" ]; then
-    for system_key in shopify shopware nuxt next storyblok; do
+    for system_key in shopify shopware nuxt-storyblok nuxt next storyblok; do
       if ls "${rules_dir}/${system_key}"*.md 2>/dev/null | grep -q .; then
         echo "$system_key"
         return 0
@@ -240,7 +240,7 @@ has_system_config() {
   # Check for system-specific rule files (any non-generic rule file)
   local rules_dir=".claude/rules"
   if [ -d "$rules_dir" ]; then
-    for system_key in shopify shopware nuxt next storyblok; do
+    for system_key in shopify shopware nuxt-storyblok nuxt next storyblok; do
       ls "${rules_dir}/${system_key}"*.md 2>/dev/null | grep -q . && return 0
     done
   fi
@@ -260,7 +260,14 @@ select_boilerplate_system() {
 
   # Auto-detect framework from config files
   if ls nuxt.config.* 1>/dev/null 2>&1; then
-    SELECTED_SYSTEM="nuxt"
+    # Nuxt + Storyblok → combined boilerplate; Nuxt-only → no boilerplate repo yet
+    if [ -f "package.json" ] && grep -q '"@storyblok/' package.json 2>/dev/null; then
+      SELECTED_SYSTEM="nuxt-storyblok"
+    else
+      SELECTED_SYSTEM="nuxt"
+      tui_info "Detected framework: nuxt (no boilerplate pull — nuxt-only repo not yet available)"
+      return 0
+    fi
   elif ls next.config.* 1>/dev/null 2>&1; then
     SELECTED_SYSTEM="next"
   elif [ -f "theme.liquid" ] || ls shopify.* 1>/dev/null 2>&1 || { [ -d "sections" ] && [ -d "snippets" ]; }; then
