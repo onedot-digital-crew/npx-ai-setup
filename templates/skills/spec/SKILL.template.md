@@ -26,7 +26,11 @@ Read `.agents/context/CONCEPT.md` if it exists → REJECT if clearly misaligned 
 
 ### 1c.5 — Challenge Gate (mandatory)
 
-Scan 2-3 relevante Source-Files bevor die Spec geschrieben wird. Stelle konkret:
+**File-Count-Check**: Glob source files relevant to $ARGUMENTS (e.g. `**/*.{js,ts,vue,sh,md}`).
+- ≤ 10 results → read top 3 directly with Glob/Grep/Read
+- > 10 results → spawn Haiku subagent (`model: haiku`, read-only: Glob/Grep/Read) to find the 3 most relevant files and return their key snippets, then evaluate findings below
+
+Stelle konkret:
 
 1. **Dopplung**: Gibt es Code der das schon macht oder teilweise löst? → Zeige `path/to/file:NN`
 2. **Pattern-Konflikt**: Widerspricht der Ansatz einem bestehenden Pattern in der Codebase? → Nenne das Pattern und wo es definiert ist
