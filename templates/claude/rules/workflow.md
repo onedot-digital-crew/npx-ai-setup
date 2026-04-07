@@ -14,6 +14,7 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 | Multi-file changes (3+ files, incl. config/rules) | `/spec` — erst planen, dann bauen |
 | Session start + `.continue-here.md` exists | `/resume` — State wiederherstellen |
 | Session >30 tool calls | `/reflect` — Learnings sichern, dann `/pause` |
+| `/spec-run NNN` done (frontend files) | `/spec-verify NNN` — visueller Browser-Check |
 | Build failure | `/build-fix` — iterativ fixen |
 | Pre-release | `/release` — Version bump, CHANGELOG, Tag |
 
