@@ -3,7 +3,6 @@
   "model": "claude-sonnet-4-6",
   "plansDirectory": ".claude/plans",
   "autoMemoryDirectory": ".agents/memory",
-  "enableAllProjectMcpServers": true,
   "_governanceDoc": "docs/claude-governance.md",
   "_governanceProfile": "project-baseline",
   "_governanceOwnership": "Project settings own repo-local permissions, hooks, and context limits. Global settings stay workstation-local and optional.",
@@ -72,8 +71,7 @@
       "Bash(gh issue *)",
       "Bash(jq:*)",
       "Bash(curl:*)",
-      "Edit(**)",
-      "Write(**)"
+      "Edit(.claude/commands)"
     ],
     "deny": [
       "Read(.env*)",
@@ -111,6 +109,11 @@
     "SessionStart": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/context-reinforcement.sh",
+            "timeout": 5000
+          },
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/context-loader.sh",
@@ -151,26 +154,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/post-compact-restore.sh",
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/protect-and-breaker.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "WebFetch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
           }
         ]
       }
@@ -233,12 +216,46 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/protect-files.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/circuit-breaker.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/context-freshness.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/memory-recall.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/update-check.sh",
             "timeout": 5
           }
         ]
@@ -249,8 +266,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/notify.sh",
-            "timeout": 5
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/notify.sh"
           }
         ]
       }
@@ -288,6 +304,17 @@
         ]
       }
     ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/task-created-log.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "TaskCompleted": [
       {
         "hooks": [
@@ -305,7 +332,7 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/transcript-ingest.sh",
-            "timeout": 30
+            "timeout": 120
           }
         ]
       },

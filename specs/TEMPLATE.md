@@ -15,8 +15,7 @@
 - [ ] Step 3: description
 
 ## Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
+- [ ] "[observable behavior verifiable by running a command]"
 
 ## Files to Modify
 - `path/to/file` - reason

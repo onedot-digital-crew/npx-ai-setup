@@ -83,3 +83,4 @@ Clean up worktree after merge/push/discard if one exists.
 - Read actual code before commenting — never speculate.
 - Focus on spec compliance and bugs over style.
 - Never push or create PRs without explicit user choice.
+- Review stays on Sonnet for all tiers — never downgrade to Haiku for review work.

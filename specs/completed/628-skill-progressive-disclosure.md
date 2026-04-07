@@ -1,6 +1,6 @@
 # Spec: Skill Progressive Disclosure + Install Refactor
 
-> **Spec ID**: 628 | **Created**: 2026-04-06 | **Status: completed | **Complexity**: high | **Branch**: main
+> **Spec ID**: 628 | **Created**: 2026-04-06 | **Status**: completed | **Complexity**: high | **Branch**: main
 > **Related**: Spec 627 (frontmatter normalization) can land independently before or after this refactor
 
 ## Goal
@@ -26,7 +26,7 @@ Install system (`lib/setup.sh:653`) only copies `SKILL.template.md` per skill. S
 - [x] `/update` detects and syncs changed supporting files
 - [x] `bash scripts/skill-lint.sh` passes on all `templates/skills/*/SKILL.template.md` files
 - [x] `bash .claude/scripts/doctor.sh` includes skill health check and reports OK/FAIL
-- [ ] Split analyze skill still functions correctly (manual test: `/analyze`)
+- [ ] Split analyze skill still functions correctly (manual test: `/analyze`) — not verified in this review; static wiring check only
 
 ## Files to Modify
 - `lib/setup.sh` -- extend install_skills() glob + cleanup_orphans() for references/
@@ -41,3 +41,9 @@ Install system (`lib/setup.sh:653`) only copies `SKILL.template.md` per skill. S
 - CI enforcement of lint (future)
 - Splitting all 30 skills (only analyze initially)
 - research split (190 lines is within acceptable range)
+
+## Verification
+- `bash scripts/skill-lint.sh` — PASS
+- `bash .claude/scripts/doctor.sh` — PASS
+- Static wiring check — PASS: `templates/skills/analyze/` and `.claude/skills/analyze/` both contain `references/` files, and `SKILL.md` references them via `@references/...`
+- Manual `/analyze` smoke test — not run in this review

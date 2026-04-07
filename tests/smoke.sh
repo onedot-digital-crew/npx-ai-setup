@@ -314,7 +314,7 @@ fi
 
 echo ""
 echo "--- Session extract active duration ---"
-SESSION_TMP=$(mktemp -d)
+SESSION_TMP=$(mktemp -d "${TMPDIR:-/tmp}/ai-setup-test.XXXXXX")
 SESSION_PROJECT_DIR="$SESSION_TMP/projects/demo-project"
 mkdir -p "$SESSION_PROJECT_DIR"
 cat > "$SESSION_PROJECT_DIR/demo-session.jsonl" <<'EOF'
@@ -346,7 +346,7 @@ fi
 
 echo "--- Stack-aware sandbox permissions ---"
 # Simulate: write template settings.json, set framework, run customize, verify deny list
-SANDBOX_TMP=$(mktemp -d)
+SANDBOX_TMP=$(mktemp -d "${TMPDIR:-/tmp}/ai-setup-test.XXXXXX")
 cp templates/claude/settings.json "$SANDBOX_TMP/settings.json"
 
 # Verify .nuxt/** is in deny list before customization

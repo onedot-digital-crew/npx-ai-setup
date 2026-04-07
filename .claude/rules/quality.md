@@ -1,9 +1,39 @@
 # Quality Principles
 
-## Fix Strategy
+## Correctness
+- Handle edge cases: empty inputs, null/undefined, boundary values
+- Validate inputs before use; fail fast with clear error messages
+- Check return values — never silently swallow errors
+- Test actual behavior, not just the happy path
 
-Never disable or remove a feature as a first fix. Always find and fix the root cause with a targeted change.
-If tempted to disable something (e.g., `payloadExtraction: false`), stop and ask the user first.
+## Reliability
+- No race conditions: shared state must be accessed safely
+- Resources must be cleaned up (files, connections, timers, listeners)
+- Operations that can run multiple times must be idempotent
+- External calls must have timeouts and retry limits
+
+## Security
+- Never interpolate user input into SQL, shell commands, or HTML
+- Validate and sanitize all external inputs (query params, headers, uploads)
+- No secrets, tokens, or passwords in source code, logs, or error messages
+- Enforce authorization checks on every request — never trust client-provided IDs
+
+## Performance
+- No N+1 queries — batch or join instead of loops with DB calls
+- No synchronous I/O in hot paths — use async equivalents
+- No layout thrashing: do not mix DOM reads and writes in loops
+- Cache only deterministic, bounded data with an eviction strategy
+
+## Maintainability
+- Single Responsibility: each function/module does one thing
+- DRY: extract repeated logic; do not copy-paste with minor variations
+- Names reveal intent: `getUserByEmail` not `getUser`
+- Handle errors at the layer that can act on them; don't log and re-throw
+
+## Code Quality
+- No dead code, no magic numbers without named constants
+- Logic is self-explanatory or has a comment explaining *why*
+- Keep functions under ~40 lines; inject dependencies for testability
 
 ## Debugging
 
@@ -14,8 +44,6 @@ If tempted to disable something (e.g., `payloadExtraction: false`), stop and ask
 3+ failed fixes = architectural problem — question the approach, not the fix.
 
 **Investigation budget**: Max 3 diagnostic attempts per hypothesis. If no new information after 3 tries, switch strategy or ask the user. Never repeat the same approach with minor variations.
-
-**Diagnose → Fix gate**: Once the root cause is confirmed, immediately switch to implementing a fix. Do not continue diagnosing or re-confirming with additional grep/curl/read cycles. Max 2 confirmation rounds, then act.
 
 **Systematic phases**: Root Cause → Pattern Analysis → Hypothesis (specific, falsifiable) → Implement.
 Treat your own code as foreign. Your mental model is a guess — the code's behavior is truth.

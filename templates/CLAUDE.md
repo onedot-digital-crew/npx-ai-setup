@@ -43,6 +43,7 @@ Use WebFetch only when defuddle is unavailable or the page requires JavaScript r
 ## Session Hygiene
 
 Auto-compact at 80%. One task per conversation — prevents context bleed.
+If a session crosses `>30` tool calls with no subagents, reconsider whether delegation would be more efficient.
 
 ## Build Artifact Rules
 

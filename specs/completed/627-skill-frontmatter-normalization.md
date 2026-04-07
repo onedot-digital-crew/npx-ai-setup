@@ -1,6 +1,6 @@
 # Spec: Skill Frontmatter Normalization
 
-> **Spec ID**: 627 | **Created**: 2026-04-06 | **Status: completed | **Complexity**: medium | **Branch**: main
+> **Spec ID**: 627 | **Created**: 2026-04-06 | **Status**: completed | **Complexity**: medium | **Branch**: main
 
 ## Goal
 Normalize all 30 skill template frontmatter fields to match Claude Code docs best practices.

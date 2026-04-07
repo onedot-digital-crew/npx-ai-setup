@@ -78,15 +78,15 @@ skill-creator-workspace/
 .claude/plans/
 .claude/tmp/
 .claude/transcripts/
-
-# ── Large project directories (read explicitly when needed) ───────────────────
 specs/
 templates/
 CHANGELOG.md
-.claude/*.log
-.claude/logs/
 30/
 tmp/
+
+# ── Claude Code log files ──────────────────────────────────────────────────────
+.claude/*.log
+.claude/logs/
 
 # ── Local reports & scratch files ─────────────────────────────────────────────
 *.tmp

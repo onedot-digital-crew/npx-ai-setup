@@ -18,3 +18,5 @@ scripts/storyblok-dump.json
 .codex/skills
 .gemini/agents
 .opencode/skills
+.claude/session-state.json
+__pycache__/

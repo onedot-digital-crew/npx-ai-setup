@@ -6,19 +6,16 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 
 | After this... | Suggest |
 |---------------|---------|
-| Code changes (edit/write) | 🧪 `/test` — Tests laufen lassen |
-| `/test` passes | 🔍 `/review` — Changes reviewen |
-| `/review` passes | 📦 `/commit` — Stagen + committen |
-| `/commit` done | 📤 `gh pr create` auf Feature-Branches, oder `/release` auf `main` / `master` |
-| Bug investigation | 🐛 `/debug` falls noch nicht geladen |
-| Multi-file changes (3+ files, incl. config/rules) | 📋 `/spec` — erst planen, dann bauen |
-| Spec created (draft) | ✅ `/spec-validate NNN` — Draft prüfen, oder ⚡ `/spec-run NNN` — validate, implement, review, commit |
-| `/spec-validate` passes | ⚡ `/spec-run NNN` — validate, implement, review, commit in einem Durchlauf |
-| `/spec-work NNN` done | ☑️ `/spec-review NNN` — Acceptance Criteria prüfen, dann `/commit` |
-| Session start + `.continue-here.md` exists | ▶️ `/resume` — State wiederherstellen |
-| Session >30 tool calls | 💡 `/reflect` — Learnings sichern, dann `/pause` |
-| Build failure | 🔧 `/build-fix` — iterativ fixen |
-| Pre-release | 🏷️ `/release` — Version bump, CHANGELOG, Tag |
+| Code changes (edit/write) | `/test` — Tests laufen lassen |
+| `/test` passes | `/review` — Changes reviewen |
+| `/review` passes | `/commit` — Stagen + committen |
+| `/commit` done | `/pr` auf Feature-Branches, oder `/release` auf `main` / `master` |
+| Bug investigation | `/debug` falls noch nicht geladen |
+| Multi-file changes (3+ files, incl. config/rules) | `/spec` — erst planen, dann bauen |
+| Session start + `.continue-here.md` exists | `/resume` — State wiederherstellen |
+| Session >30 tool calls | `/reflect` — Learnings sichern, dann `/pause` |
+| Build failure | `/build-fix` — iterativ fixen |
+| Pre-release | `/release` — Version bump, CHANGELOG, Tag |
 
 ## When to Auto-Invoke Skills
 
@@ -38,7 +35,7 @@ Claude SHOULD NOT auto-invoke without user intent:
 After completing a step, append one line:
 
 ```
-> [emoji] Naechster Schritt: `/command` — kurze Beschreibung
+> Naechster Schritt: `/command` — kurze Beschreibung
 ```
 
 Do not stack multiple hints. Pick the single most relevant next action.

@@ -2,13 +2,19 @@
 
 ## CRITICAL: Model Routing
 
-Always set `model:` when spawning subagents. Sonnet is the default for implementation subagents — Haiku only for read-only explore agents. Routing table: see global CLAUDE.md "Model Routing" section.
+Always set `model:` when spawning subagents. Haiku costs 12× less than Sonnet — use it for all search and explore work.
 
-Before spawning: Can Haiku handle this? If yes, use Haiku. Sonnet is the scarcest budget.
-Prefer direct Glob/Grep/Read over agent spawns when < 3 tool calls needed.
-Threshold: spawn agents only for tasks requiring ≥3 distinct tool calls AND write operations or code generation. Read-only exploration → no agent, use tools directly.
-Escalation rule: if you have already made 8 tool calls and the task is not yet complete, check whether remaining work splits into independent tracks — if yes, delegate at least one bounded Haiku subagent instead of continuing serially.
-Re-check rule: if you have already crossed >30 tool calls with no subagents, pause and explicitly decide whether the remaining work can be parallelized.
+| Model | Use for |
+|-------|---------|
+| `haiku` | **CRITICAL** — ALL Explore agents, file search, codebase questions, simple research |
+| `sonnet` | Implementation, code generation, test writing |
+| `opus` | Architecture review, complex analysis, spec creation |
+
+Never spawn an Explore or search agent without `model: haiku`.
+
+## Agent Dispatch
+
+Full trigger/model table: see `.claude/docs/agent-dispatch.md`.
 
 ## Agent Selection
 
@@ -18,9 +24,13 @@ Each agent file contains `## When to Use` and `## Avoid If` sections. Read these
 - Match the task against `When to Use` bullet points — all conditions should broadly apply
 - Check `Avoid If` first — if any condition matches, pick a different agent
 - When two agents seem applicable, `Avoid If` sections will indicate which one to defer to
-- Never spawn an agent if the task has fewer than 3 tool calls worth of work
+- Threshold: spawn agents only for tasks requiring ≥3 distinct tool calls
 - Never let subagents inherit your session context — construct exactly what they need in the prompt
+- Escalation rule: if you've already made 8 tool calls on a task with no subagents, consider parallelizing the remaining work
+
+## Hallucination Prevention
+
 - Never invent or guess file paths — verify with Glob/Grep before referencing
+- Never assume import paths, function names, or API routes exist — read the file first
+- When reporting issues, be specific: "Edge at index 14 references non-existent target `file:src/missing.ts`" — not generic descriptions
 - If an agent reports a file path or symbol, verify it exists before acting on the report
-- claude-mem observations may reference worktree files never merged to main — always verify paths exist before acting on them
-- Skills with `disable-model-invocation: true` but no `model:` on agent spawns inherit the parent session model — in Opus sessions this costs 5× too much; always set `model:` explicitly on every agent spawn

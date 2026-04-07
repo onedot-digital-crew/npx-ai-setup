@@ -67,13 +67,13 @@ RTK hooks are activated via `rtk init --global` (runs during setup). They transp
 Hooks in `.claude/hooks/` intercept tool calls:
 
 - `cli-health.sh` — warns at session start if rtk/defuddle are missing and distinguishes RTK hook issues from RTK DB/permission failures
-- `protect-files.sh` — blocks risky edits to protected paths during edit flows
+- `protect-files.sh` — blocks reads of .env, lock files, build output
 - `circuit-breaker.sh` — stops after 8 edits to the same file in 10 minutes
-- `context-monitor.sh` — warns at 35% remaining context on write-oriented tool flows, ahead of the configured auto-compact target (~32% remaining)
+- `context-monitor.sh` — warns at 35% remaining context on write-oriented tool flows
 
 ## Layer 4: Deny Patterns
 
-`settings.json` blocks wasteful reads: `dist/`, `node_modules/`, `*.min.js`, `package-lock.json`, `.env*`. These are hard blocks — Claude cannot bypass them. This is the real enforcement layer for read protection; hooks only warn or guard narrower edit-time actions.
+`settings.json` blocks wasteful reads: `dist/`, `node_modules/`, `*.min.js`, `package-lock.json`, `.env*`. These are hard blocks — Claude cannot bypass them.
 
 ## Layer 5: Model Routing
 

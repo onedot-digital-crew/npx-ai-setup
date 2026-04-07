@@ -39,3 +39,28 @@ Only mock: network calls, external services, file system side effects, time-depe
 Mock at module level (where imported, not where defined). Test > 1s = likely unmocked I/O.
 Before mocking: understand what the dependency actually does. A mock that doesn't reflect reality is a lie — tests pass against the lie, then fail against reality.
 
+## Assertions
+
+Assert specific values, not truthiness: `expect(result).toBe(42)` over `expect(result).toBeTruthy()`.
+Every function must cover: empty input, null/undefined, boundary values, and error paths.
+
+## Isolation
+
+Each test is fully independent — no shared mutable state. Reset side effects in `afterEach`/`teardown`.
+Replace `sleep`/`setTimeout` with polling for the actual condition:
+```
+# Bad: await sleep(500); result = get_result()
+# Good: result = await wait_for(lambda: get_result() is not None, timeout=5.0)
+```
+
+## Test Naming
+
+Descriptive names: `it("returns null when user ID does not exist")` not `it("works correctly")`.
+
+## Anti-Patterns
+
+- **Dependent tests** — each test must pass independently in any order
+- **Testing implementation** — assert outputs, not that specific mocks were called
+- **Incomplete mocks** — mocks must mirror the complete real API, not just fields you think you need
+- **Unmocked env dependencies** — external tools/binaries must be mocked in unit tests; they won't exist in CI
+- **Test-only methods in production** — never add methods to production classes purely for test access

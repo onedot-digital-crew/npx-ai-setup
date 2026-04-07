@@ -2,6 +2,7 @@
 name: reflect
 description: "Analyze the current session for corrections, architectural discoveries, and stack decisions — convert them into permanent learnings."
 model: sonnet
+disable-model-invocation: true
 mode: plan
 allowed-tools: Read, Write, Edit, Glob, AskUserQuestion, mcp__plugin_claude-mem_mcp-search__save_memory
 ---

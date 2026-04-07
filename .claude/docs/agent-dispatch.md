@@ -23,18 +23,18 @@ Use agents for focused, isolated work. Call them directly — do not ask the use
 | shopware-reviewer | After PHP/Twig changes in Shopware projects | haiku | boilerplate |
 | storyblok-reviewer | After Storyblok component schema or Vue integration changes | haiku | boilerplate |
 
-## Agent Scopes
-
-- **universal**: Installed globally (~/.claude/agents/) and per-project. Available everywhere.
-- **conditional**: Installed per-project only when stack matches (e.g. frontend framework detected).
-- **boilerplate**: Installed from stack-specific boilerplate repos (e.g. sp-shopify-boilerplate).
-
 ## When NOT to Delegate
 
 - Single-file reads or searches — use Read/Glob/Grep directly
 - Trivial fixes (typos, config tweaks) — faster to do inline
 - Tasks requiring fewer than 3 tool calls — agent startup overhead exceeds the work
 - Follow-up edits after a review — apply fixes yourself, do not re-delegate
+
+## Agent Scopes
+
+- **universal**: Installed globally (~/.claude/agents/) and per-project. Available everywhere.
+- **conditional**: Installed per-project only when stack matches (e.g. frontend framework detected).
+- **boilerplate**: Installed from stack-specific boilerplate repos (e.g. sp-shopify-boilerplate).
 
 ## Scope Limits
 

@@ -192,6 +192,18 @@ write_metadata() {
       cs=$(compute_checksum "$_target")
       json=$(echo "$json" | _json_set_file "$_target" "$cs")
     done < <(find .claude/skills -name "SKILL.md" -print0 | sort -z)
+
+    while IFS= read -r -d '' _ref; do
+      local _target="${_ref#./}"
+      local _sname
+      local _rname
+      _sname=$(echo "$_target" | sed 's|.claude/skills/\([^/]*\)/references/.*|\1|')
+      _rname="${_target##*/}"
+      [ -f "$SCRIPT_DIR/templates/skills/$_sname/references/$_rname" ] || continue
+      local cs
+      cs=$(compute_checksum "$_target")
+      json=$(echo "$json" | _json_set_file "$_target" "$cs")
+    done < <(find .claude/skills -path "*/references/*.md" -print0 | sort -z)
   fi
 
   echo "$json" > .ai-setup.json
@@ -219,6 +231,14 @@ is_current_managed_target() {
     local _skill_name
     _skill_name=$(echo "$target" | sed 's|.claude/skills/\([^/]*\)/SKILL.md|\1|')
     [ -f "$SCRIPT_DIR/templates/skills/$_skill_name/SKILL.template.md" ] && return 0
+  fi
+
+  if [[ "$target" == .claude/skills/*/references/*.md ]]; then
+    local _skill_name
+    local _ref_name
+    _skill_name=$(echo "$target" | sed 's|.claude/skills/\([^/]*\)/references/.*|\1|')
+    _ref_name="${target##*/}"
+    [ -f "$SCRIPT_DIR/templates/skills/$_skill_name/references/$_ref_name" ] && return 0
   fi
 
   return 1

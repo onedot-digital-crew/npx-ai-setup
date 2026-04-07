@@ -9,27 +9,30 @@ Before creating a new file, check if one already exists:
 - Run `ls` or Glob to find existing files matching the concept
 - Run `git ls-files` to see tracked files that may not be visible
 
-## Verify, Don't Fabricate
+## Verify, Don't Guess
+Never assume import paths, function names, or API routes. Verify by reading the relevant file.
 Never fabricate configuration formats or assume config file schemas exist — check docs or existing examples first.
-
-## Verify Existence Before Claiming Absence
-Before stating something is missing (an API tool, a hook, a config), search thoroughly (Glob + Grep, min 2 attempts with different patterns). Only report absence after confirming it.
+When unsure about current state, run `git diff` to see what has actually changed this session.
 
 ## Human Approval Gates
 Before finalizing any deliverable, present a summary and ask for confirmation.
 Never proceed to the next workflow phase without explicit user approval.
+
+## Skill-First
+Before implementing anything manually, check installed skills:
+1. Run `ls .claude/skills/` to list available skills
+2. If a skill matches the task, invoke it via the `Skill` tool — do not reimplement
+3. If no skill matches, ask the user before proceeding with manual implementation
+
+This applies everywhere: direct chat, spec steps, and delegated agents.
 
 ## Web Fetching
 Prefer `defuddle parse <url> --md` over WebFetch for reading web pages — it strips navigation and clutter, saving ~80% tokens.
 Alternative: prepend `https://markdown.new/` to any URL for instant markdown conversion without a CLI.
 Use WebFetch only when defuddle is unavailable or the page requires JavaScript rendering.
 
-## Research & Spec Gate
-Before /research creates specs: validate candidates against CONCEPT.md and project philosophy first — 3 of 4 specs in one session were cancelled post-creation for violating existing decisions.
-Before creating a spec from session-optimize findings: verify the finding still applies by reading the current file state — findings may describe issues already fixed.
-
 ## Destructive Operations
-Before confirming deletion, revert, or disable operations as "correct behavior", trace through the actual code path that would be affected. Show the specific lines, not just reasoning.
+Before confirming deletion, revert, or disable operations as "correct behavior", trace through the actual code path that would be affected. Show the specific lines, not just reasoning. Past pattern: Claude confirmed destructive behavior as correct twice before users found the real bug.
 
 ## Sandbox Safety
 Never set `dangerouslyDisableSandbox: true` on a Bash tool call without first:

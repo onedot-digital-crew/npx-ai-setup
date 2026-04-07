@@ -7,6 +7,8 @@
 # Requirements: claude CLI (for haiku summarization)
 # Token cost: ~500 tokens per invocation (haiku summarization)
 
+set -euo pipefail
+
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MEMORY_DIR="$PROJECT_DIR/.agents/memory"
 TRANSCRIPT_FILE="${CLAUDE_TRANSCRIPT:-}"
@@ -14,13 +16,12 @@ SETTINGS_FILE="$PROJECT_DIR/.claude/settings.json"
 CLAUDE_MEM_PLUGIN_DIR="${HOME}/.claude/plugins/cache/thedotmack/claude-mem"
 MAX_MEMORY_FILES=50
 MAX_MEMORY_SIZE_KB=200
-API_TIMEOUT=15
 
-# Guard: claude CLI must exist
-command -v claude >/dev/null 2>&1 || exit 0
-
-# Preflight: test API reachability with minimal prompt (10s max)
-echo "ping" | timeout 10 claude -p --model haiku --output-format text >/dev/null 2>&1 || exit 0
+# Guard: only run for substantial sessions
+message_count="${CLAUDE_MESSAGE_COUNT:-0}"
+if [ "$message_count" -lt 10 ]; then
+  exit 0
+fi
 
 # Guard: need transcript data
 if [ -z "$TRANSCRIPT_FILE" ] || [ ! -f "$TRANSCRIPT_FILE" ]; then
@@ -60,7 +61,7 @@ Rules:
 Transcript (last portion):
 $TRANSCRIPT"
 
-LEARNINGS=$(echo "$PROMPT" | timeout "$API_TIMEOUT" claude -p --model haiku --output-format text 2>/dev/null) || exit 0
+LEARNINGS=$(echo "$PROMPT" | claude -p --model haiku --output-format text 2>/dev/null) || exit 0
 
 # Skip if nothing useful
 if [ "$LEARNINGS" = "NONE" ] || [ -z "$LEARNINGS" ]; then
@@ -118,7 +119,7 @@ claude_mem_available() {
 
 # Try claude-mem first when the supported plugin install path is present.
 if command -v claude >/dev/null 2>&1 && claude_mem_available; then
-  echo "$LEARNINGS" | timeout "$API_TIMEOUT" claude -p --model haiku --output-format text \
+  echo "$LEARNINGS" | claude -p --model haiku --output-format text \
     "Save these session learnings to claude-mem. Use the save_memory MCP tool with type 'session-learning' and today's date $DATE. Content: $LEARNINGS" 2>/dev/null && exit 0
 fi
 

@@ -173,10 +173,14 @@ fi
 
 # 9. Skills directory
 if [ -d ".claude/skills" ]; then
-  skills_list="$(find .claude/skills -name "*.md" 2>/dev/null)"
-  count="$(printf '%s\n' "$skills_list" | grep -c '.' 2>/dev/null || echo 0)"
+  count="$(find .claude/skills -name "SKILL.md" 2>/dev/null | wc -l | tr -d ' ')"
+  ref_count="$(find .claude/skills -path "*/references/*.md" 2>/dev/null | wc -l | tr -d ' ')"
   if [ "$count" -gt 0 ]; then
-    add_row "$PASS" "Skills"              "${count} skill(s) installed"
+    if [ "$ref_count" -gt 0 ]; then
+      add_row "$PASS" "Skills"              "${count} skill(s) installed, ${ref_count} reference file(s)"
+    else
+      add_row "$PASS" "Skills"              "${count} skill(s) installed"
+    fi
   else
     add_row "$WARN" "Skills"              "No skills found in .claude/skills/"
   fi
@@ -210,6 +214,31 @@ if [ -d ".claude/skills" ]; then
     add_row "$PASS" "Skills YAML"          "All skill frontmatter valid"
   else
     add_row "$FAIL" "Skills YAML"          "${yaml_errors} issue(s): ${yaml_details}"
+  fi
+fi
+
+# 10b. Skills reference file integrity
+if [ -d ".claude/skills" ]; then
+  ref_errors=0
+  ref_details=""
+  while IFS= read -r skill_file; do
+    [ -z "$skill_file" ] && continue
+    skill_dir="$(dirname "$skill_file")"
+    skill_name="$(basename "$skill_dir")"
+    # Find @references/ links in SKILL.md
+    while IFS= read -r ref_path; do
+      [ -z "$ref_path" ] && continue
+      full_path="${skill_dir}/references/${ref_path}"
+      if [ ! -f "$full_path" ]; then
+        ref_errors=$((ref_errors + 1))
+        ref_details="${ref_details}${skill_name}/${ref_path} "
+      fi
+    done < <(grep -oE '@references/[A-Za-z0-9_./-]+' "$skill_file" 2>/dev/null | sed 's|^@references/||' || true)
+  done < <(find .claude/skills -name "SKILL.md" 2>/dev/null)
+  if [ "$ref_errors" -eq 0 ]; then
+    add_row "$PASS" "Skill refs"           "All skill reference files present"
+  else
+    add_row "$FAIL" "Skill refs"           "${ref_errors} missing: ${ref_details}"
   fi
 fi
 

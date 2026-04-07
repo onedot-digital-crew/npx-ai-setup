@@ -1,10 +1,3 @@
----
-paths:
-  - "**/.git*"
-  - "**/COMMIT_EDITMSG"
-  - "**/*.md"
----
-
 # Git Rules
 
 ## Commit Message Format
