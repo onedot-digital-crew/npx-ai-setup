@@ -3,6 +3,14 @@ name: spec-work
 description: "Execute a single spec step by step."
 model: sonnet
 argument-hint: "<NNN spec number>"
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - Agent
 ---
 
 Executes spec $ARGUMENTS step by step and verifies acceptance criteria.

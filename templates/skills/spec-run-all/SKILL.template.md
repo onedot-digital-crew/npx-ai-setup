@@ -3,6 +3,12 @@ name: spec-run-all
 description: "Run full pipeline for all draft specs in parallel."
 model: sonnet
 disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Edit
+  - Glob
+  - Bash
+  - Agent
 ---
 
 # Spec Run All — Full Pipeline for All Draft Specs

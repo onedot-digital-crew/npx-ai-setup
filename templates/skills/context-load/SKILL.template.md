@@ -2,6 +2,9 @@
 name: context-load
 description: "Load context files on demand — STACK.md, ARCHITECTURE.md, CONVENTIONS.md, decisions.md."
 argument-hint: "[STACK.md|ARCHITECTURE.md|CONVENTIONS.md|all|file#section]"
+allowed-tools:
+  - Read
+  - Glob
 ---
 
 # Context Load — On-Demand L2 Context

@@ -4,6 +4,10 @@ description: "Validate a draft spec before execution."
 effort: low
 model: haiku
 argument-hint: "<NNN spec number>"
+allowed-tools:
+  - Read
+  - Glob
+  - Bash
 ---
 
 Validates spec $ARGUMENTS against 10 quality metrics. Run before `/spec-work` to catch weak specs early.

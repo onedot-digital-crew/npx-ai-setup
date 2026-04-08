@@ -4,6 +4,14 @@ description: "Create a new spec for a task."
 effort: high
 model: opus
 argument-hint: "<task description>"
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Bash
+  - AskUserQuestion
+  - Agent
 ---
 
 Creates a structured spec for the task: $ARGUMENTS. Use before implementing any multi-file or architectural change.

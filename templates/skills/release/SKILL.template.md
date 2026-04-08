@@ -2,6 +2,12 @@
 name: release
 description: "Complete release workflow — version bump, CHANGELOG, Slack."
 disable-model-invocation: true
+model: sonnet
+allowed-tools:
+  - Read
+  - Edit
+  - Bash
+  - AskUserQuestion
 ---
 
 # Release — Version Bump, Changelog, Slack Message

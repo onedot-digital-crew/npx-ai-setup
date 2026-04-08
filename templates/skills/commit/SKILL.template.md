@@ -3,7 +3,11 @@ name: commit
 description: Stages changes and creates a conventional commit message. Uses `commit-prep.sh` to collect diff context before Claude generates the message — focused input, fewer tokens.
 model: haiku
 disable-model-invocation: true
-allowed-tools: Read, Bash, Glob, Grep
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Grep
 ---
 
 Stages changes and creates a conventional commit message. Uses `commit-prep.sh` to collect diff context before Claude generates the message — focused input, fewer tokens.

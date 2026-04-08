@@ -1,6 +1,12 @@
 ---
 name: spec-board
 description: "Overview of all specs as Kanban board."
+model: haiku
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - AskUserQuestion
 ---
 
 Displays a Kanban board of active specs plus only the latest 10 completed specs. Use for an overview of the current spec pipeline without scanning the full completed archive.

@@ -3,7 +3,13 @@ name: pause
 description: "Captures session state into `.continue-here.md` plus `.claude/session-state.json` and commits the Markdown handoff. Run before ending a session."
 model: haiku
 disable-model-invocation: true
-allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+  - AskUserQuestion
 ---
 
 Captures current session state into `.continue-here.md` and `.claude/session-state.json`, then commits the Markdown handoff as a WIP checkpoint. Run before ending a session.

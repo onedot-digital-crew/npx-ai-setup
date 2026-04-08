@@ -2,6 +2,14 @@
 name: explore
 description: "Read-only thinking partner before committing to a spec."
 effort: low
+model: sonnet
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - WebFetch
+  - WebSearch
 ---
 
 # Explore — Read-Only Thinking Partner

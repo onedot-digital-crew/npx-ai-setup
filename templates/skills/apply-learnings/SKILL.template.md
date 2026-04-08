@@ -2,7 +2,11 @@
 name: apply-learnings
 description: Applies pending learnings from LEARNINGS.md into the correct project context files. Marks applied entries so they are not processed again.
 model: sonnet
-allowed-tools: Read, Edit, Glob, Grep
+allowed-tools:
+  - Read
+  - Edit
+  - Glob
+  - Grep
 ---
 
 Liest `.agents/context/LEARNINGS.md` und überträgt jeden unerledigten Eintrag in die passende Zieldatei. LEARNINGS.md bleibt als Audit-Log erhalten — erledigte Einträge werden markiert.

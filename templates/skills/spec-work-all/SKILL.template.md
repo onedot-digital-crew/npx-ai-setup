@@ -2,6 +2,13 @@
 name: spec-work-all
 description: "Execute all draft specs in parallel using isolated worktrees."
 disable-model-invocation: true
+model: sonnet
+allowed-tools:
+  - Read
+  - Edit
+  - Glob
+  - Bash
+  - Agent
 ---
 
 # Spec Work All — Batch Execute Draft Specs

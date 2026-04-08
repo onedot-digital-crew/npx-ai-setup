@@ -3,7 +3,11 @@ name: architectural-decisions
 description: "ALWAYS use this skill when asked WHY something is built a certain way, why a specific technology was chosen, or why an architectural approach was taken."
 user-invocable: false
 effort: low
-allowed-tools: Read, Glob, Grep, Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Architectural Decisions

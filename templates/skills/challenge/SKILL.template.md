@@ -4,7 +4,10 @@ description: "Challenge and critically evaluate this feature idea before any imp
 effort: high
 model: sonnet
 argument-hint: "<feature idea or description>"
-allowed-tools: Read, Glob, Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 Challenge and critically evaluate this feature idea before any implementation: **$ARGUMENTS**

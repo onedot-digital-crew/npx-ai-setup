@@ -2,6 +2,15 @@
 name: spec-review
 description: "Review a completed spec after implementation."
 argument-hint: "<NNN spec number>"
+model: sonnet
+allowed-tools:
+  - Read
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - Agent
+  - AskUserQuestion
 ---
 
 Reviews spec $ARGUMENTS and its code changes against acceptance criteria. Use after spec-work to validate and close.

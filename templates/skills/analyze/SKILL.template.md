@@ -3,7 +3,12 @@ name: analyze
 description: Produces a structured codebase overview via parallel agents. Use when exploring or preparing for major changes.
 effort: high
 model: sonnet
-allowed-tools: Read, Glob, Grep, Bash, Agent
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - Agent
 ---
 
 Produces a structured codebase overview via parallel agents. Use when exploring or preparing for major changes.

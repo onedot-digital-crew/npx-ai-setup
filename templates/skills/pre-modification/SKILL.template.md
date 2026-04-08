@@ -2,6 +2,12 @@
 name: pre-modification
 description: "ALWAYS run this BEFORE modifying, refactoring, or restructuring existing code across multiple files or introducing new architectural layers."
 user-invocable: false
+model: sonnet
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Agent
 ---
 
 # Pre-Modification Risk Assessment

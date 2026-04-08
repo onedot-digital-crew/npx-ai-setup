@@ -1,11 +1,18 @@
 ---
 name: research
-description: "Deep-researches an external repository, tool, or pattern against the existing project's Claude Code setup. Produces a comprehensive brainstorm document with prioritized adoption candidates."
+description: "Deep-researches an external repository, tool, or pattern. Produces a brainstorm document with prioritized adoption candidates."
 effort: high
 model: opus
-mode: plan
 argument-hint: "<github-url or article-url>"
-allowed-tools: Read, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - WebFetch
+  - WebSearch
+  - AskUserQuestion
+  - Agent
+  - Bash
 ---
 
 Deep-researches an external repository, tool, or pattern against the existing project's Claude Code setup. Produces a comprehensive brainstorm document with prioritized adoption candidates. Input: $ARGUMENTS
