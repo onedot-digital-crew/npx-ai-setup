@@ -36,10 +36,20 @@ detect_test_cmd() {
       echo "npx jest"
       return
     fi
+
+    # Fallback: check for installed vitest/playwright in node_modules
+    if [[ -d "node_modules/vitest" ]]; then
+      echo "npx vitest run"
+      return
+    fi
+    if [[ -d "node_modules/@playwright/test" ]] || [[ -d "node_modules/playwright" ]]; then
+      echo "npx playwright test"
+      return
+    fi
   fi
 
   # Python: pytest preferred, then unittest
-  if [[ -f "pytest.ini" ]] || [[ -f "pyproject.toml" ]] || [[ -f "setup.cfg" ]] || [[ -d "tests" ]]; then
+  if [[ -f "pytest.ini" ]] || [[ -f "pyproject.toml" ]] || [[ -f "setup.cfg" ]] || { [[ -d "tests" ]] && ls tests/*.py 2>/dev/null | head -1 | grep -q .; }; then
     if has pytest; then
       echo "pytest"
       return

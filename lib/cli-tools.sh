@@ -16,6 +16,7 @@ CLI_TOOL_REGISTRY=(
   "jq:brew:jq:required:JSON processor (used internally by setup scripts)"
   "gh:brew:gh:required:GitHub CLI (used by /ci, /pr, /review skills)"
   "delta:brew:git-delta:required:Enhanced git diff output for Claude context"
+  "playwright-cli:npm:@playwright/cli:required:Microsoft Playwright CLI for token-efficient browser automation"
   "codex:npm:@openai/codex:optional:OpenAI Codex CLI (needs OPENAI_API_KEY)"
   "gemini:npm:@google/gemini-cli:optional:Google Gemini CLI (needs GEMINI_API_KEY)"
 )
@@ -111,6 +112,9 @@ _smoke_test() {
       ;;
     agent-browser)
       agent-browser --version &>/dev/null 2>&1
+      ;;
+    playwright-cli)
+      playwright-cli --version &>/dev/null 2>&1
       ;;
     jq)
       echo '{}' | jq . &>/dev/null 2>&1
@@ -213,6 +217,21 @@ install_cli_tools() {
           tui_spinner_stop ok "Chrome for Testing ready"
         else
           tui_spinner_stop warn "Chrome for Testing skipped (non-fatal)"
+        fi
+      fi
+      # Post-install: playwright-cli needs browser binaries + Claude Code skill
+      if [ "$name" = "playwright-cli" ] && command -v playwright-cli &>/dev/null; then
+        tui_spinner_start "Downloading Playwright browser binaries"
+        if playwright-cli install --browser chromium &>/dev/null; then
+          tui_spinner_stop ok "Playwright Chromium ready"
+        else
+          tui_spinner_stop warn "Playwright browser install skipped (non-fatal)"
+        fi
+        tui_spinner_start "Installing playwright-cli Claude Code skill"
+        if playwright-cli install --skills &>/dev/null; then
+          tui_spinner_stop ok "playwright-cli skill installed"
+        else
+          tui_spinner_stop warn "playwright-cli skill install skipped (non-fatal)"
         fi
       fi
     else
