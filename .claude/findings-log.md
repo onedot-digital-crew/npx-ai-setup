@@ -7,6 +7,11 @@
 
 <!-- Add new findings here after each /session-optimize run -->
 <!-- Format: - [ ] [Category] Title — Fix applied: `file:line` or Spec NNN -->
+- [ ] [E] ai-setup v2.0.8 im Projekt, Repo v2.1.0 — `/update` im Zielprojekt ausführen (2026-04-09)
+- [ ] [T] research/SKILL.md 7.9KB/190 Zeilen → trimmen auf <80 Zeilen (2026-04-09)
+- [ ] [T] analyze/SKILL.md 5.6KB/182 Zeilen → trimmen auf <90 Zeilen (2026-04-09)
+- [ ] [Q] quality.md: bash -n Regel + Diagnose-Budget auf 2 reduziert — quality.md:46 (2026-04-09)
+- [ ] [E] templates/rules/agents.md: >8 Tool-Calls-Schwellenwert quantifizieren für Parallelisierungs-Trigger (2026-04-09)
 - [x] [T] session-optimize/SKILL.md 11.8KB/175 Zeilen → getrimmt auf ~95 Zeilen (2026-04-04)
 - [x] [T] spec-work/SKILL.md 6.7KB → 2.9KB (57% Reduktion) — Routing-Refactor-Bloat entfernt (2026-04-05)
 - [x] [E] debug-prep.sh erstellt — Debugging = Top-Task-Typ, Bash dominiert mit 1187 Calls (2026-04-05)

@@ -43,7 +43,9 @@
 3. One-liner minimal targeted fix only.
 3+ failed fixes = architectural problem — question the approach, not the fix.
 
-**Investigation budget**: Max 3 diagnostic attempts per hypothesis. If no new information after 3 tries, switch strategy or ask the user. Never repeat the same approach with minor variations.
+**Investigation budget**: Max 2 diagnostic attempts per hypothesis. If no new information after 2 tries, switch strategy or ask the user. Never repeat the same approach with minor variations.
+
+**Shell scripts**: Run `bash -n <file>` before staging. Silent syntax errors cause hook failures.
 
 **Systematic phases**: Root Cause → Pattern Analysis → Hypothesis (specific, falsifiable) → Implement.
 Treat your own code as foreign. Your mental model is a guess — the code's behavior is truth.
