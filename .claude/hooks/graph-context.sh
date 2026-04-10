@@ -16,13 +16,14 @@ FILE_PATH="${CLAUDE_TOOL_INPUT_FILE_PATH:-}"
 
 # Make relative to project root
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
-REL_PATH=$(python3 -c "
+REL_PATH=$(python3 - "$FILE_PATH" "$PROJECT_DIR" <<'PYEOF'
 import os, sys
 try:
-    print(os.path.relpath('$FILE_PATH', '$PROJECT_DIR'))
+    print(os.path.relpath(sys.argv[1], sys.argv[2]))
 except Exception:
     print('')
-" 2>/dev/null || true)
+PYEOF
+2>/dev/null || true)
 
 [ -z "$REL_PATH" ] && exit 0
 # Skip if path starts with ../ (outside project)
