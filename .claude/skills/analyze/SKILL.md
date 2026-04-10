@@ -36,7 +36,17 @@ Agent prompts: `@references/agents-batch-mode.md`
 ## Hotspots
 ## Risks
 ## Recommendations (3-5 actionable)
+## Suggested Questions (3-5 investigation threads)
 ```
+
+After Recommendations, include 3–5 follow-up questions targeting structural weaknesses found during analysis. Tailor questions to what was actually observed:
+- **Hub overload**: "Why is `<file>` the most-imported module — is an abstraction boundary missing?"
+- **Isolated module**: "Who is the only consumer of `<module>` — could it be inlined or removed?"
+- **Fragile dependency**: "What breaks if `<file>` changes — are callers decoupled enough?"
+- **Circular dependency** (if found): "Can the circular dependency between `<A>` and `<B>` be broken?"
+- **Unclear ownership**: "Which domain or team owns `<component>` — is responsibility documented?"
+
+Only include questions for patterns actually found. Skip any that are not relevant to this codebase.
 
 ### 4. Persist artifacts
 

@@ -23,7 +23,16 @@ Scans recently changed files for tech debt and fixes safe wins. Use at end of se
    - Unused imports
    - TODO/FIXME/HACK comments that could be resolved now
    - Inconsistent patterns compared to the rest of the codebase
-3. **Report findings** grouped by category with file paths and line numbers.
+3. **Report findings** grouped by category with confidence levels, file paths, and line numbers. Use this format:
+   ```
+   [HIGH] Dead export `fooBar` in api/utils.ts:45 — 0 callers found
+   [MED]  Duplicated block (8 lines) in auth.ts:23 and middleware.ts:91
+   [LOW]  TODO in config.ts:12 — unresolved, low risk
+   ```
+   Confidence levels:
+   - **[HIGH]**: Verifiable via static analysis (unused exports with 0 grep hits, exact duplicate literals)
+   - **[MED]**: Likely but may have dynamic or test-only usage — verify before removing
+   - **[LOW]**: Pattern heuristic (old TODOs, style inconsistencies) — report only, do not auto-fix
 4. **Fix clear wins only**: Remove unused imports, delete dead exports, consolidate obvious duplicates. Leave anything ambiguous for the user.
 
 5. **Verify fixes**: Spawn `verify-app` via Agent tool (`model: haiku`) with the prompt:
