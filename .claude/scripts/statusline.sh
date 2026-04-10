@@ -137,6 +137,14 @@ else
     pct_used=0
 fi
 
+# Write bridge file for context-monitor.sh PostToolUse hook
+_session_id=$(echo "$input" | jq -r '.session_id // ""' 2>/dev/null | tr -cd 'a-zA-Z0-9_-')
+if [ -n "$_session_id" ]; then
+    printf '{"timestamp":%s,"remaining_percentage":%s}\n' \
+        "$(date +%s)" "$(( 100 - pct_used ))" \
+        > "/tmp/claude-ctx-${_session_id}.json" 2>/dev/null || true
+fi
+
 effort="default"
 settings_path="$HOME/.claude/settings.json"
 if [ -f "$settings_path" ]; then
