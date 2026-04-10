@@ -5,7 +5,7 @@ SessionStart injects L0 abstracts from `.agents/context/` (~400 tokens).
 For full details: `/context-load STACK.md` (or ARCHITECTURE.md, CONVENTIONS.md, all).
 
 ## CLI Shortcuts (zero tokens)
-- CI status: `! gh pr checks`
+- CI status: `! bash .claude/scripts/ci-prep.sh`
 - Lint check: `! bash .claude/scripts/lint-prep.sh`
 - Test check: `! bash .claude/scripts/test-prep.sh`
 - Health check: `! bash .claude/scripts/doctor.sh`

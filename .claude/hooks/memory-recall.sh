@@ -19,7 +19,8 @@ if [ -f "$CACHE_STAMP_FILE" ]; then
   IDLE_SECS=$(( NOW - LAST_STOP ))
   if [ "$IDLE_SECS" -gt 300 ]; then
     IDLE_MIN=$(( IDLE_SECS / 60 ))
-    echo "[CACHE EXPIRED] ${IDLE_MIN}min idle — prompt cache abgelaufen. Dieser Turn kostet 10x mehr. Erwäge /compact vor dem Fortfahren." >&2
+    printf '{"additionalContext": "[CACHE EXPIRED] %dmin idle — prompt cache abgelaufen. Dieser Turn kostet 10x mehr. Erwaege /compact vor dem Fortfahren."}\n' "$IDLE_MIN"
+    exit 0
   fi
 fi
 

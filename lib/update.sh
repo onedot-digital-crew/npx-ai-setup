@@ -447,6 +447,9 @@ run_smart_update() {
   # Sync boilerplate files from stack-specific repos (if system detected)
   sync_boilerplate
 
+  # Merge MCP servers — adds new entries without overwriting existing config
+  install_context7
+
   # Only show summary when there was work to do
   if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
     echo ""
