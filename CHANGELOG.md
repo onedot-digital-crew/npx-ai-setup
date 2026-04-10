@@ -10,7 +10,33 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+## [v2.1.1] — 2026-04-10
+
+<!-- slack-announcement -->
+:rocket: *@onedot/ai-setup v2.1.1*
+
+*Was ist neu:*
+:broom: *Cleanup* — 13 Monitoring-Hooks + 9 built-in Agents entfernt (durch Claude Code Builtins ersetzt), pause/resume Infrastruktur entfernt (superseded by claude-mem)
+:sparkles: *Features* — `ci-prep.sh` mit Green-Path-Pattern, `shellcheck-guard` PreToolUse Hook, `quality-gate.sh` für lokale Bash-Validierung, MCP-Merge beim Update (context7 wird in bestehende `.mcp.json` gemergt)
+:wrench: *Fixes* — Shell-Injection in `graph-context.sh` behoben, `memory-recall.sh` Cache-Expiry-Warning geht jetzt zu Claude (nicht nur Terminal), YAML-Frontmatter in AUDIT.md + PATTERNS.md
+:gear: *Update* — `KNOWN_ORPHANS` deckt jetzt alle seit v2.0.x entfernten Hooks/Agents/Scripts ab
+
+*Zahlen:* 11 Hooks | 8 Rules
+*Update:* `npx github:onedot-digital-crew/npx-ai-setup`
+<!-- /slack-announcement -->
+
 - **Removed**: pause/resume skills + session-state.json infrastructure (superseded by claude-mem cross-session memory)
+- **Removed**: 13 monitoring/logging hooks (context-monitor, tdd-checker, file-index, mcp-health, cli-health, etc.) — replaced by Claude Code built-ins
+- **Removed**: 9 custom agents (backend-developer, test-generator, verify-app, etc.) — replaced by Claude Code built-ins
+- **Removed**: deprecated `delegate-codex.sh` and `delegate-gemini.sh` scripts (dead code)
+- **Added**: `ci-prep.sh` — Green-path CI status check (zero tokens on all-pass)
+- **Added**: `shellcheck-guard.sh` — PreToolUse advisory validation before shell script edits
+- **Added**: `quality-gate.sh` — local bash validation (bash -n + shellcheck + smoke)
+- **Fixed**: Shell injection vulnerability in `graph-context.sh` (unquoted variable expansion)
+- **Fixed**: `memory-recall.sh` cache-expiry warning now outputs JSON to stdout (Claude sees it)
+- **Fixed**: MCP merge-on-update — `install_context7` runs during `run_smart_update` to add context7 without overwriting existing servers
+- **Fixed**: `KNOWN_ORPHANS` updated to cover all hooks/agents/scripts removed since v2.0.x
+- **Improved**: YAML frontmatter added to `AUDIT.md` and `PATTERNS.md` for context-loader.sh
 
 ## [v2.1.0] — 2026-04-08
 
