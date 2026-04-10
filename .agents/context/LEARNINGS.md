@@ -8,10 +8,11 @@
 - `nuxt` ist ein erkanntes System ohne Boilerplate-Repo — `get_boilerplate_repo()` kennt nur `shopify`, `shopware`, `nuxt-storyblok`, `next`, `storyblok`
 
 ## Corrections
-- `sync_boilerplate()` muss `get_boilerplate_repo()` prüfen bevor `pull_boilerplate_files()` aufgerufen wird — fehlendes Mapping ergibt sonst "Unknown system" statt graceful skip
 
 ## Applied
 _Entries moved here after /apply-learnings has incorporated them into their target files._
+
+- ~~`sync_boilerplate()` muss `get_boilerplate_repo()` prüfen bevor `pull_boilerplate_files()` aufgerufen wird~~ → `lib/boilerplate.sh:283` (guard already implemented via `if ! get_boilerplate_repo "$system" >/dev/null 2>&1; then return 0; fi`)
 
 - ~~`/research` muss Kandidaten gegen CONCEPT.md und Projektphilosophie validieren BEVOR Specs erstellt werden~~ → `.claude/rules/general.md` (Research & Spec Gate)
 - ~~`session-optimize` Findings IMMER gegen aktuellen File-State verifizieren bevor Spec erstellt wird~~ → `.claude/rules/general.md` (Research & Spec Gate)
