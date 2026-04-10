@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "generated": "2026-04-10T13:54:59Z",
+  "root": ".",
+  "stats": {
+    "files": 0,
+    "edges": 0,
+    "explicit_edges": 0,
+    "auto_edges": 0,
+    "circular_count": 0,
+    "top_hubs": []
+  },
+  "nodes": [],
+  "edges": [],
+  "circular_imports": []
+}
