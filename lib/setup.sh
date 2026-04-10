@@ -716,7 +716,6 @@ update_gitignore() {
       echo ".agents/.skill-cache.json" >> .gitignore
       echo "scripts/storyblok-dump.json" >> .gitignore
       echo "CLAUDE.local.md" >> .gitignore
-      echo ".claude/session-state.json" >> .gitignore
       echo ".claude/compact-state.json" >> .gitignore
       echo ".claude/worktrees/" >> .gitignore
       echo ".claude/*.log" >> .gitignore
@@ -733,7 +732,6 @@ update_gitignore() {
       grep -q "skill-cache" .gitignore 2>/dev/null || echo ".agents/.skill-cache.json" >> .gitignore
       grep -q "storyblok-dump\.json" .gitignore 2>/dev/null || echo "scripts/storyblok-dump.json" >> .gitignore
       grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
-      grep -q "session-state" .gitignore 2>/dev/null || echo ".claude/session-state.json" >> .gitignore
       grep -q "compact-state" .gitignore 2>/dev/null || echo ".claude/compact-state.json" >> .gitignore
       grep -q "worktrees" .gitignore 2>/dev/null || echo ".claude/worktrees/" >> .gitignore
       grep -q "\.claude/\*\.log" .gitignore 2>/dev/null || echo ".claude/*.log" >> .gitignore
@@ -751,7 +749,6 @@ update_gitignore() {
     echo ".agents/.skill-cache.json" >> .gitignore
     echo "scripts/storyblok-dump.json" >> .gitignore
     echo "CLAUDE.local.md" >> .gitignore
-    echo ".claude/session-state.json" >> .gitignore
     echo ".claude/compact-state.json" >> .gitignore
     echo ".claude/worktrees/" >> .gitignore
     echo ".claude/*.log" >> .gitignore

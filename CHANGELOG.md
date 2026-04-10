@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Removed**: pause/resume skills + session-state.json infrastructure (superseded by claude-mem cross-session memory)
+
 ## [v2.1.0] — 2026-04-08
 
 <!-- slack-announcement -->

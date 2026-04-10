@@ -125,7 +125,7 @@ pull_boilerplate_files() {
   local system="$1"
   local skip_skills="${2:-}"
   local repo_name
-  repo_name=$(get_boilerplate_repo "$system") || { echo "Unknown system: $system"; return 1; }
+  repo_name=$(get_boilerplate_repo "$system") || return 1
   local repo="${BOILERPLATE_ORG}/${repo_name}"
 
   tui_section "Boilerplate Pull" "Pulling ${system} config from ${repo}"

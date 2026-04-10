@@ -13,8 +13,7 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 | Bug investigation | `/debug` falls noch nicht geladen |
 | Multi-file changes (3+ files, incl. config/rules) | `/spec` — erst planen, dann bauen |
 | Spec erstellt oder abgeschlossen | `/clear` — Session leeren, Kontext-Bleed vermeiden |
-| Session start + `.continue-here.md` exists | `/resume` — State wiederherstellen |
-| Session >30 tool calls | `/reflect` — Learnings sichern, dann `/pause` |
+| Session >30 tool calls | `/reflect` — Learnings sichern, dann `/clear` |
 | Build failure | `/build-fix` — iterativ fixen |
 | Pre-release | `/release` — Version bump, CHANGELOG, Tag |
 | Viele neue Dateien committed (>5) | `/analyze` — graph.json + Context-Dateien neu generieren |
@@ -23,11 +22,10 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 
 Claude MAY invoke these skills programmatically (via Skill tool) when the context clearly calls for it:
 - `/spec-work NNN` — after context compaction when the active spec is known
-- `/resume` — at session start when `.continue-here.md` exists
 - `/spec-board` — when user asks for spec overview
 
 **User-only skills** (`disable-model-invocation: true`) — NEVER invoke via Skill tool, only suggest:
-- `/commit`, `/pause`, `/release`, `/reflect`, `/update`
+- `/commit`, `/release`, `/reflect`, `/update`
 
 Claude SHOULD NOT auto-invoke without user intent:
 - `/pr` — always confirm first

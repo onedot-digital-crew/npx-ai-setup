@@ -201,7 +201,6 @@ show_next_steps() {
   printf '  %b/analyze%b           Deep codebase analysis → PATTERNS.md + AUDIT.md\n' "$TUI_CYAN" "$TUI_RESET"
   printf '  %b/review%b            Code review before committing\n' "$TUI_CYAN" "$TUI_RESET"
   printf '  %b/find-skills%b       Discover new skills from skills.sh\n' "$TUI_CYAN" "$TUI_RESET"
-  printf '  %b/pause + /resume%b   Save and restore session state\n' "$TUI_CYAN" "$TUI_RESET"
   if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2>/dev/null; then
     printf '  %buse context7%b       Add to any prompt for up-to-date docs\n' "$TUI_CYAN" "$TUI_RESET"
   fi

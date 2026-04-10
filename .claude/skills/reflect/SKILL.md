@@ -165,4 +165,4 @@ If `mcp__plugin_claude-mem_mcp-search__save_memory` is not available (plugin not
 
 ## Next Step
 
-After saving learnings, run `/apply-learnings` to distribute new entries from LEARNINGS.md into the correct project context files (`rules/`, `ARCHITECTURE.md`, `CONVENTIONS.md`, etc.). Then run `/commit` to checkpoint all changes, or `/pause` to end the session cleanly.
+After saving learnings, run `/apply-learnings` to distribute new entries from LEARNINGS.md into the correct project context files (`rules/`, `ARCHITECTURE.md`, `CONVENTIONS.md`, etc.). Then run `/commit` to checkpoint all changes.

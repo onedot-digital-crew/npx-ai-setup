@@ -21,3 +21,8 @@ Chore/tooling: `chore/short-description`
 One logical change per commit — do not bundle unrelated changes.
 Stage specific files rather than `git add -A` to avoid committing secrets or generated artifacts.
 Always review `git diff --staged` before committing.
+
+## Command Routing
+Local git ops: always prefix with `rtk` — `rtk git status`, `rtk git diff`, `rtk git log`.
+GitHub ops (push, pull, fetch, clone, remote): use `gh` — `gh repo sync`, `gh pr create`, etc.
+Bare `git` without `rtk` is blocked by PreToolUse hook.

@@ -22,7 +22,7 @@ Executes spec $ARGUMENTS step by step and verifies acceptance criteria.
 3. **Validation gate** (skip if `--skip-validate` or `in-progress`): Score 10 criteria. Critical gap → STOP.
 4. **High complexity only**: Show Goal/Approach/Files summary, ask confirmation. Spawn `code-architect` (model: opus). REDESIGN → stop.
 5. **Branch setup**: Ask user → `spec/NNN-title`. Read `CONVENTIONS.md` + `STACK.md`. Load skills from spec Context.
-6. **Start work**: Set `in-progress`. Refresh `session-state.json` with spec path + phase.
+6. **Start work**: Set `in-progress`.
 7. **Progress checklist**: Print `[ ] Step N: <title>`. Resume from first unchecked `- [x]`.
 
 ### Model routing (per Complexity field)
@@ -37,7 +37,6 @@ Specialist routing: Vue/React/styling → `frontend-developer`; API/middleware �
 
 8. **Execute each step**: Implement → check off (`- [x]`) → append `decisions.md` if architectural. No commits — `/spec-review` is the gate.
    - Stall: 3× same failure → `- [~]`, set `blocked`, stop. 2 no-change steps → ask user.
-   - Refresh `session-state.json` at each checkpoint. Update progress before compaction.
 9. **Verify acceptance criteria**: Run commands to check each criterion. Read modified files to confirm changes landed.
 10. **CHANGELOG**: Insert under `## [Unreleased]`.
 11. **Verify**: Spawn `verify-app`. FAIL → spawn investigator (model: haiku, read-only), fix, re-verify once. Second FAIL → `in-review`, stop.

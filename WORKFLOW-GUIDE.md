@@ -129,8 +129,6 @@ Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
 
 | Command | Was es tut |
 |---------|------------|
-| `/pause` | Session-State in `.continue-here.md` speichern, WIP committen. Nutzen wenn du die Session beendest. |
-| `/resume` | State wiederherstellen und zur naechsten Aktion routen. Nutzen beim Start einer neuen Session. |
 | `/reflect` | Session-Learnings als permanente Regeln speichern. Nach langen Sessions (>30 Tool Calls). |
 | `/apply-learnings` | Gesammelte Learnings aus LEARNINGS.md in die richtigen Context-Dateien einarbeiten. |
 | `/session-optimize` | Vergangene Sessions analysieren — Qualitaet, Effizienz, Token-Savings verbessern. |
@@ -169,15 +167,9 @@ Permission-Modes sind keine versteckten Defaults:
 
 ---
 
-## Session Handoff
+## Session Continuity
 
-Es gibt jetzt drei bewusst getrennte Ebenen:
-
-- `.claude/session-state.json`: kanonische machine-readable Handoff-Schicht fuer `/pause`, `/resume` und Compact-Recovery
-- `.continue-here.md`: menschlich lesbare Zusammenfassung fuer Entscheidungen, Restarbeiten und Blocker
-- Spec-Markdown in `specs/*.md`: fachliche Source of Truth fuer Fortschritt und Acceptance Criteria
-
-Die JSON-Datei ersetzt die Specs nicht. Sie beantwortet nur: Was ist gerade aktiv, in welcher Phase bin ich, und was ist der naechste Schritt?
+Cross-session context wird ueber claude-mem (Observations/Decisions) persistent gespeichert. Spec-Markdown in `specs/*.md` bleibt die fachliche Source of Truth fuer Fortschritt und Acceptance Criteria.
 
 ---
 
@@ -208,6 +200,7 @@ PATTERNS/AUDIT regenerieren: `/analyze` ausfuehren.
 | `ultrathink:` | Prefix fuer Extended Reasoning |
 | `/compact` | Kontext komprimieren (eingebauter Claude Code Command, kein Skill) |
 | `/` | Autocomplete fuer alle verfuegbaren Commands |
+| `defuddle parse <url> --md` | Web-Seiten in Markdown holen (~80% weniger Tokens als WebFetch). Hook `tool-redirect.sh` blockt WebFetch automatisch wenn defuddle verfuegbar ist. |
 
 ---
 
@@ -217,7 +210,7 @@ PATTERNS/AUDIT regenerieren: `/analyze` ausfuehren.
 Circuit-Breaker greift nach 3 Edits. Stop, Problem anders beschreiben.
 
 **Kontext ist nach langer Session veraltet?**
-`Esc Esc` zum Komprimieren, oder `/pause` + neue Session + `/resume`.
+`Esc Esc` zum Komprimieren, oder `/clear` + neue Session.
 
 **Spec-Schritte nach Crash teilweise abgehakt?**
 `/spec-work NNN` erneut ausfuehren — erkennt `[x]` Schritte und setzt beim ersten offenen fort.

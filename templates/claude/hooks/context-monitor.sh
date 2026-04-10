@@ -68,9 +68,9 @@ printf '%s\n%s\n' "0" "$SEVERITY" > "$COUNTER_FILE" 2>/dev/null || true
 
 # Build message
 if [ "$SEVERITY" = "CRITICAL" ]; then
-  MESSAGE="CRITICAL: Context window at ${REMAINING}% remaining. Compaction is imminent. Consider refreshing .claude/session-state.json and .continue-here.md. Wrapping up should begin before context is truncated."
+  MESSAGE="CRITICAL: Context window at ${REMAINING}% remaining. Compaction is imminent. Finish your current task and wrap up before context is truncated."
 else
-  MESSAGE="WARNING: Context window at ${REMAINING}% remaining. The configured auto-compact target is 68% used (about 32% remaining). Consider refreshing .claude/session-state.json and .continue-here.md soon."
+  MESSAGE="WARNING: Context window at ${REMAINING}% remaining. The configured auto-compact target is 68% used (about 32% remaining). Consider wrapping up the current task soon."
 fi
 
 # Output additionalContext JSON to stdout (via jq for safe escaping)

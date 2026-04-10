@@ -439,10 +439,10 @@ else
 fi
 
 echo "--- Experimental hook registrations ---"
-if grep -q '"PostCompact"' templates/claude/settings.json 2>/dev/null; then
-  pass "template settings.json registers PostCompact"
+if ! grep -q '"PostCompact"' templates/claude/settings.json 2>/dev/null; then
+  pass "PostCompact removed (superseded by claude-mem)"
 else
-  fail "template settings.json missing PostCompact registration"
+  fail "PostCompact still registered but should be removed"
 fi
 if awk '
   /"command"[[:space:]]*:[[:space:]]*".*context-monitor\.sh"/ { print block "\n" $0; found=1; exit }
@@ -499,22 +499,6 @@ else
   fail "cli-health.sh did not classify RTK DB failure correctly"
 fi
 
-echo "--- Unified session handoff ---"
-if grep -q 'session-state.json' templates/claude/hooks/pre-compact-state.sh 2>/dev/null && grep -q 'session-state.json' templates/claude/hooks/post-compact-restore.sh 2>/dev/null; then
-  pass "compact hooks use unified session-state.json"
-else
-  fail "compact hooks do not consistently use session-state.json"
-fi
-if grep -q 'session-state.json' templates/skills/pause/SKILL.template.md 2>/dev/null && grep -q 'session-state.json' templates/skills/resume/SKILL.template.md 2>/dev/null; then
-  pass "pause and resume skills reference unified session-state.json"
-else
-  fail "pause/resume skills missing unified session-state.json guidance"
-fi
-if grep -q 'session-state.json' templates/skills/spec-work/SKILL.template.md 2>/dev/null && grep -q 'session-state.json' templates/skills/spec-run/SKILL.template.md 2>/dev/null; then
-  pass "spec workflow skills refresh unified session-state.json"
-else
-  fail "spec workflow skills missing unified session-state.json references"
-fi
 
 echo "--- Spec status consistency ---"
 for spec_file in specs/completed/[0-9]*.md; do

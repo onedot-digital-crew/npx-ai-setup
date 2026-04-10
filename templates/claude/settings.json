@@ -135,27 +135,6 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/post-compact-restore.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/post-compact-restore.sh",
-            "timeout": 5
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -352,15 +331,6 @@
       }
     ],
     "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/pre-compact-state.sh",
-            "timeout": 5
-          }
-        ]
-      },
       {
         "hooks": [
           {
