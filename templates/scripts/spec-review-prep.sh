@@ -57,8 +57,11 @@ printf "Spec: %s (%s)\n" "$SPEC_FILE" "$SPEC_TITLE"
 # 1. Extract branch from spec header
 # ---------------------------------------------------------------------------
 section "BRANCH"
-SPEC_BRANCH="$(grep -E '^\*\*Branch\*\*' "$SPEC_FILE" 2>/dev/null \
-  | grep -oE '`[^`]+`' | tr -d '`' | head -1 || true)"
+SPEC_BRANCH="$(grep -E '^\>' "$SPEC_FILE" 2>/dev/null \
+  | head -1 \
+  | grep -oE '\*\*Branch\*\*: `[^`]+`' \
+  | tr -d '`' \
+  | sed 's/\*\*Branch\*\*: //' || true)"
 
 if [[ -n "$SPEC_BRANCH" ]]; then
   printf "Spec branch: %s\n" "$SPEC_BRANCH"
@@ -130,8 +133,11 @@ fi
 # 5. Spec status + acceptance criteria summary
 # ---------------------------------------------------------------------------
 section "SPEC STATUS"
-STATUS="$(grep -E '^\*\*Status\*\*' "$SPEC_FILE" 2>/dev/null \
-  | sed 's/.*: *//' | head -1 || echo "unknown")"
+STATUS="$(grep -E '^\>' "$SPEC_FILE" 2>/dev/null \
+  | head -1 \
+  | sed -n 's/.*\*\*Status\*\*: \([^|]*\).*/\1/p' \
+  | tr -d ' ' || echo "unknown")"
+STATUS="${STATUS:-unknown}"
 printf "Status: %s\n" "$STATUS"
 
 AC_TOTAL="$(awk '/^## Acceptance Criteria/{f=1;next} f&&/^## /{exit} f&&/^\s*-\s*\[/{c++} END{print c+0}' "$SPEC_FILE")"

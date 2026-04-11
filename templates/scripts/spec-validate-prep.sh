@@ -131,8 +131,8 @@ printf "Remaining steps: %s\n" "$STEP_TODO"
 
 if [ "$STEP_COUNT" -eq 0 ]; then
   printf "\n> WARNING: No steps found. Steps section may be empty or not following checkbox format.\n"
-elif [ "$STEP_COUNT" -gt 10 ]; then
-  printf "\n> WARNING: %s steps — consider splitting this spec (>10 steps is a complexity smell).\n" "$STEP_COUNT"
+elif [ "$STEP_COUNT" -gt 8 ]; then
+  printf "\n> WARNING: %s steps — consider splitting this spec (max 8 steps per spec/SKILL.md).\n" "$STEP_COUNT"
 fi
 
 # ---------------------------------------------------------------------------
