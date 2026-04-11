@@ -269,9 +269,10 @@ sync_boilerplate() {
   system=$(detect_installed_system) || true
 
   if [ -z "$system" ]; then
-    # No system recorded — try to detect from project files (handles projects
-    # installed before system detection was added)
-    select_boilerplate_system
+    # No system recorded in .ai-setup.json — skip silently during updates.
+    # select_boilerplate_system is for fresh installs only; triggering it during
+    # an update can pull an unexpected boilerplate based on project files in the
+    # current working directory.
     return 0
   fi
 

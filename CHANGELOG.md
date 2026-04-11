@@ -10,6 +10,10 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Fixed**: `spec-review-prep.sh` — `SPEC_BRANCH` Extraktion korrigiert (Zeilen mit `> ` statt `**Branch**`), `STATUS` Extraktion via sed repariert (war immer "unknown")
+- **Fixed**: `spec-validate-prep.sh` — Step-Count-Warning-Schwelle von `>10` auf `>8` angepasst, entspricht dem dokumentierten Maximum in `spec/SKILL.md`
+- **Improved**: `workflow.md` — `/spec`-Trigger auf "Planning a multi-file change..." umformuliert (Spec-first Kausalität), neuer Hint für `/spec-validate` nach Spec-Erstellung
+
 ## [v2.1.1] — 2026-04-10
 
 <!-- slack-announcement -->
