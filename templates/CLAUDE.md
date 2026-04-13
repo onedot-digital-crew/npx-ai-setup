@@ -9,6 +9,8 @@ For full details: `/context-load STACK.md` (or ARCHITECTURE.md, CONVENTIONS.md, 
 - Lint check: `! bash .claude/scripts/lint-prep.sh`
 - Test check: `! bash .claude/scripts/test-prep.sh`
 - Health check: `! bash .claude/scripts/doctor.sh`
+- Quality gate (bash -n + shellcheck + smoke): `! bash .claude/scripts/quality-gate.sh`
+- Debug context: `! bash .claude/scripts/debug-prep.sh`
 
 Use the skill (`/test`, `/lint`) only when you need Claude to analyze failures or auto-fix.
 
