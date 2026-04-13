@@ -16,8 +16,9 @@ Before implementing anything manually, check installed skills:
 3. If no skill matches, ask the user before proceeding with manual implementation
 
 ## Web Fetching
-Library/API docs: use Context7 MCP (`use context7`). Web pages: `defuddle parse <url> --md`.
-Use WebFetch only when defuddle is unavailable or the page requires JavaScript rendering.
+Library/API docs: ALWAYS try Context7 first (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`).
+Only fall back to WebFetch/defuddle if Context7 returns no library match.
+Web pages (non-library): `defuddle parse <url> --md`. WebFetch only if defuddle unavailable or page requires JS rendering.
 
 ## MCP Servers
 Project `.mcp.json` overrides global servers with the same name.
