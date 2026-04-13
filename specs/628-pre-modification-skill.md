@@ -1,6 +1,6 @@
 # Spec: Pre-Modification Skill
 
-> **Spec ID**: 628 | **Created**: 2026-04-08 | **Status**: in-review | **Complexity**: medium | **Branch**: feat/628-pre-modification-skill
+> **Spec ID**: 628 | **Created**: 2026-04-08 | **Status**: draft | **Complexity**: medium | **Branch**: feat/628-pre-modification-skill
 
 ## Problem
 

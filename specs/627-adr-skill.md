@@ -1,6 +1,6 @@
 # Spec: architectural-decisions Skill
 
-> **Spec ID**: 627 | **Created**: 2026-04-08 | **Status**: in-review | **Complexity**: low | **Branch**: —
+> **Spec ID**: 627 | **Created**: 2026-04-08 | **Status**: draft | **Complexity**: low | **Branch**: —
 
 ## Goal
 

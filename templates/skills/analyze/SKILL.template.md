@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: Produces a structured codebase overview via parallel agents. Use when exploring or preparing for major changes.
+description: "Produces a structured codebase overview via parallel agents. Trigger: 'analyze codebase', 'rebuild graph', 'context refresh'."
 user-invocable: true
 effort: high
 model: sonnet

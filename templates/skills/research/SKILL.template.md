@@ -1,6 +1,6 @@
 ---
 name: research
-description: "Deep-researches an external repository, tool, or pattern. Produces a brainstorm document with prioritized adoption candidates."
+description: "Deep-researches an external repository, tool, or pattern; produces a prioritized brainstorm doc. Trigger: 'research X', 'evaluate this tool', 'look into this repo'."
 user-invocable: true
 effort: high
 model: opus
@@ -32,7 +32,9 @@ Deep-researches an external repository, tool, or pattern. Input: $ARGUMENTS
 Spawn parallel haiku agents by area: commands, agents/skills, hooks/scripts, config/README.
 Each agent reads raw GitHub content and returns full content, not summaries.
 
-In parallel, read our own `templates/`, `.claude/rules/`, and `lib/plugins.sh`.
+In parallel, detect the current project type and read relevant local context:
+- **npx-ai-setup**: read `templates/`, `.claude/rules/`, `lib/plugins.sh`
+- **Other project**: read `.claude/`, `CLAUDE.md`, `package.json`, top-level config files
 
 Build an inventory:
 
@@ -78,14 +80,14 @@ Use AskUserQuestion to explore the top 5 findings. Run at least 2 rounds.
 
 ### 5. Philosophy check
 
-Read `CONCEPT.md` and `decisions.md`. For each candidate, classify:
+Read project-specific philosophy docs if they exist (`CONCEPT.md`, `decisions.md`, `docs/architecture.md`). For each candidate, classify:
 - GO
 - PIVOT
 - SKIP
 
 Check:
+- Does it fit the project's purpose and conventions?
 - Does it add or remove guardrails?
-- Does it belong in base setup or only a boilerplate?
 - Is it already covered?
 
 Only GO candidates proceed.

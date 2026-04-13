@@ -1,6 +1,6 @@
 ---
 name: explore
-description: "Read-only thinking partner before committing to a spec."
+description: "Read-only thinking partner before committing to a spec. Trigger: 'explore this codebase', 'understand how X works', 'find where'."
 user-invocable: true
 effort: low
 model: sonnet

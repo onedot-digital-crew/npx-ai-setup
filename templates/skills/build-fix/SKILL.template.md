@@ -1,6 +1,6 @@
 ---
 name: build-fix
-description: "Active build-fixer: runs the build, parses the first error, applies a minimal fix, rebuilds — repeat until green or guard rails trigger."
+description: "Active build-fixer: runs build, parses first error, applies minimal fix, rebuilds — repeat until green or guard rails trigger. Trigger: 'build is failing', 'fix build errors', 'compilation error'."
 user-invocable: true
 effort: medium
 model: sonnet

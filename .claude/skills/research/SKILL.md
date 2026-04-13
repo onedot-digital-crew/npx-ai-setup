@@ -21,7 +21,9 @@ Deep-researches an external repository, tool, or pattern. Input: $ARGUMENTS
 
 Spawn parallel haiku agents — one per directory type: commands, agents/skills, hooks/scripts, config/README. Each reads raw GitHub URLs (`https://raw.githubusercontent.com/OWNER/REPO/main/PATH`). Return full content, not summaries.
 
-In parallel: read our existing `templates/`, `.claude/rules/`, `lib/plugins.sh`.
+In parallel: detect the current project type and read relevant local context:
+- **npx-ai-setup**: read `templates/`, `.claude/rules/`, `lib/plugins.sh`
+- **Other project**: read `.claude/`, `CLAUDE.md`, `package.json`, top-level config files
 
 Compile inventory:
 ```
@@ -63,9 +65,9 @@ Write to `specs/NNN-research-[source-name].md`:
 
 ## Phase 5 — Philosophy Check (mandatory)
 
-Read `CONCEPT.md` / `decisions.md`. Per candidate: GO / PIVOT / SKIP.
-- Safety: does it ADD or REMOVE guardrails? (npx-ai-setup is safety-first)
-- Layer: base setup vs. boilerplate-specific?
+Read project-specific philosophy docs if they exist (`CONCEPT.md`, `decisions.md`, `docs/architecture.md`). Per candidate: GO / PIVOT / SKIP.
+- Does it fit the project's purpose and conventions?
+- Does it ADD or REMOVE guardrails?
 - Already covered by an existing feature?
 
 Only GO candidates proceed.

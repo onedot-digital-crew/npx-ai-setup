@@ -1,6 +1,6 @@
 ---
 name: lint
-description: Runs the project linter, reports findings grouped by severity, and optionally auto-fixes issues.
+description: "Runs the project linter, reports findings by severity, optionally auto-fixes. Trigger: 'check linting', 'fix lint errors', 'run linter'."
 user-invocable: true
 effort: medium
 model: sonnet

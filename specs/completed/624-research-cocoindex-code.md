@@ -1,4 +1,5 @@
 # Brainstorm: CocoIndex Code Adaptionen fuer npx-ai-setup
+> **Status**: completed
 
 > **Source**: https://github.com/cocoindex-io/cocoindex-code
 > **Erstellt**: 2026-04-07

@@ -1,6 +1,6 @@
 ---
 name: debug
-description: "Investigates and fixes bug: $ARGUMENTS. Use when a defect needs hypothesis-driven root-cause analysis and a minimal targeted fix."
+description: "Investigates and fixes bug: $ARGUMENTS via hypothesis-driven root-cause analysis. Trigger: 'something is broken', 'why is X not working', 'root cause'."
 user-invocable: true
 effort: high
 model: sonnet

@@ -1,4 +1,5 @@
 # Brainstorm: Repowise Adaptionen für npx-ai-setup
+> **Status**: completed
 
 > **Source**: https://github.com/repowise-dev/repowise
 > **Erstellt**: 2026-04-08

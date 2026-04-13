@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Stages changes and creates a conventional commit message. Uses `commit-prep.sh` to collect diff context before Claude generates the message — focused input, fewer tokens.
+description: "Stages and commits via commit-prep.sh (focused diff context, fewer tokens). Trigger: 'commit this', 'stage and commit', 'create a commit'."
 user-invocable: true
 effort: low
 model: haiku

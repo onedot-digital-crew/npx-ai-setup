@@ -1,4 +1,5 @@
 # Brainstorm: Claude Code v2.1.88 Source Internals
+> **Status**: completed
 
 > **Source**: https://github.com/sanbuphy/claude-code-source-code
 > **Erstellt**: 2026-04-01

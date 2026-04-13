@@ -1,4 +1,5 @@
 # Brainstorm: Graphify Adaptionen fuer npx-ai-setup
+> **Status**: completed
 
 > **Source**: https://github.com/safishamsi/graphify
 > **Erstellt**: 2026-04-08

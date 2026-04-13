@@ -56,6 +56,24 @@ jq -r --arg f "app/pages/[...slug].vue" '.edges[] | select(.source==$f) | "\(.ki
 
 Inject the result into the agent prompt — 20 tokens instead of 500 for a grep. Skip if graph.json is missing or the project has no JS/TS files.
 
+## File Navigation Priority
+
+Before reading any file, use this hierarchy:
+1. **Glob/Grep** — find files by name pattern or search for a symbol/string
+2. **Targeted Read** — `Read` with `offset` + `limit` when you know the relevant section
+3. **Full-file Read** — only when the symbol context cannot be obtained otherwise
+
+Never open a file to "check if something exists" — use Grep first.
+
+## Output Offloading
+
+When spawning agents that return large outputs (scrape, explore, research):
+- Instruct the agent to write outputs >2KB to `$TMPDIR/agent-output-<task>.md`
+- Agent returns only the file path, not the full content
+- Read the file only when specific sections are needed
+
+This prevents large tool results from filling the context window.
+
 ## Hallucination Prevention
 
 - Never invent or guess file paths — verify with Glob/Grep before referencing

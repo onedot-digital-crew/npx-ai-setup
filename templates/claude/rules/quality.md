@@ -16,6 +16,7 @@
 - No N+1 queries — batch or join instead of loops with DB calls
 - No synchronous I/O in hot paths — use async equivalents
 - Cache only deterministic, bounded data with an eviction strategy
+- **Search before Read**: Glob/Grep → targeted Read → full-file Read. See agents.md > File Navigation Priority.
 
 ## Code Quality
 - No dead code, no magic numbers without named constants

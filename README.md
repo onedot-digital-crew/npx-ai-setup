@@ -331,6 +331,7 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [agency-agents](https://github.com/msitarzewski/agency-agents)
 - [code-review-graph](https://github.com/tirth8205/code-review-graph)
 - [manage-skills](https://github.com/Getty/manage-skills)
+- [agent-skills-for-context-engineering](https://github.com/muratcankoylan/agent-skills-for-context-engineering)
 - [OpenViking](https://github.com/volcengine/OpenViking)
 - [gastown](https://github.com/steveyegge/gastown)
 - [just-ship](https://github.com/yves-s/just-ship)
@@ -339,3 +340,4 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [claude-code-source-code](https://github.com/sanbuphy/claude-code-source-code)
 - [repowise](https://github.com/repowise-dev/repowise)
 - [graphify](https://github.com/safishamsi/graphify)
+- [lean-ctx](https://github.com/yvgude/lean-ctx)

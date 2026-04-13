@@ -1,4 +1,5 @@
 # Brainstorm: pilot-shell Adaptionen für npx-ai-setup
+> **Status**: completed
 
 > **Source**: https://github.com/maxritter/pilot-shell
 > **Erstellt**: 2026-04-01

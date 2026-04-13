@@ -1,6 +1,6 @@
 ---
 name: spec
-description: "Create a new spec for a task."
+description: "Creates a structured spec before implementation. Trigger: 'let\\'s spec this', 'plan this out', 'new feature'."
 user-invocable: true
 effort: high
 model: opus

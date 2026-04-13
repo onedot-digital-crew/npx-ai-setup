@@ -1,6 +1,6 @@
 ---
 name: review
-description: Reviews uncommitted changes with selectable intensity. Use before committing or merging.
+description: "Reviews uncommitted changes with selectable intensity. Trigger: 'review changes', 'check my work', 'before I commit'."
 user-invocable: true
 effort: medium
 model: sonnet
