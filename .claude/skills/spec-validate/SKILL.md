@@ -52,7 +52,44 @@ Spec Validation — NNN: [title]
    Total weighted score: XX.X / 100     Grade: X
 ```
 
-### 6. Verdict
+### 6. Technical Preflight (Pass 2 — Sonnet subagent)
+
+Spawn a Sonnet subagent to verify technical claims against the actual codebase.
+
+```
+Agent(subagent_type="Explore", model="sonnet", prompt="""
+Technical preflight for spec: <spec file path>
+
+Spec content (Files to Modify + Context + Steps sections):
+<paste relevant sections>
+
+Tasks:
+1. File existence: For every file in "Files to Modify", check if it exists (Glob). Report EXISTS or MISSING.
+2. Premise check: Extract 2-3 factual claims from Context/Steps (e.g. "X is set to Y", "file Z uses pattern W"). Verify each with Grep. Report CONFIRMED (file:line) or UNVERIFIED.
+3. Risk surface: Grep for imports/usages of listed files. Flag any unlisted files that import them and may need updating.
+
+Output format:
+Files to Modify
+  path/to/file.ts     EXISTS
+  path/to/other.ts    MISSING ← blocker
+
+Premise Checks
+  "claim text"   CONFIRMED (file.ts:42)
+  "claim text"   UNVERIFIED
+
+Risks
+  - path/unlisted.ts imports foo.ts — may need updating (not listed)
+
+Preflight: PASS / WARN / FAIL
+""")
+```
+
+Preflight result:
+- **PASS** — all files exist, premises confirmed
+- **WARN** — minor gaps, proceed with caution
+- **FAIL** — missing files or false premises → fix spec before `/spec-work`
+
+### 7. Verdict
 
 | Grade | Threshold | Action |
 |-------|-----------|--------|
@@ -61,13 +98,19 @@ Spec Validation — NNN: [title]
 | C | ≥ 55 | List criteria <7 with fixes. "Revision recommended." |
 | F | < 55 | List criteria <7 with fixes. "Fix and re-run `/spec-validate NNN`." |
 
+Preflight FAIL overrides Grade A/B — do not proceed to `/spec-work` until resolved.
+
 ## Next Step
 
-- Grade A/B: `> ⚡ Naechster Schritt: /spec-work NNN — Spec implementieren`
-- Grade C: `> 🔧 Naechster Schritt: Kriterien <7 fixen, dann /spec-validate NNN erneut`
-- Grade F: `> 🔧 Naechster Schritt: Spec ueberarbeiten, dann /spec-validate NNN erneut`
+- Grade A/B + Preflight PASS: `> Naechster Schritt: /spec-work NNN — Spec implementieren`
+- Grade A/B + Preflight WARN: `> Naechster Schritt: /spec-work NNN — Preflight-Warnings im Blick behalten`
+- Grade A/B + Preflight FAIL: `> Naechster Schritt: Spec korrigieren (fehlende Dateien / falsche Praemissen), dann /spec-validate NNN`
+- Grade C: `> Naechster Schritt: Kriterien <7 fixen, dann /spec-validate NNN erneut`
+- Grade F: `> Naechster Schritt: Spec ueberarbeiten, dann /spec-validate NNN erneut`
 
 ## Rules
 - **Read-only** — never modify the spec or any file.
 - Score honestly. Only report metrics that fail.
-- Advisory only — does not block `/spec-work`.
+- Preflight FAIL blocks `/spec-work` recommendation, not the user.
+- Pass 1 (Haiku): structural scoring only — no file reads beyond spec + CONVENTIONS.md.
+- Pass 2 (Sonnet subagent): codebase verification — Glob/Grep, no full-file reads unless unavoidable.
