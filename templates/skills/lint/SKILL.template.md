@@ -1,6 +1,8 @@
 ---
 name: lint
 description: Runs the project linter, reports findings grouped by severity, and optionally auto-fixes issues.
+user-invocable: true
+effort: medium
 model: sonnet
 argument-hint: "[optional: --fix to auto-fix]"
 allowed-tools:

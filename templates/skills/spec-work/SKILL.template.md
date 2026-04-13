@@ -1,6 +1,8 @@
 ---
 name: spec-work
 description: "Execute a single spec step by step."
+user-invocable: true
+effort: medium
 model: sonnet
 argument-hint: "<NNN spec number>"
 allowed-tools:

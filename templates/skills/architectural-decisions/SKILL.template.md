@@ -1,6 +1,6 @@
 ---
 name: architectural-decisions
-description: "ALWAYS use this skill when asked WHY something is built a certain way, why a specific technology was chosen, or why an architectural approach was taken."
+description: Explain why code is built this way. Use when the user asks about rationale, tradeoffs, or past architectural decisions.
 user-invocable: false
 effort: low
 allowed-tools:

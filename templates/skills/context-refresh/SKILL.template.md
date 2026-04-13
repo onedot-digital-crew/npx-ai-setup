@@ -1,6 +1,8 @@
 ---
 name: context-refresh
 description: "Regenerates .agents/context/ files (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) and updates the .state hash."
+user-invocable: true
+effort: medium
 model: sonnet
 allowed-tools:
   - Read

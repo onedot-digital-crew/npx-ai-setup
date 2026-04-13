@@ -1,6 +1,8 @@
 ---
 name: release
 description: "Complete release workflow — version bump, CHANGELOG, Slack."
+user-invocable: true
+effort: medium
 disable-model-invocation: true
 model: sonnet
 allowed-tools:

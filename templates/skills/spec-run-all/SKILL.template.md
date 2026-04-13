@@ -1,6 +1,8 @@
 ---
 name: spec-run-all
 description: "Run full pipeline for all draft specs in parallel."
+user-invocable: true
+effort: high
 model: sonnet
 disable-model-invocation: true
 allowed-tools:

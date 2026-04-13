@@ -1,6 +1,8 @@
 ---
 name: spec-board
 description: "Overview of all specs as Kanban board."
+user-invocable: true
+effort: low
 model: haiku
 allowed-tools:
   - Read

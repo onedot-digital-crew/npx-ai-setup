@@ -1,6 +1,8 @@
 ---
 name: techdebt
 description: Scans recently changed files for tech debt and fixes safe wins. Use at end of session to clean up before committing.
+user-invocable: true
+effort: medium
 model: sonnet
 allowed-tools:
   - Read

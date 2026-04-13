@@ -1,6 +1,7 @@
 ---
 name: explore
 description: "Read-only thinking partner before committing to a spec."
+user-invocable: true
 effort: low
 model: sonnet
 allowed-tools:

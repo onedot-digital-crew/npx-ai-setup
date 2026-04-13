@@ -1,6 +1,8 @@
 ---
 name: spec-run
 description: "Run full spec pipeline — validate, implement, review, commit."
+user-invocable: true
+effort: medium
 model: sonnet
 disable-model-invocation: true
 argument-hint: "<NNN spec number>"

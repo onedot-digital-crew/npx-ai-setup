@@ -1,7 +1,8 @@
 ---
 name: pre-modification
-description: "ALWAYS run this BEFORE modifying, refactoring, or restructuring existing code across multiple files or introducing new architectural layers."
+description: Assess blast radius before larger refactors or cross-cutting edits. Run before modifying existing code across multiple files.
 user-invocable: false
+effort: medium
 model: sonnet
 allowed-tools:
   - Read
@@ -101,3 +102,7 @@ Continue with the task. Never block on a fallback — a missing review is a warn
 - If verdict is CAUTION, list the required changes and ask the user if they want to address them first.
 - If verdict is GO, proceed immediately without further prompts.
 - Keep the summary under 10 lines — brevity over completeness.
+
+## Next Step
+
+If the verdict is GO, continue with the task. If the verdict is CAUTION or STOP, switch to `/spec` or address the listed risks before editing.

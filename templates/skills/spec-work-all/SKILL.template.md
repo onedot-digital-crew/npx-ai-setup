@@ -1,6 +1,8 @@
 ---
 name: spec-work-all
 description: "Execute all draft specs in parallel using isolated worktrees."
+user-invocable: true
+effort: high
 disable-model-invocation: true
 model: sonnet
 allowed-tools:

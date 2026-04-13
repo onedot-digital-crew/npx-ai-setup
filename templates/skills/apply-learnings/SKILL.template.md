@@ -1,6 +1,8 @@
 ---
 name: apply-learnings
 description: Applies pending learnings from LEARNINGS.md into the correct project context files. Marks applied entries so they are not processed again.
+user-invocable: true
+effort: medium
 model: sonnet
 allowed-tools:
   - Read
@@ -27,7 +29,7 @@ Falls eine Section keiner Zieldatei zugeordnet werden kann: User fragen.
 
 ## Process
 
-### 1. LEARNINGS.md lesen
+### 1. Read LEARNINGS.md
 
 Read `.agents/context/LEARNINGS.md`.
 
@@ -39,15 +41,15 @@ Identifiziere alle **unerledigten** Einträge:
 
 Gruppiere nach Section (Corrections, Architecture, Stack, etc.).
 
-### 2. Für jeden Eintrag: Zieldatei bestimmen
+### 2. Determine target file
 
 Nutze das Mapping oben. Bei unbekannter Section: frage den User welche Datei gemeint ist.
 
-### 3. Zieldatei lesen und Duplikat-Check
+### 3. Check target file and duplicates
 
 Read die Zieldatei. Prüfe ob der Kern-Inhalt des Eintrags bereits vorhanden ist (inhaltlich, nicht wörtlich). Falls ja: Eintrag überspringen und direkt als Applied markieren.
 
-### 4. Minimal einarbeiten
+### 4. Integrate minimally
 
 Füge den Eintrag an der passenden Stelle in der Zieldatei ein:
 - `rules/*.md` — unter der thematisch nächsten Sektion als Bullet
@@ -58,7 +60,7 @@ Füge den Eintrag an der passenden Stelle in der Zieldatei ein:
 
 **Nicht als Block-Append** — inhaltlich integrieren. Max 1-2 Zeilen pro Eintrag.
 
-### 5. Eintrag in LEARNINGS.md als Applied markieren
+### 5. Mark as applied
 
 Nach erfolgreichem Einarbeiten: verschiebe den Eintrag von seiner Section nach `## Applied`.
 
@@ -69,7 +71,7 @@ Format in `## Applied`:
 
 Falls `## Applied` noch nicht existiert: am Ende der Datei hinzufügen.
 
-### 6. Abschlussbericht
+### 6. Report
 
 Nach allen Einträgen:
 ```

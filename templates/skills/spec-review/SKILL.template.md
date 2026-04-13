@@ -2,6 +2,8 @@
 name: spec-review
 description: "Review a completed spec after implementation."
 argument-hint: "<NNN spec number>"
+user-invocable: true
+effort: medium
 model: sonnet
 allowed-tools:
   - Read
@@ -18,45 +20,44 @@ Reviews spec $ARGUMENTS and its code changes against acceptance criteria. Use af
 ## Process
 
 ### 1. Find the spec
-If `$ARGUMENTS` is a number, open `specs/NNN-*.md`. If empty, list specs with status `in-review` and ask. Must be `in-review` — otherwise report status and stop.
+If `$ARGUMENTS` is a number, open `specs/NNN-*.md`. If empty, list specs with status `in-review` and ask. The spec must be `in-review`.
 
 ### 2. Read the spec
-Understand Goal, Steps, Acceptance Criteria, Files to Modify, Out of Scope. Note checked items.
+Read Goal, Steps, Acceptance Criteria, Files to Modify, and Out of Scope. Note checked items.
 
 ### 3. Inspect code changes
 
-Run the prep script — it collects diff, doctor check, and spec status in one shell pass:
+Run the prep script:
 
 ```bash
 bash .claude/scripts/spec-review-prep.sh $ARGUMENTS
 ```
 
-The output contains: branch detection, full diff (branch or working tree), top 5 changed files, doctor.sh results, and acceptance criteria progress.
-
-Read full files for the 5 most changed files (listed in prep output); review only diff hunks for the rest.
-Do NOT re-run `git diff` or `doctor.sh` — all data is in the prep output.
+The output includes branch detection, full diff, top 5 changed files, doctor results, and acceptance-criteria progress.
+Read the 5 most changed files completely; review only diff hunks for the rest. Do not re-run `git diff` or `doctor.sh`.
 
 ### 4. Review against spec
 
-**4a — Goal achievement** ("Task done ≠ Goal achieved"):
+**4a — Goal achievement**:
 - Verify the Goal is actually met, not just checkboxes
 - Verify acceptance criteria against diff
 - Flag Out of Scope violations
 
-Verify each acceptance criterion: run commands, read modified files, confirm behavior matches.
+Verify each acceptance criterion with commands and file reads.
 
-**4b — Definition of Done**: Check `.agents/context/CONVENTIONS.md` DoD section if it exists.
+**4b — Definition of Done**:
+Check `.agents/context/CONVENTIONS.md` DoD section if it exists.
 
-**4c — Code quality** (by complexity):
+**4c — Code quality**:
 - Low/Medium: spawn `code-reviewer` agent (model: sonnet)
 - High: spawn `code-reviewer` AND `staff-reviewer` in parallel (model: sonnet)
 
-**4d — Conditional reviewers** (spawn in parallel with 4c if applicable):
+**4d — Conditional reviewers**:
 - Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
 - Spec touches DB queries, loops, rendering, data fetching, or bundle imports → also spawn `performance-reviewer`
 
-**4e — Doctor check** (already in prep output):
-Check the `DOCTOR CHECK` section from step 3 prep output. Any FAIL blocks APPROVED verdict — must be fixed first.
+**4e — Doctor check**:
+Use the `DOCTOR CHECK` section from prep output. Any FAIL blocks APPROVED.
 
 ### 5. Verdict
 

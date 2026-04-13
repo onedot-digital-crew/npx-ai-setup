@@ -1,6 +1,7 @@
 ---
 name: scan
 description: "Scans project dependencies for security vulnerabilities. Uses `scan-prep.sh` to gather and filter raw audit data before Claude analyzes it — zero tokens spent on data collection."
+user-invocable: true
 effort: low
 model: sonnet
 allowed-tools:

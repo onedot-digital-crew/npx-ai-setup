@@ -1,6 +1,7 @@
 ---
 name: spec-validate
 description: "Validate a draft spec before execution."
+user-invocable: true
 effort: low
 model: haiku
 argument-hint: "<NNN spec number>"

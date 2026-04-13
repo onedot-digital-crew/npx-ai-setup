@@ -1,6 +1,8 @@
 ---
 name: build-fix
 description: "Active build-fixer: runs the build, parses the first error, applies a minimal fix, rebuilds — repeat until green or guard rails trigger."
+user-invocable: true
+effort: medium
 model: sonnet
 argument-hint: "[optional: build command override]"
 allowed-tools:
@@ -16,7 +18,6 @@ allowed-tools:
 Active build-fixer: runs the build, parses the first error, applies a minimal fix, rebuilds — repeat until green or guard rails trigger.
 
 ## When NOT to Use
-
 - **Architecture issues** — stop and run `/spec` or spawn `code-architect`
 - **Test failures** — use `/test` instead; this command fixes build errors only
 - **Refactoring needed** — use `/techdebt` or open a spec
@@ -40,18 +41,16 @@ Run `! bash .claude/scripts/build-prep.sh` to auto-detect the build command and 
 - If exit 2: parse the `=== BUILD ERRORS ===` section to identify the first error group and proceed to the fix loop.
 - If exit 1: build system not detected — ask user to specify the build command via `$ARGUMENTS`.
 
-### 1. Fix Loop (up to 10 iterations)
-
-### 2. Fix Loop (up to 10 iterations)
+### 1. Fix loop
 
 For each iteration:
 
-#### 2a. Parse Error
+#### 1a. Parse error
 - Extract: error type, file path, line number, message
 - Classify: type error | import error | syntax error | missing export | other
 - If "other" and unrecognizable: stop, report the raw error, recommend manual intervention
 
-#### 2b. Plan Fix
+#### 1b. Plan fix
 State the fix in one sentence before touching any file:
 > "Fix: [what will change] in [file] at line [N] because [reason]."
 
@@ -59,12 +58,12 @@ Check guard rails:
 - Calculate lines to change vs total file lines — if >5%, stop and escalate
 - If fix requires changing >2 files simultaneously, stop and open a spec
 
-#### 2c. Apply Fix
+#### 1c. Apply fix
 - Read the target file completely before editing
 - Make the minimal change — do not touch surrounding code
 - Verify the change compiles in isolation where possible (e.g., `tsc --noEmit` on the single file)
 
-#### 2d. Rebuild
+#### 1d. Rebuild
 Run `! bash .claude/scripts/build-prep.sh` again. Capture result.
 
 If output contains `BUILD_PASSED`: exit loop → go to Step 3.
@@ -72,7 +71,7 @@ If **FAIL**: check for new errors vs same error:
   - New error: continue loop with next iteration
   - Same error after 2nd attempt: abort, report "Unfixable automatically — see error below."
 
-### 2e. Validate (after build passes)
+### 2. Validate
 After build passes, spawn `build-validator` agent (model: haiku) to confirm the build is truly green and check for warnings that might indicate fragile fixes.
 
 ### 3. Report
@@ -96,8 +95,11 @@ If aborted, append:
 ```
 
 ## Rules
-
 - Never run `--force` or ignore TypeScript strict checks to silence errors
 - Never delete type definitions to make errors disappear
 - If $ARGUMENTS contains a build command (e.g., `npm run build:prod`), use that instead of auto-detected command
 - Commit nothing — leave staging to the user
+
+## Next Step
+
+If the build is green, continue with `/review` or `/commit`. If it aborted, switch to `/debug` or `/spec`.

@@ -1,6 +1,8 @@
 ---
 name: reflect
 description: "Analyze the current session for corrections, architectural discoveries, and stack decisions — convert them into permanent learnings."
+user-invocable: true
+effort: medium
 model: sonnet
 disable-model-invocation: true
 allowed-tools:
@@ -15,158 +17,91 @@ Analyze the current session for corrections, architectural discoveries, and stac
 
 ## Process
 
-### 1. Recall signals from this session
+### 1. Recall session signals
 
-Review the conversation history in your context. Look for four categories of signals:
+Review the conversation history and extract only:
+- **CORRECTION**: explicit corrections or rejected approaches
+- **AFFIRMATION**: approved approaches worth preserving
+- **ARCHITECTURAL**: data flow, boundaries, dependencies, gotchas
+- **STACK**: dependencies, versions, tool choices, runtime requirements
 
-**CORRECTION signals** (explicit corrections — must apply):
-- "don't do X", "stop doing Z", "not like that"
-- "use Y instead", "wrong approach", "revert that"
-- "I said X, not Y", "that's incorrect"
+Skip general questions, clarifications, and one-off decisions without reusable value.
 
-**AFFIRMATION signals** (approved approaches — apply if consistent):
-- "good", "exactly", "yes that's right", "keep doing that"
-- "that's the right way", "perfect", "this is how I want it"
+If `decisions.md` exists and you find new architectural decisions, append only genuinely new rows with the next D-number.
 
-**ARCHITECTURAL signals** (discovered patterns, component relationships, gotchas):
-- Discovered data flow paths or component dependencies
-- Codebase gotchas ("this file actually controls X", "Y depends on Z")
-- Structural patterns ("all routes go through middleware X", "state lives in Y")
-- Integration boundaries ("service A talks to B via C")
-- After detecting architectural signals, also check if `decisions.md` exists in the project root. If yes, append new architectural decisions as rows using the next sequential D-number. Only append decisions not already present in the register.
-
-**STACK signals** (new deps, version decisions, tool choices discovered at runtime):
-- New dependency added or removed during session
-- Version constraint discovered ("library X requires Node >= 18")
-- Tool choice made ("use pnpm not npm", "vitest not jest")
-- Runtime requirement discovered ("needs Redis running locally")
-
-Only process CORRECTION, AFFIRMATION, ARCHITECTURAL, and STACK signals. Skip general questions, clarifications, and one-off decisions without a clear general rule.
-
-### 2. Classify each signal by target
-
-For each signal found, classify where it belongs:
+### 2. Classify by target
 
 | Signal type | Target | Section |
 |---|---|---|
-| Coding style, naming, patterns, tooling choices | `.agents/context/LEARNINGS.md` | `## Conventions` |
+| Coding style, naming, patterns, tooling | `.agents/context/LEARNINGS.md` | `## Conventions` |
 | Component relationships, data flow, gotchas | `.agents/context/LEARNINGS.md` | `## Architecture` |
 | Dependencies, versions, runtime requirements | `.agents/context/LEARNINGS.md` | `## Stack` |
 | Corrections and approved approaches | `.agents/context/LEARNINGS.md` | `## Corrections` |
-| Project workflow, process rules, safety rules | `CLAUDE.md` | Critical Rules section |
-| Tool usage, commands, CLI patterns | `CLAUDE.md` | Commands section |
+| Workflow, process rules, safety rules | `CLAUDE.md` | Critical Rules |
+| Tool usage, commands, CLI patterns | `CLAUDE.md` | Commands |
 
-Most signals go to `.agents/context/LEARNINGS.md`. Only workflow/process rules and CLI patterns go to `CLAUDE.md`.
+Prefer `.agents/context/LEARNINGS.md`. Only workflow and CLI rules go to `CLAUDE.md`.
 
-### 3. Draft proposed changes (smart merge)
+### 3. Draft smart-merge operations
 
-Read `.agents/context/LEARNINGS.md` and `CLAUDE.md` first to detect existing entries.
+Read `.agents/context/LEARNINGS.md` and `CLAUDE.md` first.
 
-For each signal, determine the **operation type**:
-
-- **`+ ADD`** — New entry, no semantic overlap with existing entries
-- **`~ UPDATE`** — Existing entry needs refinement (e.g. more specific, corrected, expanded). Reference the existing entry being replaced.
-- **`- REMOVE`** — Existing entry is now stale, contradicted, or superseded by a new signal. Reference the entry being removed.
+For each signal, classify the write operation:
+- `+ ADD` — new rule or fact
+- `~ UPDATE` — refine an existing entry
+- `- REMOVE` — stale or contradicted entry
 
 Draft rules:
-- Maximum 1-2 lines per entry
-- Corrections/affirmations: phrase as a directive ("Always X", "Never Y", "Use X instead of Y")
-- Architectural findings: phrase as a factual statement ("Component X depends on Y", "All API calls route through Z")
-- Stack findings: phrase as a factual statement ("Requires Node >= 18", "Uses pnpm as package manager")
+- Max 1-2 lines per entry
+- Corrections and affirmations as directives
+- Architecture and stack items as factual statements
 
-If no actionable signals were found in this session, report that clearly and stop.
+If there are no actionable signals, report that and stop.
 
-### 4. Show proposed changes for approval
+### 4. Ask for approval
 
-Use AskUserQuestion to present all proposed operations and ask for approval before writing anything.
-Format the proposal showing operation type, target section, and content:
-```
-Proposed changes from this session:
-
-.agents/context/LEARNINGS.md — ## Conventions
-+ ADD: Always use kebab-case for script filenames
-~ UPDATE: "Use snake_case for variables" → "Use snake_case for variables and function names"
-- REMOVE: "Prefer camelCase for JS functions" (contradicted by project convention)
-
-.agents/context/LEARNINGS.md — ## Architecture
-+ ADD: All API calls route through middleware X
-
-CLAUDE.md — Critical Rules
-+ ADD: Never modify template files directly — use generation logic instead
-
-Apply these changes?
-Options: [Apply all] [Skip all] [Edit manually]
-```
+Use AskUserQuestion to show all proposed operations grouped by target and section.
+Offer: `Apply all`, `Skip all`, `Edit manually`.
 
 ### 5. Write approved changes
 
-Only write items the user approved. For each approved item:
+Only write approved items.
 
-**For `.agents/context/LEARNINGS.md`:**
-- If the file does not exist, create it with the header and relevant sections
-- **ADD**: Append the entry under the matching section header
-- **UPDATE**: Replace the old entry with the new one using the Edit tool
-- **REMOVE**: Delete the entry using the Edit tool
-- Keep the file organized with these sections: `## Corrections`, `## Conventions`, `## Architecture`, `## Stack`
-- Only create sections that have entries — do not add empty sections
+For `.agents/context/LEARNINGS.md`:
+- Create the file only if needed
+- Keep sections to `Corrections`, `Conventions`, `Architecture`, `Stack`
+- Only create sections that have entries
+- `ADD` append, `UPDATE` replace, `REMOVE` delete
 
-**LEARNINGS.md format:**
-```markdown
-# Learnings
+For `CLAUDE.md`:
+- `ADD` append under `Critical Rules` or `Commands`
+- `UPDATE` replace
+- `REMOVE` delete
 
-> Curated session learnings from /reflect. Persistent across updates — generate.sh never touches this file.
+### 6. Save approved corrections to claude-mem
 
-## Corrections
-- Always use X instead of Y — reason
-- Never do Z in this codebase — reason
+After writing approved changes, save only approved **CORRECTION** signals to `mcp__plugin_claude-mem_mcp-search__save_memory`.
 
-## Conventions
-- Use kebab-case for script filenames
-
-## Architecture
-- Component X depends on Y for state management
-- All API calls route through middleware Z
-
-## Stack
-- Requires Node >= 18 for native fetch
-- Uses pnpm as package manager
-```
-
-**For `CLAUDE.md`:**
-- **ADD**: Append under "Critical Rules" or "Commands" as classified
-- **UPDATE**: Replace the old entry with the Edit tool
-- **REMOVE**: Delete the entry with the Edit tool
-
-### 6. Save deliberate decisions to claude-mem (automatic, no approval needed)
-
-After writing approved changes, automatically call `mcp__plugin_claude-mem_mcp-search__save_memory` for every approved **CORRECTION signal**.
-
-Do NOT save AFFIRMATION, ARCHITECTURAL, or STACK signals — those live in project files and are always loaded.
-
-For each approved correction, call save_memory with:
-- `title`: `decision: [component or context] — [what was decided]`
-  Example: `decision: SliderWrapper — keep ClientOnly without SSR fallback`
-- `text`: structured block:
+Use:
+- `title`: `decision: [context] — [decision]`
+- `text`:
   ```
-  Project: [project name from git remote or directory name]
-  Context: [component, file, or feature area]
-  Decision: [what was deliberately chosen]
-  Avoid: [what Claude must NOT suggest — the rejected alternative]
-  Reason: [why, one sentence]
+  Project: [project]
+  Context: [component, file, or feature]
+  Decision: [chosen approach]
+  Avoid: [rejected alternative]
+  Reason: [one sentence]
   ```
 
-This enables semantic retrieval in future sessions: if Claude is about to suggest the rejected approach, the search match surfaces the saved decision before the suggestion is made.
-
-If `mcp__plugin_claude-mem_mcp-search__save_memory` is not available (plugin not installed), skip this step silently — do not error.
+If the plugin is unavailable, skip silently.
 
 ## Rules
-- Smart merge: ADD new entries, UPDATE refined entries, REMOVE stale entries — not append-only.
-- Never write low-signal observations as rules.
-- If a signal is ambiguous, skip it rather than guess.
-- If no signals were found, say so and stop — do not invent rules.
-- Changes must be explicit and git-trackable — no silent mutations.
-- LEARNINGS.md is the primary target — only workflow/process rules go to CLAUDE.md.
+- Smart merge only: ADD, UPDATE, REMOVE.
+- Never write low-signal observations as durable rules.
+- If a signal is ambiguous, skip it.
+- Do not invent learnings when none were observed.
+- LEARNINGS.md is primary; CLAUDE.md is secondary.
 
 ## Next Step
 
-After saving learnings, run `/apply-learnings` to distribute new entries from LEARNINGS.md into the correct project context files (`rules/`, `ARCHITECTURE.md`, `CONVENTIONS.md`, etc.). Then run `/commit` to checkpoint all changes.
+Run `/apply-learnings`, then `/commit`.
