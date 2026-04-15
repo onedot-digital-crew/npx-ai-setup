@@ -8,4 +8,4 @@ Run AI setup health check (12 checks: hooks, settings, context files, CLAUDE.md 
 
 ## Next Step
 
-If checks fail, run `/update` to install the latest version, or fix the reported issues manually and re-run `/doctor`.
+If checks fail, run `/update` to install the latest version, or fix the reported issues manually and re-run `/health`.

@@ -93,4 +93,4 @@ Summarize changed files concisely. If nothing changed, say so explicitly.
 
 ## Next Step
 
-Restart Claude Code and run `/doctor`.
+Restart Claude Code and run `/health`.

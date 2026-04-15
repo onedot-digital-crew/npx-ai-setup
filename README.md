@@ -93,7 +93,7 @@ Available in Claude Code and compatible clients. In Codex, use `$spec`, `$spec-w
 | Command | Model | Description |
 |---------|-------|-------------|
 | `/reflect` | Sonnet | Capture session learnings as permanent rules |
-| `/doctor` | Sonnet | AI setup health check (hooks, settings, context, MCP) |
+| `/health` | Haiku | AI setup health check (hooks, settings, context, MCP) |
 | `/update` | Sonnet | Check for ai-setup updates and install |
 | `/context-refresh` | Sonnet | Regenerate STACK.md, ARCHITECTURE.md, CONVENTIONS.md |
 

@@ -1,6 +1,6 @@
 ---
 name: test-setup
-description: Run ai-setup from local dev repo (~/Sites/npx-ai-setup) and validate with /doctor. Use to test setup changes before publishing.
+description: Run ai-setup from local dev repo (~/Sites/npx-ai-setup) and validate with /health. Use to test setup changes before publishing.
 user-invocable: true
 effort: low
 model: haiku
@@ -8,11 +8,11 @@ allowed-tools:
   - Bash
 ---
 
-Run ai-setup from local dev repo (~/Sites/npx-ai-setup) and validate with /doctor.
+Run ai-setup from local dev repo (~/Sites/npx-ai-setup) and validate with /health.
 Use to test setup changes before publishing.
 
 !.claude/scripts/test-setup.sh
 
 ## Next Step
 
-After the test run, review the output for errors. Run `/doctor` in the target project to verify the installation is healthy.
+After the test run, review the output for errors. Run `/health` in the target project to verify the installation is healthy.

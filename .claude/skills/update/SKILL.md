@@ -107,4 +107,4 @@ If no files changed (update was a no-op or failed silently), say so explicitly.
 
 ## Next Step
 
-After the update, restart Claude Code to pick up new hooks and settings. Run `/doctor` to verify the installation is healthy.
+After the update, restart Claude Code to pick up new hooks and settings. Run `/health` to verify the installation is healthy.

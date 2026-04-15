@@ -17,7 +17,7 @@ Use the skill (`/test`, `/lint`) only when you need Claude to analyze failures o
 ## Skill Shell Execution
 
 Do NOT set `disableSkillShellExecution: true` in settings.json for this project.
-Skills `doctor`, `spec-board`, `review`, `ci`, `test-setup`, and `session-optimize` use `!` inline shell execution.
+Skills `health`, `spec-board`, `review`, `ci`, `test-setup`, and `session-optimize` use `!` inline shell execution.
 
 ## Build Artifact Rules
 

@@ -16,7 +16,7 @@ Dieses Setup macht Claude Code zum strukturierten Entwicklungswerkzeug statt ein
 ```bash
 claude                # Claude Code im Projekt oeffnen
 /spec-board           # aktive Specs anzeigen
-/doctor               # Setup-Health pruefen
+/health               # Setup-Health pruefen
 /analyze              # Codebase-Analyse → PATTERNS.md + AUDIT.md (empfohlen nach Erstinstallation)
 ```
 
@@ -132,7 +132,7 @@ Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
 | `/reflect` | Session-Learnings als permanente Regeln speichern. Nach langen Sessions (>30 Tool Calls). |
 | `/apply-learnings` | Gesammelte Learnings aus LEARNINGS.md in die richtigen Context-Dateien einarbeiten. |
 | `/session-optimize` | Vergangene Sessions analysieren — Qualitaet, Effizienz, Token-Savings verbessern. |
-| `/doctor` | AI-Setup Health Check — Hooks, Settings, Context, MCP pruefen. |
+| `/health` | AI-Setup Health Check — Hooks, Settings, Context, MCP pruefen. |
 | `/update` | ai-setup Updates pruefen und installieren. |
 
 ---

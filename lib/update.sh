@@ -580,6 +580,8 @@ cleanup_known_orphans() {
     ".claude/commands/pause.md"
     ".claude/commands/resume.md"
     ".continue-here.md"
+    ".claude/skills/doctor/SKILL.md"
+    ".claude/commands/doctor.md"
   )
   for target in "${orphans[@]}"; do
     [ -f "$target" ] || continue
