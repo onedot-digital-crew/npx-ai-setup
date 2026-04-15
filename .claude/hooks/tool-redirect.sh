@@ -28,10 +28,12 @@ if [ "$TOOL_NAME" = "Bash" ]; then
   CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
   # Check for bare `git` (not prefixed with rtk)
-  # Match git at start, after &&, after ;, or after whitespace — NOT after |
-  if echo "$CMD" | grep -qE '(^|&&|;|\s)git\s' && ! echo "$CMD" | grep -qE '(^|&&|;|\s)rtk\s+git\s'; then
+  # Match: git at start, after &&, after ;, or after whitespace — NOT inside .git/ paths
+  if echo "$CMD" | grep -qE '(^|[[:space:];&])git[[:space:]]' && \
+     ! echo "$CMD" | grep -qE '(^|[[:space:];&])rtk[[:space:]]+git[[:space:]]' && \
+     ! echo "$CMD" | grep -qE '\.git/'; then
     # Extract git subcommand (first word after git, ignoring rev-range args like HASH..HEAD)
-    SUBCMD=$(echo "$CMD" | grep -oE '(^|[;&\s])git\s+[a-z-]+' | head -1 | awk '{print $NF}')
+    SUBCMD=$(echo "$CMD" | grep -oE '(^|[[:space:];&])git[[:space:]]+[a-z-]+' | head -1 | awk '{print $NF}')
 
     # GitHub-specific operations → suggest gh
     case "$SUBCMD" in
