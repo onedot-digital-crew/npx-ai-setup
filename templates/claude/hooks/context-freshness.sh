@@ -29,10 +29,10 @@ done < "$STATE_FILE"
 
 CHANGED=""
 
-# Compare git commit hash (~5ms)
+# Compare git commit count since last refresh (warn only at 5+ commits)
 if [ -n "$STORED_GIT" ]; then
-  CURRENT_GIT=$(git rev-parse HEAD 2>/dev/null)
-  [ -n "$CURRENT_GIT" ] && [ "$CURRENT_GIT" != "$STORED_GIT" ] && CHANGED="source code"
+  COMMIT_COUNT=$(git rev-list --count "${STORED_GIT}..HEAD" 2>/dev/null || echo "0")
+  [ "$COMMIT_COUNT" -ge 5 ] 2>/dev/null && CHANGED="${COMMIT_COUNT} commits since last context refresh"
 fi
 
 # Compare package.json

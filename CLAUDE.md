@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 ## Project Context (tiered loading)
-SessionStart injects L0 abstracts from `.agents/context/` (~400 tokens).
+@.agents/context/SUMMARY.md
 For full details: `/context-load STACK.md` (or ARCHITECTURE.md, CONVENTIONS.md, all).
 
 ## CLI Shortcuts (zero tokens)

@@ -10,6 +10,13 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+### feat: SUMMARY.md @-Import statt context-loader.sh (Spec 636)
+- `build-summary.sh` Generator: AUDIT/ARCH Frontmatter + CONCEPT.md (wenn vorhanden) + graph.json Top-Hubs → `.agents/context/SUMMARY.md` (max 50 Zeilen)
+- `CLAUDE.md` + `templates/CLAUDE.md`: `@.agents/context/SUMMARY.md` unter Project Context — statisch gecacht
+- `context-refresh` Skill ruft `build-summary.sh` vor `.state`-Write
+- `context-loader.sh` Hook entfernt aus `.claude/hooks/` und beiden `settings.json`
+- `context-freshness.sh`: Commit-Counter statt Hash-Diff — warnt erst bei ≥5 Commits
+
 ## [v2.1.2] — 2026-04-13
 
 <!-- slack-announcement -->

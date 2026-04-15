@@ -89,7 +89,7 @@ Read the 2-3 most relevant source files. Use the Phase 1d sketch — do not re-a
 
 ### Step 3 — Create the spec file (with auto-split check)
 Translate Phase 1d sketch into spec steps with actual file paths. After drafting, check auto-split triggers:
-- **Trigger A**: draft >60 lines or >8 steps
+- **Trigger A**: draft >8 steps
 - **Trigger B**: steps span fundamentally different architectural layers
 
 If either fires: split into two specs (NNN and NNN+1), cross-reference each, note dependencies. Otherwise write a single spec.
@@ -136,10 +136,9 @@ Show spec to user for review and refinement.
 ```
 
 ## Constraints & Rules
-- **Total spec: max 60 lines.** If more, split into multiple specs.
 - **Goal**: 1 sentence. **Context**: 2-3 sentences.
 - **Steps**: Flat checkbox list, max 8 items. No nested sub-steps.
-- **Acceptance Criteria**: max 5 items. **Out of Scope**: max 3 items.
+- **Acceptance Criteria**: vollständig — alle beobachtbaren Outcomes. **Out of Scope**: max 3 items.
 - Steps must come from Phase 1d sketch — be specific, include file paths.
 - Use today's date. Filename: lowercase with hyphens.
 - Always create `specs/` and `specs/completed/` if they don't exist.

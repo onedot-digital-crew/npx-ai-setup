@@ -19,15 +19,16 @@ Regenerates `.agents/context/` files and reliably updates `.state` so `context-f
    - `package.json` contains `@storyblok` → `bash .claude/scripts/context-storyblok.sh`
    - No match → skip (only standard 3 files)
 
-3. **Always** run this directly after agents and scripts complete:
+3. **Always** run these directly after agents and scripts complete:
 ```bash
+bash .claude/scripts/build-summary.sh
 {
   echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)"
   echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)"
   echo "GIT_HASH=$(git rev-parse HEAD 2>/dev/null)"
 } > .agents/context/.state
 ```
-4. Confirm: "Context refreshed. .state updated to $(git rev-parse --short HEAD)."
+4. Confirm: "Context refreshed. .state updated to $(git rev-parse --short HEAD). SUMMARY.md regenerated."
 
 ## Why step 3 is mandatory
 
@@ -35,7 +36,7 @@ The agent may silently skip the `.state` write. Running it here guarantees `.sta
 
 ## System scanners
 
-Installed to `.claude/scripts/` by `ai-setup`. Run in < 1s, zero LLM cost. Write a system-specific `.agents/context/*.md` with frontmatter abstract — loaded automatically by `context-loader.sh` at SessionStart.
+Installed to `.claude/scripts/` by `ai-setup`. Run in < 1s, zero LLM cost. Write a system-specific `.agents/context/*.md` with frontmatter abstract — included in `SUMMARY.md` on next `/context-refresh`.
 
 ## Next Step
 
