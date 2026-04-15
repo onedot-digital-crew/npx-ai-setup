@@ -30,7 +30,8 @@ done < "$STATE_FILE"
 CHANGED=""
 
 # Compare git commit count since last refresh (warn only at 5+ commits)
-if [ -n "$STORED_GIT" ]; then
+# Skips gracefully in shallow clones where STORED_GIT may not exist in local history
+if [ -n "$STORED_GIT" ] && git cat-file -e "${STORED_GIT}^{commit}" 2>/dev/null; then
   COMMIT_COUNT=$(git rev-list --count "${STORED_GIT}..HEAD" 2>/dev/null || echo "0")
   [ "$COMMIT_COUNT" -ge 5 ] 2>/dev/null && CHANGED="${COMMIT_COUNT} commits since last context refresh"
 fi

@@ -1,6 +1,6 @@
 # Spec: SUMMARY.md Auto-Import statt Context-Loader Hook
 
-> **Spec ID**: 636 | **Created**: 2026-04-15 | **Status**: in-review | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 636 | **Created**: 2026-04-15 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 Projekt-Kontext via committeter `SUMMARY.md` (@-Import in CLAUDE.md) laden (AUDIT Critical/High + ARCH-Abstracts + Graph Top-Hubs), `context-loader.sh` Hook ersetzen, `context-freshness.sh` erst ab 5 Commits warnen.

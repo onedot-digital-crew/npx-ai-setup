@@ -32,7 +32,8 @@ extract_frontmatter_key() {
     [ "$line" = "---" ] && return 0
     case "$line" in
       "${key}:"*)
-        val="${line#${key}: }"
+        val="${line#${key}:}"
+        val="${val# }"   # strip single leading space (standard YAML)
         val="${val#\"}"
         val="${val%\"}"
         echo "$val"
@@ -141,9 +142,11 @@ extract_sections() {
 line_count=$(wc -l < "$OUTPUT")
 if [ "$line_count" -gt 50 ]; then
   tmp=$(mktemp)
+  trap 'rm -f "$tmp"' EXIT
   head -50 "$OUTPUT" > "$tmp"
   echo "<!-- truncated at 50 lines -->" >> "$tmp"
   mv "$tmp" "$OUTPUT"
+  trap - EXIT
 fi
 
 echo "SUMMARY.md generated: $(wc -l < "$OUTPUT") lines → $OUTPUT"
