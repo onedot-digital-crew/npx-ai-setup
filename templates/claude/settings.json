@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "claude-opus-4-6",
+  "model": "claude-opus-4-7",
   "plansDirectory": ".claude/plans",
   "autoMemoryDirectory": ".agents/memory",
   "_governanceDoc": "docs/claude-governance.md",
@@ -90,6 +90,20 @@
       "Read(*.min.css)",
       "Read(*.map)",
       "Read(*.chunk.js)",
+      "Edit(.env*)",
+      "Write(.env*)",
+      "Edit(**/package-lock.json)",
+      "Write(**/package-lock.json)",
+      "Edit(**/yarn.lock)",
+      "Write(**/yarn.lock)",
+      "Edit(**/pnpm-lock.yaml)",
+      "Write(**/pnpm-lock.yaml)",
+      "Edit(**/bun.lockb)",
+      "Write(**/bun.lockb)",
+      "Edit(**/composer.lock)",
+      "Write(**/composer.lock)",
+      "Edit(.git/**)",
+      "Write(.git/**)",
       "Bash(rm -r *)",
       "Bash(rm -rf *)",
       "Bash(git reset --hard *)",
@@ -128,11 +142,22 @@
       },
       {
         "matcher": "Read|Edit",
+        "if": "Read(**/*.{ts,tsx,js,jsx,mjs,cjs,vue,py})|Edit(**/*.{ts,tsx,js,jsx,mjs,cjs,vue,py})",
         "hooks": [
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/graph-context.sh",
             "timeout": 2
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(grep *)|Bash(find *)|Bash(cat *)|Bash(head *)|Bash(tail *)|Bash(git *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
           }
         ]
       },
@@ -179,6 +204,17 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/spec-stop-guard.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/precompact-guidance.sh",
             "timeout": 5
           }
         ]

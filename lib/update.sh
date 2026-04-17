@@ -609,7 +609,6 @@ cleanup_known_orphans() {
     ".claude/skills/setup-optimize/token_analysis.py"
     ".claude/hooks/memory-recall.sh"
     ".claude/hooks/transcript-ingest.sh"
-    ".claude/hooks/precompact-guidance.sh"
     ".claude/hooks/notify.sh"
     ".claude/rules/terse-output.md"
   )
