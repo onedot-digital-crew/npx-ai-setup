@@ -115,71 +115,51 @@
   "command": {
     "analyze": {
       "description": "analyze",
-      "template": "{file:.claude/commands/analyze.md}\\n\\n$ARGUMENTS"
-    },
-    "bug": {
-      "description": "bug",
-      "template": "{file:.claude/commands/bug.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/analyze/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "challenge": {
       "description": "challenge",
-      "template": "{file:.claude/commands/challenge.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/challenge/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "commit": {
       "description": "commit",
-      "template": "{file:.claude/commands/commit.md}\\n\\n$ARGUMENTS"
-    },
-    "evaluate": {
-      "description": "evaluate",
-      "template": "{file:.claude/commands/evaluate.md}\\n\\n$ARGUMENTS"
-    },
-    "grill": {
-      "description": "grill",
-      "template": "{file:.claude/commands/grill.md}\\n\\n$ARGUMENTS"
-    },
-    "pr": {
-      "description": "pr",
-      "template": "{file:.claude/commands/pr.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/commit/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "reflect": {
       "description": "reflect",
-      "template": "{file:.claude/commands/reflect.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/reflect/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "release": {
       "description": "release",
-      "template": "{file:.claude/commands/release.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/release/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "review": {
       "description": "review",
-      "template": "{file:.claude/commands/review.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/review/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "spec-board": {
       "description": "spec board",
-      "template": "{file:.claude/commands/spec-board.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/spec-board/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "spec-review": {
       "description": "spec review",
-      "template": "{file:.claude/commands/spec-review.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/spec-review/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "spec-work-all": {
       "description": "spec work all",
-      "template": "{file:.claude/commands/spec-work-all.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/spec-work-all/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "spec-work": {
       "description": "spec work",
-      "template": "{file:.claude/commands/spec-work.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/spec-work/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "spec": {
       "description": "spec",
-      "template": "{file:.claude/commands/spec.md}\\n\\n$ARGUMENTS"
-    },
-    "techdebt": {
-      "description": "techdebt",
-      "template": "{file:.claude/commands/techdebt.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/spec/SKILL.md}\\n\\n$ARGUMENTS"
     },
     "test": {
       "description": "test",
-      "template": "{file:.claude/commands/test.md}\\n\\n$ARGUMENTS"
+      "template": "{file:.claude/skills/test/SKILL.md}\\n\\n$ARGUMENTS"
     }
   }
 }

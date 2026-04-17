@@ -668,8 +668,6 @@ install_skills() {
     local name="${skill_dir##*/}"
     local skill_file="$skill_dir/SKILL.template.md"
     [ -f "$skill_file" ] || continue
-    # Skip internal-only skills not meant for target projects
-    [[ "$name" == "test-setup" ]] && continue
     mkdir -p ".claude/skills/$name"
     _install_or_update_file "$skill_file" ".claude/skills/$name/SKILL.md"
     # Install supporting reference files if present

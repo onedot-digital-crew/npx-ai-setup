@@ -1,7 +1,7 @@
 # Learnings
 
 > Curated session learnings from /reflect. Persistent across updates — generate.sh never touches this file.
-> After /reflect: run `/apply-learnings` to distribute entries into the correct project files. Applied entries move to `## Applied`.
+> After /reflect: review entries and move each into the correct project file manually (CLAUDE.md, rules, skill docs). Applied entries move to `## Applied`.
 
 ## Architecture
 - Direkte Edits an `.claude/skills/*/SKILL.md` überleben `/update` nicht — Änderungen immer in `templates/skills/*/SKILL.template.md` vornehmen
@@ -10,7 +10,7 @@
 ## Corrections
 
 ## Applied
-_Entries moved here after /apply-learnings has incorporated them into their target files._
+_Entries moved here after manual incorporation into target files._
 
 - ~~`sync_boilerplate()` muss `get_boilerplate_repo()` prüfen bevor `pull_boilerplate_files()` aufgerufen wird~~ → `lib/boilerplate.sh:283` (guard already implemented via `if ! get_boilerplate_repo "$system" >/dev/null 2>&1; then return 0; fi`)
 

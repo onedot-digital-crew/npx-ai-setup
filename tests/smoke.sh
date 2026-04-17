@@ -356,12 +356,6 @@ else
   fail "session-extract fixture output missing expected summary lines"
 fi
 
-if grep -q 'LOCAL FALLBACK' .claude/skills/session-optimize/SKILL.md 2>/dev/null; then
-  pass "session-optimize documents local fallback mode"
-else
-  fail "session-optimize missing local fallback documentation"
-fi
-
 echo "--- Stack-aware sandbox permissions ---"
 # Simulate: write template settings.json, set framework, run customize, verify deny list
 SANDBOX_TMP=$(mktemp -d "${TMPDIR:-/tmp}/ai-setup-test.XXXXXX")

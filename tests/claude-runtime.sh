@@ -191,7 +191,7 @@ echo "--- Fixture setup ---"
 prepare_fixture_project
 assert_file_exists "$PROJECT_DIR/.claude/settings.json" "project settings installed"
 assert_file_exists "$PROJECT_DIR/.claude/hooks/context-freshness.sh" "project hooks installed"
-assert_file_exists "$PROJECT_DIR/.claude/skills/context-load/SKILL.md" "project skills installed"
+assert_file_exists "$PROJECT_DIR/.claude/skills/commit/SKILL.md" "project skills installed"
 instrument_hook "context-freshness.sh"
 instrument_hook "protect-files.sh"
 instrument_hook "circuit-breaker.sh"

@@ -2,7 +2,7 @@
 
 ## Project Context (tiered loading)
 @.agents/context/SUMMARY.md
-For full details: `/context-load STACK.md` (or ARCHITECTURE.md, CONVENTIONS.md, all).
+For full details: `@.agents/context/STACK.md` (or `ARCHITECTURE.md`, `CONVENTIONS.md`).
 
 ## CLI Shortcuts (zero tokens)
 - CI status: `! bash .claude/scripts/ci-prep.sh`
@@ -12,7 +12,7 @@ For full details: `/context-load STACK.md` (or ARCHITECTURE.md, CONVENTIONS.md, 
 - Quality gate (bash -n + shellcheck + smoke): `! bash .claude/scripts/quality-gate.sh`
 - Debug context: `! bash .claude/scripts/debug-prep.sh`
 
-Use the skill (`/test`, `/lint`) only when you need Claude to analyze failures or auto-fix.
+Use the `/test` skill only when you need Claude to analyze failures or auto-fix.
 
 ## Build Artifact Rules
 
@@ -24,7 +24,11 @@ Non-interactive: `claude -p "<prompt>" --output-format json`. CI: add `--bare` (
 Cost controls: `--max-budget-usd 0.50` / `--max-turns 20`.
 
 ## Model Routing
-Haiku: explore agents and direct tool use only. Sonnet: code generation and implementation (default for subagents).
+Main session: Opus — orchestrator/strategist. Delegate implementation to subagents.
+- Haiku: explore agents, file search, read-only research
+- Sonnet: code generation, implementation (default for subagents)
+- Opus: main session, architecture review, spec creation
+Main edits inline only when <3 tool calls needed; otherwise spawn a subagent.
 
 ## RTK
 Always prefix commands with `rtk`. Full reference: `.claude/docs/rtk-reference.md`.

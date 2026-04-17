@@ -8,7 +8,7 @@ Checks CI status for the current branch — runs `gh pr checks` and `gh run list
 ## When NOT to Use
 
 - **Before opening a PR** — use `/pr` which includes CI checks in pr-prep.sh
-- **Build errors in your local code** — use `/build-fix`
+- **Build errors in your local code** — run the build locally and fix manually
 - **Test failures locally** — use `/test`
 
 ## Process
@@ -57,7 +57,7 @@ If any check failed, list:
 ### 4. Suggest Next Step
 
 - CI green → run `/review` or `/commit` if you have uncommitted changes.
-- CI failing → run `/build-fix` for build/type errors, or `/test` for test failures.
+- CI failing → run the build locally for build/type errors, or `/test` for test failures.
 - PR not found → push the branch and open a PR with `/pr`.
 
 ## Rules
@@ -69,4 +69,4 @@ If any check failed, list:
 ## Next Step
 
 If CI is green, run `/review` to check uncommitted changes or `/pr` to open a pull request.
-If CI is failing, run `/build-fix` for compiler errors or `/test` for test failures.
+If CI is failing, run the build locally for compiler errors or `/test` for test failures.

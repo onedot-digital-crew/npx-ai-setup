@@ -10,11 +10,10 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 | `/test` passes | `/review` — Changes reviewen |
 | `/review` passes | `/commit` — Stagen + committen |
 | `/commit` done | `/pr` auf Feature-Branches, oder `/release` auf `main` / `master` |
-| Bug investigation | `/debug` falls noch nicht geladen |
 | Multi-file changes (3+ files, incl. config/rules) | `/spec` — erst planen, dann bauen |
 | Spec erstellt oder abgeschlossen | `/clear` — Session leeren, Kontext-Bleed vermeiden |
 | Session >30 tool calls | `/reflect` — Learnings sichern, dann `/clear` |
-| Build failure | `/build-fix` — iterativ fixen |
+| Build failure | `! bash .claude/scripts/ci-prep.sh` dann manuell fixen |
 | Pre-release | `/release` — Version bump, CHANGELOG, Tag |
 | Viele neue Dateien committed (>5) | `/analyze` — graph.json + Context-Dateien neu generieren |
 
@@ -25,7 +24,7 @@ Claude MAY invoke these skills programmatically (via Skill tool) when the contex
 - `/spec-board` — when user asks for spec overview
 
 **User-only skills** (`disable-model-invocation: true`) — NEVER invoke via Skill tool, only suggest:
-- `/commit`, `/release`, `/reflect`, `/update`
+- `/commit`, `/release`, `/reflect`
 
 Claude SHOULD NOT auto-invoke without user intent:
 - `/pr` — always confirm first

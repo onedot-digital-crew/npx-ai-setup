@@ -10,6 +10,18 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+### Removed
+- Skills: `/spec-run`, `/spec-run-all`, `/setup-optimize`, `/debug`, `/build-fix`, `/lint`, `/scan`, `/techdebt`, `/health`, `/update`, `/context-refresh`, `/context-load`, `/apply-learnings` — verschlankt auf 22 user-invokable slash commands
+- Hooks: `memory-recall.sh`, `transcript-ingest.sh`, `precompact-guidance.sh`, `notify.sh` — redundant seit claude-mem `SessionStart`-Hook Events konsumiert
+- Rules: `terse-output.md` als Projekt-Rule entfernt (bleibt Global-Rule); hooks/README.md Referenzen auf entfernte `context-monitor.sh`, `file-index.sh`, `subagent-*`, `tdd-checker.sh`, `permission-denied-log.sh` bereinigt
+
+### Changed
+- `.claude/rules/agents.md`: 82 → 31 Zeilen — TDD-Tutorials und Modell-Boilerplate entfernt, Kern-Dispatch-Regeln behalten
+- `.claude/rules/testing.md`: 66 → 30 Zeilen — Standard-Test-Knowledge raus, nur noch projektspezifische Policies
+- `settings.json` Hook-Config gestrippt: UserPromptSubmit 3 → 2 Hooks, Stop 2 → 1, Notification + PreCompact komplett entfernt
+- `README.md` + `WORKFLOW-GUIDE.md` + `hooks/README.md`: stale refs auf entfernte Commands/Hooks entfernt, Inventar synchronisiert
+- `lib/update.sh` Cross-Project-Cleanup-Array um 9 Einträge erweitert für saubere Migration auf Client-Projekten
+
 ## [v2.1.3] — 2026-04-15
 
 <!-- slack-announcement -->

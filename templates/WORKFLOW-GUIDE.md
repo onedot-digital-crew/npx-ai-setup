@@ -16,9 +16,10 @@ Dieses Setup macht Claude Code zum strukturierten Entwicklungswerkzeug statt ein
 ```bash
 claude                # Claude Code im Projekt oeffnen
 /spec-board           # aktive Specs anzeigen
-/health               # Setup-Health pruefen
 /analyze              # Codebase-Analyse → PATTERNS.md + AUDIT.md (empfohlen nach Erstinstallation)
 ```
+
+Setup-Health pruefen: `! bash .claude/scripts/doctor.sh`
 
 ---
 
@@ -31,7 +32,9 @@ Einmalig ausfuehren wenn du in eine neue Codebase einsteigst oder ein groesseres
 | `/analyze` | Parallele Agents analysieren die Codebase, erzeugen PATTERNS.md (Architektur-Patterns) und AUDIT.md (Hotspots, Risks, Recommendations) | Direkt nach Erstinstallation und wenn sich die Codebase stark veraendert hat |
 | `/explore "topic"` | Read-Only Thinking Partner — Codebase erkunden, Tradeoffs aufzeigen, ASCII-Diagramme. Aendert keine Dateien | Wenn du verstehen willst wie etwas funktioniert, ohne Code anzufassen |
 | `/research "tool"` | Deep-Research eines externen Repos/Tools/Patterns, produziert Brainstorm-Dokument | Bevor ein neues Tool oder Pattern eingefuehrt wird |
-| `/context-load` | Context-Dateien on-demand laden (STACK.md, ARCHITECTURE.md, CONVENTIONS.md) | Wenn Claude Kontext verloren hat oder du gezielt Stack-Details brauchst |
+| `/discover` | Reverse-Engineer Draft-Specs aus existierendem Code | Wenn es Features ohne Spec gibt und du den Stand dokumentieren willst |
+
+Context on-demand laden: `@.agents/context/STACK.md` (oder `ARCHITECTURE.md`, `CONVENTIONS.md`) direkt im Prompt.
 
 ---
 
@@ -48,7 +51,7 @@ Der Standard-Ablauf fuer jede Aenderung die mehr als ein einzelnes File betrifft
 4. /test                          ← Tests laufen lassen + Failures fixen
 5. /review                        ← Uncommitted Changes reviewen
 6. /commit                        ← Stagen + Conventional Commit Message
-7. gh pr create                   ← PR direkt via CLI
+7. /pr                            ← PR-Titel/Body + Build-Validation
 8. /release                       ← Version bump, CHANGELOG, Tag
 ```
 
@@ -73,8 +76,6 @@ Neue Idee oder Feature?
 | `/spec "task"` | Komplexitaet einschaetzen, Implementation durchdenken, Spec erstellen |
 | `/spec-validate NNN` | Spec-Qualitaet scoren bevor sie ausgefuehrt wird |
 | `/spec-work NNN` | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
-| `/spec-run NNN` | Full Pipeline: validate → implement → review → commit (self-healing) |
-| `/spec-run-all` | Full Pipeline fuer alle Draft-Specs parallel in Git Worktrees |
 | `/spec-work-all` | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren |
 | `/spec-review NNN` | Review gegen Acceptance Criteria + Finishing Gate |
 | `/spec-board` | Kanban-Board aller Specs |
@@ -85,28 +86,30 @@ Neue Idee oder Feature?
 |---------|------------|
 | `/test` | Tests laufen lassen + Failures fixen (bis zu 3 Versuche) |
 | `/review` | Uncommitted Changes reviewen (Quick Scan / Standard / Adversarial) |
-| `/lint` | Linter ausfuehren, sichere Violations auto-fixen |
-| `/scan` | Security-Vulnerability-Scan (snyk/npm audit/pip-audit) |
-| `/techdebt` | End-of-Session Sweep — Dead Code, Unused Imports aufspueren |
+
+Schnelle Zero-Token-Checks: `! bash .claude/scripts/lint-prep.sh` bzw. `test-prep.sh`, `ci-prep.sh`, `quality-gate.sh`.
 
 ### Build & Deploy
 
 | Command | Was es tut |
 |---------|------------|
 | `/commit` | Stagen + Conventional Commit Message generieren |
-| `gh pr create` | PR direkt via GitHub CLI erstellen (kein separater Skill) |
+| `/pr` | PR-Titel/Body draften, Build-Validation laufen lassen |
+| `/ci` | CI-Status via `gh pr checks` / `gh run list` pruefen |
 | `/release` | Version bump, CHANGELOG aktualisieren, Git Tag |
-| `/build-fix` | Build-Error iterativ fixen — parsen, fixen, rebuilden (max 10x) |
 
 ### Debugging & Planung
 
 | Command | Was es tut |
 |---------|------------|
-| `/debug "description"` | Hypothesen-getriebene Bug-Untersuchung mit strukturiertem Protokoll |
 | `/challenge "idea"` | Schnelles Critical Gate — GO/SIMPLIFY/REJECT vor Spec-Investment |
 | `/research "tool"` | Deep-Research eines externen Tools/Repos/Patterns |
 | `/explore "topic"` | Read-Only Thinking Partner — keine Dateiaenderungen |
 | `/orchestrate "task"` | Task an Gemini oder Codex CLI delegieren |
+| `/analyze` | Parallele Agents — PATTERNS.md + AUDIT.md erzeugen |
+| `/discover` | Reverse-Engineer Draft-Specs aus existierendem Code |
+
+Fuer Bug-Investigation: `! bash .claude/scripts/debug-prep.sh` sammelt Git-Diff, jungste Logs und Test-Status in einem Shot.
 
 ---
 
@@ -115,13 +118,13 @@ Neue Idee oder Feature?
 Fuer Production-Bugs die den normalen Spec-Cycle umgehen.
 
 ```
-/debug "symptom"               # Root Cause isolieren
-/test                          # Fix mit Tests verifizieren
-/commit                        # Conventional Commit: fix(scope): description
-gh pr create                   # Fast-Track PR via CLI
+! bash .claude/scripts/debug-prep.sh   # Context in Shell sammeln
+/test                                  # Fix mit Tests verifizieren
+/commit                                # Conventional Commit: fix(scope): description
+/pr                                    # Fast-Track PR
 ```
 
-Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
+Kein Spec noetig — Debug-Prep liefert das Untersuchungsprotokoll.
 
 ---
 
@@ -130,22 +133,10 @@ Kein Spec noetig — `/debug` Output dient als Untersuchungsprotokoll.
 | Command | Was es tut |
 |---------|------------|
 | `/reflect` | Session-Learnings als permanente Regeln speichern. Nach langen Sessions (>30 Tool Calls). |
-| `/apply-learnings` | Gesammelte Learnings aus LEARNINGS.md in die richtigen Context-Dateien einarbeiten. |
-| `/session-optimize` | Vergangene Sessions analysieren — Qualitaet, Effizienz, Token-Savings verbessern. |
-| `/health` | AI-Setup Health Check — Hooks, Settings, Context, MCP pruefen. |
-| `/update` | ai-setup Updates pruefen und installieren. |
+| `/claude-changelog` | CHANGELOG automatisch pflegen auf Basis der Commits. |
+| `/yolo` | Fast-Execution-Modus mit minimalem Review — nur fuer klare, lokale Aenderungen. |
 
----
-
-## Utilities
-
-| Command | Was es tut |
-|---------|------------|
-| `/context-load` | Context-Dateien on-demand laden (STACK, ARCHITECTURE, CONVENTIONS). |
-| `/context-refresh` | Context-Dateien neu generieren (STACK.md, ARCHITECTURE.md, CONVENTIONS.md). |
-| `/gh-cli` | GitHub CLI Reference — Repos, Issues, PRs, Actions, Releases. |
-| `/agent-browser` | Browser-Automation — Seiten navigieren, Formulare ausfuellen, Screenshots. |
-| `/bash-defensive-patterns` | Defensive Bash-Techniken fuer Production-Grade Scripts. |
+ai-setup Update: `npx github:onedot-digital-crew/npx-ai-setup` erneut ausfuehren — interaktives Menue (Update/Regenerate/Reset).
 
 ---
 
@@ -179,13 +170,14 @@ In `.agents/context/` — automatisch beim Setup generiert, committed, teamweit 
 
 | Datei | Inhalt | Erzeugt durch |
 |-------|--------|---------------|
+| `SUMMARY.md` | Tiered-Summary aus STACK/ARCHITECTURE/AUDIT — via `@-import` in CLAUDE.md geladen | `build-summary.sh` (automatisch) |
 | `STACK.md` | Tech Stack, Versionen, Key Dependencies | Setup (automatisch) |
 | `ARCHITECTURE.md` | Systemarchitektur und Datenfluesse | Setup (automatisch) |
 | `CONVENTIONS.md` | Naming Patterns, Coding Standards, Testing | Setup (automatisch) |
 | `PATTERNS.md` | Wiederverwendbare Code-Patterns, Module Boundaries | `/analyze` (manuell) |
 | `AUDIT.md` | Hotspots, Risks, Recommendations | `/analyze` (manuell) |
 
-STACK/ARCHITECTURE/CONVENTIONS regenerieren: `/context-refresh` oder `npx @onedot/ai-setup` → **Regenerate** → **Context**.
+Regenerieren: `npx @onedot/ai-setup` → **Regenerate** → **Context**.
 PATTERNS/AUDIT regenerieren: `/analyze` ausfuehren.
 
 ---
@@ -200,6 +192,7 @@ PATTERNS/AUDIT regenerieren: `/analyze` ausfuehren.
 | `ultrathink:` | Prefix fuer Extended Reasoning |
 | `/compact` | Kontext komprimieren (eingebauter Claude Code Command, kein Skill) |
 | `/` | Autocomplete fuer alle verfuegbaren Commands |
+| `defuddle parse <url> --md` | Web-Seiten in Markdown holen (~80% weniger Tokens als WebFetch). Hook `tool-redirect.sh` blockt WebFetch automatisch wenn defuddle verfuegbar ist. |
 
 ---
 
@@ -215,10 +208,7 @@ Circuit-Breaker greift nach 3 Edits. Stop, Problem anders beschreiben.
 `/spec-work NNN` erneut ausfuehren — erkennt `[x]` Schritte und setzt beim ersten offenen fort.
 
 **Wer blockt eigentlich was?**
-`permissions.deny` in `.claude/settings.json` blockt harte Reads wie `.env*`, `dist/` oder Lockfiles. Hooks wie `protect-files.sh` und `context-monitor.sh` sind dagegen lokale Sicherheitsnetze fuer Edit-Flows, Warnings und Runtime-Hinweise.
-
-**Build schlaegt nach spec-work fehl?**
-`/build-fix` — parsed den ersten Error, fixt minimal, rebuildet, wiederholt.
+`permissions.deny` in `.claude/settings.json` blockt harte Reads wie `.env*`, `dist/` oder Lockfiles. Hooks wie `protect-files.sh` und `circuit-breaker.sh` sind dagegen lokale Sicherheitsnetze fuer Edit-Flows, Warnings und Runtime-Hinweise.
 
 **Command nicht gefunden?**
 `/` in Claude Code tippen fuer Autocomplete, oder in `.claude/skills/` schauen.

@@ -35,7 +35,20 @@ if [ -f "$CACHE" ]; then
         [ "${_a[$_i]:-0}" -gt "${_b[$_i]:-0}" ] 2>/dev/null && _gt=1 && break
         [ "${_a[$_i]:-0}" -lt "${_b[$_i]:-0}" ] 2>/dev/null && break
       done
-      [ "$_gt" -eq 1 ] && echo "ai-setup v${LATEST} available (you have v${INSTALLED}). Run: npx github:onedot-digital-crew/npx-ai-setup"
+      # Throttle notification: max once per 4h to avoid spamming every user prompt
+      NOTIFY_STAMP="/tmp/ai-setup-update-notified-$(echo "$PROJECT_ROOT" | cksum | cut -d' ' -f1).txt"
+      NOTIFY_AGE=99999
+      if [ -f "$NOTIFY_STAMP" ]; then
+        if [ "$(uname)" = "Darwin" ]; then
+          NOTIFY_AGE=$(( $(date +%s) - $(stat -f %m "$NOTIFY_STAMP") ))
+        else
+          NOTIFY_AGE=$(( $(date +%s) - $(stat -c %Y "$NOTIFY_STAMP") ))
+        fi
+      fi
+      if [ "$_gt" -eq 1 ] && [ "$NOTIFY_AGE" -gt 14400 ]; then
+        echo "ai-setup v${LATEST} available (you have v${INSTALLED}). Run: npx github:onedot-digital-crew/npx-ai-setup"
+        touch "$NOTIFY_STAMP"
+      fi
     fi
     exit 0
   fi

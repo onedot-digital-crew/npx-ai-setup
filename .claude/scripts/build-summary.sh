@@ -1,7 +1,10 @@
 #!/bin/bash
 # build-summary.sh — Generates .agents/context/SUMMARY.md
 # Called by /context-refresh after regenerating context files.
-# Sources: AUDIT.md + ARCHITECTURE.md frontmatter + CONCEPT.md (if present) + graph.json top_hubs
+# Sources: STACK.md > ARCHITECTURE.md > AUDIT.md > CONCEPT.md > any other *.md
+#          in .agents/context/ with YAML frontmatter abstract:.
+# Any domain-specific context file (STORYBLOK.md, SHOPIFY.md, etc.) with
+# frontmatter `abstract:` is auto-included alphabetically after the standard set.
 # Output: max 50 lines, marker <!-- GENERATED --> at top.
 
 set -e
@@ -91,39 +94,41 @@ extract_sections() {
   echo "# Project Summary"
   echo ""
 
-  # AUDIT: abstract + all sections (Critical/High findings are in sections)
-  AUDIT_FILE="$CONTEXT_DIR/AUDIT.md"
-  if [ -f "$AUDIT_FILE" ]; then
-    audit_abstract=$(extract_frontmatter_key "$AUDIT_FILE" "abstract")
-    if [ -n "$audit_abstract" ]; then
-      echo "## Audit"
-      echo "$audit_abstract"
-      extract_sections "$AUDIT_FILE" 5
-      echo ""
-    fi
-  fi
+  # Emit a context file: heading = filename (minus .md, title-cased),
+  # body = frontmatter abstract + up to N sections. Returns 0 if emitted.
+  emit_context_file() {
+    local file="$1"
+    local max_sections="$2"
+    local heading="$3"
+    [ -f "$file" ] || return 1
+    local abstract
+    abstract=$(extract_frontmatter_key "$file" "abstract")
+    [ -n "$abstract" ] || return 1
+    echo "## $heading"
+    echo "$abstract"
+    [ "$max_sections" -gt 0 ] && extract_sections "$file" "$max_sections"
+    echo ""
+  }
 
-  # ARCHITECTURE: abstract + key sections
-  ARCH_FILE="$CONTEXT_DIR/ARCHITECTURE.md"
-  if [ -f "$ARCH_FILE" ]; then
-    arch_abstract=$(extract_frontmatter_key "$ARCH_FILE" "abstract")
-    if [ -n "$arch_abstract" ]; then
-      echo "## Architecture"
-      echo "$arch_abstract"
-      extract_sections "$ARCH_FILE" 3
-      echo ""
-    fi
-  fi
+  # Standard set in priority order
+  emit_context_file "$CONTEXT_DIR/STACK.md"        3 "Stack"        || true
+  emit_context_file "$CONTEXT_DIR/ARCHITECTURE.md" 3 "Architecture" || true
+  emit_context_file "$CONTEXT_DIR/AUDIT.md"        5 "Audit"        || true
+  emit_context_file "$CONTEXT_DIR/CONCEPT.md"      0 "Concept"      || true
 
-  # CONCEPT: abstract (if present — project-specific principles)
-  CONCEPT_FILE="$CONTEXT_DIR/CONCEPT.md"
-  if [ -f "$CONCEPT_FILE" ]; then
-    concept_abstract=$(extract_frontmatter_key "$CONCEPT_FILE" "abstract")
-    if [ -n "$concept_abstract" ]; then
-      echo "## Concept"
-      echo "$concept_abstract"
-      echo ""
-    fi
+  # Auto-discover: any other *.md in context/ with frontmatter abstract:
+  # (STORYBLOK.md, SHOPIFY.md, WORDPRESS.md, custom domain context, etc.)
+  if [ -d "$CONTEXT_DIR" ]; then
+    for file in "$CONTEXT_DIR"/*.md; do
+      [ -f "$file" ] || continue
+      base=$(basename "$file" .md)
+      case "$base" in
+        STACK|ARCHITECTURE|AUDIT|CONCEPT|SUMMARY|PATTERNS|CONVENTIONS) continue ;;
+      esac
+      # Title-case heading: STORYBLOK -> Storyblok
+      heading=$(echo "$base" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+      emit_context_file "$file" 2 "$heading" || true
+    done
   fi
 
   # GRAPH: top hub files (most-imported — navigation context)

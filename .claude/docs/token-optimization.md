@@ -82,7 +82,7 @@ Skills use the cheapest model that can handle the task:
 | Model | Used for |
 |-------|---------|
 | haiku | `/commit`, explore agents, file search |
-| sonnet | `/test`, `/scan`, `/debug`, code generation |
+| sonnet | `/test`, `/commit`, `/release`, code generation |
 | opus | `/review` adversarial, `/spec`, architecture |
 
 ## Layer 6: Green-Path Short-Circuits

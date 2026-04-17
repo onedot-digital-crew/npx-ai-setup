@@ -35,6 +35,19 @@ lint_skill() {
         return
     fi
 
+    # ── 1b. Frontmatter parses as valid YAML ─────────────────────────────────
+    if ! ruby -e '
+      require "yaml"
+      path = ARGV[0]
+      text = File.read(path)
+      parts = text.split(/^---\s*$\n?/, 3)
+      raise "missing YAML frontmatter" if parts.length < 3
+      YAML.safe_load("---\n#{parts[1]}---\n", aliases: true)
+    ' "$file" >/dev/null 2>&1; then
+        _fail "$file: invalid YAML frontmatter"
+        return
+    fi
+
     # ── 2. Required field: name (kebab-case) ──────────────────────────────────
     local name_value
     name_value="$(grep -m1 "^name:" "$file" | sed 's/^name:[[:space:]]*//' | tr -d '"'"'")"

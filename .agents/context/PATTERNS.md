@@ -49,7 +49,7 @@ tests/           smoke.sh + integration.sh + claude-runtime.sh
 
 **Parallel Execution:** `wait_parallel()` in `lib/process.sh` runs Claude CLI calls as background jobs. Used in `run_generation()` (`lib/generate.sh`) for concurrent STACK.md + ARCHITECTURE.md + CONVENTIONS.md generation.
 
-**build-summary.sh:** (`.claude/scripts/build-summary.sh`) Aggregates YAML frontmatter `abstract:` and `sections:` from AUDIT.md + ARCHITECTURE.md into SUMMARY.md (max 50 lines). Called by `/context-refresh`. Frontmatter fields in these files drive CLAUDE.md context — keeping them accurate is required.
+**build-summary.sh:** (`.claude/scripts/build-summary.sh`) Aggregates YAML frontmatter `abstract:` and `sections:` from AUDIT.md + ARCHITECTURE.md into SUMMARY.md (max 50 lines). Run manually via `bash .claude/scripts/build-summary.sh`. Frontmatter fields in these files drive CLAUDE.md context — keeping them accurate is required.
 
 ## Conventions
 
