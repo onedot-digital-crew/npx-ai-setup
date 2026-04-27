@@ -40,6 +40,7 @@ install_claude_mem() {
 }
 
 # Claude-Mem tuned settings — reduces rate-limit burn and token overhead
+# On fresh install: copy template. On update: merge missing keys without overwriting user values.
 install_claude_mem_settings() {
   local mem_home="${HOME}/.claude-mem"
   local target="${mem_home}/settings.json"
@@ -47,18 +48,52 @@ install_claude_mem_settings() {
 
   mkdir -p "$mem_home"
 
-  if [ -f "$target" ]; then
-    echo "  🧠 Claude-Mem settings already exist (${target}) — skipping"
-    return 0
-  fi
-
   if [ ! -f "$source_tpl" ]; then
     echo "  ⚠️  Claude-Mem settings template missing: ${source_tpl}"
     return 1
   fi
 
-  cp "$source_tpl" "$target"
-  echo "  🧠 Claude-Mem settings installed → ${target} (haiku, 30 obs, skip noise tools)"
+  if [ ! -f "$target" ]; then
+    cp "$source_tpl" "$target"
+    echo "  🧠 Claude-Mem settings installed → ${target} (haiku, 30 obs, skip noise tools)"
+    return 0
+  fi
+
+  # Merge missing keys from template without overwriting existing values.
+  # jq: for each key in template, add to target only if absent.
+  if command -v jq >/dev/null 2>&1; then
+    local tmp
+    tmp=$(mktemp)
+    if jq --slurpfile tpl "$source_tpl" '$tpl[0] * . ' "$target" > "$tmp" 2>/dev/null; then
+      mv "$tmp" "$target"
+      echo "  🧠 Claude-Mem settings updated → ${target} (missing keys merged from template)"
+    else
+      rm -f "$tmp"
+      echo "  ⚠️  Claude-Mem settings merge failed — ${target} unchanged"
+    fi
+  else
+    echo "  ⚠️  jq not found — skipping Claude-Mem settings merge (install jq to enable)"
+  fi
+}
+
+# Warn when project .claude/settings.json contains top-level CLAUDE_MEM_* keys.
+# These are ignored by claude-mem (which only reads ~/.claude-mem/settings.json).
+scan_misplaced_mem_settings() {
+  local project_settings=".claude/settings.json"
+  [ -f "$project_settings" ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+
+  local misplaced
+  misplaced=$(jq -r 'keys[] | select(startswith("CLAUDE_MEM_"))' "$project_settings" 2>/dev/null)
+  [ -z "$misplaced" ] && return 0
+
+  echo ""
+  echo "  ⚠️  Misplaced Claude-Mem config detected in ${project_settings}:"
+  echo "$misplaced" | while IFS= read -r key; do
+    echo "     - ${key}"
+  done
+  echo "     These keys are ignored here — claude-mem only reads ~/.claude-mem/settings.json"
+  echo "     Move them there or remove them from ${project_settings}"
 }
 
 # Official Claude Code Plugins (code-review, feature-dev, etc.)

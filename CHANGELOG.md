@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- feat(plugins): merge missing template keys into ~/.claude-mem/settings.json on update; warn on misplaced CLAUDE_MEM_* keys in project .claude/settings.json
+
 ## [v2.2.1] — 2026-04-24
 
 <!-- slack-announcement -->

@@ -450,6 +450,9 @@ run_smart_update() {
   # Merge MCP servers — adds new entries without overwriting existing config
   install_context7
 
+  # Warn when project settings contain misplaced CLAUDE_MEM_* keys
+  command -v scan_misplaced_mem_settings >/dev/null 2>&1 && scan_misplaced_mem_settings
+
   # Only show summary when there was work to do
   if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
     echo ""
