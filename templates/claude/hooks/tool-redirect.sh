@@ -9,6 +9,11 @@
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 
+# Emergency bypass — set RTK_SKIP=1 to disable all redirects (e.g. when rtk itself is broken).
+if [ "${RTK_SKIP:-0}" = "1" ]; then
+  exit 0
+fi
+
 # ── 1. WebFetch → defuddle ───────────────────────────────────────────────────
 if [ "$TOOL_NAME" = "WebFetch" ]; then
   command -v defuddle >/dev/null 2>&1 || exit 0
@@ -75,7 +80,9 @@ EOF
 
   # Check for bare `git` (not prefixed with rtk)
   # Match: git at start, after &&, after ;, or after whitespace — NOT inside .git/ paths
-  if echo "$CMD" | grep -qE '(^|[[:space:];&])git[[:space:]]' && \
+  # Skip entirely if rtk is not installed on this workstation (avoid deadlock).
+  if command -v rtk >/dev/null 2>&1 && \
+     echo "$CMD" | grep -qE '(^|[[:space:];&])git[[:space:]]' && \
      ! echo "$CMD" | grep -qE '(^|[[:space:];&])rtk[[:space:]]+git[[:space:]]' && \
      ! echo "$CMD" | grep -qE '\.git/'; then
     # Extract git subcommand (first word after git, ignoring rev-range args like HASH..HEAD)

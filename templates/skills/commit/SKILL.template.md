@@ -20,12 +20,13 @@ Stages changes and creates a conventional commit message. Uses `commit-prep.sh` 
    ```
    ! bash .claude/scripts/commit-prep.sh
    ```
-   - Output `NO_STAGED_CHANGES` → nothing to commit; stop and inform the user.
+   - Output `NO_STAGED_CHANGES` → check unstaged changes via `git status --short`. If none → stop, inform user. If unstaged → continue to step 3.
    - Otherwise: output contains branch name, staged diff, staged stat, and recent commits.
 
 2. **Analyze the prep output** — determine if this is a new feature, enhancement, bug fix, refactor, test, or docs update.
 
 3. **Stage relevant files by name** (`git add <file>...`). Do NOT use `git add -A` or `git add .` — avoid accidentally staging secrets or binaries.
+   - On `Operation not permitted` / `index.lock` errors: **STOP retrying**. Report to user: sandbox or permissions blocking `.git/` writes. Do not chmod, do not delete locks, do not loop. User must adjust `sandbox` or `permissions` in `.claude/settings.json`.
 
 4. **Write a concise conventional commit message** (1-2 sentences) focusing on **why**, not what.
 

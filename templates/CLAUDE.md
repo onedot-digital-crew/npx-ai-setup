@@ -30,6 +30,9 @@ Example prompt: "Explore how X works across [area]. Return ≤1 page with file:l
 Never assume import paths, function names, API routes, config schemas. Read the file or check docs first.
 External Lib/API/SDK/CLI: Context7 MUST be first (`mcp__context7__*`), then `defuddle parse <url> --md`, WebFetch last resort. Applies to known libs too. Details: `.claude/rules/general.md`.
 
+## MCPs
+Project `.mcp.json` und user-global MCPs (`~/.claude/mcp.json`) sind aktiv — bei Domain-Match (Storyblok, Shopify, Coolify, Crewbuddy, etc.) MCP-Tools zuerst nutzen, nicht WebFetch oder raten.
+
 ## Frontend Visual Verification (MANDATORY)
 After ANY edit to `*.vue`, `*.tsx`, `*.jsx`, `*.liquid`, `*.css`, `*.scss`: invoke `/agent-browser` to open dev server and screenshot affected route. Type-check passes ≠ rendered correctly. Never declare frontend work done without visual verification.
 
