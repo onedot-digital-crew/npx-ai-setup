@@ -68,7 +68,6 @@ SPEC_SKILLS_MAP=(
   "templates/skills/spec-board/SKILL.template.md:.claude/skills/spec-board/SKILL.md"
   "templates/skills/spec/SKILL.template.md:.claude/skills/spec/SKILL.md"
   "templates/skills/spec-review/SKILL.template.md:.claude/skills/spec-review/SKILL.md"
-  "templates/skills/spec-validate/SKILL.template.md:.claude/skills/spec-validate/SKILL.md"
   "templates/skills/spec-work/SKILL.template.md:.claude/skills/spec-work/SKILL.md"
   "templates/skills/spec-work-all/SKILL.template.md:.claude/skills/spec-work-all/SKILL.md"
   "templates/skills/orchestrate/SKILL.template.md:.claude/skills/orchestrate/SKILL.md"

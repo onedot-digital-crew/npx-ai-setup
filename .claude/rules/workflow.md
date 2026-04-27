@@ -21,7 +21,7 @@ After completing work, suggest the logical next skill. Keep hints to one line.
 | `/review` passes | `/commit` — Stagen + committen |
 | `/commit` done | `/pr` auf Feature-Branches, oder `/release` auf `main` / `master` |
 | Planning a multi-file change (3+ files, new dep, or arch change) | `/spec` — erst planen, dann bauen |
-| Spec erstellt (Status: draft) | `/spec-validate NNN` — Qualität prüfen vor Umsetzung |
+| Spec erstellt (Status: draft) | `/spec-work NNN` — Spec implementieren |
 | Spec erstellt oder abgeschlossen | `/clear` — Session leeren, Kontext-Bleed vermeiden |
 | Session >30 tool calls | `/reflect` — Learnings sichern, dann `/clear` |
 | Build failure | `! bash .claude/scripts/ci-prep.sh` dann manuell fixen |

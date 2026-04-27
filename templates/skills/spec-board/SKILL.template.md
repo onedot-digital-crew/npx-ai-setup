@@ -58,4 +58,4 @@ C) Skip — leave as is
 
 ## Next Step
 
-To work on a spec, run `/spec-work NNN`. To validate a draft spec before starting, run `/spec-validate NNN`.
+To work on a spec, run `/spec-work NNN`.

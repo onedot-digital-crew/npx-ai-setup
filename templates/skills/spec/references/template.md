@@ -34,7 +34,7 @@
 
 ## Constraints
 
-- Max 60 lines total. Auto-split at >8 steps or cross-layer architecture.
+- Auto-split at >12 steps or cross-layer architecture (frontend + backend + DB). No hard line cap — coherence > brevity.
 - Goal: 1 sentence. Context: 2-3 sentences. Out of Scope: max 3 items.
 - Every step must reference a file path. No abstract steps.
 - Use today's date (`date +%Y-%m-%d`). Filename: `NNN-lowercase-hyphens.md`.

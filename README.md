@@ -47,11 +47,10 @@ Available in Claude Code and compatible clients. In Codex, use `$spec`, `$spec-w
 
 | Command | Model | Description |
 |---------|-------|-------------|
-| `/spec "task"` | Opus | Triage complexity, think through implementation, create spec |
+| `/spec "task"` | Opus | Plan + structural check + user-approval (Plan-Mode aligned) |
 | `/spec-work 001` | Sonnet | Execute a spec step by step |
 | `/spec-work-all` | Sonnet | Execute all draft specs in parallel via Git worktrees |
 | `/spec-review 001` | Opus | Review spec changes against acceptance criteria |
-| `/spec-validate 001` | Sonnet | Validate spec quality before executing |
 | `/spec-board` | Sonnet | Kanban-style overview of all specs |
 
 ### Development

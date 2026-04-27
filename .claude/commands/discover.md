@@ -149,4 +149,4 @@ After writing all specs, report:
 
 ## Next Step
 
-After generating draft specs, run `/spec-validate NNN` to score each spec, then `/spec-work NNN` to implement the highest-priority one.
+After generating draft specs, run `/spec-work NNN` to implement the highest-priority one.

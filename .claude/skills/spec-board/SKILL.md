@@ -1,6 +1,14 @@
 ---
 name: spec-board
 description: "Overview of all specs as Kanban board."
+user-invocable: true
+effort: low
+model: haiku
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - AskUserQuestion
 ---
 
 Displays a Kanban board of active specs plus only the latest 10 completed specs. Use for an overview of the current spec pipeline without scanning the full completed archive.
@@ -50,4 +58,4 @@ C) Skip — leave as is
 
 ## Next Step
 
-To work on a spec, run `/spec-work NNN`. To validate a draft spec before starting, run `/spec-validate NNN`.
+To work on a spec, run `/spec-work NNN`.

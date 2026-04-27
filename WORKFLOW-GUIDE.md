@@ -45,14 +45,13 @@ Der Standard-Ablauf fuer jede Aenderung die mehr als ein einzelnes File betrifft
 ### Der Ablauf
 
 ```
-1. /spec "task description"       ← Komplexitaet einschaetzen, Spec erstellen
-2. /spec-validate NNN             ← Spec-Qualitaet pruefen vor Ausfuehrung
-3. /spec-work NNN                 ← Schritt fuer Schritt ausfuehren
-4. /test                          ← Tests laufen lassen + Failures fixen
-5. /review                        ← Uncommitted Changes reviewen
-6. /commit                        ← Stagen + Conventional Commit Message
-7. /pr                            ← PR-Titel/Body + Build-Validation
-8. /release                       ← Version bump, CHANGELOG, Tag
+1. /spec "task description"       ← Plan + Struktur-Check + User-Review (Plan-Mode-aligned)
+2. /spec-work NNN                 ← Schritt fuer Schritt ausfuehren
+3. /test                          ← Tests laufen lassen + Failures fixen
+4. /review                        ← Uncommitted Changes reviewen
+5. /commit                        ← Stagen + Conventional Commit Message
+6. /pr                            ← PR-Titel/Body + Build-Validation
+7. /release                       ← Version bump, CHANGELOG, Tag
 ```
 
 **Spec-Lifecycle:** `draft` → `in-progress` → `in-review` → `completed`
@@ -73,8 +72,7 @@ Neue Idee oder Feature?
 
 | Command | Was es tut |
 |---------|------------|
-| `/spec "task"` | Komplexitaet einschaetzen, Implementation durchdenken, Spec erstellen |
-| `/spec-validate NNN` | Spec-Qualitaet scoren bevor sie ausgefuehrt wird |
+| `/spec "task"` | Komplexitaet einschaetzen, Spec erstellen, Struktur-Check + User-Approval |
 | `/spec-work NNN` | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
 | `/spec-work-all` | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren |
 | `/spec-review NNN` | Review gegen Acceptance Criteria + Finishing Gate |

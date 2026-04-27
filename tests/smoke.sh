@@ -136,13 +136,18 @@ else
   fail "templates/claude/settings.json missing UserPromptSubmit update-check.sh hook"
 fi
 
-# Step 7: Verify spec-work validation gate
+# Step 7: Verify spec validation moved into /spec (Plan-Mode aligned)
 echo ""
-echo "--- Spec-work validation gate ---"
-if grep -q 'Validation gate\|validation gate\|skip-validate' templates/skills/spec-work/SKILL.template.md 2>/dev/null; then
-  pass "templates/skills/spec-work/SKILL.template.md has validation gate"
+echo "--- Spec validation in /spec ---"
+if grep -q 'Phase 3 — Structural check' templates/skills/spec/SKILL.template.md 2>/dev/null; then
+  pass "templates/skills/spec/SKILL.template.md has structural validation phase"
 else
-  fail "templates/skills/spec-work/SKILL.template.md missing validation gate"
+  fail "templates/skills/spec/SKILL.template.md missing structural validation phase"
+fi
+if [ ! -d templates/skills/spec-validate ]; then
+  pass "templates/skills/spec-validate skill removed (merged into /spec)"
+else
+  fail "templates/skills/spec-validate skill still present"
 fi
 
 echo ""
