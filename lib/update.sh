@@ -612,6 +612,8 @@ cleanup_known_orphans() {
     ".claude/hooks/notify.sh"
     ".claude/rules/terse-output.md"
     ".claudeignore"
+    ".claude/skills/spec-validate/SKILL.md"
+    ".claude/skills/spec-validate/references/scoring.md"
   )
   for target in "${orphans[@]}"; do
     [ -f "$target" ] || continue
