@@ -16,7 +16,11 @@ Produces a structured codebase overview via parallel agents. Use when exploring 
 
 ## Process
 
-### 0. Count source files
+### 0a. Load existing context (alignment check)
+Read `.agents/context/CONCEPT.md` if present — analysis must respect documented project boundaries.
+Read `.agents/context/SUMMARY.md` if present — avoid duplicating fields that already exist.
+
+### 0b. Count source files
 
 ```bash
 git ls-files 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|py|go|rs|rb|php|java|kt|swift|vue|svelte|sh|sql)$' | grep -v -E '(\.lock|\.min\.|dist/|build/|node_modules/|vendor/|\.next/|\.nuxt/)' | wc -l

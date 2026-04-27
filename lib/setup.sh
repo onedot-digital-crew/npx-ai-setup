@@ -85,6 +85,14 @@ _install_or_update_file() {
   # Already identical — skip silently
   [ "$tpl_cs" = "$cur_cs" ] && return 0
 
+  # Force-update mode: always overwrite, never smart-merge
+  if [ "${FORCE_UPDATE:-0}" = "1" ]; then
+    cp "$src" "$target"
+    [[ "$target" == *.sh ]] && chmod +x "$target"
+    tui_success "$target force-updated"
+    return 0
+  fi
+
   # Template is newer — check if user modified the installed file
   if [ -f .ai-setup.json ] && _json_valid .ai-setup.json; then
     local stored_cs

@@ -27,6 +27,7 @@ PATCH_PATTERN=""
 FORCE_SKIP_GRAPHIFY=false
 INSTALL_GRAPHIFY=no
 FORCE_ALL_SKILLS=0
+FORCE_UPDATE=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --patch)
@@ -39,6 +40,8 @@ while [[ $# -gt 0 ]]; do
       FORCE_SKIP_GRAPHIFY=true; shift ;;
     --force-all-skills)
       FORCE_ALL_SKILLS=1; shift ;;
+    --force-update)
+      FORCE_UPDATE=1; shift ;;
     --relax-context-caps)
       export CONTEXT_CAPS_RELAX=1; shift ;;
     --reset|--system|--regenerate|--audit|--force-skills)
@@ -46,16 +49,17 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     --*)
-      echo "❌ Unsupported flag '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --relax-context-caps"
+      echo "❌ Unsupported flag '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --force-update | --relax-context-caps"
       exit 1
       ;;
     *)
-      echo "❌ Unexpected argument '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --relax-context-caps"
+      echo "❌ Unexpected argument '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --force-update | --relax-context-caps"
       exit 1
       ;;
   esac
 done
 export FORCE_ALL_SKILLS
+export FORCE_UPDATE
 
 # Load modules
 source "$SCRIPT_DIR/lib/_loader.sh"
