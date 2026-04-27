@@ -48,13 +48,15 @@ Verify each acceptance criterion with commands and file reads.
 **4b — Definition of Done**:
 Check `.agents/context/CONVENTIONS.md` DoD section if it exists.
 
-**4c — Code quality**:
-- Low/Medium: spawn `code-reviewer` agent (model: sonnet)
-- High: spawn `code-reviewer` AND `staff-reviewer` in parallel (model: sonnet)
+**4c — Code quality** (existence-checked spawns; missing optional agents skip silently):
+- Always: `code-reviewer` (model: sonnet) — required, must exist
+- High complexity AND `staff-reviewer` exists → spawn in parallel with code-reviewer
 
 **4d — Conditional reviewers**:
-- Spec touches auth, user input, API endpoints, or secrets → also spawn `security-reviewer`
-- Spec touches DB queries, loops, rendering, data fetching, or bundle imports → also spawn `performance-reviewer`
+- Spec touches auth/user-input/API/secrets AND `security-reviewer` exists → spawn
+- Spec touches DB/loops/rendering/data-fetching/bundle AND `performance-reviewer` exists → spawn
+
+Check agent existence via `ls .claude/agents/<name>.md` before spawn. Run all reviewers in parallel (single message, multiple Agent calls). Review stays on Sonnet for all tiers — Opus only when user explicitly asks for deeper review.
 
 **4e — Doctor check**:
 Use the `DOCTOR CHECK` section from prep output. Any FAIL blocks APPROVED.

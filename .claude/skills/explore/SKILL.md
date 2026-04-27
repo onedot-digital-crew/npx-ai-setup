@@ -1,7 +1,18 @@
 ---
 name: explore
-description: "Read-only thinking partner before committing to a spec."
+description: "Read-only thinking partner before committing to a spec. Trigger: 'explore this codebase', 'understand how X works', 'find where'."
+user-invocable: true
 effort: low
+model: sonnet
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - WebFetch
+  - WebSearch
+  - mcp__context7__resolve-library-id
+  - mcp__context7__query-docs
 ---
 
 # Explore — Read-Only Thinking Partner

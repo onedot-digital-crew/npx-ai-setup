@@ -104,4 +104,4 @@ If the plugin is unavailable, skip silently.
 
 ## Next Step
 
-Run `/apply-learnings`, then `/commit`.
+Run `/commit` to persist the LEARNINGS.md / CLAUDE.md updates.

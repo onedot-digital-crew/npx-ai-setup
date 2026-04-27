@@ -4,12 +4,13 @@ description: "Reviews uncommitted changes with selectable intensity. Trigger: 'r
 user-invocable: true
 effort: medium
 model: sonnet
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Glob
   - Grep
   - Bash
+  - Agent
+  - AskUserQuestion
 ---
 
 Reviews uncommitted changes with selectable intensity. Use before committing or merging.
@@ -118,10 +119,12 @@ If a blocking claim cannot be verified to an exact file and line, remove it from
 
 ### 4. Agent dispatch (Mode B and C only)
 
-After the manual review, dispatch relevant agents in parallel:
-- Always: `code-reviewer`
-- If security-sensitive changes: `security-reviewer`
-- If hot path changes: `performance-reviewer`
+Check agent existence (`ls .claude/agents/<name>.md`) before spawn. Missing optional agents skip silently.
+
+Dispatch in parallel (single message, multiple Agent calls):
+- Always: `code-reviewer` (required, must exist)
+- Security-sensitive changes AND `security-reviewer` exists → spawn
+- Hot path changes AND `performance-reviewer` exists → spawn
 
 Merge agent findings into the final report and deduplicate overlaps.
 

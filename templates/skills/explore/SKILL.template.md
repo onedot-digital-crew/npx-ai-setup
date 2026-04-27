@@ -11,6 +11,8 @@ allowed-tools:
   - Bash
   - WebFetch
   - WebSearch
+  - mcp__context7__resolve-library-id
+  - mcp__context7__query-docs
 ---
 
 # Explore — Read-Only Thinking Partner
