@@ -23,64 +23,64 @@ STORYBLOK_DIR=""
 [ -d "$PROJECT_DIR/storyblok" ] && STORYBLOK_DIR="$PROJECT_DIR/storyblok"
 
 # --- Pages ---
-page_count=$(find "$PAGES_DIR" -name "*.vue" 2>/dev/null | wc -l | tr -d ' ')
-pages=$(find "$PAGES_DIR" -name "*.vue" 2>/dev/null \
-  | sed "s|$PAGES_DIR/||" | sed 's/\.vue$//' | sort | tr '\n' ',' | sed 's/,$//')
+page_count=$(find "$PAGES_DIR" -name "*.vue" 2> /dev/null | wc -l | tr -d ' ')
+pages=$(find "$PAGES_DIR" -name "*.vue" 2> /dev/null |
+  sed "s|$PAGES_DIR/||" | sed 's/\.vue$//' | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- Components ---
-component_count=$(find "$COMPONENTS_DIR" -name "*.vue" 2>/dev/null | wc -l | tr -d ' ')
-component_dirs=$(find "$COMPONENTS_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null \
-  | xargs -I{} basename {} | sort | tr '\n' ',' | sed 's/,$//')
+component_count=$(find "$COMPONENTS_DIR" -name "*.vue" 2> /dev/null | wc -l | tr -d ' ')
+component_dirs=$(find "$COMPONENTS_DIR" -mindepth 1 -maxdepth 1 -type d 2> /dev/null |
+  xargs -I{} basename {} | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- Composables ---
-composables=$(find "$COMPOSABLES_DIR" \( -name "use*.ts" -o -name "use*.js" \) 2>/dev/null \
-  | xargs -I{} basename {} | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
+composables=$(find "$COMPOSABLES_DIR" \( -name "use*.ts" -o -name "use*.js" \) 2> /dev/null |
+  xargs -I{} basename {} | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- Stores ---
 stores=""
 for store_dir in "$PROJECT_DIR/stores" "$PROJECT_DIR/app/stores"; do
-  [ -d "$store_dir" ] && stores=$(find "$store_dir" \( -name "*.ts" -o -name "*.js" \) 2>/dev/null \
-    | xargs -I{} basename {} | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
+  [ -d "$store_dir" ] && stores=$(find "$store_dir" \( -name "*.ts" -o -name "*.js" \) 2> /dev/null |
+    xargs -I{} basename {} | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
 done
 
 # --- Layouts ---
-layouts=$(find "$LAYOUTS_DIR" -name "*.vue" 2>/dev/null \
-  | xargs -I{} basename {} .vue | sort | tr '\n' ',' | sed 's/,$//')
+layouts=$(find "$LAYOUTS_DIR" -name "*.vue" 2> /dev/null |
+  xargs -I{} basename {} .vue | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- Middleware ---
 middleware=""
 for mw_dir in "$PROJECT_DIR/middleware" "$PROJECT_DIR/app/middleware"; do
-  [ -d "$mw_dir" ] && middleware=$(find "$mw_dir" \( -name "*.ts" -o -name "*.js" \) 2>/dev/null \
-    | xargs -I{} basename {} | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
+  [ -d "$mw_dir" ] && middleware=$(find "$mw_dir" \( -name "*.ts" -o -name "*.js" \) 2> /dev/null |
+    xargs -I{} basename {} | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
 done
 
 # --- Server routes ---
-server_routes=$(find "$PROJECT_DIR/server/api" \( -name "*.ts" -o -name "*.js" \) 2>/dev/null \
-  | sed "s|$PROJECT_DIR/server/api/||" | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
+server_routes=$(find "$PROJECT_DIR/server/api" \( -name "*.ts" -o -name "*.js" \) 2> /dev/null |
+  sed "s|$PROJECT_DIR/server/api/||" | sed 's/\.\(ts\|js\)$//' | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- Storyblok components ---
 storyblok_count=0
-[ -n "$STORYBLOK_DIR" ] && storyblok_count=$(find "$STORYBLOK_DIR" -name "*.vue" 2>/dev/null | wc -l | tr -d ' ')
+[ -n "$STORYBLOK_DIR" ] && storyblok_count=$(find "$STORYBLOK_DIR" -name "*.vue" 2> /dev/null | wc -l | tr -d ' ')
 
 # --- Nuxt modules (from nuxt.config) ---
 nuxt_modules=""
-nuxt_config=$(find "$PROJECT_DIR" -maxdepth 1 -name "nuxt.config.*" 2>/dev/null | head -1)
+nuxt_config=$(find "$PROJECT_DIR" -maxdepth 1 -name "nuxt.config.*" 2> /dev/null | head -1)
 if [ -n "$nuxt_config" ]; then
-  nuxt_modules=$(grep -oE "'@[^']+'" "$nuxt_config" 2>/dev/null \
-    | tr -d "'" | sort -u | tr '\n' ',' | sed 's/,$//' || echo "")
+  nuxt_modules=$(grep -oE "'@[^']+'" "$nuxt_config" 2> /dev/null |
+    tr -d "'" | sort -u | tr '\n' ',' | sed 's/,$//' || echo "")
 fi
 
 # --- Build abstract ---
-store_count=$(echo "$stores" | tr ',' '\n' | grep -c . 2>/dev/null || echo 0)
+store_count=$(echo "$stores" | tr ',' '\n' | grep -c . 2> /dev/null || echo 0)
 abstract="Nuxt: ${page_count} pages | ${component_count} components${component_dirs:+ (${component_dirs})}${store_count:+ | ${store_count} stores}${storyblok_count:+ | ${storyblok_count} storyblok components}${server_routes:+ | server/api}"
 
 # --- Frontmatter sections (loaded at SessionStart) ---
 fm_entries=""
-[ -n "$pages" ]         && fm_entries="${fm_entries}  - \"pages: ${pages}\"\n"
-[ -n "$composables" ]   && fm_entries="${fm_entries}  - \"composables: ${composables}\"\n"
-[ -n "$stores" ]        && fm_entries="${fm_entries}  - \"stores: ${stores}\"\n"
+[ -n "$pages" ] && fm_entries="${fm_entries}  - \"pages: ${pages}\"\n"
+[ -n "$composables" ] && fm_entries="${fm_entries}  - \"composables: ${composables}\"\n"
+[ -n "$stores" ] && fm_entries="${fm_entries}  - \"stores: ${stores}\"\n"
 [ -n "$server_routes" ] && fm_entries="${fm_entries}  - \"server/api: ${server_routes}\"\n"
-[ -n "$middleware" ]    && fm_entries="${fm_entries}  - \"middleware: ${middleware}\"\n"
+[ -n "$middleware" ] && fm_entries="${fm_entries}  - \"middleware: ${middleware}\"\n"
 fm_sections=""
 [ -n "$fm_entries" ] && fm_sections=$(printf "sections:\n%b" "$fm_entries")
 

@@ -1,26 +1,30 @@
 # Quality Principles
 
 ## Correctness
+
 - Handle edge cases: empty inputs, null/undefined, boundary values
 - Validate inputs before use; fail fast with clear error messages
 - Check return values — never silently swallow errors
 - Test actual behavior, not just the happy path
 
 ## Reliability
+
 - No race conditions: shared state must be accessed safely
 - Resources must be cleaned up (files, connections, timers, listeners)
 - Operations that can run multiple times must be idempotent
 - External calls must have timeouts and retry limits
 
 ## Performance
+
 - No N+1 queries — batch or join instead of loops with DB calls
 - No synchronous I/O in hot paths — use async equivalents
 - Cache only deterministic, bounded data with an eviction strategy
 - **Search before Read**: Glob/Grep → targeted Read → full-file Read. See agents.md > File Navigation Priority.
 
 ## Code Quality
+
 - No dead code, no magic numbers without named constants
-- Logic is self-explanatory or has a comment explaining *why*
+- Logic is self-explanatory or has a comment explaining _why_
 - Keep functions under ~40 lines; inject dependencies for testability
 
 ## Debugging

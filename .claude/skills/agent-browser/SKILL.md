@@ -62,17 +62,20 @@ agent-browser pdf output.pdf
 ## Common Patterns
 
 **Auth — use existing browser session:**
+
 ```bash
 agent-browser --auto-connect state save ./auth.json
 agent-browser --state ./auth.json open https://app.example.com
 ```
 
 **Auth — persistent profile:**
+
 ```bash
 agent-browser --profile ~/.myapp open https://app.example.com
 ```
 
 **Data extraction:**
+
 ```bash
 agent-browser open https://example.com
 agent-browser snapshot -i

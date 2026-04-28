@@ -19,9 +19,9 @@ detect_lint_cmd() {
   fi
 
   # eslint (config file variants)
-  if [[ -f ".eslintrc" ]] || [[ -f ".eslintrc.js" ]] || [[ -f ".eslintrc.cjs" ]] || \
-     [[ -f ".eslintrc.json" ]] || [[ -f ".eslintrc.yaml" ]] || [[ -f ".eslintrc.yml" ]] || \
-     [[ -f "eslint.config.js" ]] || [[ -f "eslint.config.mjs" ]] || [[ -f "eslint.config.cjs" ]]; then
+  if [[ -f ".eslintrc" ]] || [[ -f ".eslintrc.js" ]] || [[ -f ".eslintrc.cjs" ]] ||
+    [[ -f ".eslintrc.json" ]] || [[ -f ".eslintrc.yaml" ]] || [[ -f ".eslintrc.yml" ]] ||
+    [[ -f "eslint.config.js" ]] || [[ -f "eslint.config.mjs" ]] || [[ -f "eslint.config.cjs" ]]; then
     if has eslint; then
       echo "eslint ."
       return
@@ -35,7 +35,7 @@ detect_lint_cmd() {
       return
     fi
   fi
-  if [[ -f "pyproject.toml" ]] && grep -q '\[tool\.ruff\]' pyproject.toml 2>/dev/null; then
+  if [[ -f "pyproject.toml" ]] && grep -q '\[tool\.ruff\]' pyproject.toml 2> /dev/null; then
     if has ruff; then
       echo "ruff check ."
       return
@@ -59,7 +59,7 @@ detect_lint_cmd() {
         const s = p.scripts || {};
         if (s['lint']) { console.log('lint'); }
       } catch(e) {}
-    " 2>/dev/null || true)
+    " 2> /dev/null || true)
 
     if [[ -n "$scripts" ]]; then
       echo "npm run $scripts"

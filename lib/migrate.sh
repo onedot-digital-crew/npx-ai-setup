@@ -72,7 +72,7 @@ _settings_json_mutate() {
   local tmp
   tmp=$(mktemp)
 
-  if command -v jq >/dev/null 2>&1; then
+  if command -v jq > /dev/null 2>&1; then
     jq "$jq_filter" "$settings_file" > "$tmp" && mv "$tmp" "$settings_file" || {
       rm -f "$tmp"
       return 1
@@ -82,8 +82,8 @@ _settings_json_mutate() {
 
   rm -f "$tmp"
 
-  if command -v node >/dev/null 2>&1; then
-    node - "$settings_file" <<NODESCRIPT
+  if command -v node > /dev/null 2>&1; then
+    node - "$settings_file" << NODESCRIPT
 const fs = require('fs');
 const settingsFile = process.argv[2];
 let cfg = {};
@@ -114,7 +114,7 @@ _add_file() {
     return 1
   fi
   if [ -f "$target" ]; then
-    return 0  # Already exists — idempotent
+    return 0 # Already exists — idempotent
   fi
   mkdir -p "$(dirname "$target")"
   cp "$src" "$target"
@@ -143,12 +143,12 @@ _update_file() {
   tpl_cs=$(compute_checksum "$src")
   cur_cs=$(compute_checksum "$target")
   if [ "$tpl_cs" = "$cur_cs" ]; then
-    return 0  # Already up to date
+    return 0 # Already up to date
   fi
 
   # Check for user modifications
   local stored_cs
-  stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+  stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2> /dev/null)
   if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
     local bp
     bp=$(backup_file "$target")
@@ -174,16 +174,19 @@ _patch_line() {
     return 1
   fi
   # Already contains exact replacement line — skip
-  if grep -qF "$replacement" "$file" 2>/dev/null; then
+  if grep -qF "$replacement" "$file" 2> /dev/null; then
     return 0
   fi
-  if grep -q "$pattern" "$file" 2>/dev/null; then
+  if grep -q "$pattern" "$file" 2> /dev/null; then
     # Replace first matching line
     local tmp
     tmp=$(mktemp)
     awk -v pat="$pattern" -v rep="$replacement" -v done=0 \
       'done==0 && $0 ~ pat { print rep; done=1; next } { print }' \
-      "$file" > "$tmp" && mv "$tmp" "$file" || { rm -f "$tmp"; return 1; }
+      "$file" > "$tmp" && mv "$tmp" "$file" || {
+      rm -f "$tmp"
+      return 1
+    }
     echo "  ✅ $file (patched line)"
   else
     printf '\n%s\n' "$replacement" >> "$file"
@@ -199,7 +202,7 @@ _settings_add_permission() {
   local settings_file=".claude/settings.json"
   [ -f "$settings_file" ] || return 0
 
-  if command -v jq >/dev/null 2>&1 && jq -e --arg p "$perm" '.permissions.allow // [] | index($p) != null' "$settings_file" >/dev/null 2>&1; then
+  if command -v jq > /dev/null 2>&1 && jq -e --arg p "$perm" '.permissions.allow // [] | index($p) != null' "$settings_file" > /dev/null 2>&1; then
     return 0
   fi
 
@@ -218,9 +221,9 @@ _settings_add_hook() {
   local settings_file=".claude/settings.json"
   [ -f "$settings_file" ] || return 0
 
-  if command -v jq >/dev/null 2>&1 && jq -e --arg e "$event" --arg c "$cmd" \
+  if command -v jq > /dev/null 2>&1 && jq -e --arg e "$event" --arg c "$cmd" \
     '.hooks[$e] // [] | map(.hooks // []) | flatten | map(.command // "") | index($c) != null' \
-    "$settings_file" >/dev/null 2>&1; then
+    "$settings_file" > /dev/null 2>&1; then
     return 0
   fi
 
@@ -236,11 +239,11 @@ _settings_add_hook() {
 _remove_file() {
   local target="$1"
   if [ ! -f "$target" ]; then
-    return 0  # Already gone — idempotent
+    return 0 # Already gone — idempotent
   fi
 
   local stored_cs cur_cs
-  stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+  stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2> /dev/null)
   cur_cs=$(compute_checksum "$target")
 
   if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then

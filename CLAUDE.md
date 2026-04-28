@@ -9,15 +9,18 @@ Bei Feature-Entscheidungen immer fragen: **"Bringt das dem Zielprojekt was?"** �
 Dieses Repo selbst ist Bash-CLI; Zielprojekte können beliebiger Stack sein.
 
 ### Zielgruppe & Primary Stacks
+
 Interne ONEDOT/Alpensattel-Projekte unter `~/Sites/`. Häufigste Stacks (in Reihenfolge):
-1. **Nuxt/Vue 3** (nuxt-*, sb-nuxt-*) — Storyblok-driven, Tailwind
-2. **Shopify Themes** (sp-*) — Liquid, Vite, TS-bundle
+
+1. **Nuxt/Vue 3** (nuxt-_, sb-nuxt-_) — Storyblok-driven, Tailwind
+2. **Shopify Themes** (sp-\*) — Liquid, Vite, TS-bundle
 3. **Laravel/PHP** (crewbuddy, laravel-overhub)
 4. **Next/SaaS** (horizon, onedot-seomachine)
 
 Features müssen für mindestens einen Primary Stack nützlich sein. Generische Dev-Tools (linter, test runner, graph builder) immer via Stack-Detection gated einschalten.
 
 ### Design-Prinzipien
+
 - **Tokens > Vollständigkeit**: jedes Template/Skill muss Token sparen oder Qualität messbar heben.
 - **Opt-in statt Default**: schwere Tools (Python-deps, LLM-calls, MCP-server) als Prompt/Flag, nie silent install.
 - **Idempotent**: mehrfaches `npx ai-setup` darf nichts kaputt machen, `--patch` für Updates.
@@ -26,10 +29,12 @@ Features müssen für mindestens einen Primary Stack nützlich sein. Generische 
 - **Context7 first**: externe Lib/API/SDK/CLI-Lookups via Context7, WebFetch nur als Fallback. Details: `.claude/rules/general.md`.
 
 ## Project Context (tiered loading)
+
 @.agents/context/SUMMARY.md
 For full details: `@.agents/context/STACK.md` (or `ARCHITECTURE.md`, `CONVENTIONS.md`).
 
 ## CLI Shortcuts (zero tokens)
+
 - CI status: `! bash .claude/scripts/ci-prep.sh`
 - Lint check: `! bash .claude/scripts/lint-prep.sh`
 - Test check: `! bash .claude/scripts/test-prep.sh`
@@ -40,10 +45,11 @@ For full details: `@.agents/context/STACK.md` (or `ARCHITECTURE.md`, `CONVENTION
 Use the `/test` skill only when you need Claude to analyze failures or auto-fix.
 
 ## Model Routing
+
 - `haiku` — explore agents and direct read-only tool use only; never for implementation.
 - `sonnet` — default for implementation subagents (code generation, tests).
 - `opus` — architecture review, spec creation.
-Details: `.claude/rules/agents.md`.
+  Details: `.claude/rules/agents.md`.
 
 ## Build Artifact Rules
 
@@ -51,5 +57,6 @@ Never read or search inside: `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, 
 Hard blocks via `permissions.deny` in `.claude/settings.json`.
 
 ## Automation (Agent SDK CLI)
+
 Non-interactive: `claude -p "<prompt>" --output-format json`. CI: add `--bare` (disables Hooks/Skills/MCP).
 Cost controls: `--max-budget-usd 0.50` / `--max-turns 20`.

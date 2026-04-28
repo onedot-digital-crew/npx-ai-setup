@@ -42,7 +42,7 @@ is_known_current_model() {
     if [ "$candidate" = "$known_model" ]; then
       return 0
     fi
-  done <<EOF
+  done << EOF
 $KNOWN_CURRENT_MODELS
 EOF
 
@@ -57,15 +57,15 @@ check_model_version() {
     return 0
   fi
 
-  if command -v python3 >/dev/null 2>&1; then
-    if model="$(python3 -c 'import json,sys; path=sys.argv[1]; data=json.load(open(path)); print(data.get("model",""))' "$SETTINGS_FILE" 2>/dev/null)"; then
+  if command -v python3 > /dev/null 2>&1; then
+    if model="$(python3 -c 'import json,sys; path=sys.argv[1]; data=json.load(open(path)); print(data.get("model",""))' "$SETTINGS_FILE" 2> /dev/null)"; then
       :
     else
       add_row "$WARN" "Model version" "Cannot read model from settings.json — invalid JSON"
       return 0
     fi
-  elif command -v jq >/dev/null 2>&1; then
-    if model="$(jq -r '.model // empty' "$SETTINGS_FILE" 2>/dev/null)"; then
+  elif command -v jq > /dev/null 2>&1; then
+    if model="$(jq -r '.model // empty' "$SETTINGS_FILE" 2> /dev/null)"; then
       :
     else
       add_row "$WARN" "Model version" "Cannot read model from settings.json"
@@ -90,46 +90,46 @@ check_model_version() {
 
 # 1. Hooks directory exists
 if [ -d ".claude/hooks" ]; then
-  hooks_list="$(find .claude/hooks -name "*.sh" 2>/dev/null)"
-  count="$(printf '%s\n' "$hooks_list" | grep -c '.' 2>/dev/null || echo 0)"
+  hooks_list="$(find .claude/hooks -name "*.sh" 2> /dev/null)"
+  count="$(printf '%s\n' "$hooks_list" | grep -c '.' 2> /dev/null || echo 0)"
   if [ "$count" -gt 0 ]; then
-    add_row "$PASS" "Hooks"               "${count} hook script(s) found"
+    add_row "$PASS" "Hooks" "${count} hook script(s) found"
   else
-    add_row "$FAIL" "Hooks"               ".claude/hooks/ missing or empty"
+    add_row "$FAIL" "Hooks" ".claude/hooks/ missing or empty"
   fi
 else
-  add_row "$FAIL" "Hooks"               ".claude/hooks/ missing or empty"
+  add_row "$FAIL" "Hooks" ".claude/hooks/ missing or empty"
 fi
 
 # 2. Hooks are executable
 if [ -d ".claude/hooks" ]; then
-  non_exec="$(find .claude/hooks -name "*.sh" ! -perm -u+x 2>/dev/null | wc -l | tr -d ' ')"
+  non_exec="$(find .claude/hooks -name "*.sh" ! -perm -u+x 2> /dev/null | wc -l | tr -d ' ')"
   if [ "$non_exec" = "0" ]; then
-    add_row "$PASS" "Hooks executable"   "All hook scripts are +x"
+    add_row "$PASS" "Hooks executable" "All hook scripts are +x"
   else
-    add_row "$FAIL" "Hooks executable"   "${non_exec} hook(s) not executable (chmod +x)"
+    add_row "$FAIL" "Hooks executable" "${non_exec} hook(s) not executable (chmod +x)"
   fi
 fi
 
 # 3. settings.json valid JSON
 if [ -f "$SETTINGS_FILE" ]; then
-  if command -v python3 >/dev/null 2>&1; then
-    if python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$SETTINGS_FILE" 2>/dev/null; then
-      add_row "$PASS" "settings.json"    "Valid JSON"
+  if command -v python3 > /dev/null 2>&1; then
+    if python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$SETTINGS_FILE" 2> /dev/null; then
+      add_row "$PASS" "settings.json" "Valid JSON"
     else
-      add_row "$FAIL" "settings.json"    "Invalid JSON — run: python3 -m json.tool $SETTINGS_FILE"
+      add_row "$FAIL" "settings.json" "Invalid JSON — run: python3 -m json.tool $SETTINGS_FILE"
     fi
-  elif command -v jq >/dev/null 2>&1; then
-    if jq empty "$SETTINGS_FILE" 2>/dev/null; then
-      add_row "$PASS" "settings.json"    "Valid JSON"
+  elif command -v jq > /dev/null 2>&1; then
+    if jq empty "$SETTINGS_FILE" 2> /dev/null; then
+      add_row "$PASS" "settings.json" "Valid JSON"
     else
-      add_row "$FAIL" "settings.json"    "Invalid JSON"
+      add_row "$FAIL" "settings.json" "Invalid JSON"
     fi
   else
-    add_row "$WARN" "settings.json"    "Cannot validate — python3 and jq both missing"
+    add_row "$WARN" "settings.json" "Cannot validate — python3 and jq both missing"
   fi
 else
-  add_row "$FAIL" "settings.json"      "$SETTINGS_FILE not found"
+  add_row "$FAIL" "settings.json" "$SETTINGS_FILE not found"
 fi
 
 # 4. Model version
@@ -138,18 +138,18 @@ check_model_version
 # 5. CLAUDE.md present
 if [ -f "CLAUDE.md" ]; then
   lines="$(wc -l < CLAUDE.md | tr -d ' ')"
-  add_row "$PASS" "CLAUDE.md"           "Present (${lines} lines)"
+  add_row "$PASS" "CLAUDE.md" "Present (${lines} lines)"
 else
-  add_row "$FAIL" "CLAUDE.md"           "CLAUDE.md not found"
+  add_row "$FAIL" "CLAUDE.md" "CLAUDE.md not found"
 fi
 
 # 6. CLAUDE.md size guard (>200 lines is a smell)
 if [ -f "CLAUDE.md" ]; then
   lines="$(wc -l < CLAUDE.md | tr -d ' ')"
   if [ "$lines" -gt 200 ]; then
-    add_row "$WARN" "CLAUDE.md size"    "${lines} lines — consider trimming (token cost)"
+    add_row "$WARN" "CLAUDE.md size" "${lines} lines — consider trimming (token cost)"
   else
-    add_row "$PASS" "CLAUDE.md size"    "${lines} lines (OK)"
+    add_row "$PASS" "CLAUDE.md size" "${lines} lines (OK)"
   fi
 fi
 
@@ -159,35 +159,35 @@ for f in STACK.md ARCHITECTURE.md CONVENTIONS.md; do
   [ -f ".agents/context/$f" ] && context_found=$((context_found + 1))
 done
 if [ "$context_found" -eq 3 ]; then
-  add_row "$PASS" "Context files"       "STACK, ARCHITECTURE, CONVENTIONS present"
+  add_row "$PASS" "Context files" "STACK, ARCHITECTURE, CONVENTIONS present"
 elif [ "$context_found" -gt 0 ]; then
-  add_row "$WARN" "Context files"       "${context_found}/3 present — run the update flow and choose Regenerate"
+  add_row "$WARN" "Context files" "${context_found}/3 present — run the update flow and choose Regenerate"
 else
-  add_row "$WARN" "Context files"       "None found in .agents/context/ — run the update flow and choose Regenerate"
+  add_row "$WARN" "Context files" "None found in .agents/context/ — run the update flow and choose Regenerate"
 fi
 
 # 8. .mcp.json present
 if [ -f ".mcp.json" ]; then
-  add_row "$PASS" "MCP config"          ".mcp.json found"
+  add_row "$PASS" "MCP config" ".mcp.json found"
 else
-  add_row "$WARN" "MCP config"          ".mcp.json not found (optional)"
+  add_row "$WARN" "MCP config" ".mcp.json not found (optional)"
 fi
 
 # 9. Skills directory
 if [ -d ".claude/skills" ]; then
-  count="$(find .claude/skills -name "SKILL.md" 2>/dev/null | wc -l | tr -d ' ')"
-  ref_count="$(find .claude/skills -path "*/references/*.md" 2>/dev/null | wc -l | tr -d ' ')"
+  count="$(find .claude/skills -name "SKILL.md" 2> /dev/null | wc -l | tr -d ' ')"
+  ref_count="$(find .claude/skills -path "*/references/*.md" 2> /dev/null | wc -l | tr -d ' ')"
   if [ "$count" -gt 0 ]; then
     if [ "$ref_count" -gt 0 ]; then
-      add_row "$PASS" "Skills"              "${count} skill(s) installed, ${ref_count} reference file(s)"
+      add_row "$PASS" "Skills" "${count} skill(s) installed, ${ref_count} reference file(s)"
     else
-      add_row "$PASS" "Skills"              "${count} skill(s) installed"
+      add_row "$PASS" "Skills" "${count} skill(s) installed"
     fi
   else
-    add_row "$WARN" "Skills"              "No skills found in .claude/skills/"
+    add_row "$WARN" "Skills" "No skills found in .claude/skills/"
   fi
 else
-  add_row "$WARN" "Skills"              "No skills found in .claude/skills/"
+  add_row "$WARN" "Skills" "No skills found in .claude/skills/"
 fi
 
 # 10. Skills YAML frontmatter validation
@@ -198,24 +198,24 @@ if [ -d ".claude/skills" ]; then
     [ -z "$skill_file" ] && continue
     skill_name="$(basename "$(dirname "$skill_file")")"
     # Check for name field
-    if ! grep -q '^name:' "$skill_file" 2>/dev/null; then
+    if ! grep -q '^name:' "$skill_file" 2> /dev/null; then
       yaml_errors=$((yaml_errors + 1))
       yaml_details="${yaml_details}${skill_name}(no name) "
     fi
     # Check for description field
-    if ! grep -q '^description:' "$skill_file" 2>/dev/null; then
+    if ! grep -q '^description:' "$skill_file" 2> /dev/null; then
       yaml_errors=$((yaml_errors + 1))
       yaml_details="${yaml_details}${skill_name}(no description) "
     # Check for unquoted colons in description value
-    elif grep -q '^description: [^"].*:' "$skill_file" 2>/dev/null; then
+    elif grep -q '^description: [^"].*:' "$skill_file" 2> /dev/null; then
       yaml_errors=$((yaml_errors + 1))
       yaml_details="${yaml_details}${skill_name}(unquoted colon) "
     fi
-  done < <(find .claude/skills -name "SKILL.md" 2>/dev/null)
+  done < <(find .claude/skills -name "SKILL.md" 2> /dev/null)
   if [ "$yaml_errors" -eq 0 ]; then
-    add_row "$PASS" "Skills YAML"          "All skill frontmatter valid"
+    add_row "$PASS" "Skills YAML" "All skill frontmatter valid"
   else
-    add_row "$FAIL" "Skills YAML"          "${yaml_errors} issue(s): ${yaml_details}"
+    add_row "$FAIL" "Skills YAML" "${yaml_errors} issue(s): ${yaml_details}"
   fi
 fi
 
@@ -235,47 +235,47 @@ if [ -d ".claude/skills" ]; then
         ref_errors=$((ref_errors + 1))
         ref_details="${ref_details}${skill_name}/${ref_path} "
       fi
-    done < <(grep -oE '@references/[A-Za-z0-9_./-]+' "$skill_file" 2>/dev/null | sed 's|^@references/||' || true)
-  done < <(find .claude/skills -name "SKILL.md" 2>/dev/null)
+    done < <(grep -oE '@references/[A-Za-z0-9_./-]+' "$skill_file" 2> /dev/null | sed 's|^@references/||' || true)
+  done < <(find .claude/skills -name "SKILL.md" 2> /dev/null)
   if [ "$ref_errors" -eq 0 ]; then
-    add_row "$PASS" "Skill refs"           "All skill reference files present"
+    add_row "$PASS" "Skill refs" "All skill reference files present"
   else
-    add_row "$FAIL" "Skill refs"           "${ref_errors} missing: ${ref_details}"
+    add_row "$FAIL" "Skill refs" "${ref_errors} missing: ${ref_details}"
   fi
 fi
 
 # 11. Claude scripts directory
 if [ -d ".claude/scripts" ]; then
-  count="$(find .claude/scripts -name "*.sh" 2>/dev/null | wc -l | tr -d ' ')"
-  add_row "$PASS" "Claude scripts"      "${count} script(s) in .claude/scripts/"
+  count="$(find .claude/scripts -name "*.sh" 2> /dev/null | wc -l | tr -d ' ')"
+  add_row "$PASS" "Claude scripts" "${count} script(s) in .claude/scripts/"
 else
-  add_row "$WARN" "Claude scripts"      ".claude/scripts/ not present"
+  add_row "$WARN" "Claude scripts" ".claude/scripts/ not present"
 fi
 
 # 12. git config user.email set
-if command -v git >/dev/null 2>&1; then
-  git_email="$(git config user.email 2>/dev/null || true)"
+if command -v git > /dev/null 2>&1; then
+  git_email="$(git config user.email 2> /dev/null || true)"
   if [ -n "$git_email" ]; then
-    add_row "$PASS" "git user.email"    "$git_email"
+    add_row "$PASS" "git user.email" "$git_email"
   else
-    add_row "$FAIL" "git user.email"    "Not set — run: git config user.email you@example.com"
+    add_row "$FAIL" "git user.email" "Not set — run: git config user.email you@example.com"
   fi
 else
-  add_row "$FAIL" "git"                 "git not found in PATH"
+  add_row "$FAIL" "git" "git not found in PATH"
 fi
 
 # 13. .ai-setup.json metadata present
 if [ -f ".ai-setup.json" ]; then
-  if command -v jq >/dev/null 2>&1; then
-    ver="$(jq -r '.version // "?"' .ai-setup.json 2>/dev/null || echo "?")"
-  elif command -v python3 >/dev/null 2>&1; then
-    ver="$(python3 -c "import json; d=json.load(open('.ai-setup.json')); print(d.get('version','?'))" 2>/dev/null || echo "?")"
+  if command -v jq > /dev/null 2>&1; then
+    ver="$(jq -r '.version // "?"' .ai-setup.json 2> /dev/null || echo "?")"
+  elif command -v python3 > /dev/null 2>&1; then
+    ver="$(python3 -c "import json; d=json.load(open('.ai-setup.json')); print(d.get('version','?'))" 2> /dev/null || echo "?")"
   else
     ver="present"
   fi
-  add_row "$PASS" "Setup metadata"      "ai-setup v${ver}"
+  add_row "$PASS" "Setup metadata" "ai-setup v${ver}"
 else
-  add_row "$WARN" "Setup metadata"      ".ai-setup.json missing — run npx @onedot/ai-setup"
+  add_row "$WARN" "Setup metadata" ".ai-setup.json missing — run npx @onedot/ai-setup"
 fi
 
 # 14. CLI tools version freshness
@@ -287,9 +287,9 @@ CLI_TOOLS_TO_CHECK="rtk:@onedot/rtk defuddle:defuddle agent-browser:agent-browse
 for entry in $CLI_TOOLS_TO_CHECK; do
   tool_name="${entry%%:*}"
   tool_pkg="${entry#*:}"
-  if command -v "$tool_name" >/dev/null 2>&1; then
+  if command -v "$tool_name" > /dev/null 2>&1; then
     cli_tools_checked=$((cli_tools_checked + 1))
-    outdated_output="$(npm outdated -g "$tool_pkg" 2>/dev/null || true)"
+    outdated_output="$(npm outdated -g "$tool_pkg" 2> /dev/null || true)"
     if [ -n "$outdated_output" ]; then
       cli_outdated=$((cli_outdated + 1))
       cli_outdated_names="${cli_outdated_names}${tool_name} "
@@ -306,15 +306,15 @@ fi
 
 # 15. specs/ directory
 if [ -d "specs" ]; then
-  count="$(find specs -maxdepth 1 -name "*.md" ! -name "README.md" ! -name "TEMPLATE.md" 2>/dev/null | wc -l | tr -d ' ')"
-  add_row "$PASS" "Specs"               "${count} open spec(s) in specs/"
+  count="$(find specs -maxdepth 1 -name "*.md" ! -name "README.md" ! -name "TEMPLATE.md" 2> /dev/null | wc -l | tr -d ' ')"
+  add_row "$PASS" "Specs" "${count} open spec(s) in specs/"
 else
-  add_row "$WARN" "Specs"               "No specs/ directory"
+  add_row "$WARN" "Specs" "No specs/ directory"
 fi
 
 # 16. Corpus size
-if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
-  corpus_count="$(git ls-files 2>/dev/null | wc -l | tr -d ' ')"
+if command -v git > /dev/null 2>&1 && git rev-parse --git-dir > /dev/null 2>&1; then
+  corpus_count="$(git ls-files 2> /dev/null | wc -l | tr -d ' ')"
   if [ "$corpus_count" -gt 500 ]; then
     add_row "$WARN" "Corpus size" "${corpus_count} tracked files — /analyze and /context-refresh will be expensive"
   elif [ "$corpus_count" -lt 5 ]; then
@@ -333,14 +333,20 @@ _find_claudeignore_templates() {
   local script_dir
   script_dir="$(cd "$(dirname "$0")" && pwd)"
   local candidate="${script_dir}/../../templates/claudeignore"
-  [ -d "$candidate" ] && { echo "$candidate"; return 0; }
+  [ -d "$candidate" ] && {
+    echo "$candidate"
+    return 0
+  }
 
   # 2. Global npm install: resolve the @onedot/ai-setup package root
-  if command -v npm >/dev/null 2>&1; then
+  if command -v npm > /dev/null 2>&1; then
     local npm_root
-    npm_root=$(npm root -g 2>/dev/null || true)
-    [ -n "$npm_root" ] && [ -d "${npm_root}/@onedot/ai-setup/templates/claudeignore" ] \
-      && { echo "${npm_root}/@onedot/ai-setup/templates/claudeignore"; return 0; }
+    npm_root=$(npm root -g 2> /dev/null || true)
+    [ -n "$npm_root" ] && [ -d "${npm_root}/@onedot/ai-setup/templates/claudeignore" ] &&
+      {
+        echo "${npm_root}/@onedot/ai-setup/templates/claudeignore"
+        return 0
+      }
   fi
 
   # 3. npx cache fallbacks — search under typical npm cache paths
@@ -351,8 +357,11 @@ _find_claudeignore_templates() {
     [ -d "$cache_root" ] || continue
     local hit
     hit=$(find "$cache_root" -maxdepth 5 -type d -name claudeignore \
-          -path '*templates/claudeignore' 2>/dev/null | head -1)
-    [ -n "$hit" ] && { echo "$hit"; return 0; }
+      -path '*templates/claudeignore' 2> /dev/null | head -1)
+    [ -n "$hit" ] && {
+      echo "$hit"
+      return 0
+    }
   done
 
   return 1
@@ -361,7 +370,7 @@ _find_claudeignore_templates() {
 check_claudeignore_freshness() {
   [ -f ".claudeignore" ] || return 0
   local profile
-  profile=$(grep -m1 '^# --- ai-setup managed (profile:' .claudeignore 2>/dev/null | sed "s/.*profile: //;s/) ---.*//") || true
+  profile=$(grep -m1 '^# --- ai-setup managed (profile:' .claudeignore 2> /dev/null | sed "s/.*profile: //;s/) ---.*//") || true
   [ -z "$profile" ] && return 0
 
   local tpl_dir
@@ -377,10 +386,10 @@ check_claudeignore_freshness() {
   if [ "$(uname -s)" = "Darwin" ]; then _stat_cmd="stat -f %m"; else _stat_cmd="stat -c %Y"; fi
 
   local tpl_mtime base_mtime ci_mtime newest_tpl
-  tpl_mtime=$($_stat_cmd "$profile_tpl" 2>/dev/null || echo 0)
+  tpl_mtime=$($_stat_cmd "$profile_tpl" 2> /dev/null || echo 0)
   base_mtime=0
-  [ -f "$base_tpl" ] && base_mtime=$($_stat_cmd "$base_tpl" 2>/dev/null || echo 0)
-  ci_mtime=$($_stat_cmd ".claudeignore" 2>/dev/null || echo 0)
+  [ -f "$base_tpl" ] && base_mtime=$($_stat_cmd "$base_tpl" 2> /dev/null || echo 0)
+  ci_mtime=$($_stat_cmd ".claudeignore" 2> /dev/null || echo 0)
 
   # Compare installed file against MAX(profile, base) — base changes must also trigger stale warning
   newest_tpl=$tpl_mtime
@@ -396,16 +405,15 @@ check_claudeignore_freshness() {
 }
 check_claudeignore_freshness
 
-
 # 18. graph-before-read hook vs graph.json
 gbr_hook_registered=false
 if [ -f "$SETTINGS_FILE" ]; then
-  if command -v python3 >/dev/null 2>&1; then
-    if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); hooks=d.get('hooks',{}); pre=hooks.get('PreToolUse',[]); print('yes' if any('graph-before-read' in str(e) for e in pre) else 'no')" "$SETTINGS_FILE" 2>/dev/null | grep -q yes; then
+  if command -v python3 > /dev/null 2>&1; then
+    if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); hooks=d.get('hooks',{}); pre=hooks.get('PreToolUse',[]); print('yes' if any('graph-before-read' in str(e) for e in pre) else 'no')" "$SETTINGS_FILE" 2> /dev/null | grep -q yes; then
       gbr_hook_registered=true
     fi
-  elif command -v jq >/dev/null 2>&1; then
-    if jq -e '[.hooks.PreToolUse[]? | select(.. | strings | test("graph-before-read"))] | length > 0' "$SETTINGS_FILE" >/dev/null 2>&1; then
+  elif command -v jq > /dev/null 2>&1; then
+    if jq -e '[.hooks.PreToolUse[]? | select(.. | strings | test("graph-before-read"))] | length > 0' "$SETTINGS_FILE" > /dev/null 2>&1; then
       gbr_hook_registered=true
     fi
   fi
@@ -427,14 +435,14 @@ if [ -d ".claude/skills" ]; then
 
   # Search for detect-stack.sh relative to script locations or npm cache
   for _candidate in \
-    "$(dirname "$(command -v ai-setup.sh 2>/dev/null || true)" 2>/dev/null)/../lib/detect-stack.sh" \
+    "$(dirname "$(command -v ai-setup.sh 2> /dev/null || true)" 2> /dev/null)/../lib/detect-stack.sh" \
     "$HOME/.npm/_npx"/*/node_modules/@onedot/ai-setup/lib/detect-stack.sh; do
     [ -f "$_candidate" ] && _detect_script="$_candidate" && break
   done
 
   if [ -n "$_detect_script" ]; then
-    _doctor_profile=$(bash "$_detect_script" "$PWD" 2>/dev/null \
-      | grep "^stack_profile=" | cut -d= -f2 || true)
+    _doctor_profile=$(bash "$_detect_script" "$PWD" 2> /dev/null |
+      grep "^stack_profile=" | cut -d= -f2 || true)
   fi
 
   if [ -n "$_doctor_profile" ] && [ "$_doctor_profile" != "default" ]; then
@@ -447,7 +455,7 @@ if [ -d ".claude/skills" ]; then
       stacks_line=$(awk '
         /^---$/ { if (front == 0) { front = 1; next } else { exit } }
         front == 1 && /^stacks:/ { print; exit }
-      ' "$skill_file" 2>/dev/null || true)
+      ' "$skill_file" 2> /dev/null || true)
 
       [ -z "$stacks_line" ] && continue
 
@@ -461,22 +469,22 @@ if [ -d ".claude/skills" ]; then
 
       if [ "$_match" -eq 0 ]; then
         drift_count=$((drift_count + 1))
-        stacks_val=$(printf '%s\n' "$stacks_line" | sed 's/^stacks:[[:space:]]*//' )
+        stacks_val=$(printf '%s\n' "$stacks_line" | sed 's/^stacks:[[:space:]]*//')
         drift_details="${drift_details}${skill_name}${stacks_val} "
       fi
-    done < <(find .claude/skills -name "SKILL.md" 2>/dev/null)
+    done < <(find .claude/skills -name "SKILL.md" 2> /dev/null)
 
     if [ "$drift_count" -eq 0 ]; then
-      add_row "$PASS" "Skill stack drift"   "No mismatched skills (profile: ${_doctor_profile})"
+      add_row "$PASS" "Skill stack drift" "No mismatched skills (profile: ${_doctor_profile})"
     else
-      add_row "$WARN" "Skill stack drift"   "${drift_count} skill(s) for wrong stack: ${drift_details}"
+      add_row "$WARN" "Skill stack drift" "${drift_count} skill(s) for wrong stack: ${drift_details}"
     fi
   fi
 fi
 
 # 19. Graphify skill vs binary
 if [ -f ".claude/skills/graphify.md" ] || [ -f ".claude/skills/graphify/SKILL.md" ]; then
-  if command -v graphify >/dev/null 2>&1; then
+  if command -v graphify > /dev/null 2>&1; then
     add_row "$PASS" "Graphify" "Skill installed and binary found"
   else
     add_row "$WARN" "Graphify" "Skill installed but graphify not in PATH — run: pipx install graphifyy"
@@ -489,7 +497,7 @@ if [ -f "$_dsc_script" ] && [ -d ".agents/context" ]; then
   if [ "${CONTEXT_CAPS_RELAX:-0}" = "1" ]; then
     add_row "$PASS" "Context size caps" "RELAXED (CONTEXT_CAPS_RELAX=1)"
   else
-    _dsc_out="$(bash "$_dsc_script" ".agents/context" 2>/dev/null || true)"
+    _dsc_out="$(bash "$_dsc_script" ".agents/context" 2> /dev/null || true)"
     _dsc_viols="$(printf '%s\n' "$_dsc_out" | grep '^VIOLATION:' || true)"
     if [ -n "$_dsc_viols" ]; then
       _dsc_count="$(printf '%s\n' "$_dsc_viols" | grep -c '.' || echo 0)"
@@ -505,12 +513,12 @@ unset _dsc_script _dsc_out _dsc_viols _dsc_count _dsc_detail _dsc_total
 
 # 21. Hook token audit (dev-only — only runs inside npx-ai-setup repo)
 if [ -f "lib/hook-token-audit.sh" ]; then
-  audit_out="$(bash lib/hook-token-audit.sh 2>/dev/null || true)"
-  audit_violations="$(printf '%s\n' "$audit_out" | grep -c 'VIOLATION' 2>/dev/null || echo 0)"
+  audit_out="$(bash lib/hook-token-audit.sh 2> /dev/null || true)"
+  audit_violations="$(printf '%s\n' "$audit_out" | grep -c 'VIOLATION' 2> /dev/null || echo 0)"
   if [ "${audit_violations:-0}" -gt 0 ]; then
     add_row "$WARN" "Hook token budget" "${audit_violations} hook(s) exceed token cap — run: bash lib/hook-token-audit.sh"
   else
-    total_tokens="$(printf '%s\n' "$audit_out" | grep -oE '^[[:space:]]*[A-Z].*[[:space:]]+[0-9]+[[:space:]]+(tokens|OK)' | awk '{sum+=$(NF-1)} END {print sum+0}' 2>/dev/null || echo '?')"
+    total_tokens="$(printf '%s\n' "$audit_out" | grep -oE '^[[:space:]]*[A-Z].*[[:space:]]+[0-9]+[[:space:]]+(tokens|OK)' | awk '{sum+=$(NF-1)} END {print sum+0}' 2> /dev/null || echo '?')"
     add_row "$PASS" "Hook token budget" "All hooks within budget (~${total_tokens} tokens total)"
   fi
 fi

@@ -16,24 +16,24 @@ section() { printf "\n=== %s ===\n" "$1"; }
 # ---------------------------------------------------------------------------
 # Get last tag
 # ---------------------------------------------------------------------------
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+LAST_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "")
 
 if [[ -z "$LAST_TAG" ]]; then
   echo "CHANGELOG_PREP_START $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "NOTE: No tags found — showing all commits"
-  COMMITS=$(git log --oneline 2>/dev/null || echo "(no commits)")
+  COMMITS=$(git log --oneline 2> /dev/null || echo "(no commits)")
   LAST_TAG="(none)"
 else
   # Green path: nothing new since last tag
-  HEAD_SHA=$(git rev-parse HEAD 2>/dev/null)
-  TAG_SHA=$(git rev-parse "${LAST_TAG}^{}" 2>/dev/null || git rev-parse "${LAST_TAG}" 2>/dev/null)
+  HEAD_SHA=$(git rev-parse HEAD 2> /dev/null)
+  TAG_SHA=$(git rev-parse "${LAST_TAG}^{}" 2> /dev/null || git rev-parse "${LAST_TAG}" 2> /dev/null)
 
   if [[ "$HEAD_SHA" == "$TAG_SHA" ]]; then
     echo "NO_NEW_COMMITS"
     exit 0
   fi
 
-  COMMITS=$(git log "${LAST_TAG}..HEAD" --oneline 2>/dev/null || echo "")
+  COMMITS=$(git log "${LAST_TAG}..HEAD" --oneline 2> /dev/null || echo "")
 
   if [[ -z "$COMMITS" ]]; then
     echo "NO_NEW_COMMITS"
@@ -61,9 +61,9 @@ while IFS= read -r line; do
 
   # Check for BREAKING CHANGE (full commit body check)
   SHA=$(echo "$line" | awk '{print $1}')
-  BODY=$(git log -1 --format='%b' "$SHA" 2>/dev/null || true)
+  BODY=$(git log -1 --format='%b' "$SHA" 2> /dev/null || true)
 
-  if echo "$BODY" | grep -q "BREAKING CHANGE" 2>/dev/null || echo "$line" | grep -qE '^[a-f0-9]+ [a-z]+(\([^)]+\))?!:' 2>/dev/null; then
+  if echo "$BODY" | grep -q "BREAKING CHANGE" 2> /dev/null || echo "$line" | grep -qE '^[a-f0-9]+ [a-z]+(\([^)]+\))?!:' 2> /dev/null; then
     BREAKING="${BREAKING}  ${line}\n"
   elif echo "$line" | grep -qE '^[a-f0-9]+ feat(\([^)]+\))?:'; then
     FEATS="${FEATS}  ${line}\n"
@@ -77,7 +77,11 @@ while IFS= read -r line; do
 done <<< "$COMMITS"
 
 # Counts
-count_lines() { local c; c=$(printf '%b' "$1" | grep -c '.' 2>/dev/null) || true; echo "${c:-0}"; }
+count_lines() {
+  local c
+  c=$(printf '%b' "$1" | grep -c '.' 2> /dev/null) || true
+  echo "${c:-0}"
+}
 BREAKING_COUNT=$(count_lines "$BREAKING")
 FEAT_COUNT=$(count_lines "$FEATS")
 FIX_COUNT=$(count_lines "$FIXES")

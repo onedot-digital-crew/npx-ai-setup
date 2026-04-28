@@ -11,16 +11,16 @@ source "$SCRIPT_DIR/prep-lib.sh"
 # Helpers
 # ---------------------------------------------------------------------------
 section() { printf "\n## %s\n\n" "$1"; }
-hr()      { printf '%s\n' "---"; }
+hr() { printf '%s\n' "---"; }
 
 # ---------------------------------------------------------------------------
 # Green-path: nothing to review
 # ---------------------------------------------------------------------------
 git_guard
 MAIN="$(main_branch)"
-STAGED_CHANGES="$(git diff --cached --name-only 2>/dev/null || true)"
-UNSTAGED_CHANGES="$(git diff --name-only 2>/dev/null || true)"
-BRANCH_DIFF="$(git diff "$MAIN"...HEAD --name-only 2>/dev/null || true)"
+STAGED_CHANGES="$(git diff --cached --name-only 2> /dev/null || true)"
+UNSTAGED_CHANGES="$(git diff --name-only 2> /dev/null || true)"
+BRANCH_DIFF="$(git diff "$MAIN"...HEAD --name-only 2> /dev/null || true)"
 
 if [[ -z "$STAGED_CHANGES" ]] && [[ -z "$UNSTAGED_CHANGES" ]] && [[ -z "$BRANCH_DIFF" ]]; then
   echo "NO_CHANGES_TO_REVIEW"
@@ -30,7 +30,7 @@ fi
 # ---------------------------------------------------------------------------
 # 1. Header
 # ---------------------------------------------------------------------------
-BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo "unknown")"
 TIMESTAMP="$(date '+%Y-%m-%d %H:%M:%S')"
 
 printf "# Review Prep Report\n"
@@ -42,21 +42,21 @@ hr
 # ---------------------------------------------------------------------------
 section "Changed Files"
 
-STAGED_FILES="$(rtk_or_raw git diff --cached --name-only 2>/dev/null || true)"
-UNSTAGED_FILES="$(rtk_or_raw git diff --name-only 2>/dev/null || true)"
+STAGED_FILES="$(rtk_or_raw git diff --cached --name-only 2> /dev/null || true)"
+UNSTAGED_FILES="$(rtk_or_raw git diff --name-only 2> /dev/null || true)"
 
 # Combine and deduplicate
-ALL_CHANGED="$(printf '%s\n%s\n' "$STAGED_FILES" "$UNSTAGED_FILES" \
-  | grep -v '^$' | sort -u || true)"
+ALL_CHANGED="$(printf '%s\n%s\n' "$STAGED_FILES" "$UNSTAGED_FILES" |
+  grep -v '^$' | sort -u || true)"
 
 if [ -z "$ALL_CHANGED" ]; then
   printf "No changed files found (working tree clean, nothing staged).\n"
 else
-  CHANGED_COUNT="$(printf '%s\n' "$ALL_CHANGED" | grep -c '.' 2>/dev/null || echo 0)"
+  CHANGED_COUNT="$(printf '%s\n' "$ALL_CHANGED" | grep -c '.' 2> /dev/null || echo 0)"
   printf "%s file(s) changed:\n\n" "$CHANGED_COUNT"
   while IFS= read -r f; do
     [ -z "$f" ] && continue
-    if printf '%s\n' "$STAGED_FILES" | grep -qxF "$f" 2>/dev/null; then
+    if printf '%s\n' "$STAGED_FILES" | grep -qxF "$f" 2> /dev/null; then
       printf '%s\n' "- \`${f}\` (staged)"
     else
       printf '%s\n' "- \`${f}\` (unstaged)"
@@ -69,9 +69,9 @@ fi
 # ---------------------------------------------------------------------------
 section "Diff Statistics"
 
-STAGED_STAT="$(rtk_or_raw git diff --cached --stat 2>/dev/null || true)"
-UNSTAGED_STAT="$(rtk_or_raw git diff --stat 2>/dev/null || true)"
-BRANCH_STAT="$(rtk_or_raw git diff main...HEAD --stat 2>/dev/null || rtk_or_raw git diff origin/main...HEAD --stat 2>/dev/null || true)"
+STAGED_STAT="$(rtk_or_raw git diff --cached --stat 2> /dev/null || true)"
+UNSTAGED_STAT="$(rtk_or_raw git diff --stat 2> /dev/null || true)"
+BRANCH_STAT="$(rtk_or_raw git diff main...HEAD --stat 2> /dev/null || rtk_or_raw git diff origin/main...HEAD --stat 2> /dev/null || true)"
 
 if [ -n "$STAGED_STAT" ]; then
   printf "### Staged\n\`\`\`\n%s\n\`\`\`\n\n" "$STAGED_STAT"
@@ -95,7 +95,7 @@ fi
 # 4. Full diffs (staged + unstaged)
 # ---------------------------------------------------------------------------
 section "Full Diff (Staged)"
-STAGED_DIFF="$(rtk_or_raw git diff --cached 2>/dev/null || true)"
+STAGED_DIFF="$(rtk_or_raw git diff --cached 2> /dev/null || true)"
 if [ -n "$STAGED_DIFF" ]; then
   printf "\`\`\`diff\n%s\n\`\`\`\n" "$STAGED_DIFF"
 else
@@ -103,7 +103,7 @@ else
 fi
 
 section "Full Diff (Unstaged)"
-UNSTAGED_DIFF="$(rtk_or_raw git diff 2>/dev/null || true)"
+UNSTAGED_DIFF="$(rtk_or_raw git diff 2> /dev/null || true)"
 if [ -n "$UNSTAGED_DIFF" ]; then
   printf "\`\`\`diff\n%s\n\`\`\`\n" "$UNSTAGED_DIFF"
 else
@@ -128,10 +128,10 @@ else
     # Supports: bash functions, JS/TS functions, Python defs
     FUNC_NAMES="$(grep -E \
       '^\s*(function [a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*\s*\(\s*\)\s*\{|def [a-zA-Z_][a-zA-Z0-9_]*|const [a-zA-Z_][a-zA-Z0-9_]* = (function|\()|(export )?(async )?function [a-zA-Z_][a-zA-Z0-9_]*)' \
-      "$file" 2>/dev/null \
-      | grep -oE '(function |def )[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*\s*\(' \
-      | grep -oE '[a-zA-Z_][a-zA-Z0-9_]+' \
-      | sort -u || true)"
+      "$file" 2> /dev/null |
+      grep -oE '(function |def )[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*\s*\(' |
+      grep -oE '[a-zA-Z_][a-zA-Z0-9_]+' |
+      sort -u || true)"
 
     if [ -z "$FUNC_NAMES" ]; then
       continue
@@ -144,24 +144,24 @@ else
 
       # Search for this name in the codebase (excluding the file itself and build dirs)
       # Use pathspec exclusion only on Git >= 2.16 (older versions don't support :!path)
-      if git --version 2>/dev/null | grep -qE 'git version [01]\.|git version 2\.[0-9]\.|git version 2\.1[0-5]\.'; then
+      if git --version 2> /dev/null | grep -qE 'git version [01]\.|git version 2\.[0-9]\.|git version 2\.1[0-5]\.'; then
         MATCHES="$(git grep -l --word-regexp "$fname" -- \
           '*.sh' '*.js' '*.ts' '*.py' \
-          2>/dev/null \
-          | grep -vxF "$file" || true)"
+          2> /dev/null |
+          grep -vxF "$file" || true)"
       else
         MATCHES="$(git grep -l --word-regexp "$fname" -- \
           '*.sh' '*.js' '*.ts' '*.py' ':!dist/' ':!.output/' ':!node_modules/' ':!*.min.js' \
-          2>/dev/null \
-          | grep -vxF "$file" || true)"
+          2> /dev/null |
+          grep -vxF "$file" || true)"
       fi
 
       if [ -n "$MATCHES" ]; then
-        MATCH_COUNT="$(printf '%s\n' "$MATCHES" | grep -c '.' 2>/dev/null || echo 0)"
+        MATCH_COUNT="$(printf '%s\n' "$MATCHES" | grep -c '.' 2> /dev/null || echo 0)"
         DUPE_FINDINGS="${DUPE_FINDINGS}- \`${fname}\` (defined in \`${file}\`) also found in ${MATCH_COUNT} other file(s):\n"
         while IFS= read -r m; do
           [ -z "$m" ] && continue
-          LINE="$(git grep -n --word-regexp "$fname" "$m" 2>/dev/null | head -3 | tr '\n' ' ' || true)"
+          LINE="$(git grep -n --word-regexp "$fname" "$m" 2> /dev/null | head -3 | tr '\n' ' ' || true)"
           DUPE_FINDINGS="${DUPE_FINDINGS}  - \`${m}\`: ${LINE}\n"
         done <<< "$MATCHES"
       fi
@@ -181,8 +181,8 @@ fi
 # ---------------------------------------------------------------------------
 section "Summary for Claude"
 
-STAGED_COUNT="$(printf '%s\n' "$STAGED_FILES" | grep -c '.' 2>/dev/null || echo 0)"
-UNSTAGED_COUNT="$(printf '%s\n' "$UNSTAGED_FILES" | grep -c '.' 2>/dev/null || echo 0)"
+STAGED_COUNT="$(printf '%s\n' "$STAGED_FILES" | grep -c '.' 2> /dev/null || echo 0)"
+UNSTAGED_COUNT="$(printf '%s\n' "$UNSTAGED_FILES" | grep -c '.' 2> /dev/null || echo 0)"
 
 printf "- Staged files: %s\n" "$STAGED_COUNT"
 printf "- Unstaged files: %s\n" "$UNSTAGED_COUNT"

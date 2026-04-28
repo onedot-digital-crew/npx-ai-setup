@@ -41,6 +41,7 @@ If a tool call would modify any file, stop and refuse.
 
 3. **Map the space** — identify relevant files, modules, dependencies, and entry points.
    Use ASCII diagrams to show relationships:
+
    ```
    UserRequest → Router → Handler → Service → DB
                                  ↘ Cache

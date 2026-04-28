@@ -2,10 +2,10 @@
 
 ## Caps
 
-| Hook Type | Cap | Rationale |
-|-----------|-----|-----------|
-| `SessionStart`, `PreCompact` | **2000 tokens** | One-shot — fires once per session |
-| `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, `TaskCompleted` | **300 tokens** | Per-turn — cost multiplies with session length |
+| Hook Type                                                                | Cap             | Rationale                                      |
+| ------------------------------------------------------------------------ | --------------- | ---------------------------------------------- |
+| `SessionStart`, `PreCompact`                                             | **2000 tokens** | One-shot — fires once per session              |
+| `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, `TaskCompleted` | **300 tokens**  | Per-turn — cost multiplies with session length |
 
 ## Rules
 

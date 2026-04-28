@@ -17,7 +17,7 @@ _smart_merge_file() {
   esac
 
   # Require claude CLI
-  command -v claude >/dev/null 2>&1 || return 1
+  command -v claude > /dev/null 2>&1 || return 1
 
   local tmp_prompt tmp_out tmp_target
   tmp_prompt=$(mktemp)
@@ -45,7 +45,7 @@ MERGE_PROMPT_EOF
 
   # Note: "$(cat file)" command substitution is safe here — the result is a single
   # string argument; shell metacharacters in file content are NOT re-evaluated.
-  if claude -p "$(cat "$tmp_prompt")" --model claude-haiku-4-5 --output-format text > "$tmp_out" 2>/dev/null; then
+  if claude -p "$(cat "$tmp_prompt")" --model claude-haiku-4-5 --output-format text > "$tmp_out" 2> /dev/null; then
     if [ -s "$tmp_out" ]; then
       # Atomic write: cp to .merge-tmp then mv (mv is atomic on same filesystem)
       cp "$tmp_out" "$tmp_target" && mv "$tmp_target" "$target" || {
@@ -97,9 +97,10 @@ _install_or_update_file() {
   if [ -f .ai-setup.json ] && _json_valid .ai-setup.json; then
     local stored_cs
     if [ "$_JSON_CMD" = "jq" ]; then
-      stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+      stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2> /dev/null)
     else
-      stored_cs=$(node - "$target" <<'NODESCRIPT' 2>/dev/null
+      stored_cs=$(
+        node - "$target" << 'NODESCRIPT' 2> /dev/null
         try{const d=JSON.parse(require('fs').readFileSync('.ai-setup.json','utf8'));
         const v=(d.files||{})[process.argv[2]];if(v)process.stdout.write(v);}catch(e){}
 NODESCRIPT
@@ -144,14 +145,14 @@ _install_template_dir() {
     while IFS= read -r -d '' _f; do
       local _name="${_f##*/}"
       _install_or_update_file "$_f" "$target_dir/$_name"
-      [ "$executable" = "executable" ] && chmod +x "$target_dir/$_name" 2>/dev/null || true
+      [ "$executable" = "executable" ] && chmod +x "$target_dir/$_name" 2> /dev/null || true
       _count=$((_count + 1))
     done < <(find "$src_dir" -maxdepth 1 -name "$glob" -type f -print0 | sort -z)
   else
     while IFS= read -r -d '' _f; do
       local _name="${_f##*/}"
       _install_or_update_file "$_f" "$target_dir/$_name"
-      [ "$executable" = "executable" ] && chmod +x "$target_dir/$_name" 2>/dev/null || true
+      [ "$executable" = "executable" ] && chmod +x "$target_dir/$_name" 2> /dev/null || true
       _count=$((_count + 1))
     done < <(find "$src_dir" -maxdepth 1 -type f -print0 | sort -z)
   fi
@@ -163,11 +164,11 @@ _install_template_dir() {
 # Sets: $AI_CLI
 check_requirements() {
   MISSING=()
-  ! command -v node &>/dev/null && MISSING+=("node (>= 18)")
-  ! command -v npm &>/dev/null && MISSING+=("npm")
-  if ! command -v jq &>/dev/null && ! command -v node &>/dev/null; then
+  ! command -v node &> /dev/null && MISSING+=("node (>= 18)")
+  ! command -v npm &> /dev/null && MISSING+=("npm")
+  if ! command -v jq &> /dev/null && ! command -v node &> /dev/null; then
     MISSING+=("jq or node (brew install jq, or install Node.js >= 18)")
-  elif ! command -v jq &>/dev/null; then
+  elif ! command -v jq &> /dev/null; then
     tui_info "jq not found - Node.js JSON fallback active"
   fi
 
@@ -180,7 +181,7 @@ check_requirements() {
   fi
 
   # Node.js version check (>= 18)
-  NODE_VERSION=$(node -v 2>/dev/null | sed 's/v//' | cut -d. -f1)
+  NODE_VERSION=$(node -v 2> /dev/null | sed 's/v//' | cut -d. -f1)
   if [ -n "$NODE_VERSION" ] && [ "$NODE_VERSION" -lt 18 ]; then
     tui_error "Node.js >= 18 required (found v$NODE_VERSION)"
     exit 1
@@ -188,8 +189,8 @@ check_requirements() {
 
   # npm cache permission check (root-owned files block npx)
   local npm_cache
-  npm_cache="$(npm config get cache 2>/dev/null || echo "$HOME/.npm")"
-  if [ -d "$npm_cache" ] && find "$npm_cache" -maxdepth 1 -not -user "$(id -u)" -print -quit 2>/dev/null | grep -q .; then
+  npm_cache="$(npm config get cache 2> /dev/null || echo "$HOME/.npm")"
+  if [ -d "$npm_cache" ] && find "$npm_cache" -maxdepth 1 -not -user "$(id -u)" -print -quit 2> /dev/null | grep -q .; then
     tui_hint \
       "npm cache contains root-owned files — this can break npx" \
       "Fix: sudo chown -R \$(id -u):\$(id -g) \"$npm_cache\""
@@ -204,9 +205,9 @@ check_requirements() {
 
   # AI CLI detection (optional, for Auto-Init)
   AI_CLI=""
-  if command -v claude &>/dev/null; then
+  if command -v claude &> /dev/null; then
     AI_CLI="claude"
-  elif command -v gh &>/dev/null && gh copilot --version &>/dev/null 2>&1; then
+  elif command -v gh &> /dev/null && gh copilot --version &> /dev/null 2>&1; then
     AI_CLI="copilot"
   fi
   tui_success "Requirements OK (AI CLI: ${AI_CLI:-none detected})"
@@ -222,7 +223,7 @@ check_requirements() {
 # Native installer auto-updates and requires no dependencies (npm is deprecated).
 _check_claude_code_install_method() {
   local claude_path
-  claude_path=$(command -v claude 2>/dev/null) || return 0
+  claude_path=$(command -v claude 2> /dev/null) || return 0
 
   # Native binary present — no migration needed regardless of other installations
   if [ -x "$HOME/.local/bin/claude" ]; then
@@ -232,8 +233,8 @@ _check_claude_code_install_method() {
   local install_method=""
 
   # Check if installed via Homebrew
-  if command -v brew &>/dev/null; then
-    if brew list --cask claude-code &>/dev/null 2>&1; then
+  if command -v brew &> /dev/null; then
+    if brew list --cask claude-code &> /dev/null 2>&1; then
       install_method="brew"
     elif [[ "$claude_path" == */homebrew/* ]] || [[ "$claude_path" == */Caskroom/* ]]; then
       install_method="brew"
@@ -243,7 +244,7 @@ _check_claude_code_install_method() {
   # Check if installed via npm (deprecated)
   if [ -z "$install_method" ]; then
     local npm_root
-    npm_root=$(npm root -g 2>/dev/null) || true
+    npm_root=$(npm root -g 2> /dev/null) || true
     if [ -n "$npm_root" ] && [ -d "$npm_root/@anthropic-ai/claude-code" ]; then
       install_method="npm"
     elif [[ "$claude_path" == */node_modules/* ]] || [[ "$claude_path" == */npm/* ]]; then
@@ -259,7 +260,7 @@ _check_claude_code_install_method() {
   local label
   case "$install_method" in
     brew) label="Homebrew" ;;
-    npm)  label="npm (deprecated)" ;;
+    npm) label="npm (deprecated)" ;;
   esac
 
   tui_warn "Claude Code ist via ${label} installiert (kein Auto-Update)"
@@ -296,14 +297,14 @@ _check_claude_code_install_method() {
 _check_claude_code_version() {
   local MIN_CC_VERSION="2.1.89"
   local cc_version
-  cc_version=$(claude --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+  cc_version=$(claude --version 2> /dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
   [ -z "$cc_version" ] && return 0
 
   # Semver comparison: returns 0 if $1 >= $2
   _semver_ge() {
     local IFS=.
     local i a=($1) b=($2)
-    for ((i=0; i<3; i++)); do
+    for ((i = 0; i < 3; i++)); do
       [ "${a[i]:-0}" -gt "${b[i]:-0}" ] && return 0
       [ "${a[i]:-0}" -lt "${b[i]:-0}" ] && return 1
     done
@@ -320,7 +321,7 @@ _check_claude_code_version() {
   if _update_out=$(claude update 2>&1); then
     echo "$_update_out" | tail -5
     local new_version
-    new_version=$(claude --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+    new_version=$(claude --version 2> /dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
     tui_success "Claude Code aktualisiert auf v${new_version:-latest}"
   else
     echo "$_update_out" | tail -5
@@ -373,7 +374,7 @@ cleanup_orphans() {
     while IFS= read -r -d '' f; do
       local name="${f##*/}"
       [ -f "$src/$name" ] || ORPHANS+=("$target/$name")
-    done < <(find "$target" -maxdepth 1 -type f -name "$glob" -print0 2>/dev/null)
+    done < <(find "$target" -maxdepth 1 -type f -name "$glob" -print0 2> /dev/null)
   }
 
   # Helper: find subdirs in $target_dir not present in $src_dir (flat, maxdepth 1)
@@ -383,7 +384,7 @@ cleanup_orphans() {
     while IFS= read -r -d '' d; do
       local name="${d##*/}"
       [ -d "$src/$name" ] || ORPHANS+=("$target/$name/")
-    done < <(find "$target" -maxdepth 1 -mindepth 1 -type d -print0 2>/dev/null)
+    done < <(find "$target" -maxdepth 1 -mindepth 1 -type d -print0 2> /dev/null)
   }
 
   # Helper: find files installed recursively from $src_dir that no longer exist there
@@ -393,15 +394,15 @@ cleanup_orphans() {
     while IFS= read -r -d '' f; do
       local rel="${f#$target/}"
       [ -f "$src/$rel" ] || ORPHANS+=("$target/$rel")
-    done < <(find "$target" -type f -print0 2>/dev/null)
+    done < <(find "$target" -type f -print0 2> /dev/null)
   }
 
-  _find_orphan_files "$TPL/commands"      ".claude/commands"  "*.md"
-  _find_orphan_files "$TPL/claude/rules"  ".claude/rules"     "*.md"
-  _find_orphan_files "$TPL/scripts"       ".claude/scripts"   "*.sh"
-  _find_orphan_files "$TPL/claude/hooks"  ".claude/hooks"
-  _find_orphan_files "$TPL/agents"        ".claude/agents"    "*.md"
-  _find_orphan_dirs  "$TPL/skills"        ".claude/skills"
+  _find_orphan_files "$TPL/commands" ".claude/commands" "*.md"
+  _find_orphan_files "$TPL/claude/rules" ".claude/rules" "*.md"
+  _find_orphan_files "$TPL/scripts" ".claude/scripts" "*.sh"
+  _find_orphan_files "$TPL/claude/hooks" ".claude/hooks"
+  _find_orphan_files "$TPL/agents" ".claude/agents" "*.md"
+  _find_orphan_dirs "$TPL/skills" ".claude/skills"
   # Check for orphaned reference files within each installed skill
   while IFS= read -r -d '' skill_dir; do
     local name="${skill_dir##*/}"
@@ -410,8 +411,8 @@ cleanup_orphans() {
     while IFS= read -r -d '' ref; do
       local ref_name="${ref##*/}"
       [ -f "$skill_dir/references/$ref_name" ] || ORPHANS+=("$installed_refs/$ref_name")
-    done < <(find "$installed_refs" -type f -name "*.md" -print0 2>/dev/null)
-  done < <(find "$TPL/skills" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+    done < <(find "$installed_refs" -type f -name "*.md" -print0 2> /dev/null)
+  done < <(find "$TPL/skills" -mindepth 1 -maxdepth 1 -type d -print0 2> /dev/null)
   _find_orphan_files_recursive "$TPL/github" ".github"
 
   if [ ${#ORPHANS[@]} -eq 0 ]; then
@@ -440,17 +441,17 @@ run_reset() {
   local TARGETS=()
 
   # Managed directories (fully owned by setup)
-  [ -d ".claude/commands" ]  && TARGETS+=(".claude/commands/")
-  [ -d ".claude/rules" ]     && TARGETS+=(".claude/rules/")
-  [ -d ".claude/scripts" ]   && TARGETS+=(".claude/scripts/")
-  [ -d ".claude/hooks" ]     && TARGETS+=(".claude/hooks/")
+  [ -d ".claude/commands" ] && TARGETS+=(".claude/commands/")
+  [ -d ".claude/rules" ] && TARGETS+=(".claude/rules/")
+  [ -d ".claude/scripts" ] && TARGETS+=(".claude/scripts/")
+  [ -d ".claude/hooks" ] && TARGETS+=(".claude/hooks/")
 
   # Template-managed skills only (leave custom skills untouched)
   if [ -d ".claude/skills" ] && [ -d "$TPL/skills" ]; then
     while IFS= read -r -d '' d; do
       local name="${d##*/}"
       [ -d "$TPL/skills/$name" ] && TARGETS+=(".claude/skills/$name/")
-    done < <(find ".claude/skills" -maxdepth 1 -mindepth 1 -type d -print0 2>/dev/null)
+    done < <(find ".claude/skills" -maxdepth 1 -mindepth 1 -type d -print0 2> /dev/null)
   fi
 
   # Template-managed agents only (leave custom agents untouched)
@@ -458,26 +459,26 @@ run_reset() {
     while IFS= read -r -d '' f; do
       local name="${f##*/}"
       [ -f "$TPL/agents/$name" ] && TARGETS+=(".claude/agents/$name")
-    done < <(find ".claude/agents" -maxdepth 1 -type f -print0 2>/dev/null)
+    done < <(find ".claude/agents" -maxdepth 1 -type f -print0 2> /dev/null)
   fi
 
   # Managed single files
-  [ -f ".claude/settings.json" ]      && TARGETS+=(".claude/settings.json")
-  [ -f "WORKFLOW-GUIDE.md" ]           && TARGETS+=("WORKFLOW-GUIDE.md")
-  [ -f ".ai-setup.json" ]             && TARGETS+=(".ai-setup.json")
-  [ -f "AGENTS.md" ]                  && TARGETS+=("AGENTS.md")
-  [ -f "opencode.json" ]              && TARGETS+=("opencode.json")
+  [ -f ".claude/settings.json" ] && TARGETS+=(".claude/settings.json")
+  [ -f "WORKFLOW-GUIDE.md" ] && TARGETS+=("WORKFLOW-GUIDE.md")
+  [ -f ".ai-setup.json" ] && TARGETS+=(".ai-setup.json")
+  [ -f "AGENTS.md" ] && TARGETS+=("AGENTS.md")
+  [ -f "opencode.json" ] && TARGETS+=("opencode.json")
 
   # Conditional installs (only if they exist)
-  [ -f ".gemini/settings.json" ]  && TARGETS+=(".gemini/settings.json")
-  [ -f ".codex/config.toml" ]     && TARGETS+=(".codex/config.toml")
+  [ -f ".gemini/settings.json" ] && TARGETS+=(".gemini/settings.json")
+  [ -f ".codex/config.toml" ] && TARGETS+=(".codex/config.toml")
 
   # GitHub templates (copilot instructions + workflows)
   if [ -d ".github" ] && [ -d "$TPL/github" ]; then
     while IFS= read -r -d '' f; do
       local rel="${f#$TPL/github/}"
       [ -f ".github/$rel" ] && TARGETS+=(".github/$rel")
-    done < <(find "$TPL/github" -type f -print0 2>/dev/null)
+    done < <(find "$TPL/github" -type f -print0 2> /dev/null)
   fi
 
   if [ ${#TARGETS[@]} -eq 0 ]; then
@@ -551,9 +552,9 @@ customize_settings_for_stack() {
   # Auto-detect framework from config files when SELECTED_SYSTEM is empty
   # (e.g. update runs where user skips framework selection)
   if [ -z "$framework" ]; then
-    if ls nuxt.config.* 1>/dev/null 2>&1; then
+    if ls nuxt.config.* 1> /dev/null 2>&1; then
       framework="nuxt"
-    elif ls next.config.* 1>/dev/null 2>&1; then
+    elif ls next.config.* 1> /dev/null 2>&1; then
       framework="next"
     fi
   fi
@@ -583,9 +584,12 @@ customize_settings_for_stack() {
       .permissions.deny |= map(
         select(. as $d | ($patterns | split("|")) | index($d) | not)
       )
-    ' "$settings" > "$tmp" && mv "$tmp" "$settings" || { rm -f "$tmp"; return 1; }
+    ' "$settings" > "$tmp" && mv "$tmp" "$settings" || {
+      rm -f "$tmp"
+      return 1
+    }
   else
-    node - "$settings" "$remove_patterns" <<'NODESCRIPT' 2>/dev/null || { rm -f "$tmp"; return 1; }
+    node - "$settings" "$remove_patterns" << 'NODESCRIPT' 2> /dev/null || {
       const fs = require('fs');
       const settings = process.argv[2];
       const patterns = process.argv[3].split('|');
@@ -595,6 +599,9 @@ customize_settings_for_stack() {
       }
       fs.writeFileSync(settings, JSON.stringify(cfg, null, 2));
 NODESCRIPT
+      rm -f "$tmp"
+      return 1
+    }
   fi
   rm -f "$tmp"
 
@@ -603,7 +610,7 @@ NODESCRIPT
 
 # Install .gemini/settings.json if gemini CLI is available
 install_gemini_config() {
-  command -v gemini >/dev/null 2>&1 || return 0
+  command -v gemini > /dev/null 2>&1 || return 0
   tui_step "Writing .gemini/settings.json"
   mkdir -p .gemini
   _install_or_update_file "$TPL/gemini/settings.json" .gemini/settings.json
@@ -611,7 +618,7 @@ install_gemini_config() {
 
 # Install .codex/config.toml if codex CLI is available
 install_codex_config() {
-  command -v codex >/dev/null 2>&1 || return 0
+  command -v codex > /dev/null 2>&1 || return 0
   tui_step "Writing .codex/config.toml"
   mkdir -p .codex
   _install_or_update_file "$TPL/codex/config.toml" .codex/config.toml
@@ -620,7 +627,7 @@ install_codex_config() {
 # Install hook scripts
 install_hooks() {
   tui_step "Installing hooks"
-  _install_template_dir "$TPL/claude/hooks" ".claude/hooks" "" "executable" >/dev/null
+  _install_template_dir "$TPL/claude/hooks" ".claude/hooks" "" "executable" > /dev/null
 }
 
 # Install rule templates
@@ -638,7 +645,7 @@ install_rules() {
 
   # Conditional: install TypeScript rules only when TS files are detected
   local _ts_found
-  _ts_found=$(find . \( -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" 2>/dev/null | head -1)
+  _ts_found=$(find . \( -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" 2> /dev/null | head -1)
   if [ -n "$_ts_found" ]; then
     tui_info "TypeScript detected - installing typescript.md rules"
     for _ts_mapping in "${TS_RULES_MAP[@]}"; do
@@ -685,7 +692,7 @@ install_skills() {
         _install_or_update_file "$ref" ".claude/skills/$name/references/$ref_name"
       done < <(find "$skill_dir/references" -type f -name "*.md" -print0 | sort -z)
     fi
-    _count=$(( _count + 1 ))
+    _count=$((_count + 1))
   done < <(find "$TPL/skills" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
   [ "$_count" -gt 0 ] && tui_success "$_count skill(s) installed to .claude/skills/"
   return 0
@@ -710,7 +717,7 @@ install_claude_scripts() {
 update_gitignore() {
   tui_step "Updating .gitignore"
   if [ -f .gitignore ]; then
-    if ! grep -q "claude/settings.local" .gitignore 2>/dev/null; then
+    if ! grep -q "claude/settings.local" .gitignore 2> /dev/null; then
       echo "" >> .gitignore
       echo "# Claude Code / Project setup" >> .gitignore
       echo ".claude/settings.local.json" >> .gitignore
@@ -730,20 +737,20 @@ update_gitignore() {
       echo ".opencode/skills" >> .gitignore
     else
       # Add new entries if missing from existing block
-      grep -q "\.ai-setup\.json" .gitignore 2>/dev/null || echo ".ai-setup.json" >> .gitignore
-      grep -q "\.ai-setup-backup" .gitignore 2>/dev/null || echo ".ai-setup-backup/" >> .gitignore
-      grep -q "\.agents/context/\.state" .gitignore 2>/dev/null || echo ".agents/context/.state" >> .gitignore
-      grep -q "\.agents/memory" .gitignore 2>/dev/null || echo ".agents/memory/" >> .gitignore
-      grep -q "skill-cache" .gitignore 2>/dev/null || echo ".agents/.skill-cache.json" >> .gitignore
-      grep -q "storyblok-dump\.json" .gitignore 2>/dev/null || echo "scripts/storyblok-dump.json" >> .gitignore
-      grep -q "CLAUDE\.local\.md" .gitignore 2>/dev/null || echo "CLAUDE.local.md" >> .gitignore
-      grep -q "compact-state" .gitignore 2>/dev/null || echo ".claude/compact-state.json" >> .gitignore
-      grep -q "worktrees" .gitignore 2>/dev/null || echo ".claude/worktrees/" >> .gitignore
-      grep -q "\.claude/\*\.log" .gitignore 2>/dev/null || echo ".claude/*.log" >> .gitignore
-      grep -q "__pycache__" .gitignore 2>/dev/null || echo "__pycache__/" >> .gitignore
-      grep -q "\.codex/skills" .gitignore 2>/dev/null || echo ".codex/skills" >> .gitignore
-      grep -q "\.gemini/agents" .gitignore 2>/dev/null || echo ".gemini/agents" >> .gitignore
-      grep -q "\.opencode/skills" .gitignore 2>/dev/null || echo ".opencode/skills" >> .gitignore
+      grep -q "\.ai-setup\.json" .gitignore 2> /dev/null || echo ".ai-setup.json" >> .gitignore
+      grep -q "\.ai-setup-backup" .gitignore 2> /dev/null || echo ".ai-setup-backup/" >> .gitignore
+      grep -q "\.agents/context/\.state" .gitignore 2> /dev/null || echo ".agents/context/.state" >> .gitignore
+      grep -q "\.agents/memory" .gitignore 2> /dev/null || echo ".agents/memory/" >> .gitignore
+      grep -q "skill-cache" .gitignore 2> /dev/null || echo ".agents/.skill-cache.json" >> .gitignore
+      grep -q "storyblok-dump\.json" .gitignore 2> /dev/null || echo "scripts/storyblok-dump.json" >> .gitignore
+      grep -q "CLAUDE\.local\.md" .gitignore 2> /dev/null || echo "CLAUDE.local.md" >> .gitignore
+      grep -q "compact-state" .gitignore 2> /dev/null || echo ".claude/compact-state.json" >> .gitignore
+      grep -q "worktrees" .gitignore 2> /dev/null || echo ".claude/worktrees/" >> .gitignore
+      grep -q "\.claude/\*\.log" .gitignore 2> /dev/null || echo ".claude/*.log" >> .gitignore
+      grep -q "__pycache__" .gitignore 2> /dev/null || echo "__pycache__/" >> .gitignore
+      grep -q "\.codex/skills" .gitignore 2> /dev/null || echo ".codex/skills" >> .gitignore
+      grep -q "\.gemini/agents" .gitignore 2> /dev/null || echo ".gemini/agents" >> .gitignore
+      grep -q "\.opencode/skills" .gitignore 2> /dev/null || echo ".opencode/skills" >> .gitignore
     fi
   else
     echo "# Claude Code / Project setup" > .gitignore
@@ -764,7 +771,7 @@ update_gitignore() {
   fi
 
   # AGENTS.md should be tracked like CLAUDE.md (never ignored)
-  if grep -Eq '^[[:space:]]*/?AGENTS\.md[[:space:]]*$' .gitignore 2>/dev/null; then
+  if grep -Eq '^[[:space:]]*/?AGENTS\.md[[:space:]]*$' .gitignore 2> /dev/null; then
     local tmp_gitignore
     tmp_gitignore=$(mktemp)
     awk '!/^[[:space:]]*\/?AGENTS\.md[[:space:]]*$/' .gitignore > "$tmp_gitignore" && mv "$tmp_gitignore" .gitignore

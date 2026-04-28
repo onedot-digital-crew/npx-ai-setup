@@ -14,12 +14,14 @@ allowed-tools:
 Challenge and critically evaluate this feature idea before any implementation: **$ARGUMENTS**
 
 ## When to Use
+
 - Big ideas that touch >5 files or introduce new systems/patterns
 - Before investing time in a spec for something you're unsure about
 - When `/spec` Quick Triage recommends it (high complexity detected)
 - When you want a GO/SIMPLIFY/REJECT verdict before planning
 
 ## When NOT to Use
+
 - Simple tasks (typos, config, single-file fixes) → just do it or `/spec` directly
 - Evaluating external tools/repos → use `/research` instead
 - Open-ended exploration without a concrete proposal → use `/explore` instead
@@ -28,10 +30,13 @@ Challenge and critically evaluate this feature idea before any implementation: *
 ## Process
 
 ### 1. Restate the idea
+
 Summarize the proposed feature in 1-2 sentences in your own words to confirm understanding.
 
 ### 2. Concept fit
+
 Read `.agents/context/CONCEPT.md` if it exists. If not, note that the concept fit check was skipped. Otherwise evaluate:
+
 - Does this align with the project's core principles as defined in `.agents/context/CONCEPT.md`?
 - Does it fit the distinction described in CONCEPT.md (e.g., templates not generation, or the project's primary abstraction)?
 - Would this belong in the core layer, or is it scope creep?
@@ -39,24 +44,29 @@ Read `.agents/context/CONCEPT.md` if it exists. If not, note that the concept fi
 Rate concept fit: **ALIGNED / BORDERLINE / MISALIGNED** (skip if CONCEPT.md missing)
 
 ### 3. Necessity
+
 - What problem does it solve? Is that problem real or hypothetical?
 - What happens if we don't build it? Can users work without it?
 - Is this solving a problem that users have reported, or a problem we imagined?
 
 ### 4. Overhead and maintenance
+
 - How much ongoing maintenance does this add?
 - Does it increase the surface area of the tool (more flags, more config, more docs)?
 - What breaks if this feature has a bug?
 - Does it add complexity that slows down the core promise of this project?
 
 ### 5. Complexity and risks
+
 - How many files need to change?
 - Does this require new dependencies?
 - What edge cases or failure modes exist?
 - Does this interact with hooks, agents, or the CLI in unexpected ways?
 
 ### 6. Simpler alternatives
+
 List 1-3 alternatives, including:
+
 - A simpler version of the same idea (scope reduction)
 - A workaround that avoids building anything new
 - **"Don't build it"** — explicitly state this as an option if it applies
@@ -88,6 +98,7 @@ Choose exactly one. Incorporate concerns raised in Phase 6b into the rationale.
 ---
 
 ## Rules
+
 - Be direct and skeptical. The default stance is skepticism, not encouragement.
 - Do NOT modify any files.
 - Cite specific lines from `.agents/context/CONCEPT.md` when evaluating concept fit (only if file exists).

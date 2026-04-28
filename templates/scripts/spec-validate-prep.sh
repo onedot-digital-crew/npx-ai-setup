@@ -38,11 +38,11 @@ fi
 # Helpers
 # ---------------------------------------------------------------------------
 section() { printf "\n## %s\n\n" "$1"; }
-hr()      { printf '%s\n' "---"; }
+hr() { printf '%s\n' "---"; }
 
 extract_status() {
   local file="$1"
-  python3 - "$file" <<'PYEOF'
+  python3 - "$file" << 'PYEOF'
 import re, sys
 text = open(sys.argv[1], encoding="utf-8").read()
 m = re.search(r'\*\*Status\*\*:\s*([^|\n]+)', text)
@@ -58,14 +58,14 @@ count_section_lines() {
 
 section_present() {
   local file="$1" heading="$2"
-  grep -qE "^## ${heading}" "$file" 2>/dev/null && printf "present" || printf "missing"
+  grep -qE "^## ${heading}" "$file" 2> /dev/null && printf "present" || printf "missing"
 }
 
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-SPEC_ID="$(basename "$SPEC_FILE" .md | grep -oE '^[0-9]+'  || echo "???")"
-SPEC_TITLE="$(grep -m1 '^# ' "$SPEC_FILE" 2>/dev/null | sed 's/^# //' || echo "Unknown")"
+SPEC_ID="$(basename "$SPEC_FILE" .md | grep -oE '^[0-9]+' || echo "???")"
+SPEC_TITLE="$(grep -m1 '^# ' "$SPEC_FILE" 2> /dev/null | sed 's/^# //' || echo "Unknown")"
 TOTAL_LINES="$(wc -l < "$SPEC_FILE" | tr -d ' ')"
 TIMESTAMP="$(date '+%Y-%m-%d %H:%M:%S')"
 
@@ -98,7 +98,7 @@ printf "%-30s %s\n" "Section" "Status"
 printf "%-30s %s\n" "-------" "------"
 
 for display in "${REQUIRED_SECTIONS[@]}"; do
-  status="$(grep -qE "^## ${display}" "$SPEC_FILE" 2>/dev/null && echo "[PRESENT]" || echo "[MISSING]")"
+  status="$(grep -qE "^## ${display}" "$SPEC_FILE" 2> /dev/null && echo "[PRESENT]" || echo "[MISSING]")"
   printf "%-30s %s\n" "$display" "$status"
 done
 
@@ -178,7 +178,7 @@ MAX=100
 
 # Each required section present: +12 points (6 sections * 12 = 72)
 for display in "${REQUIRED_SECTIONS[@]}"; do
-  if grep -qE "^## ${display}" "$SPEC_FILE" 2>/dev/null; then
+  if grep -qE "^## ${display}" "$SPEC_FILE" 2> /dev/null; then
     SCORE=$((SCORE + 12))
   fi
 done

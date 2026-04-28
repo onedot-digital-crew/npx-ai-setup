@@ -3,6 +3,7 @@
 Dieses Setup macht Claude Code zum strukturierten Entwicklungswerkzeug statt einer Chat-Box. Statt "mach mal Feature X" gibt es einen klaren Prozess: Idee bewerten, Plan erstellen, ausfuehren, reviewen, committen. Jeder Schritt ist ein Slash-Command, jede Aenderung nachvollziehbar.
 
 **Was laeuft automatisch im Hintergrund:**
+
 - **Hooks + Settings** verhindern typische Fehler: Hooks geben Warnungen oder blocken riskante Edits, waehrend `permissions.deny` in `settings.json` harte Read-Blocks fuer Build-Output, Secrets und andere teure Dateien setzt
 - **Context-Dateien** geben Claude sofort Wissen ueber Stack, Architektur und Conventions — ohne jedes Mal erklaeren zu muessen
 - **Prep-Scripts** sammeln Daten in Shell bevor Claude sie sieht — spart 60-90% Tokens
@@ -27,12 +28,12 @@ Setup-Health pruefen: `! bash .claude/scripts/doctor.sh`
 
 Einmalig ausfuehren wenn du in eine neue Codebase einsteigst oder ein groesseres Vorhaben planst.
 
-| Command | Was es tut | Wann nutzen |
-|---------|------------|-------------|
-| `/analyze` | Parallele Agents analysieren die Codebase, erzeugen PATTERNS.md (Architektur-Patterns) und AUDIT.md (Hotspots, Risks, Recommendations) | Direkt nach Erstinstallation und wenn sich die Codebase stark veraendert hat |
-| `/explore "topic"` | Read-Only Thinking Partner — Codebase erkunden, Tradeoffs aufzeigen, ASCII-Diagramme. Aendert keine Dateien | Wenn du verstehen willst wie etwas funktioniert, ohne Code anzufassen |
-| `/research "tool"` | Deep-Research eines externen Repos/Tools/Patterns, produziert Brainstorm-Dokument | Bevor ein neues Tool oder Pattern eingefuehrt wird |
-| `/discover` | Reverse-Engineer Draft-Specs aus existierendem Code | Wenn es Features ohne Spec gibt und du den Stand dokumentieren willst |
+| Command            | Was es tut                                                                                                                             | Wann nutzen                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `/analyze`         | Parallele Agents analysieren die Codebase, erzeugen PATTERNS.md (Architektur-Patterns) und AUDIT.md (Hotspots, Risks, Recommendations) | Direkt nach Erstinstallation und wenn sich die Codebase stark veraendert hat |
+| `/explore "topic"` | Read-Only Thinking Partner — Codebase erkunden, Tradeoffs aufzeigen, ASCII-Diagramme. Aendert keine Dateien                            | Wenn du verstehen willst wie etwas funktioniert, ohne Code anzufassen        |
+| `/research "tool"` | Deep-Research eines externen Repos/Tools/Patterns, produziert Brainstorm-Dokument                                                      | Bevor ein neues Tool oder Pattern eingefuehrt wird                           |
+| `/discover`        | Reverse-Engineer Draft-Specs aus existierendem Code                                                                                    | Wenn es Features ohne Spec gibt und du den Stand dokumentieren willst        |
 
 Context on-demand laden: `@.agents/context/STACK.md` (oder `ARCHITECTURE.md`, `CONVENTIONS.md`) direkt im Prompt.
 
@@ -70,42 +71,42 @@ Neue Idee oder Feature?
 
 ### Spec Commands
 
-| Command | Was es tut |
-|---------|------------|
-| `/spec "task"` | Komplexitaet einschaetzen, Spec erstellen, Struktur-Check + User-Approval |
-| `/spec-work NNN` | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
-| `/spec-work-all` | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren |
-| `/spec-review NNN` | Review gegen Acceptance Criteria + Finishing Gate |
-| `/spec-board` | Kanban-Board aller Specs |
+| Command            | Was es tut                                                                |
+| ------------------ | ------------------------------------------------------------------------- |
+| `/spec "task"`     | Komplexitaet einschaetzen, Spec erstellen, Struktur-Check + User-Approval |
+| `/spec-work NNN`   | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
+| `/spec-work-all`   | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren          |
+| `/spec-review NNN` | Review gegen Acceptance Criteria + Finishing Gate                         |
+| `/spec-board`      | Kanban-Board aller Specs                                                  |
 
 ### Code Quality
 
-| Command | Was es tut |
-|---------|------------|
-| `/test` | Tests laufen lassen + Failures fixen (bis zu 3 Versuche) |
+| Command   | Was es tut                                                         |
+| --------- | ------------------------------------------------------------------ |
+| `/test`   | Tests laufen lassen + Failures fixen (bis zu 3 Versuche)           |
 | `/review` | Uncommitted Changes reviewen (Quick Scan / Standard / Adversarial) |
 
 Schnelle Zero-Token-Checks: `! bash .claude/scripts/lint-prep.sh` bzw. `test-prep.sh`, `ci-prep.sh`, `quality-gate.sh`.
 
 ### Build & Deploy
 
-| Command | Was es tut |
-|---------|------------|
-| `/commit` | Stagen + Conventional Commit Message generieren |
-| `/pr` | PR-Titel/Body draften, Build-Validation laufen lassen |
-| `/ci` | CI-Status via `gh pr checks` / `gh run list` pruefen |
-| `/release` | Version bump, CHANGELOG aktualisieren, Git Tag |
+| Command    | Was es tut                                            |
+| ---------- | ----------------------------------------------------- |
+| `/commit`  | Stagen + Conventional Commit Message generieren       |
+| `/pr`      | PR-Titel/Body draften, Build-Validation laufen lassen |
+| `/ci`      | CI-Status via `gh pr checks` / `gh run list` pruefen  |
+| `/release` | Version bump, CHANGELOG aktualisieren, Git Tag        |
 
 ### Debugging & Planung
 
-| Command | Was es tut |
-|---------|------------|
-| `/challenge "idea"` | Schnelles Critical Gate — GO/SIMPLIFY/REJECT vor Spec-Investment |
-| `/research "tool"` | Deep-Research eines externen Tools/Repos/Patterns |
-| `/explore "topic"` | Read-Only Thinking Partner — keine Dateiaenderungen |
-| `/orchestrate "task"` | Task an Gemini oder Codex CLI delegieren |
-| `/analyze` | Parallele Agents — PATTERNS.md + AUDIT.md erzeugen |
-| `/discover` | Reverse-Engineer Draft-Specs aus existierendem Code |
+| Command               | Was es tut                                                       |
+| --------------------- | ---------------------------------------------------------------- |
+| `/challenge "idea"`   | Schnelles Critical Gate — GO/SIMPLIFY/REJECT vor Spec-Investment |
+| `/research "tool"`    | Deep-Research eines externen Tools/Repos/Patterns                |
+| `/explore "topic"`    | Read-Only Thinking Partner — keine Dateiaenderungen              |
+| `/orchestrate "task"` | Task an Gemini oder Codex CLI delegieren                         |
+| `/analyze`            | Parallele Agents — PATTERNS.md + AUDIT.md erzeugen               |
+| `/discover`           | Reverse-Engineer Draft-Specs aus existierendem Code              |
 
 Fuer Bug-Investigation: `! bash .claude/scripts/debug-prep.sh` sammelt Git-Diff, jungste Logs und Test-Status in einem Shot.
 
@@ -128,11 +129,11 @@ Kein Spec noetig — Debug-Prep liefert das Untersuchungsprotokoll.
 
 ## Session Management
 
-| Command | Was es tut |
-|---------|------------|
-| `/reflect` | Session-Learnings als permanente Regeln speichern. Nach langen Sessions (>30 Tool Calls). |
-| `/claude-changelog` | CHANGELOG automatisch pflegen auf Basis der Commits. |
-| `/yolo` | Fast-Execution-Modus mit minimalem Review — nur fuer klare, lokale Aenderungen. |
+| Command             | Was es tut                                                                                |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `/reflect`          | Session-Learnings als permanente Regeln speichern. Nach langen Sessions (>30 Tool Calls). |
+| `/claude-changelog` | CHANGELOG automatisch pflegen auf Basis der Commits.                                      |
+| `/yolo`             | Fast-Execution-Modus mit minimalem Review — nur fuer klare, lokale Aenderungen.           |
 
 ai-setup Update: `npx github:onedot-digital-crew/npx-ai-setup` erneut ausfuehren — interaktives Menue (Update/Regenerate/Reset).
 
@@ -166,14 +167,14 @@ Cross-session context wird ueber claude-mem (Observations/Decisions) persistent 
 
 In `.agents/context/` — automatisch beim Setup generiert, committed, teamweit geteilt. Claude kennt dadurch euren Stack und eure Conventions von der ersten Session an.
 
-| Datei | Inhalt | Erzeugt durch |
-|-------|--------|---------------|
-| `SUMMARY.md` | Tiered-Summary aus STACK/ARCHITECTURE/AUDIT — via `@-import` in CLAUDE.md geladen | `build-summary.sh` (automatisch) |
-| `STACK.md` | Tech Stack, Versionen, Key Dependencies | Setup (automatisch) |
-| `ARCHITECTURE.md` | Systemarchitektur und Datenfluesse | Setup (automatisch) |
-| `CONVENTIONS.md` | Naming Patterns, Coding Standards, Testing | Setup (automatisch) |
-| `PATTERNS.md` | Wiederverwendbare Code-Patterns, Module Boundaries | `/analyze` (manuell) |
-| `AUDIT.md` | Hotspots, Risks, Recommendations | `/analyze` (manuell) |
+| Datei             | Inhalt                                                                            | Erzeugt durch                    |
+| ----------------- | --------------------------------------------------------------------------------- | -------------------------------- |
+| `SUMMARY.md`      | Tiered-Summary aus STACK/ARCHITECTURE/AUDIT — via `@-import` in CLAUDE.md geladen | `build-summary.sh` (automatisch) |
+| `STACK.md`        | Tech Stack, Versionen, Key Dependencies                                           | Setup (automatisch)              |
+| `ARCHITECTURE.md` | Systemarchitektur und Datenfluesse                                                | Setup (automatisch)              |
+| `CONVENTIONS.md`  | Naming Patterns, Coding Standards, Testing                                        | Setup (automatisch)              |
+| `PATTERNS.md`     | Wiederverwendbare Code-Patterns, Module Boundaries                                | `/analyze` (manuell)             |
+| `AUDIT.md`        | Hotspots, Risks, Recommendations                                                  | `/analyze` (manuell)             |
 
 Regenerieren: `npx @onedot/ai-setup` → **Regenerate** → **Context**.
 PATTERNS/AUDIT regenerieren: `/analyze` ausfuehren.
@@ -182,14 +183,14 @@ PATTERNS/AUDIT regenerieren: `/analyze` ausfuehren.
 
 ## Tips
 
-| Shortcut | Was es tut |
-|----------|------------|
-| `Esc Esc` | Letzte Antwort zurueckspulen (Tokens zurueckgewinnen) |
-| `! git status` | Bash-Command direkt ausfuehren (kein Token-Overhead) |
-| `@src/index.ts` | Datei kompakt in den Kontext importieren |
-| `ultrathink:` | Prefix fuer Extended Reasoning |
-| `/compact` | Kontext komprimieren (eingebauter Claude Code Command, kein Skill) |
-| `/` | Autocomplete fuer alle verfuegbaren Commands |
+| Shortcut                    | Was es tut                                                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Esc Esc`                   | Letzte Antwort zurueckspulen (Tokens zurueckgewinnen)                                                                                              |
+| `! git status`              | Bash-Command direkt ausfuehren (kein Token-Overhead)                                                                                               |
+| `@src/index.ts`             | Datei kompakt in den Kontext importieren                                                                                                           |
+| `ultrathink:`               | Prefix fuer Extended Reasoning                                                                                                                     |
+| `/compact`                  | Kontext komprimieren (eingebauter Claude Code Command, kein Skill)                                                                                 |
+| `/`                         | Autocomplete fuer alle verfuegbaren Commands                                                                                                       |
 | `defuddle parse <url> --md` | Web-Seiten in Markdown holen (~80% weniger Tokens als WebFetch). Hook `tool-redirect.sh` blockt WebFetch automatisch wenn defuddle verfuegbar ist. |
 
 ---
@@ -216,4 +217,4 @@ Manuell committen: `! git commit -m "msg"`
 
 ---
 
-*Installiert von `@onedot/ai-setup`. Wird nicht automatisch in den Claude-Kontext geladen.*
+_Installiert von `@onedot/ai-setup`. Wird nicht automatisch in den Claude-Kontext geladen._

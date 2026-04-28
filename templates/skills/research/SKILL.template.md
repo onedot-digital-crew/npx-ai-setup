@@ -33,6 +33,7 @@ Spawn parallel haiku agents by area: commands, agents/skills, hooks/scripts, con
 Each agent reads raw GitHub content and returns full content, not summaries.
 
 In parallel, detect the current project type and read relevant local context:
+
 - **npx-ai-setup**: read `templates/`, `.claude/rules/`, `lib/plugins.sh`
 - **Other project**: read `.claude/`, `CLAUDE.md`, `package.json`, top-level config files
 
@@ -46,6 +47,7 @@ OURS:     [N] commands, [N] rules, [N] hooks
 ### 2. Match and compare
 
 For each external item, classify:
+
 - ✅ Covered
 - ⚠️ Partial
 - ❌ Missing
@@ -81,11 +83,13 @@ Use AskUserQuestion to explore the top 5 findings. Run at least 2 rounds.
 ### 5. Philosophy check
 
 Read project-specific philosophy docs if they exist (`CONCEPT.md`, `decisions.md`, `docs/architecture.md`). For each candidate, classify:
+
 - GO
 - PIVOT
 - SKIP
 
 Check:
+
 - Does it fit the project's purpose and conventions?
 - Does it add or remove guardrails?
 - Is it already covered?
@@ -97,6 +101,7 @@ Only GO candidates proceed.
 Use AskUserQuestion multi-select with one option per GO candidate. Create spec files for selected items.
 
 ## Rules
+
 - For GitHub repos, read all relevant files, not just the README.
 - Agents must return source material, not summaries.
 - Quote exact lines when comparing.

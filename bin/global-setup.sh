@@ -25,7 +25,10 @@ unset _SCRIPT _DIR
 CHECK_MODE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --check) CHECK_MODE="yes"; shift ;;
+    --check)
+      CHECK_MODE="yes"
+      shift
+      ;;
     *) shift ;;
   esac
 done
@@ -60,15 +63,15 @@ phase_system_check() {
   local platform
   platform="$(uname -s)"
   case "$platform" in
-    Darwin) echo "   Platform : macOS ($(sw_vers -productVersion 2>/dev/null || echo 'unknown'))" ;;
-    Linux)  echo "   Platform : Linux" ;;
-    *)      echo "   Platform : $platform (untested)" ;;
+    Darwin) echo "   Platform : macOS ($(sw_vers -productVersion 2> /dev/null || echo 'unknown'))" ;;
+    Linux) echo "   Platform : Linux" ;;
+    *) echo "   Platform : $platform (untested)" ;;
   esac
 
   # Node.js
-  if command -v node &>/dev/null; then
+  if command -v node &> /dev/null; then
     local node_ver
-    node_ver="$(node -v 2>/dev/null)"
+    node_ver="$(node -v 2> /dev/null)"
     tui_key_value "Node.js" "${node_ver}"
   else
     tui_error "Node.js not found (install from https://nodejs.org)"
@@ -76,16 +79,16 @@ phase_system_check() {
   fi
 
   # npm
-  if command -v npm &>/dev/null; then
-    tui_key_value "npm" "$(npm -v 2>/dev/null)"
+  if command -v npm &> /dev/null; then
+    tui_key_value "npm" "$(npm -v 2> /dev/null)"
   else
     tui_error "npm not found"
     ok=false
   fi
 
   # cargo (optional — needed for agent-browser)
-  if command -v cargo &>/dev/null; then
-    tui_key_value "cargo" "$(cargo -V 2>/dev/null | awk '{print $2}')"
+  if command -v cargo &> /dev/null; then
+    tui_key_value "cargo" "$(cargo -V 2> /dev/null | awk '{print $2}')"
   else
     tui_warn "cargo not found (optional - needed for agent-browser)"
   fi
@@ -146,8 +149,8 @@ phase_api_keys() {
   }
 
   _check_key "Anthropic" "ANTHROPIC_API_KEY" "https://console.anthropic.com/settings/keys"
-  _check_key "OpenAI"    "OPENAI_API_KEY"    "https://platform.openai.com/api-keys"
-  _check_key "Gemini"    "GEMINI_API_KEY"    "https://aistudio.google.com/app/apikey"
+  _check_key "OpenAI" "OPENAI_API_KEY" "https://platform.openai.com/api-keys"
+  _check_key "Gemini" "GEMINI_API_KEY" "https://aistudio.google.com/app/apikey"
 
   if [ "$any_missing" = "true" ] && [ "$CHECK_MODE" != "yes" ]; then
     echo ""

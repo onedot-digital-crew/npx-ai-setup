@@ -1,10 +1,12 @@
 # CLAUDE.md
 
 ## Project Context
+
 @.agents/context/SUMMARY.md
 Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTIONS.md`.
 
 ## Rules (load on demand)
+
 - Investigation/debug discipline → `.claude/rules/quality.md`
 - Model routing (haiku/sonnet/opus), file navigation, context offload → `.claude/rules/agents.md`
 - External docs (Context7 first) → `.claude/rules/general.md`
@@ -17,6 +19,7 @@ Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTION
 - TypeScript (TS projects only) → `.claude/rules/typescript.md`
 
 ## Hard Constraints
+
 - **RTK**: prefix ALL shell commands with `rtk`. Hook auto-rewrites where possible. Reference: `.claude/docs/rtk-reference.md`.
 - **Build artifacts**: never read/search `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`. Blocked via `permissions.deny`.
 - **Frontend verify**: after editing `*.vue` `*.tsx` `*.jsx` `*.liquid` `*.css` `*.scss`, invoke `/agent-browser` for visual screenshot. Type-check ≠ rendered correctly.
@@ -24,7 +27,9 @@ Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTION
 - **Skill `!` exec**: prep-skills (`/test`, `/ci`, doctor, quality-gate) use `!`-prefixed shell. If org policy sets `disableSkillShellExecution: true`, those skills fail silently — fallback: run the `.sh` directly via Bash.
 
 ## CLI Shortcuts (zero tokens)
+
 CI `! bash .claude/scripts/ci-prep.sh` | Lint `! bash .claude/scripts/lint-prep.sh` | Test `! bash .claude/scripts/test-prep.sh` | Health `! bash .claude/scripts/doctor.sh` | Quality-gate `! bash .claude/scripts/quality-gate.sh` | Debug `! bash .claude/scripts/debug-prep.sh`
 
 ## Automation (Agent SDK CLI)
+
 Non-interactive: `claude -p "<prompt>" --output-format json`. CI: `--bare` disables hooks/skills/MCP. Cost: `--max-budget-usd 0.50` / `--max-turns 20`.

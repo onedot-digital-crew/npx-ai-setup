@@ -11,7 +11,7 @@ OUTPUT="$PROJECT_DIR/.agents/context/STORYBLOK.md"
 
 # --- Storyblok packages ---
 sb_packages=""
-if [ -f "$PROJECT_DIR/package.json" ] && command -v python3 >/dev/null 2>&1; then
+if [ -f "$PROJECT_DIR/package.json" ] && command -v python3 > /dev/null 2>&1; then
   sb_packages=$(python3 -c "
 import json
 with open('$PROJECT_DIR/package.json') as f:
@@ -19,45 +19,45 @@ with open('$PROJECT_DIR/package.json') as f:
 deps = {**d.get('dependencies', {}), **d.get('devDependencies', {})}
 sb = [k for k in deps if '@storyblok' in k]
 print(', '.join(sorted(sb)))
-" 2>/dev/null || echo "")
+" 2> /dev/null || echo "")
 fi
 
 # --- Storyblok Vue components (app/storyblok/ or storyblok/) ---
 SB_DIR="$PROJECT_DIR/app/storyblok"
 [ -d "$PROJECT_DIR/storyblok" ] && SB_DIR="$PROJECT_DIR/storyblok"
 
-sb_component_count=$(find "$SB_DIR" -name "*.vue" 2>/dev/null | wc -l | tr -d ' ')
-sb_components=$(find "$SB_DIR" -name "*.vue" 2>/dev/null \
-  | sed "s|$SB_DIR/||" | sed 's/\.vue$//' | sort | tr '\n' ',' | sed 's/,$//')
+sb_component_count=$(find "$SB_DIR" -name "*.vue" 2> /dev/null | wc -l | tr -d ' ')
+sb_components=$(find "$SB_DIR" -name "*.vue" 2> /dev/null |
+  sed "s|$SB_DIR/||" | sed 's/\.vue$//' | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- .storyblok config dir ---
-sb_config_files=$(find "$PROJECT_DIR/.storyblok" -maxdepth 1 -type f 2>/dev/null \
-  | xargs -I{} basename {} | sort | tr '\n' ',' | sed 's/,$//')
+sb_config_files=$(find "$PROJECT_DIR/.storyblok" -maxdepth 1 -type f 2> /dev/null |
+  xargs -I{} basename {} | sort | tr '\n' ',' | sed 's/,$//')
 
 # --- Component definitions JSON (Storyblok CLI export) ---
-sb_def_file=$(find "$PROJECT_DIR" -maxdepth 2 -name "components.*.json" 2>/dev/null | head -1)
+sb_def_file=$(find "$PROJECT_DIR" -maxdepth 2 -name "components.*.json" 2> /dev/null | head -1)
 sb_def_count=0
-if [ -n "$sb_def_file" ] && command -v python3 >/dev/null 2>&1; then
+if [ -n "$sb_def_file" ] && command -v python3 > /dev/null 2>&1; then
   sb_def_count=$(python3 -c "
 import json
 with open('$sb_def_file') as f:
   d = json.load(f)
 comps = d.get('components', d) if isinstance(d, dict) else d
 print(len(comps) if isinstance(comps, list) else len(comps.keys()))
-" 2>/dev/null || echo 0)
+" 2> /dev/null || echo 0)
 fi
 
 # --- Space ID from nuxt.config or .env ---
 space_id=""
-nuxt_config=$(find "$PROJECT_DIR" -maxdepth 1 -name "nuxt.config.*" 2>/dev/null | head -1)
+nuxt_config=$(find "$PROJECT_DIR" -maxdepth 1 -name "nuxt.config.*" 2> /dev/null | head -1)
 if [ -n "$nuxt_config" ]; then
-  space_id=$(grep -oE 'spaceId[: ]+[0-9]+' "$nuxt_config" 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "")
+  space_id=$(grep -oE 'spaceId[: ]+[0-9]+' "$nuxt_config" 2> /dev/null | grep -oE '[0-9]+' | head -1 || echo "")
 fi
 if [ -z "$space_id" ] && [ -f "$PROJECT_DIR/.env" ]; then
-  space_id=$(grep -E "STORYBLOK_SPACE_ID|SB_SPACE_ID" "$PROJECT_DIR/.env" 2>/dev/null | cut -d= -f2 | head -1 || echo "")
+  space_id=$(grep -E "STORYBLOK_SPACE_ID|SB_SPACE_ID" "$PROJECT_DIR/.env" 2> /dev/null | cut -d= -f2 | head -1 || echo "")
 fi
 if [ -z "$space_id" ] && [ -f "$PROJECT_DIR/.env.example" ]; then
-  space_id=$(grep -E "STORYBLOK_SPACE_ID|SB_SPACE_ID" "$PROJECT_DIR/.env.example" 2>/dev/null | cut -d= -f2 | head -1 || echo "")
+  space_id=$(grep -E "STORYBLOK_SPACE_ID|SB_SPACE_ID" "$PROJECT_DIR/.env.example" 2> /dev/null | cut -d= -f2 | head -1 || echo "")
 fi
 
 # --- Build abstract ---
@@ -68,7 +68,7 @@ abstract="Storyblok: ${sb_component_count} Vue components${sb_def_label}${space_
 # --- Frontmatter sections (loaded at SessionStart) ---
 fm_entries=""
 [ -n "$sb_components" ] && fm_entries="${fm_entries}  - \"components: ${sb_components}\"\n"
-[ -n "$sb_packages" ]   && fm_entries="${fm_entries}  - \"packages: ${sb_packages}\"\n"
+[ -n "$sb_packages" ] && fm_entries="${fm_entries}  - \"packages: ${sb_packages}\"\n"
 fm_sections=""
 [ -n "$fm_entries" ] && fm_sections=$(printf "sections:\n%b" "$fm_entries")
 

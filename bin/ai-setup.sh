@@ -35,16 +35,26 @@ while [[ $# -gt 0 ]]; do
         echo "❌ --patch requires a pattern (e.g. --patch spec-work)"
         exit 1
       fi
-      PATCH_PATTERN="$2"; shift 2 ;;
+      PATCH_PATTERN="$2"
+      shift 2
+      ;;
     --force-skip-graphify)
-      FORCE_SKIP_GRAPHIFY=true; shift ;;
+      FORCE_SKIP_GRAPHIFY=true
+      shift
+      ;;
     --force-all-skills)
-      FORCE_ALL_SKILLS=1; shift ;;
+      FORCE_ALL_SKILLS=1
+      shift
+      ;;
     --force-update)
-      FORCE_UPDATE=1; shift ;;
+      FORCE_UPDATE=1
+      shift
+      ;;
     --relax-context-caps)
-      export CONTEXT_CAPS_RELAX=1; shift ;;
-    --reset|--system|--regenerate|--audit|--force-skills)
+      export CONTEXT_CAPS_RELAX=1
+      shift
+      ;;
+    --reset | --system | --regenerate | --audit | --force-skills)
       echo "❌ Flag '$1' is not supported. Use the interactive setup/update flow instead."
       exit 1
       ;;
@@ -106,7 +116,7 @@ fi
 # ==============================================================================
 SKIP_SKILLS=false
 if [ -f package.json ]; then
-  _skip_val=$(_json_read package.json '.aiSetup.skipSkills' 2>/dev/null || true)
+  _skip_val=$(_json_read package.json '.aiSetup.skipSkills' 2> /dev/null || true)
   [ "$_skip_val" = "true" ] && SKIP_SKILLS=true
 fi
 
@@ -153,7 +163,7 @@ update_gitignore
 STACK_PROFILE="default"
 GRAPHIFY_CANDIDATE="false"
 if [ -f "$SCRIPT_DIR/lib/detect-stack.sh" ]; then
-  _detect_out=$(bash "$SCRIPT_DIR/lib/detect-stack.sh" "$PWD" 2>/dev/null || true)
+  _detect_out=$(bash "$SCRIPT_DIR/lib/detect-stack.sh" "$PWD" 2> /dev/null || true)
   STACK_PROFILE=$(printf '%s\n' "$_detect_out" | grep '^stack_profile=' | cut -d= -f2 || echo "default")
   GRAPHIFY_CANDIDATE=$(printf '%s\n' "$_detect_out" | grep '^graphify_candidate=' | cut -d= -f2 || echo "false")
 fi
@@ -204,7 +214,7 @@ generate_opencode_config
 statusline_settings="$HOME/.claude/settings.json"
 statusline_configured=false
 if [ -f "$statusline_settings" ] && _json_valid "$statusline_settings"; then
-  if [ -n "$(_json_read "$statusline_settings" '.statusLine' 2>/dev/null)" ]; then
+  if [ -n "$(_json_read "$statusline_settings" '.statusLine' 2> /dev/null)" ]; then
     statusline_configured=true
   fi
 fi
@@ -231,7 +241,7 @@ if [ "$STACK_PROFILE" != "default" ] && [ -d "$BUNDLE_DIR" ]; then
   mkdir -p "$CONTEXT_DIR"
   _bundle_skip=0
   for _f in STACK.md ARCHITECTURE.md CONVENTIONS.md; do
-    if [ -f "$CONTEXT_DIR/$_f" ] && ! grep -q "<!-- bundle:" "$CONTEXT_DIR/$_f" 2>/dev/null; then
+    if [ -f "$CONTEXT_DIR/$_f" ] && ! grep -q "<!-- bundle:" "$CONTEXT_DIR/$_f" 2> /dev/null; then
       # File exists and was manually edited (no bundle marker) — don't overwrite
       tui_warn "$_f already exists (custom). Saving bundle as ${_f}.new"
       cp "$BUNDLE_DIR/$_f" "$CONTEXT_DIR/${_f}.new"
@@ -241,7 +251,7 @@ if [ "$STACK_PROFILE" != "default" ] && [ -d "$BUNDLE_DIR" ]; then
     fi
   done
   if [ -f "$SCRIPT_DIR/lib/generate-summary.sh" ]; then
-    bash "$SCRIPT_DIR/lib/generate-summary.sh" "$BUNDLE_DIR" "$CONTEXT_DIR" 2>/dev/null || true
+    bash "$SCRIPT_DIR/lib/generate-summary.sh" "$BUNDLE_DIR" "$CONTEXT_DIR" 2> /dev/null || true
   fi
   _BUNDLE_INSTALLED=1
   if [ "$_bundle_skip" -gt 0 ]; then
@@ -274,8 +284,8 @@ if [ "$AI_CLI" = "claude" ]; then
       _NOTIFY_MSG="Project context generated with warnings"
     fi
     case "$(uname -s)" in
-      Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"Project Setup\" sound name \"Glass\"" 2>/dev/null || true ;;
-      Linux) command -v notify-send >/dev/null 2>&1 && notify-send "Project Setup" "$_NOTIFY_MSG" 2>/dev/null || true ;;
+      Darwin) osascript -e "display notification \"$_NOTIFY_MSG\" with title \"Project Setup\" sound name \"Glass\"" 2> /dev/null || true ;;
+      Linux) command -v notify-send > /dev/null 2>&1 && notify-send "Project Setup" "$_NOTIFY_MSG" 2> /dev/null || true ;;
     esac
   fi
 elif [ "$AI_CLI" = "copilot" ]; then
@@ -296,7 +306,7 @@ show_next_steps
 # Liquid dependency graph for shopify-liquid profile
 if [ "$STACK_PROFILE" = "shopify-liquid" ] && [ -f "$SCRIPT_DIR/lib/build-liquid-graph.sh" ]; then
   tui_step "Building Liquid dependency graph"
-  if bash "$SCRIPT_DIR/lib/build-liquid-graph.sh" "$PWD" 2>/dev/null; then
+  if bash "$SCRIPT_DIR/lib/build-liquid-graph.sh" "$PWD" 2> /dev/null; then
     tui_success "Liquid graph built (.agents/context/liquid-graph.json)"
   else
     tui_warn "Liquid graph skipped (non-fatal)"

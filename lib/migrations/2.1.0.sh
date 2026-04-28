@@ -20,8 +20,8 @@ _remove_file ".claude/agents/liquid-linter.md"
 # ------------------------------------------------------------------
 # Update remaining agents with new model routing / name references
 # ------------------------------------------------------------------
-_update_file "templates/agents/code-reviewer.md"        ".claude/agents/code-reviewer.md"
-_update_file "templates/agents/security-reviewer.md"    ".claude/agents/security-reviewer.md"
+_update_file "templates/agents/code-reviewer.md" ".claude/agents/code-reviewer.md"
+_update_file "templates/agents/security-reviewer.md" ".claude/agents/security-reviewer.md"
 
 # ------------------------------------------------------------------
 # Update dispatch documentation

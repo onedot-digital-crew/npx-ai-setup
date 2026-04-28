@@ -54,7 +54,7 @@ parse_spec() {
     # Title from heading (supports "# Spec: ..." and "# Brainstorm: ...")
     if [ -z "$title" ]; then
       case "$line" in
-        "# Spec: "*)       title="${line#\# Spec: }" ;;
+        "# Spec: "*) title="${line#\# Spec: }" ;;
         "# Brainstorm: "*) title="${line#\# Brainstorm: }" ;;
       esac
     fi
@@ -66,7 +66,10 @@ parse_spec() {
     # Count checkboxes only in Steps section
     if [ "$in_steps" = "1" ]; then
       case "$line" in
-        *"- [x]"*) done=$((done + 1)) ; total=$((total + 1)) ;;
+        *"- [x]"*)
+          done=$((done + 1))
+          total=$((total + 1))
+          ;;
         *"- [ ]"*) total=$((total + 1)) ;;
       esac
     fi
@@ -97,8 +100,8 @@ collect_recent_completed_specs() {
     return 0
   fi
 
-  find "$completed_dir" -maxdepth 1 -name "*.md" \
-    | awk -F/ '
+  find "$completed_dir" -maxdepth 1 -name "*.md" |
+    awk -F/ '
         {
           file=$NF
           id=file
@@ -107,10 +110,10 @@ collect_recent_completed_specs() {
             printf "%09d %s\n", id, $0
           }
         }
-      ' \
-    | sort \
-    | tail -n "$COMPLETED_LIMIT" \
-    | sed 's/^[0-9][0-9]* //'
+      ' |
+    sort |
+    tail -n "$COMPLETED_LIMIT" |
+    sed 's/^[0-9][0-9]* //'
 }
 
 # Bucket arrays
@@ -148,10 +151,10 @@ progress_bar() {
 # Canonical vocab: draft | in-progress | in-review | blocked | completed
 normalize_status() {
   case "$1" in
-    done|finished|closed|merged|resolved) echo "completed" ;;
-    wip|working|active)                   echo "in-progress" ;;
-    review|reviewing)                     echo "in-review" ;;
-    *)                                    echo "$1" ;;
+    done | finished | closed | merged | resolved) echo "completed" ;;
+    wip | working | active) echo "in-progress" ;;
+    review | reviewing) echo "in-review" ;;
+    *) echo "$1" ;;
   esac
 }
 
@@ -160,16 +163,16 @@ process_spec_file() {
   local base row status_field
   base="$(basename "$f")"
   # Skip non-spec files
-  case "$base" in README.md|TEMPLATE.md|template.md) return 0 ;; esac
+  case "$base" in README.md | TEMPLATE.md | template.md) return 0 ;; esac
   row="$(parse_spec "$f")"
   status_field="$(echo "$row" | cut -d'|' -f3)"
   status_field="$(normalize_status "$status_field")"
   case "$status_field" in
-    draft)       BACKLOG+=("$row") ;;
+    draft) BACKLOG+=("$row") ;;
     in-progress) INPROG+=("$row") ;;
-    in-review)   REVIEW+=("$row") ;;
-    blocked)     BLOCKED+=("$row") ;;
-    completed)   DONE+=("$row") ;;
+    in-review) REVIEW+=("$row") ;;
+    blocked) BLOCKED+=("$row") ;;
+    completed) DONE+=("$row") ;;
   esac
 }
 
@@ -177,16 +180,16 @@ process_spec_file() {
 while IFS= read -r f; do
   [ -n "$f" ] || continue
   local_base="$(basename "$f")"
-  case "$local_base" in README.md|TEMPLATE.md|template.md) continue ;; esac
+  case "$local_base" in README.md | TEMPLATE.md | template.md) continue ;; esac
   row="$(parse_spec "$f")"
   status_field="$(echo "$row" | cut -d'|' -f3)"
   status_field="$(normalize_status "$status_field")"
   [ "$status_field" = "completed" ] && continue
   case "$status_field" in
-    draft)       BACKLOG+=("$row") ;;
+    draft) BACKLOG+=("$row") ;;
     in-progress) INPROG+=("$row") ;;
-    in-review)   REVIEW+=("$row") ;;
-    blocked)     BLOCKED+=("$row") ;;
+    in-review) REVIEW+=("$row") ;;
+    blocked) BLOCKED+=("$row") ;;
   esac
 done < <(collect_open_specs)
 
@@ -199,7 +202,7 @@ done < <(collect_recent_completed_specs)
 # Compact side-by-side layout using temp files (no eval).
 # Only non-empty columns are rendered; empty ones show in the footer.
 
-TERM_WIDTH="${COLUMNS:-$(tput cols 2>/dev/null || echo 120)}"
+TERM_WIDTH="${COLUMNS:-$(tput cols 2> /dev/null || echo 120)}"
 TMPBASE="${TMPDIR:-/tmp}/specboard.$$"
 trap 'rm -f "${TMPBASE}".col_* 2>/dev/null' EXIT
 
@@ -231,11 +234,26 @@ write_col() {
     local id title status branch done_n total marker="" mc=""
     IFS='|' read -r id title status branch done_n total <<< "$row"
     case "$status" in
-      draft)       marker="◻"; mc="$C_BACKLOG" ;;
-      in-progress) marker="▶"; mc="$C_PROGRESS" ;;
-      in-review)   marker="●"; mc="$C_REVIEW" ;;
-      blocked)     marker="✖"; mc="$C_BLOCKED" ;;
-      completed)   marker="✓"; mc="$C_DONE" ;;
+      draft)
+        marker="◻"
+        mc="$C_BACKLOG"
+        ;;
+      in-progress)
+        marker="▶"
+        mc="$C_PROGRESS"
+        ;;
+      in-review)
+        marker="●"
+        mc="$C_REVIEW"
+        ;;
+      blocked)
+        marker="✖"
+        mc="$C_BLOCKED"
+        ;;
+      completed)
+        marker="✓"
+        mc="$C_DONE"
+        ;;
     esac
     local max_t=$((inner - 2))
     [ "$max_t" -lt 4 ] && max_t=4
@@ -259,7 +277,7 @@ maybe_col() {
   if [ $# -gt 0 ]; then
     local f="${TMPBASE}.col_${name}"
     COL_FILES+=("$f")
-    write_col "$f" "$label" "$color" "$glyph" "0" "$@"  # col_w set after count
+    write_col "$f" "$label" "$color" "$glyph" "0" "$@" # col_w set after count
   else
     EMPTY_NAMES+=("${glyph} ${label}")
   fi
@@ -268,10 +286,10 @@ maybe_col() {
 # Count non-empty columns first
 n_active=0
 [ ${#BACKLOG[@]} -gt 0 ] && n_active=$((n_active + 1))
-[ ${#INPROG[@]}  -gt 0 ] && n_active=$((n_active + 1))
-[ ${#REVIEW[@]}  -gt 0 ] && n_active=$((n_active + 1))
+[ ${#INPROG[@]} -gt 0 ] && n_active=$((n_active + 1))
+[ ${#REVIEW[@]} -gt 0 ] && n_active=$((n_active + 1))
 [ ${#BLOCKED[@]} -gt 0 ] && n_active=$((n_active + 1))
-[ ${#DONE[@]}    -gt 0 ] && n_active=$((n_active + 1))
+[ ${#DONE[@]} -gt 0 ] && n_active=$((n_active + 1))
 
 if [ "$n_active" -eq 0 ]; then
   printf '%sSpec Board%s  —  no specs\n' "$C_HEAD" "$C_RESET"
@@ -279,7 +297,7 @@ if [ "$n_active" -eq 0 ]; then
 fi
 
 # Column width: divide terminal by active columns, with 2-char gap
-COL_W=$(( (TERM_WIDTH - (n_active - 1) * 2) / n_active ))
+COL_W=$(((TERM_WIDTH - (n_active - 1) * 2) / n_active))
 [ "$COL_W" -lt 26 ] && COL_W=26
 
 # Now build columns with correct width
@@ -298,11 +316,11 @@ _build_if() {
   fi
 }
 
-_build_if backlog  "BACKLOG"     "$C_BACKLOG"  "◻" ${BACKLOG[@]+"${BACKLOG[@]}"}
+_build_if backlog "BACKLOG" "$C_BACKLOG" "◻" ${BACKLOG[@]+"${BACKLOG[@]}"}
 _build_if progress "IN PROGRESS" "$C_PROGRESS" "▶" ${INPROG[@]+"${INPROG[@]}"}
-_build_if review   "REVIEW"      "$C_REVIEW"   "●" ${REVIEW[@]+"${REVIEW[@]}"}
-_build_if blocked  "BLOCKED"     "$C_BLOCKED"  "✖" ${BLOCKED[@]+"${BLOCKED[@]}"}
-_build_if done     "DONE"        "$C_DONE"     "✓" ${DONE[@]+"${DONE[@]}"}
+_build_if review "REVIEW" "$C_REVIEW" "●" ${REVIEW[@]+"${REVIEW[@]}"}
+_build_if blocked "BLOCKED" "$C_BLOCKED" "✖" ${BLOCKED[@]+"${BLOCKED[@]}"}
+_build_if done "DONE" "$C_DONE" "✓" ${DONE[@]+"${DONE[@]}"}
 
 # Find max line count across column files
 max_lines=0
@@ -330,7 +348,7 @@ else
 fi
 
 # Footer (no blank line — keeps output compact for CLI collapse threshold)
-open_count=$(( ${#BACKLOG[@]} + ${#INPROG[@]} + ${#REVIEW[@]} + ${#BLOCKED[@]} ))
+open_count=$((${#BACKLOG[@]} + ${#INPROG[@]} + ${#REVIEW[@]} + ${#BLOCKED[@]}))
 printf '%s' "Open: ${open_count} | Done: ${#DONE[@]}"
 if [ ${#EMPTY_NAMES[@]} -gt 0 ]; then
   printf '  %s(' "$C_DIM"

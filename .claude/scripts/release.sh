@@ -7,18 +7,21 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── Dependency checks ──────────────────────────────────────────────────────────
-if ! command -v git >/dev/null 2>&1; then
-  echo "ERROR: git not found in PATH" >&2; exit 1
+if ! command -v git > /dev/null 2>&1; then
+  echo "ERROR: git not found in PATH" >&2
+  exit 1
 fi
-if ! command -v python3 >/dev/null 2>&1 && ! command -v node >/dev/null 2>&1; then
-  echo "ERROR: python3 (or node) required for package.json and CHANGELOG manipulation" >&2; exit 1
+if ! command -v python3 > /dev/null 2>&1 && ! command -v node > /dev/null 2>&1; then
+  echo "ERROR: python3 (or node) required for package.json and CHANGELOG manipulation" >&2
+  exit 1
 fi
-if ! command -v npm >/dev/null 2>&1; then
-  echo "ERROR: npm not found in PATH" >&2; exit 1
+if ! command -v npm > /dev/null 2>&1; then
+  echo "ERROR: npm not found in PATH" >&2
+  exit 1
 fi
 
 # ── Dirty check ────────────────────────────────────────────────────────────────
-if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+if ! git diff --quiet 2> /dev/null || ! git diff --cached --quiet 2> /dev/null; then
   echo "ERROR: Uncommitted changes found. Commit or stash them before releasing." >&2
   git status --short >&2
   exit 1
@@ -26,31 +29,34 @@ fi
 
 # ── Read current version from package.json ─────────────────────────────────────
 if [ ! -f "package.json" ]; then
-  echo "ERROR: package.json not found in current directory." >&2; exit 1
+  echo "ERROR: package.json not found in current directory." >&2
+  exit 1
 fi
 
-if command -v python3 >/dev/null 2>&1; then
-  CURRENT_VERSION="$(python3 -c "import json; print(json.load(open('package.json'))['version'])" 2>/dev/null)"
-elif command -v node >/dev/null 2>&1; then
+if command -v python3 > /dev/null 2>&1; then
+  CURRENT_VERSION="$(python3 -c "import json; print(json.load(open('package.json'))['version'])" 2> /dev/null)"
+elif command -v node > /dev/null 2>&1; then
   CURRENT_VERSION="$(node -e "process.stdout.write(require('./package.json').version)")"
 else
-  echo "ERROR: python3 or node required to read package.json version" >&2; exit 1
+  echo "ERROR: python3 or node required to read package.json version" >&2
+  exit 1
 fi
 
 if [ -z "$CURRENT_VERSION" ]; then
-  echo "ERROR: Could not read version from package.json" >&2; exit 1
+  echo "ERROR: Could not read version from package.json" >&2
+  exit 1
 fi
 
 # ── Commits since last tag ─────────────────────────────────────────────────────
-LAST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+LAST_TAG="$(git describe --tags --abbrev=0 2> /dev/null || true)"
 echo "# Release"
 echo ""
 if [ -n "$LAST_TAG" ]; then
   echo "## Commits since ${LAST_TAG}"
-  git log --oneline "${LAST_TAG}..HEAD" 2>/dev/null || echo "  (none)"
+  git log --oneline "${LAST_TAG}..HEAD" 2> /dev/null || echo "  (none)"
 else
   echo "## Recent commits (no previous tag)"
-  git log --oneline -10 2>/dev/null || echo "  (none)"
+  git log --oneline -10 2> /dev/null || echo "  (none)"
 fi
 
 echo ""
@@ -65,19 +71,31 @@ if [ -z "$BUMP" ]; then
 fi
 
 case "$BUMP" in
-  patch|minor|major) ;;
-  *) echo "ERROR: Invalid bump type '${BUMP}'. Use patch, minor, or major." >&2; exit 1 ;;
+  patch | minor | major) ;;
+  *)
+    echo "ERROR: Invalid bump type '${BUMP}'. Use patch, minor, or major." >&2
+    exit 1
+    ;;
 esac
 
 # ── Calculate new version ──────────────────────────────────────────────────────
 IFS='.' read -r VMAJOR VMINOR VPATCH <<< "$CURRENT_VERSION"
-VMAJOR="${VMAJOR:-0}"; VMINOR="${VMINOR:-0}"; VPATCH="${VPATCH:-0}"
+VMAJOR="${VMAJOR:-0}"
+VMINOR="${VMINOR:-0}"
+VPATCH="${VPATCH:-0}"
 # Strip any pre-release suffix (e.g. "0-beta.1" -> "0") before arithmetic
 VPATCH="${VPATCH%%-*}"
 
 case "$BUMP" in
-  major) VMAJOR=$((VMAJOR + 1)); VMINOR=0; VPATCH=0 ;;
-  minor) VMINOR=$((VMINOR + 1)); VPATCH=0 ;;
+  major)
+    VMAJOR=$((VMAJOR + 1))
+    VMINOR=0
+    VPATCH=0
+    ;;
+  minor)
+    VMINOR=$((VMINOR + 1))
+    VPATCH=0
+    ;;
   patch) VPATCH=$((VPATCH + 1)) ;;
 esac
 NEW_VERSION="${VMAJOR}.${VMINOR}.${VPATCH}"
@@ -119,7 +137,7 @@ if [ ! -f "CHANGELOG.md" ]; then
   echo "ERROR: CHANGELOG.md not found. Create one with an '## [Unreleased]' section first." >&2
   exit 1
 fi
-if ! grep -q "## \[Unreleased\]" CHANGELOG.md 2>/dev/null; then
+if ! grep -q "## \[Unreleased\]" CHANGELOG.md 2> /dev/null; then
   echo "ERROR: No '## [Unreleased]' section found in CHANGELOG.md." >&2
   echo "       Add one or run the CHANGELOG migration before releasing." >&2
   exit 1
@@ -137,12 +155,15 @@ printf "Proceed? [y/N] "
 read -r CONFIRM
 case "$CONFIRM" in
   [Yy]*) ;;
-  *) echo "Aborted."; exit 0 ;;
+  *)
+    echo "Aborted."
+    exit 0
+    ;;
 esac
 
 # ── Update package.json ────────────────────────────────────────────────────────
-if command -v python3 >/dev/null 2>&1; then
-  python3 - "$NEW_VERSION" "$CURRENT_VERSION" <<'PYEOF'
+if command -v python3 > /dev/null 2>&1; then
+  python3 - "$NEW_VERSION" "$CURRENT_VERSION" << 'PYEOF'
 import json, sys
 new_version = sys.argv[1]
 current_version = sys.argv[2]
@@ -154,8 +175,8 @@ with open('package.json', 'w') as f:
     f.write('\n')
 print("  Updated package.json: {} -> {}".format(current_version, new_version))
 PYEOF
-elif command -v node >/dev/null 2>&1; then
-  node - "$NEW_VERSION" "$CURRENT_VERSION" <<'NJEOF'
+elif command -v node > /dev/null 2>&1; then
+  node - "$NEW_VERSION" "$CURRENT_VERSION" << 'NJEOF'
 const fs = require('fs');
 const newVersion = process.argv[2];
 const currentVersion = process.argv[3];
@@ -169,7 +190,7 @@ fi
 # ── Update CHANGELOG.md ────────────────────────────────────────────────────────
 # Replace [Unreleased] with versioned heading and insert new [Unreleased] above
 # python3 is required (used above for package.json), so no sed fallback needed
-python3 - "$NEW_VERSION" "$TODAY" <<'PYEOF'
+python3 - "$NEW_VERSION" "$TODAY" << 'PYEOF'
 import sys
 new_version = sys.argv[1]
 today = sys.argv[2]

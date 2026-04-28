@@ -35,6 +35,7 @@ Stage and commit any remaining uncommitted changes (descriptive message, no `git
 ### 4. Staff Review
 
 Spawn `staff-reviewer` via Agent tool with the prompt:
+
 > "Review this branch for production readiness before PR creation. Branch: <branch-name>. Recent commits: <commits from pr-prep output>."
 
 - If staff-reviewer returns **APPROVE**: continue drafting PR normally; note "Staff review: APPROVED" in the output.
@@ -48,12 +49,14 @@ Draft the PR title (short, under 70 chars) and body (`## Summary` with 2-3 bulle
 ### 6. Show Commands
 
 Show the user the PR details and the preferred commands to run:
+
 ```
 git push -u origin <branch>
 gh pr create --title "..." --body "..."
 ```
 
 Explain the publish boundary explicitly:
+
 - This command drafts PR metadata only.
 - The user still confirms the actual `git push` and `gh pr create` step.
 - Prefer `gh pr create` over manual browser entry when `gh` is installed.
@@ -61,9 +64,11 @@ Explain the publish boundary explicitly:
 ## Post-PR
 
 After presenting the PR commands to the user, suggest:
+
 > "Run `/reflect` to capture any learnings from this session before they leave context."
 
 ## Rules
+
 - Never push (`git push` is denied by settings).
 - Never push to main/master directly.
 - If the branch is `main` or `master`, stop and ask the user to create a feature branch first.

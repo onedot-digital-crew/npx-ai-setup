@@ -2,7 +2,7 @@
 # JSON wrapper — uses jq when available, falls back to Node.js >= 18.
 # Detect once at load time; callers use _json_* functions.
 
-if command -v jq >/dev/null 2>&1; then
+if command -v jq > /dev/null 2>&1; then
   _JSON_CMD="jq"
 else
   _JSON_CMD="node"
@@ -13,11 +13,11 @@ fi
 _json_read() {
   local file="$1" path="$2"
   if [ "$_JSON_CMD" = "jq" ]; then
-    jq -r "${path} // empty" "$file" 2>/dev/null
+    jq -r "${path} // empty" "$file" 2> /dev/null
   else
     local keys
     keys=$(echo "$path" | sed 's/^\.//' | tr '.' ' ')
-    node - "$file" "$keys" <<'NODESCRIPT' 2>/dev/null
+    node - "$file" "$keys" << 'NODESCRIPT' 2> /dev/null
       try {
         let d = JSON.parse(require('fs').readFileSync(process.argv[2],'utf8'));
         for (const k of process.argv[3].split(' ').filter(Boolean)) d = d?.[k];
@@ -31,9 +31,9 @@ NODESCRIPT
 _json_valid() {
   local file="$1"
   if [ "$_JSON_CMD" = "jq" ]; then
-    jq -e . "$file" >/dev/null 2>&1
+    jq -e . "$file" > /dev/null 2>&1
   else
-    node - "$file" <<'NODESCRIPT' 2>/dev/null
+    node - "$file" << 'NODESCRIPT' 2> /dev/null
       try{JSON.parse(require('fs').readFileSync(process.argv[2],'utf8'));process.exit(0);}
       catch(e){process.exit(1);}
 NODESCRIPT
@@ -48,7 +48,7 @@ _json_merge() {
   if [ "$_JSON_CMD" = "jq" ]; then
     jq --argjson m "$merge" '. * $m' "$target" > "$tmp" && mv "$tmp" "$target" || rm -f "$tmp"
   else
-    node - "$target" "$merge" <<'NODESCRIPT' 2>/dev/null || return 1
+    node - "$target" "$merge" << 'NODESCRIPT' 2> /dev/null || return 1
       const fs=require('fs');
       const target=process.argv[2], merge=JSON.parse(process.argv[3]);
       const deep=(a,b)=>typeof b!=='object'||Array.isArray(b)?b:Object.fromEntries(
@@ -68,7 +68,7 @@ _json_build_metadata() {
     jq -n --arg ver "$ver" --arg inst "$inst" --arg upd "$upd" \
       '{version:$ver,installed_at:$inst,updated_at:$upd,files:{}}'
   else
-    node - "$ver" "$inst" "$upd" <<'NODESCRIPT'
+    node - "$ver" "$inst" "$upd" << 'NODESCRIPT'
       process.stdout.write(JSON.stringify(
         {version:process.argv[2],installed_at:process.argv[3],updated_at:process.argv[4],files:{}},null,2));
 NODESCRIPT

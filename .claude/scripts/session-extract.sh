@@ -18,9 +18,18 @@ SESSION_IDLE_CAP_MINUTES="${SESSION_IDLE_CAP_MINUTES:-10}"
 # Parse args
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --all) ALL_PROJECTS=true; shift ;;
-    --last) LAST="${2:-5}"; shift 2 ;;
-    *) SLUG="$1"; shift ;;
+    --all)
+      ALL_PROJECTS=true
+      shift
+      ;;
+    --last)
+      LAST="${2:-5}"
+      shift 2
+      ;;
+    *)
+      SLUG="$1"
+      shift
+      ;;
   esac
 done
 
@@ -53,14 +62,14 @@ for SESSION_DIR in "${DIRS[@]}"; do
   SESSION_FILES=()
   while IFS= read -r f; do
     SESSION_FILES+=("$f")
-  done < <(find "$SESSION_DIR" -maxdepth 1 -name "*.jsonl" -type f -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -n "$LAST")
+  done < <(find "$SESSION_DIR" -maxdepth 1 -name "*.jsonl" -type f -print0 2> /dev/null | xargs -0 ls -t 2> /dev/null | head -n "$LAST")
 
   [[ ${#SESSION_FILES[@]} -eq 0 ]] && continue
 
   echo "=== PROJECT: $PROJECT_LABEL (last $LAST) ==="
   echo ""
 
-  python3 - "$SESSION_IDLE_CAP_MINUTES" "${SESSION_FILES[@]}" <<'PYEOF'
+  python3 - "$SESSION_IDLE_CAP_MINUTES" "${SESSION_FILES[@]}" << 'PYEOF'
 import json, sys, os
 from datetime import datetime
 from collections import Counter

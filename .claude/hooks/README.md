@@ -6,18 +6,18 @@ Hook scripts use these exit codes: `0` = pass, `1` = fail with feedback, `2` = b
 
 Wired in `.claude/settings.json`:
 
-| Event | Hook | Purpose |
-|-------|------|---------|
-| `PreToolUse` | `protect-files.sh` | Block edits to `.env*`, secrets, lockfiles |
-| `PreToolUse` | `circuit-breaker.sh` | Warn/block repeated edits to same file |
-| `PreToolUse` | `shellcheck-guard.sh` | Lint shell scripts before edit |
-| `PreToolUse` | `graph-context.sh` | Inject dependency-graph context for JS/TS edits |
-| `PreToolUse` | `tool-redirect.sh` | Rewrite `git`/`grep`/etc. via `rtk`, block WebFetch when `defuddle` is available |
-| `PostToolUse` | `post-edit-lint.sh` | Silent formatter run after edits |
-| `UserPromptSubmit` | `context-freshness.sh` | Emit `[CONTEXT STALE]` after 5+ commits since last context regen |
-| `UserPromptSubmit` | `update-check.sh` | Notify when ai-setup updates are available |
-| `TaskCompleted` | `task-completed-gate.sh` | Block task completion when tests/build fail |
-| `Stop` | `spec-stop-guard.sh` | Block first Stop while spec still `in-progress`, allow second within 60s |
+| Event              | Hook                     | Purpose                                                                          |
+| ------------------ | ------------------------ | -------------------------------------------------------------------------------- |
+| `PreToolUse`       | `protect-files.sh`       | Block edits to `.env*`, secrets, lockfiles                                       |
+| `PreToolUse`       | `circuit-breaker.sh`     | Warn/block repeated edits to same file                                           |
+| `PreToolUse`       | `shellcheck-guard.sh`    | Lint shell scripts before edit                                                   |
+| `PreToolUse`       | `graph-context.sh`       | Inject dependency-graph context for JS/TS edits                                  |
+| `PreToolUse`       | `tool-redirect.sh`       | Rewrite `git`/`grep`/etc. via `rtk`, block WebFetch when `defuddle` is available |
+| `PostToolUse`      | `post-edit-lint.sh`      | Silent formatter run after edits                                                 |
+| `UserPromptSubmit` | `context-freshness.sh`   | Emit `[CONTEXT STALE]` after 5+ commits since last context regen                 |
+| `UserPromptSubmit` | `update-check.sh`        | Notify when ai-setup updates are available                                       |
+| `TaskCompleted`    | `task-completed-gate.sh` | Block task completion when tests/build fail                                      |
+| `Stop`             | `spec-stop-guard.sh`     | Block first Stop while spec still `in-progress`, allow second within 60s         |
 
 ## Behavior Notes
 

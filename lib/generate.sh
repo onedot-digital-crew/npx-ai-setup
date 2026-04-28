@@ -29,7 +29,7 @@ run_generation() {
   : "${REGEN_COMMANDS:=yes}"
   : "${REGEN_AGENTS:=${REGEN_COMMANDS}}"
   # Keep a single canonical skills directory and expose it under .agents/skills as alias.
-  if command -v ensure_skills_alias >/dev/null 2>&1; then
+  if command -v ensure_skills_alias > /dev/null 2>&1; then
     ensure_skills_alias
   fi
 
@@ -45,8 +45,8 @@ run_generation() {
     for mapping in "${TEMPLATE_MAP[@]}"; do
       local tpl="${mapping%%:*}"
       local target="${mapping#*:}"
-      if { [[ "$tpl" == templates/commands/* ]] && [ "$REGEN_COMMANDS" = "yes" ]; } \
-        || { [[ "$tpl" == templates/agents/* ]] && [ "$REGEN_AGENTS" = "yes" ]; }; then
+      if { [[ "$tpl" == templates/commands/* ]] && [ "$REGEN_COMMANDS" = "yes" ]; } ||
+        { [[ "$tpl" == templates/agents/* ]] && [ "$REGEN_AGENTS" = "yes" ]; }; then
         if [ -f "$SCRIPT_DIR/$tpl" ]; then
           mkdir -p "$(dirname "$target")"
           cp "$SCRIPT_DIR/$tpl" "$target"
@@ -65,38 +65,41 @@ run_generation() {
 
     # Gather all context upfront
     CONTEXT="--- package.json ---
-$(cat package.json 2>/dev/null)
+$(cat package.json 2> /dev/null)
 --- package.json scripts ---
-$(jq -r '.scripts | to_entries[] | "- \(.key): \(.value)"' package.json 2>/dev/null)
+$(jq -r '.scripts | to_entries[] | "- \(.key): \(.value)"' package.json 2> /dev/null)
 --- Directory structure (max 80 files) ---
 $CACHED_FILES
 --- ESLint Config ---
-$(cat eslint.config.* .eslintrc* 2>/dev/null | head -100)
+$(cat eslint.config.* .eslintrc* 2> /dev/null | head -100)
 --- Prettier Config ---
-$(cat .prettierrc* 2>/dev/null)
+$(cat .prettierrc* 2> /dev/null)
 --- CLAUDE.md (current) ---
-$(cat CLAUDE.md 2>/dev/null)
+$(cat CLAUDE.md 2> /dev/null)
 --- AGENTS.md (current) ---
-$(cat AGENTS.md 2>/dev/null)"
+$(cat AGENTS.md 2> /dev/null)"
 
     # Sanitize CONTEXT: replace backticks with single quotes to prevent heredoc command substitution
     CONTEXT=$(printf '%s' "$CONTEXT" | tr '`' "'")
 
     # Extended context for project context generation
-    CTX_PKG=$(cat package.json 2>/dev/null || echo "No package.json")
-    CTX_TSCONFIG=$(cat tsconfig.*.json 2>/dev/null; [ -f tsconfig.json ] && cat tsconfig.json 2>/dev/null || echo "No tsconfig")
+    CTX_PKG=$(cat package.json 2> /dev/null || echo "No package.json")
+    CTX_TSCONFIG=$(
+      cat tsconfig.*.json 2> /dev/null
+      [ -f tsconfig.json ] && cat tsconfig.json 2> /dev/null || echo "No tsconfig"
+    )
     CTX_TSCONFIG=$(echo "$CTX_TSCONFIG" | head -80)
     CTX_DIRS=$(find . -maxdepth 3 -type d \
       \( -name node_modules -o -name .git -o -name dist -o -name build \
-         -o -name .next -o -name vendor -o -name .nuxt -o -name .output \) -prune -o \
-      -type d -print 2>/dev/null | head -60)
+      -o -name .next -o -name vendor -o -name .nuxt -o -name .output \) -prune -o \
+      -type d -print 2> /dev/null | head -60)
     CTX_FILES="$CACHED_FILES"
     CTX_CONFIGS=$(ls -1 *.config.* .eslintrc* .prettierrc* tailwind.config.* \
       vite.config.* nuxt.config.* next.config.* astro.config.* \
       webpack.config.* rollup.config.* docker-compose* Dockerfile \
       Makefile Cargo.toml go.mod requirements.txt pyproject.toml \
-      biome.json 2>/dev/null || echo "No config files found")
-    CTX_README=$(head -50 README.md 2>/dev/null || echo "No README")
+      biome.json 2> /dev/null || echo "No config files found")
+    CTX_README=$(head -50 README.md 2> /dev/null || echo "No README")
 
     # Sample source files: targeted selection of architecturally relevant files
     CTX_SAMPLE=""
@@ -104,17 +107,17 @@ $(cat AGENTS.md 2>/dev/null)"
 
     # 1. Entry points (most architecturally informative)
     for _ep in bin/*.sh src/index.* src/main.* app/page.* app/layout.* pages/index.* \
-               index.ts index.js main.ts main.js server.ts server.js app.ts app.js \
-               src/App.* src/app.* nuxt.config.* next.config.* vite.config.* astro.config.*; do
+      index.ts index.js main.ts main.js server.ts server.js app.ts app.js \
+      src/App.* src/app.* nuxt.config.* next.config.* vite.config.* astro.config.*; do
       [ -f "$_ep" ] && _sample_files="${_sample_files} ${_ep}"
     done
 
     # 2. First route/component/composable (framework conventions)
     for _dir in components pages routes composables hooks lib/api src/routes src/pages \
-                app/api sections snippets Resources/views custom/plugins; do
+      app/api sections snippets Resources/views custom/plugins; do
       if [ -d "$_dir" ]; then
         local _first
-        _first=$(find "$_dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.vue' -o -name '*.svelte' -o -name '*.php' -o -name '*.liquid' -o -name '*.sh' \) 2>/dev/null | head -1)
+        _first=$(find "$_dir" -maxdepth 2 -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.vue' -o -name '*.svelte' -o -name '*.php' -o -name '*.liquid' -o -name '*.sh' \) 2> /dev/null | head -1)
         [ -n "$_first" ] && _sample_files="${_sample_files} ${_first}"
       fi
     done
@@ -126,7 +129,7 @@ $(cat AGENTS.md 2>/dev/null)"
       _seen="$_seen $f "
       CTX_SAMPLE+="
 --- $f (first 50 lines) ---
-$(head -50 "$f" 2>/dev/null)"
+$(head -50 "$f" 2> /dev/null)"
       _count=$((_count + 1))
       [ "$_count" -ge 5 ] && break
     done
@@ -136,7 +139,7 @@ $(head -50 "$f" 2>/dev/null)"
       for f in $(echo "$CACHED_FILES" | head -3); do
         CTX_SAMPLE+="
 --- $f (first 50 lines) ---
-$(head -50 "$f" 2>/dev/null)"
+$(head -50 "$f" 2> /dev/null)"
       done
     fi
 
@@ -148,11 +151,11 @@ $(head -50 "$f" 2>/dev/null)"
 
     # Detect test framework for conditional TDD rule
     HAS_TESTS=""
-    if cat package.json 2>/dev/null | grep -qE '"(jest|vitest|mocha|jasmine|ava)"'; then
+    if cat package.json 2> /dev/null | grep -qE '"(jest|vitest|mocha|jasmine|ava)"'; then
       HAS_TESTS="jest/vitest/mocha"
-    elif [ -f "pytest.ini" ] || { [ -f "pyproject.toml" ] && grep -q "pytest" pyproject.toml 2>/dev/null; }; then
+    elif [ -f "pytest.ini" ] || { [ -f "pyproject.toml" ] && grep -q "pytest" pyproject.toml 2> /dev/null; }; then
       HAS_TESTS="pytest"
-    elif [ -f "requirements.txt" ] && grep -qi "pytest" requirements.txt 2>/dev/null; then
+    elif [ -f "requirements.txt" ] && grep -qi "pytest" requirements.txt 2> /dev/null; then
       HAS_TESTS="pytest"
     fi
 
@@ -172,7 +175,8 @@ If a test framework is present, add a 'TDD Workflow' subsection under Critical R
     PID_AM=""
     CLAUDE_MD_BEFORE=""
     AGENTS_MD_BEFORE=""
-    CLAUDE_MD_PROMPT=$(cat <<EOF
+    CLAUDE_MD_PROMPT=$(
+      cat << EOF
 IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit CLAUDE.md in a single turn.
 
 Replace the ## Commands and ## Critical Rules sections in CLAUDE.md (remove any HTML comments in those sections).
@@ -192,8 +196,9 @@ Rules:
 
 $CONTEXT
 EOF
-)
-    AGENTS_MD_PROMPT=$(cat <<EOF
+    )
+    AGENTS_MD_PROMPT=$(
+      cat << EOF
 IMPORTANT: All project context is provided below. Do NOT read any files. Directly edit AGENTS.md in a single turn.
 
 Replace the ## Project Overview, ## Architecture Summary, ## Commands, and ## Critical Rules sections in AGENTS.md (remove any HTML comments in those sections).
@@ -221,8 +226,9 @@ Rules:
 
 $CONTEXT
 EOF
-)
-    CONTEXT_PROMPT=$(cat <<EOF
+    )
+    CONTEXT_PROMPT=$(
+      cat << EOF
 IMPORTANT: All project context is provided below. Do NOT read any files. Create all 3 files directly in a single turn.
 
 Create exactly 3 files in .agents/context/ using the Write tool:
@@ -255,15 +261,15 @@ $CTX_README
 --- Sample source files ---
 $CTX_SAMPLE
 EOF
-)
+    )
 
     if [ "$REGEN_CLAUDE_MD" = "yes" ]; then
       if [ ! -f CLAUDE.md ] && [ -f "$SCRIPT_DIR/templates/CLAUDE.md" ]; then
         cp "$SCRIPT_DIR/templates/CLAUDE.md" CLAUDE.md
       fi
-      CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2>/dev/null || echo "none")
+      CLAUDE_MD_BEFORE=$(cksum CLAUDE.md 2> /dev/null || echo "none")
 
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 5 "$CLAUDE_MD_PROMPT" >"$ERR_CM" 2>&1 &
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 5 "$CLAUDE_MD_PROMPT" > "$ERR_CM" 2>&1 &
       PID_CM=$!
     fi
 
@@ -272,19 +278,19 @@ EOF
       if [ ! -f AGENTS.md ] && [ -f "$SCRIPT_DIR/templates/AGENTS.md" ]; then
         cp "$SCRIPT_DIR/templates/AGENTS.md" AGENTS.md
       fi
-      AGENTS_MD_BEFORE=$(cksum AGENTS.md 2>/dev/null || echo "none")
+      AGENTS_MD_BEFORE=$(cksum AGENTS.md 2> /dev/null || echo "none")
 
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 5 "$AGENTS_MD_PROMPT" >"$ERR_AM" 2>&1 &
+      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 5 "$AGENTS_MD_PROMPT" > "$ERR_AM" 2>&1 &
       PID_AM=$!
     fi
 
     # Step 2: Generate project context (sonnet, background, parallel with Step 1)
     PID_CTX=""
     if [ "$REGEN_CONTEXT" = "yes" ]; then
-    mkdir -p .agents/context
+      mkdir -p .agents/context
 
-  claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 8 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1 &
-    PID_CTX=$!
+      claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 8 "$CONTEXT_PROMPT" > "$ERR_CTX" 2>&1 &
+      PID_CTX=$!
     fi
 
     # Wait for background processes
@@ -297,103 +303,103 @@ EOF
 
     # Verify Step 1a: CLAUDE.md was actually modified
     if [ -n "$PID_CM" ]; then
-    EXIT_CM=0
-    wait "$PID_CM" 2>/dev/null || EXIT_CM=$?
-    CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
-    if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
-      tui_warn "CLAUDE.md unchanged after initial generation - retrying"
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$CLAUDE_MD_PROMPT" >"$ERR_CM" 2>&1
-      EXIT_CM=$?
-      CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2>/dev/null || echo "none")
-      if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" != "$CLAUDE_MD_AFTER" ]; then
-        tui_success "CLAUDE.md updated after retry"
-      fi
-    fi
-    if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
-      regen_failed=1
-      echo ""
-      if [ "$EXIT_CM" -eq 143 ]; then
-        tui_warn "CLAUDE.md generation timed out (>180s)"
-        tui_info "Fix: open the update flow and choose Regenerate"
-      else
-        tui_warn "CLAUDE.md was not updated (exit code $EXIT_CM)"
-        if [ -s "$ERR_CM" ]; then
-          echo "  Output: $(tail -5 "$ERR_CM")"
+      EXIT_CM=0
+      wait "$PID_CM" 2> /dev/null || EXIT_CM=$?
+      CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2> /dev/null || echo "none")
+      if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
+        tui_warn "CLAUDE.md unchanged after initial generation - retrying"
+        claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$CLAUDE_MD_PROMPT" > "$ERR_CM" 2>&1
+        EXIT_CM=$?
+        CLAUDE_MD_AFTER=$(cksum CLAUDE.md 2> /dev/null || echo "none")
+        if [ "$EXIT_CM" -eq 0 ] && [ "$CLAUDE_MD_BEFORE" != "$CLAUDE_MD_AFTER" ]; then
+          tui_success "CLAUDE.md updated after retry"
         fi
-        tui_info "Fix: run 'claude' in your terminal to check authentication, then re-run"
       fi
-    fi
+      if [ "$EXIT_CM" -ne 0 ] || [ "$CLAUDE_MD_BEFORE" = "$CLAUDE_MD_AFTER" ]; then
+        regen_failed=1
+        echo ""
+        if [ "$EXIT_CM" -eq 143 ]; then
+          tui_warn "CLAUDE.md generation timed out (>180s)"
+          tui_info "Fix: open the update flow and choose Regenerate"
+        else
+          tui_warn "CLAUDE.md was not updated (exit code $EXIT_CM)"
+          if [ -s "$ERR_CM" ]; then
+            echo "  Output: $(tail -5 "$ERR_CM")"
+          fi
+          tui_info "Fix: run 'claude' in your terminal to check authentication, then re-run"
+        fi
+      fi
     fi
 
     # Verify Step 1b: AGENTS.md was actually modified
     if [ -n "$PID_AM" ]; then
-    EXIT_AM=0
-    wait "$PID_AM" 2>/dev/null || EXIT_AM=$?
-    AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
-    if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
-      tui_warn "AGENTS.md unchanged after initial generation - retrying"
-      claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$AGENTS_MD_PROMPT" >"$ERR_AM" 2>&1
-      EXIT_AM=$?
-      AGENTS_MD_AFTER=$(cksum AGENTS.md 2>/dev/null || echo "none")
-      if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" != "$AGENTS_MD_AFTER" ]; then
-        tui_success "AGENTS.md updated after retry"
-      fi
-    fi
-    if [ "$EXIT_AM" -ne 0 ] || [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
-      regen_failed=1
-      echo ""
-      if [ "$EXIT_AM" -eq 143 ]; then
-        tui_warn "AGENTS.md generation timed out (>180s)"
-        tui_info "Fix: open the update flow and choose Regenerate"
-      else
-        tui_warn "AGENTS.md was not updated (exit code $EXIT_AM)"
-        if [ -s "$ERR_AM" ]; then
-          echo "  Output: $(tail -5 "$ERR_AM")"
+      EXIT_AM=0
+      wait "$PID_AM" 2> /dev/null || EXIT_AM=$?
+      AGENTS_MD_AFTER=$(cksum AGENTS.md 2> /dev/null || echo "none")
+      if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
+        tui_warn "AGENTS.md unchanged after initial generation - retrying"
+        claude -p --model claude-sonnet-4-6 --permission-mode acceptEdits --max-turns 6 "$AGENTS_MD_PROMPT" > "$ERR_AM" 2>&1
+        EXIT_AM=$?
+        AGENTS_MD_AFTER=$(cksum AGENTS.md 2> /dev/null || echo "none")
+        if [ "$EXIT_AM" -eq 0 ] && [ "$AGENTS_MD_BEFORE" != "$AGENTS_MD_AFTER" ]; then
+          tui_success "AGENTS.md updated after retry"
         fi
-        tui_info "Fix: run 'claude' in your terminal to check authentication, then re-run"
       fi
-    fi
+      if [ "$EXIT_AM" -ne 0 ] || [ "$AGENTS_MD_BEFORE" = "$AGENTS_MD_AFTER" ]; then
+        regen_failed=1
+        echo ""
+        if [ "$EXIT_AM" -eq 143 ]; then
+          tui_warn "AGENTS.md generation timed out (>180s)"
+          tui_info "Fix: open the update flow and choose Regenerate"
+        else
+          tui_warn "AGENTS.md was not updated (exit code $EXIT_AM)"
+          if [ -s "$ERR_AM" ]; then
+            echo "  Output: $(tail -5 "$ERR_AM")"
+          fi
+          tui_info "Fix: run 'claude' in your terminal to check authentication, then re-run"
+        fi
+      fi
     fi
 
     # Verify Step 2: context files were created
     if [ -n "$PID_CTX" ]; then
-    EXIT_CTX=0
-    wait "$PID_CTX" 2>/dev/null || EXIT_CTX=$?
-    CTX_COUNT=$(count_generated_context_files)
-
-    if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -lt 3 ]; then
-      tui_warn "Context generation created $CTX_COUNT of 3 files - retrying"
-      claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 12 "$CONTEXT_PROMPT" >"$ERR_CTX" 2>&1
-      EXIT_CTX=$?
+      EXIT_CTX=0
+      wait "$PID_CTX" 2> /dev/null || EXIT_CTX=$?
       CTX_COUNT=$(count_generated_context_files)
-      if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -eq 3 ]; then
-        tui_success "All 3 context files created after retry"
-      fi
-    fi
 
-    if [ "$CTX_COUNT" -eq 3 ]; then
-      tui_success "All 3 context files created in .agents/context/"
-    elif [ "$CTX_COUNT" -gt 0 ]; then
-      regen_failed=1
-      tui_warn "$CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
-      if [ -s "$ERR_CTX" ]; then
-        echo "  Output: $(tail -5 "$ERR_CTX")"
+      if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -lt 3 ]; then
+        tui_warn "Context generation created $CTX_COUNT of 3 files - retrying"
+        claude -p --model claude-haiku-4-5-20251001 --permission-mode acceptEdits --max-turns 12 "$CONTEXT_PROMPT" > "$ERR_CTX" 2>&1
+        EXIT_CTX=$?
+        CTX_COUNT=$(count_generated_context_files)
+        if [ "$EXIT_CTX" -eq 0 ] && [ "$CTX_COUNT" -eq 3 ]; then
+          tui_success "All 3 context files created after retry"
+        fi
       fi
-    else
-      regen_failed=1
-      tui_warn "Context generation failed (exit code $EXIT_CTX)"
-      if [ -s "$ERR_CTX" ]; then
-        echo "  Output: $(tail -5 "$ERR_CTX")"
+
+      if [ "$CTX_COUNT" -eq 3 ]; then
+        tui_success "All 3 context files created in .agents/context/"
+      elif [ "$CTX_COUNT" -gt 0 ]; then
+        regen_failed=1
+        tui_warn "$CTX_COUNT of 3 context files created (partial, exit code $EXIT_CTX)"
+        if [ -s "$ERR_CTX" ]; then
+          echo "  Output: $(tail -5 "$ERR_CTX")"
+        fi
+      else
+        regen_failed=1
+        tui_warn "Context generation failed (exit code $EXIT_CTX)"
+        if [ -s "$ERR_CTX" ]; then
+          echo "  Output: $(tail -5 "$ERR_CTX")"
+        fi
+        tui_info "Fix: check 'claude' works, then open the update flow and choose Regenerate"
       fi
-      tui_info "Fix: check 'claude' works, then open the update flow and choose Regenerate"
-    fi
     fi
 
     # Save state for freshness detection
     STATE_FILE=".agents/context/.state"
     if [ -d ".agents/context" ]; then
-      echo "PKG_HASH=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)" > "$STATE_FILE"
-      echo "TSCONFIG_HASH=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
+      echo "PKG_HASH=$(cksum package.json 2> /dev/null | cut -d' ' -f1,2)" > "$STATE_FILE"
+      echo "TSCONFIG_HASH=$(cksum tsconfig.json 2> /dev/null | cut -d' ' -f1,2)" >> "$STATE_FILE"
       echo "DIR_HASH=$(echo "$CACHED_FILES" | cksum | cut -d' ' -f1,2)" >> "$STATE_FILE"
       echo "GENERATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$STATE_FILE"
     fi

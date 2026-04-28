@@ -24,27 +24,27 @@ Read this matrix once at start. Skip silently if a file/agent doesn't exist.
 
 **Foundation (every spec):**
 
-| File | Step | Why |
-|---|---|---|
-| `.agents/context/STACK.md` | 4 | Frameworks, build tooling for branch setup |
-| `.agents/context/CONVENTIONS.md` | 7 | Code style for implementation |
-| `.agents/context/graph.json` | 7 | jq lookups before grep (saves tokens) |
-| `decisions.md` | 7 | Append architectural decisions |
+| File                             | Step | Why                                        |
+| -------------------------------- | ---- | ------------------------------------------ |
+| `.agents/context/STACK.md`       | 4    | Frameworks, build tooling for branch setup |
+| `.agents/context/CONVENTIONS.md` | 7    | Code style for implementation              |
+| `.agents/context/graph.json`     | 7    | jq lookups before grep (saves tokens)      |
+| `decisions.md`                   | 7    | Append architectural decisions             |
 
 **Conditional (existence-checked):**
 
-| Agent / Script | Trigger | Step |
-|---|---|---|
-| `code-architect` agent | Complexity=high in spec frontmatter | 3 |
-| `frontend-developer` agent | Steps touch `*.vue` `*.tsx` `*.jsx` `*.css` `*.scss` `*.liquid` | 7 |
-| `backend-developer` agent | Steps touch API routes, middleware, server-side | 7 |
-| `bash .claude/scripts/quality-gate.sh` | Steps modify `.sh` files | 8 |
-| `bash .claude/scripts/lint-prep.sh` | After Edit/Write to source files | 8 |
-| `bash .claude/scripts/test-prep.sh` | Spec has test-related steps | 11 |
-| `code-reviewer` agent | Always at step 12 (low/medium complexity) | 12 |
-| `staff-reviewer` agent | Complexity=high | 12 |
-| `security-reviewer` agent | Spec touches auth/secrets/permissions | 12 |
-| `performance-reviewer` agent | Spec touches DB queries, bundle size, rendering hot paths | 12 |
+| Agent / Script                         | Trigger                                                         | Step |
+| -------------------------------------- | --------------------------------------------------------------- | ---- |
+| `code-architect` agent                 | Complexity=high in spec frontmatter                             | 3    |
+| `frontend-developer` agent             | Steps touch `*.vue` `*.tsx` `*.jsx` `*.css` `*.scss` `*.liquid` | 7    |
+| `backend-developer` agent              | Steps touch API routes, middleware, server-side                 | 7    |
+| `bash .claude/scripts/quality-gate.sh` | Steps modify `.sh` files                                        | 8    |
+| `bash .claude/scripts/lint-prep.sh`    | After Edit/Write to source files                                | 8    |
+| `bash .claude/scripts/test-prep.sh`    | Spec has test-related steps                                     | 11   |
+| `code-reviewer` agent                  | Always at step 12 (low/medium complexity)                       | 12   |
+| `staff-reviewer` agent                 | Complexity=high                                                 | 12   |
+| `security-reviewer` agent              | Spec touches auth/secrets/permissions                           | 12   |
+| `performance-reviewer` agent           | Spec touches DB queries, bundle size, rendering hot paths       | 12   |
 
 **Fallback:** if a conditional agent doesn't exist (`ls .claude/agents/<name>.md`), proceed without it. Never block on missing optional agents. `code-reviewer` is the only required agent at step 12.
 
@@ -61,11 +61,11 @@ Read this matrix once at start. Skip silently if a file/agent doesn't exist.
 
 ### Model routing per spec Complexity
 
-| Complexity | Implementation model |
-|---|---|
-| low | direct (no subagent) |
-| medium / unset | `model: sonnet` |
-| high | `model: opus` |
+| Complexity     | Implementation model |
+| -------------- | -------------------- |
+| low            | direct (no subagent) |
+| medium / unset | `model: sonnet`      |
+| high           | `model: opus`        |
 
 **Effort override** (`${CLAUDE_EFFORT}`): if `xhigh` or `max`, treat all medium specs as high (spawn opus for implementation, run all optional review agents in step 12 regardless of complexity).
 
@@ -99,18 +99,19 @@ When spec modifies SKILL.md files: before step 8, spawn Haiku subagent to diff o
 
 ## Status Lifecycle (canonical vocab — enforced)
 
-| Status | Trigger | Side effect |
-|---|---|---|
-| `draft` | `/spec` created | file in `specs/NNN-*.md` |
-| `in-progress` | step 5 (this skill) | — |
-| `in-review` | step 12 start | — |
-| `blocked` | stall guard / verify-fail | stop, surface to user |
-| `completed` | step 12 review PASS | **move file to `specs/completed/NNN-*.md`** |
+| Status        | Trigger                   | Side effect                                 |
+| ------------- | ------------------------- | ------------------------------------------- |
+| `draft`       | `/spec` created           | file in `specs/NNN-*.md`                    |
+| `in-progress` | step 5 (this skill)       | —                                           |
+| `in-review`   | step 12 start             | —                                           |
+| `blocked`     | stall guard / verify-fail | stop, surface to user                       |
+| `completed`   | step 12 review PASS       | **move file to `specs/completed/NNN-*.md`** |
 
 Use ONLY these five values. Synonyms like `done`, `finished`, `closed`, `merged` are forbidden — `spec-board.sh` won't bucket them and the spec disappears from the board.
 `completed` without the file move = drift; `/spec-board` will flag it as Type B.
 
 ## Rules
+
 - Follow spec exactly. Check off each step. No commits during `/spec-work`.
 - Blocked → set `blocked`, ask user. Skill references → invoke via `Skill` tool.
 - `--complete`: skip steps 9-12 (changelog + verify + test + review). Use when manually verified. STILL set `Status: completed` AND move file to `specs/completed/`.

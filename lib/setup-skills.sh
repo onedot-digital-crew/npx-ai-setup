@@ -11,10 +11,10 @@ install_agents() {
   local _has_frontend=false
   local _has_backend=false
   if [ -f "package.json" ]; then
-    grep -qE '"(react|vue|nuxt|next|svelte|astro)"' package.json 2>/dev/null && _has_frontend=true
+    grep -qE '"(react|vue|nuxt|next|svelte|astro)"' package.json 2> /dev/null && _has_frontend=true
     # Backend: Nuxt/Next server, express, fastify, nitro, or server/ directory
-    if grep -qE '"(express|fastify|@hono|h3|nitro)"' package.json 2>/dev/null \
-       || [ -d "server" ] || ls nuxt.config.* 1>/dev/null 2>&1 || ls next.config.* 1>/dev/null 2>&1; then
+    if grep -qE '"(express|fastify|@hono|h3|nitro)"' package.json 2> /dev/null ||
+      [ -d "server" ] || ls nuxt.config.* 1> /dev/null 2>&1 || ls next.config.* 1> /dev/null 2>&1; then
       _has_backend=true
     fi
   fi
@@ -44,7 +44,7 @@ install_global_agents() {
   local skipped="no"
   local _count=0
 
-  if ! mkdir -p "$global_dir" 2>/dev/null; then
+  if ! mkdir -p "$global_dir" 2> /dev/null; then
     tui_warn "Global agents skipped: cannot create $global_dir"
     return 0
   fi
@@ -59,7 +59,7 @@ install_global_agents() {
     [ "$_agent_name" = "backend-developer.md" ] && continue
 
     if [ ! -f "$global_dir/$_agent_name" ] || ! cmp -s "$_agent_path" "$global_dir/$_agent_name"; then
-      if cp "$_agent_path" "$global_dir/$_agent_name" 2>/dev/null; then
+      if cp "$_agent_path" "$global_dir/$_agent_name" 2> /dev/null; then
         _count=$((_count + 1))
       else
         if [ "$warned" = "false" ]; then
@@ -149,16 +149,16 @@ merge_skills_dir_into_canonical() {
     name="${item##*/}"
     target="$canonical_dir/$name"
     if [ ! -e "$target" ]; then
-      if mv "$item" "$target" 2>/dev/null; then
+      if mv "$item" "$target" 2> /dev/null; then
         eval "$moved_ref=\$(( $moved_ref + 1 ))"
       else
         mkdir -p "$backup_dir"
-        mv "$item" "$backup_dir/$name" 2>/dev/null || true
+        mv "$item" "$backup_dir/$name" 2> /dev/null || true
         eval "$conflicts_ref=\$(( $conflicts_ref + 1 ))"
       fi
     else
       mkdir -p "$backup_dir"
-      mv "$item" "$backup_dir/$name" 2>/dev/null || true
+      mv "$item" "$backup_dir/$name" 2> /dev/null || true
       eval "$conflicts_ref=\$(( $conflicts_ref + 1 ))"
     fi
   done < <(find "$source_dir" -mindepth 1 -maxdepth 1 -print0)
@@ -182,17 +182,17 @@ repair_canonical_skill_links() {
 
   while IFS= read -r -d '' link; do
     name="${link##*/}"
-    target_rel=$(readlink "$link" 2>/dev/null || echo "")
-    target_abs=$(cd "$(dirname "$link")" 2>/dev/null && cd "$target_rel" 2>/dev/null && pwd -P)
+    target_rel=$(readlink "$link" 2> /dev/null || echo "")
+    target_abs=$(cd "$(dirname "$link")" 2> /dev/null && cd "$target_rel" 2> /dev/null && pwd -P)
 
     case "$target_rel" in
-      *".agents/skills/$name"|*".claude/skills/$name")
-        rm -f "$link" 2>/dev/null || true
+      *".agents/skills/$name" | *".claude/skills/$name")
+        rm -f "$link" 2> /dev/null || true
         src=""
         [ -d "$HOME/.agents/skills/$name" ] && src="$HOME/.agents/skills/$name"
         [ -z "$src" ] && [ -d "$HOME/.claude/skills/$name" ] && src="$HOME/.claude/skills/$name"
         if [ -n "$src" ]; then
-          cp -R "$src" "$canonical_dir/$name" 2>/dev/null || mkdir -p "$canonical_dir/$name"
+          cp -R "$src" "$canonical_dir/$name" 2> /dev/null || mkdir -p "$canonical_dir/$name"
           repaired=$((repaired + 1))
           echo "  🛠️  Repaired skill link loop: $name (restored from $(basename "$(dirname "$src")"))"
         else
@@ -203,7 +203,7 @@ repair_canonical_skill_links() {
       *)
         # Self-referential absolute resolution also indicates a loop.
         if [ -n "$target_abs" ] && [ "$target_abs" = "$canonical_abs/$name" ]; then
-          rm -f "$link" 2>/dev/null || true
+          rm -f "$link" 2> /dev/null || true
           removed=$((removed + 1))
           echo "  ⚠️  Removed self-referential skill link: $name"
         fi
@@ -235,14 +235,14 @@ ensure_skills_alias() {
   mkdir -p .claude .agents
   ts=$(date +"%Y%m%d_%H%M%S")
   backup_dir=".ai-setup-backup/skills-migration-$ts"
-  project_abs=$(pwd -P 2>/dev/null || pwd)
+  project_abs=$(pwd -P 2> /dev/null || pwd)
 
   # Canonical path must be a real directory (not a symlink), otherwise loops can occur.
   if [ -L "$canonical" ]; then
-    canonical_target=$(readlink "$canonical" 2>/dev/null || echo "")
-    canonical_target_abs=$(cd "$(dirname "$canonical")" 2>/dev/null && cd "$canonical_target" 2>/dev/null && pwd -P)
+    canonical_target=$(readlink "$canonical" 2> /dev/null || echo "")
+    canonical_target_abs=$(cd "$(dirname "$canonical")" 2> /dev/null && cd "$canonical_target" 2> /dev/null && pwd -P)
     echo "  ♻️  Converting legacy symlink $canonical -> ${canonical_target:-<unresolved>} to canonical directory"
-    rm -f "$canonical" 2>/dev/null || true
+    rm -f "$canonical" 2> /dev/null || true
     mkdir -p "$canonical"
 
     # Only migrate automatically from in-project targets (e.g. .agents/skills).
@@ -262,18 +262,18 @@ ensure_skills_alias() {
   if [ ! -d "$canonical" ]; then
     if [ -e "$canonical" ]; then
       mkdir -p "$backup_dir"
-      mv "$canonical" "$backup_dir/skills-canonical-path-$ts" 2>/dev/null || rm -f "$canonical" 2>/dev/null || true
+      mv "$canonical" "$backup_dir/skills-canonical-path-$ts" 2> /dev/null || rm -f "$canonical" 2> /dev/null || true
       conflicts=$((conflicts + 1))
     fi
     mkdir -p "$canonical"
   fi
 
-  canonical_abs=$(cd "$canonical" 2>/dev/null && pwd -P)
+  canonical_abs=$(cd "$canonical" 2> /dev/null && pwd -P)
   repair_canonical_skill_links "$canonical" "$canonical_abs"
 
   if [ -L "$alias" ]; then
-    alias_target=$(readlink "$alias" 2>/dev/null || echo "")
-    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$alias_target" 2>/dev/null && pwd -P)
+    alias_target=$(readlink "$alias" 2> /dev/null || echo "")
+    alias_abs=$(cd "$(dirname "$alias")" 2> /dev/null && cd "$alias_target" 2> /dev/null && pwd -P)
     if [ -n "$alias_abs" ] && [ -n "$canonical_abs" ] && [ "$alias_abs" = "$canonical_abs" ]; then
       return 0
     fi
@@ -281,11 +281,11 @@ ensure_skills_alias() {
     if [ -n "$alias_abs" ] && [ -d "$alias_abs" ]; then
       merge_skills_dir_into_canonical "$alias_abs" "$canonical" "$backup_dir" moved conflicts
     fi
-    rm -f "$alias" 2>/dev/null || true
+    rm -f "$alias" 2> /dev/null || true
   fi
 
   # Migrate legacy non-symlink layout (.agents/skills as real directory).
-  if [ -d "$alias" ] && [ -n "$(ls -A "$alias" 2>/dev/null)" ]; then
+  if [ -d "$alias" ] && [ -n "$(ls -A "$alias" 2> /dev/null)" ]; then
     echo "  ♻️  Migrating legacy skills layout ($alias -> $canonical)..."
     merge_skills_dir_into_canonical "$alias" "$canonical" "$backup_dir" moved conflicts
   fi
@@ -294,10 +294,10 @@ ensure_skills_alias() {
   [ "$conflicts" -gt 0 ] && echo "  ⚠️  $conflicts conflicting item(s) backed up to $backup_dir" || true
 
   if [ -d "$alias" ]; then
-    rm -rf "$alias" 2>/dev/null || true
+    rm -rf "$alias" 2> /dev/null || true
   fi
 
-  if ln -s ../.claude/skills "$alias" 2>/dev/null; then
+  if ln -s ../.claude/skills "$alias" 2> /dev/null; then
     echo "  🔗 Linked $alias -> ../.claude/skills"
   else
     echo "  ℹ️  Symlink not available on this system. Using $canonical only."
@@ -306,63 +306,63 @@ ensure_skills_alias() {
 
 # Create .codex/skills -> .claude/skills symlink if codex is installed.
 ensure_codex_skills_alias() {
-  command -v codex >/dev/null 2>&1 || return 0
+  command -v codex > /dev/null 2>&1 || return 0
   local alias=".codex/skills"
   local canonical_abs
-  canonical_abs=$(cd .claude/skills 2>/dev/null && pwd -P)
+  canonical_abs=$(cd .claude/skills 2> /dev/null && pwd -P)
   mkdir -p .codex
   if [ -L "$alias" ]; then
     local alias_abs
-    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$(readlink "$alias")" 2>/dev/null && pwd -P)
+    alias_abs=$(cd "$(dirname "$alias")" 2> /dev/null && cd "$(readlink "$alias")" 2> /dev/null && pwd -P)
     [ -n "$alias_abs" ] && [ "$alias_abs" = "$canonical_abs" ] && return 0
-    rm -f "$alias" 2>/dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
+    rm -f "$alias" 2> /dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
   elif [ -e "$alias" ]; then
     echo "  ⏭️  $alias already exists as a non-symlink — skipping (Codex)"
     return 0
   fi
-  if ln -s ../.claude/skills "$alias" 2>/dev/null; then
+  if ln -s ../.claude/skills "$alias" 2> /dev/null; then
     echo "  🔗 Linked $alias -> ../.claude/skills (Codex)"
   fi
 }
 
 # Create .gemini/agents -> .claude/skills symlink if gemini is installed.
 ensure_gemini_skills_alias() {
-  command -v gemini >/dev/null 2>&1 || return 0
+  command -v gemini > /dev/null 2>&1 || return 0
   local alias=".gemini/agents"
   local canonical_abs
-  canonical_abs=$(cd .claude/skills 2>/dev/null && pwd -P)
+  canonical_abs=$(cd .claude/skills 2> /dev/null && pwd -P)
   mkdir -p .gemini
   if [ -L "$alias" ]; then
     local alias_abs
-    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$(readlink "$alias")" 2>/dev/null && pwd -P)
+    alias_abs=$(cd "$(dirname "$alias")" 2> /dev/null && cd "$(readlink "$alias")" 2> /dev/null && pwd -P)
     [ -n "$alias_abs" ] && [ "$alias_abs" = "$canonical_abs" ] && return 0
-    rm -f "$alias" 2>/dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
+    rm -f "$alias" 2> /dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
   elif [ -e "$alias" ]; then
     echo "  ⏭️  $alias already exists as a non-symlink — skipping (Gemini)"
     return 0
   fi
-  if ln -s ../.claude/skills "$alias" 2>/dev/null; then
+  if ln -s ../.claude/skills "$alias" 2> /dev/null; then
     echo "  🔗 Linked $alias -> ../.claude/skills (Gemini)"
   fi
 }
 
 # Create .opencode/skills -> .claude/skills symlink if opencode is installed.
 ensure_opencode_skills_alias() {
-  command -v opencode >/dev/null 2>&1 || return 0
+  command -v opencode > /dev/null 2>&1 || return 0
   local alias=".opencode/skills"
   local canonical_abs
-  canonical_abs=$(cd .claude/skills 2>/dev/null && pwd -P)
+  canonical_abs=$(cd .claude/skills 2> /dev/null && pwd -P)
   mkdir -p .opencode
   if [ -L "$alias" ]; then
     local alias_abs
-    alias_abs=$(cd "$(dirname "$alias")" 2>/dev/null && cd "$(readlink "$alias")" 2>/dev/null && pwd -P)
+    alias_abs=$(cd "$(dirname "$alias")" 2> /dev/null && cd "$(readlink "$alias")" 2> /dev/null && pwd -P)
     [ -n "$alias_abs" ] && [ "$alias_abs" = "$canonical_abs" ] && return 0
-    rm -f "$alias" 2>/dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
+    rm -f "$alias" 2> /dev/null || echo "  ⚠️  Could not remove stale symlink $alias"
   elif [ -e "$alias" ]; then
     echo "  ⏭️  $alias already exists as a non-symlink — skipping (OpenCode)"
     return 0
   fi
-  if ln -s ../.claude/skills "$alias" 2>/dev/null; then
+  if ln -s ../.claude/skills "$alias" 2> /dev/null; then
     echo "  🔗 Linked $alias -> ../.claude/skills (OpenCode)"
   fi
 }
@@ -389,7 +389,7 @@ install_graphify_skill() {
   cp "$src" "$dst"
   tui_success "Graphify skill installed ($dst)"
 
-  if ! command -v graphify >/dev/null 2>&1; then
+  if ! command -v graphify > /dev/null 2>&1; then
     tui_warn "graphify binary not found — run: pipx install graphifyy"
   fi
 }

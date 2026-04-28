@@ -23,9 +23,14 @@
     "test:claude-runtime": "bash tests/claude-runtime.sh",
     "verify:release": "npm run test && bash tests/routing-check.sh && REQUIRE_CLAUDE_RUNTIME=1 bash tests/claude-runtime.sh",
     "test": "npm run test:smoke && npm run test:integration",
+    "format": "bash scripts/format-check.sh",
+    "format:fix": "bash scripts/format-check.sh --fix",
     "routing-check": "bash tests/routing-check.sh",
     "hooks:install": "git config core.hooksPath .githooks",
     "hooks:status": "git config --get core.hooksPath"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.8.3"
+  }
 }

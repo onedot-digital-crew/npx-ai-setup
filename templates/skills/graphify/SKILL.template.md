@@ -19,11 +19,11 @@ code navigation. Complements the auto-generated import graphs — it does NOT re
 
 ## Graph Types in This Project
 
-| File | What it maps | When present |
-|------|-------------|--------------|
-| `.agents/context/graph.json` | JS/TS import graph (auto-generated) | Always (JS/TS projects) |
-| `.agents/context/liquid-graph.json` | Liquid section/snippet/template deps | Shopify only (spec 639) |
-| `graphify-out/graph.json` | Semantic community graph (this skill) | After `/graphify build` |
+| File                                | What it maps                          | When present            |
+| ----------------------------------- | ------------------------------------- | ----------------------- |
+| `.agents/context/graph.json`        | JS/TS import graph (auto-generated)   | Always (JS/TS projects) |
+| `.agents/context/liquid-graph.json` | Liquid section/snippet/template deps  | Shopify only (spec 639) |
+| `graphify-out/graph.json`           | Semantic community graph (this skill) | After `/graphify build` |
 
 ## Prerequisites
 

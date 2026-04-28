@@ -18,7 +18,7 @@ ISSUES=0
 check_count() {
   local label="$1" actual="$2" file="$3" pattern="$4"
   local stated
-  stated=$(grep -oE "$pattern" "$file" 2>/dev/null | head -1 | grep -oE '[0-9]+' || true)
+  stated=$(grep -oE "$pattern" "$file" 2> /dev/null | head -1 | grep -oE '[0-9]+' || true)
   if [ -z "$stated" ]; then
     echo "  SKIP: $label — no count found in $file"
     return
@@ -38,7 +38,7 @@ check_table() {
   local items=("$@")
   local missing=()
   for item in "${items[@]}"; do
-    if ! grep -q "$item" "$file" 2>/dev/null; then
+    if ! grep -q "$item" "$file" 2> /dev/null; then
       missing+=("$item")
     fi
   done
@@ -57,13 +57,13 @@ echo ""
 SKILL_DIRS=()
 while IFS= read -r d; do
   SKILL_DIRS+=("$(basename "$d")")
-done < <(find templates/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+done < <(find templates/skills -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sort)
 SKILL_COUNT=${#SKILL_DIRS[@]}
 
 HOOK_FILES=()
 while IFS= read -r f; do
   HOOK_FILES+=("$(basename "$f" .sh)")
-done < <(find templates/claude/hooks -maxdepth 1 -name '*.sh' -type f 2>/dev/null | sort)
+done < <(find templates/claude/hooks -maxdepth 1 -name '*.sh' -type f 2> /dev/null | sort)
 HOOK_COUNT=${#HOOK_FILES[@]}
 
 AGENT_FILES=()
@@ -71,13 +71,13 @@ while IFS= read -r f; do
   name="$(basename "$f" .md)"
   [ "$name" = "README" ] && continue
   AGENT_FILES+=("$name")
-done < <(find templates/agents -maxdepth 1 -name '*.md' -type f 2>/dev/null | sort)
+done < <(find templates/agents -maxdepth 1 -name '*.md' -type f 2> /dev/null | sort)
 AGENT_COUNT=${#AGENT_FILES[@]}
 
 RULE_FILES=()
 while IFS= read -r f; do
   RULE_FILES+=("$(basename "$f" .md)")
-done < <(find templates/claude/rules -maxdepth 1 -name '*.md' -type f 2>/dev/null | sort)
+done < <(find templates/claude/rules -maxdepth 1 -name '*.md' -type f 2> /dev/null | sort)
 RULE_COUNT=${#RULE_FILES[@]}
 
 echo "## Filesystem counts"
@@ -105,7 +105,7 @@ if [ -f "README.md" ]; then
   # Hook list completeness (hooks are listed inline, not as table rows)
   HOOKS_MISSING=()
   for hook in "${HOOK_FILES[@]}"; do
-    if ! grep -q "$hook" "README.md" 2>/dev/null; then
+    if ! grep -q "$hook" "README.md" 2> /dev/null; then
       HOOKS_MISSING+=("$hook")
     fi
   done

@@ -12,6 +12,7 @@ Stack-specific starting points for `.agents/context/` files. Installed by `npx a
 ## Bundle structure
 
 Each bundle has 3 files:
+
 - `STACK.md` — runtime, deps, build tooling
 - `ARCHITECTURE.md` — directory layout, entry points, data flow
 - `CONVENTIONS.md` — naming, patterns, Definition of Done
@@ -20,14 +21,14 @@ Each file starts with `<!-- bundle: <profile> v1 -->`. Files without this marker
 
 ## Profiles
 
-| Profile | Trigger |
-|---------|---------|
-| `nuxt-storyblok` | `nuxt.config.*` + `@storyblok/nuxt` in package.json |
-| `nuxtjs` | `nuxt.config.*` or `nuxt` in package.json (no Storyblok) |
-| `shopify-liquid` | ≥5 `.liquid` files in sections/ snippets/ templates/ |
-| `laravel` | `artisan` file or `laravel/framework` in composer.json |
-| `nextjs` | `next.config.*` or `next` in package.json |
-| `default` | Fallback — generic placeholders |
+| Profile          | Trigger                                                  |
+| ---------------- | -------------------------------------------------------- |
+| `nuxt-storyblok` | `nuxt.config.*` + `@storyblok/nuxt` in package.json      |
+| `nuxtjs`         | `nuxt.config.*` or `nuxt` in package.json (no Storyblok) |
+| `shopify-liquid` | ≥5 `.liquid` files in sections/ snippets/ templates/     |
+| `laravel`        | `artisan` file or `laravel/framework` in composer.json   |
+| `nextjs`         | `next.config.*` or `next` in package.json                |
+| `default`        | Fallback — generic placeholders                          |
 
 Detection order matters: `nuxt-storyblok` is checked before `nuxtjs`, `nextjs` before `nuxtjs` — the first match wins.
 

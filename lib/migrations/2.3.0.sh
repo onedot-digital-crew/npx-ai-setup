@@ -12,8 +12,8 @@ settings_file=".claude/settings.json"
 # ------------------------------------------------------------------
 # 1. Disable sandbox in existing settings.json
 # ------------------------------------------------------------------
-if [ -f "$settings_file" ] && command -v jq >/dev/null 2>&1; then
-  current=$(jq -r '.sandbox.enabled // empty' "$settings_file" 2>/dev/null)
+if [ -f "$settings_file" ] && command -v jq > /dev/null 2>&1; then
+  current=$(jq -r '.sandbox.enabled // empty' "$settings_file" 2> /dev/null)
   if [ "$current" = "true" ]; then
     tmp=$(mktemp)
     jq '.sandbox.enabled = false' "$settings_file" > "$tmp" && mv "$tmp" "$settings_file"

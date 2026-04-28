@@ -18,9 +18,11 @@ Runs the project test suite and fixes failures in source code. Uses `test-prep.s
 ## Process
 
 1. **Run the prep script** (zero LLM tokens):
+
    ```
    ! bash .claude/scripts/test-prep.sh
    ```
+
    - Output `ALL_TESTS_PASSED` (exit 0) → **short-circuit**: report success and stop. No further LLM processing needed.
    - Exit 1 → no test framework detected; report the error and stop.
    - Exit 2 → failures found; output contains filtered failure summary and last 80 lines of full output.
@@ -40,6 +42,7 @@ Runs the project test suite and fixes failures in source code. Uses `test-prep.s
 5. If still failing after Attempt 3, report what was tried and what remains broken.
 
 ## Rules
+
 - Fix source code, not tests (unless the test itself has a clear bug).
 - Do not delete or skip failing tests.
 - Do not install new dependencies without asking.
@@ -48,6 +51,7 @@ Runs the project test suite and fixes failures in source code. Uses `test-prep.s
 ## Coverage Gap Detection (optional)
 
 After all tests pass, if `test-generator` agent exists (`ls .claude/agents/test-generator.md`):
+
 - Run `git diff --name-only` to identify changed source files
 - For each changed file, check if a corresponding test file exists
 - If test files are missing for changed source code, spawn `test-generator` agent (model: sonnet) to generate missing tests

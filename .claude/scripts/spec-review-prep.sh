@@ -46,7 +46,7 @@ section() { printf "\n=== %s ===\n\n" "$1"; }
 # Header
 # ---------------------------------------------------------------------------
 SPEC_ID="$(basename "$SPEC_FILE" .md | grep -oE '^[0-9]+' || echo "???")"
-SPEC_TITLE="$(grep -m1 '^# ' "$SPEC_FILE" 2>/dev/null | sed 's/^# //' || echo "Unknown")"
+SPEC_TITLE="$(grep -m1 '^# ' "$SPEC_FILE" 2> /dev/null | sed 's/^# //' || echo "Unknown")"
 TIMESTAMP="$(date '+%Y-%m-%d %H:%M:%S')"
 MAIN="$(main_branch)"
 
@@ -57,15 +57,15 @@ printf "Spec: %s (%s)\n" "$SPEC_FILE" "$SPEC_TITLE"
 # 1. Extract branch from spec header
 # ---------------------------------------------------------------------------
 section "BRANCH"
-SPEC_BRANCH="$(grep -E '^\>' "$SPEC_FILE" 2>/dev/null \
-  | head -1 \
-  | grep -oE '\*\*Branch\*\*: `[^`]+`' \
-  | tr -d '`' \
-  | sed 's/\*\*Branch\*\*: //' || true)"
+SPEC_BRANCH="$(grep -E '^\>' "$SPEC_FILE" 2> /dev/null |
+  head -1 |
+  grep -oE '\*\*Branch\*\*: `[^`]+`' |
+  tr -d '`' |
+  sed 's/\*\*Branch\*\*: //' || true)"
 
 if [[ -n "$SPEC_BRANCH" ]]; then
   printf "Spec branch: %s\n" "$SPEC_BRANCH"
-  if git rev-parse --verify "$SPEC_BRANCH" >/dev/null 2>&1; then
+  if git rev-parse --verify "$SPEC_BRANCH" > /dev/null 2>&1; then
     printf "Branch exists: yes\n"
     DIFF_BASE="${MAIN}...${SPEC_BRANCH}"
   else
@@ -82,10 +82,10 @@ fi
 # ---------------------------------------------------------------------------
 section "DIFF STAT"
 if [[ -n "$DIFF_BASE" ]]; then
-  rtk_or_raw git diff "$DIFF_BASE" --stat 2>/dev/null || echo "(no diff)"
+  rtk_or_raw git diff "$DIFF_BASE" --stat 2> /dev/null || echo "(no diff)"
 else
-  STAGED_STAT="$(rtk_or_raw git diff --cached --stat 2>/dev/null || true)"
-  UNSTAGED_STAT="$(rtk_or_raw git diff --stat 2>/dev/null || true)"
+  STAGED_STAT="$(rtk_or_raw git diff --cached --stat 2> /dev/null || true)"
+  UNSTAGED_STAT="$(rtk_or_raw git diff --stat 2> /dev/null || true)"
   [[ -n "$STAGED_STAT" ]] && printf "Staged:\n%s\n\n" "$STAGED_STAT"
   [[ -n "$UNSTAGED_STAT" ]] && printf "Unstaged:\n%s\n\n" "$UNSTAGED_STAT"
   [[ -z "$STAGED_STAT" ]] && [[ -z "$UNSTAGED_STAT" ]] && printf "(no changes)\n"
@@ -93,10 +93,10 @@ fi
 
 section "FULL DIFF"
 if [[ -n "$DIFF_BASE" ]]; then
-  rtk_or_raw git diff "$DIFF_BASE" 2>/dev/null || echo "(no diff)"
+  rtk_or_raw git diff "$DIFF_BASE" 2> /dev/null || echo "(no diff)"
 else
-  STAGED_DIFF="$(rtk_or_raw git diff --cached 2>/dev/null || true)"
-  UNSTAGED_DIFF="$(rtk_or_raw git diff 2>/dev/null || true)"
+  STAGED_DIFF="$(rtk_or_raw git diff --cached 2> /dev/null || true)"
+  UNSTAGED_DIFF="$(rtk_or_raw git diff 2> /dev/null || true)"
   [[ -n "$STAGED_DIFF" ]] && printf "=== Staged ===\n%s\n" "$STAGED_DIFF"
   [[ -n "$UNSTAGED_DIFF" ]] && printf "=== Unstaged ===\n%s\n" "$UNSTAGED_DIFF"
   [[ -z "$STAGED_DIFF" ]] && [[ -z "$UNSTAGED_DIFF" ]] && printf "(no diff)\n"
@@ -107,13 +107,16 @@ fi
 # ---------------------------------------------------------------------------
 section "TOP 5 CHANGED FILES"
 if [[ -n "$DIFF_BASE" ]]; then
-  git diff "$DIFF_BASE" --numstat 2>/dev/null \
-    | awk '{print ($1+$2), $3}' | sort -rn | head -5 \
-    || echo "(none)"
+  git diff "$DIFF_BASE" --numstat 2> /dev/null |
+    awk '{print ($1+$2), $3}' | sort -rn | head -5 ||
+    echo "(none)"
 else
-  { git diff --cached --numstat 2>/dev/null; git diff --numstat 2>/dev/null; } \
-    | awk '{print ($1+$2), $3}' | sort -rn | head -5 \
-    || echo "(none)"
+  {
+    git diff --cached --numstat 2> /dev/null
+    git diff --numstat 2> /dev/null
+  } |
+    awk '{print ($1+$2), $3}' | sort -rn | head -5 ||
+    echo "(none)"
 fi
 
 # ---------------------------------------------------------------------------
@@ -133,10 +136,10 @@ fi
 # 5. Spec status + acceptance criteria summary
 # ---------------------------------------------------------------------------
 section "SPEC STATUS"
-STATUS="$(grep -E '^\>' "$SPEC_FILE" 2>/dev/null \
-  | head -1 \
-  | sed -n 's/.*\*\*Status\*\*: \([^|]*\).*/\1/p' \
-  | tr -d ' ' || echo "unknown")"
+STATUS="$(grep -E '^\>' "$SPEC_FILE" 2> /dev/null |
+  head -1 |
+  sed -n 's/.*\*\*Status\*\*: \([^|]*\).*/\1/p' |
+  tr -d ' ' || echo "unknown")"
 STATUS="${STATUS:-unknown}"
 printf "Status: %s\n" "$STATUS"
 

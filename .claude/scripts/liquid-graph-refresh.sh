@@ -31,7 +31,7 @@ else
   for d in sections snippets templates layout blocks; do
     dir="${PROJECT_DIR}/${d}"
     [ -d "$dir" ] || continue
-    if find "$dir" -maxdepth 2 -name "*.liquid" -newer "$GRAPH_FILE" 2>/dev/null | grep -q .; then
+    if find "$dir" -maxdepth 2 -name "*.liquid" -newer "$GRAPH_FILE" 2> /dev/null | grep -q .; then
       NEEDS_REFRESH=1
       break
     fi

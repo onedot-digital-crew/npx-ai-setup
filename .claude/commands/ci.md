@@ -34,6 +34,7 @@ Run:
 ```
 
 Parse the output:
+
 - `completed / success` — CI green.
 - `completed / failure` or `in_progress` — report status and affected workflows.
 
@@ -50,6 +51,7 @@ Always report:
 ```
 
 If any check failed, list:
+
 - Workflow name
 - Step that failed (if visible)
 - Link to the run (`gh run view <id> --log-failed`)

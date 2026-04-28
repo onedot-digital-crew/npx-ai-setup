@@ -20,7 +20,7 @@
 
 **Rationale**: Generative content is harder to review, harder to version, and non-deterministic. A developer running the setup tool should know exactly what they are getting. Templates are committed to this repository, visible on GitHub, and updated via version bumps. The generated parts (CLAUDE.md Commands section, context files) are the minimum necessary — the parts that cannot be templated because they require knowledge of the specific project.
 
-## Granular Permissions, Not Bash(*)
+## Granular Permissions, Not Bash(\*)
 
 **Decision**: `.claude/settings.json` lists explicit bash permissions instead of `Bash(*)`.
 

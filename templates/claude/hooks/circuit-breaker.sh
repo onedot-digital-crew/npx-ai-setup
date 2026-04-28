@@ -9,25 +9,25 @@ FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Whitelist: spec progress files, handoff docs, and common hot files (frequent edits by design)
 case "$FILE_PATH" in
-  */specs/*.md|*/HANDOFF.md) exit 0 ;;
-  */CHANGELOG.md|*/README.md) exit 0 ;;
-  */pages/*|*/components/*|*/app/*) exit 0 ;;
+  */specs/*.md | */HANDOFF.md) exit 0 ;;
+  */CHANGELOG.md | */README.md) exit 0 ;;
+  */pages/* | */components/* | */app/*) exit 0 ;;
 esac
 
 PROJ_HASH=$(echo "$PWD" | shasum | cut -c1-8)
 LOG="/tmp/claude-cb-${PROJ_HASH}.log"
-touch "$LOG" && chmod 600 "$LOG" 2>/dev/null
+touch "$LOG" && chmod 600 "$LOG" 2> /dev/null
 NOW=$(date +%s)
 WINDOW=600
 WARN=20
 BLOCK=40
 
 # Raise thresholds when a spec is actively in-progress — planned edits, not a loop
-if [ -d specs ] && grep -ql "Status.*in-progress" specs/*.md 2>/dev/null; then
+if [ -d specs ] && grep -ql "Status.*in-progress" specs/*.md 2> /dev/null; then
   WARN=50
   BLOCK=100
   # Further raise when multiple specs are in-progress (spec-work-all batch scenario)
-  SPEC_COUNT=$(grep -rl "Status.*in-progress" specs/*.md 2>/dev/null | wc -l | tr -d ' ')
+  SPEC_COUNT=$(grep -rl "Status.*in-progress" specs/*.md 2> /dev/null | wc -l | tr -d ' ')
   if [ "${SPEC_COUNT:-0}" -ge 2 ]; then
     WARN=100
     BLOCK=200
@@ -37,9 +37,9 @@ fi
 echo "$NOW $FILE_PATH" >> "$LOG"
 
 CUTOFF=$((NOW - WINDOW))
-awk -v c="$CUTOFF" '$1 >= c' "$LOG" > "${LOG}.tmp" 2>/dev/null && mv "${LOG}.tmp" "$LOG"
+awk -v c="$CUTOFF" '$1 >= c' "$LOG" > "${LOG}.tmp" 2> /dev/null && mv "${LOG}.tmp" "$LOG"
 
-COUNT=$(awk -v f="$FILE_PATH" 'NF>=2 && $2==f' "$LOG" 2>/dev/null | wc -l | tr -d ' ')
+COUNT=$(awk -v f="$FILE_PATH" 'NF>=2 && $2==f' "$LOG" 2> /dev/null | wc -l | tr -d ' ')
 
 if [ "$COUNT" -ge "$BLOCK" ]; then
   echo "⛔ CIRCUIT BREAKER TRIGGERED — Edit blocked." >&2
@@ -51,7 +51,7 @@ if [ "$COUNT" -ge "$BLOCK" ]; then
   # Show recent edit timestamps so Claude understands the pattern
   echo "Recent edit history (last 10):" >&2
   grep -F "$FILE_PATH" "$LOG" | tail -10 | while read -r ts _; do
-    DELTA=$(( NOW - ts ))
+    DELTA=$((NOW - ts))
     echo "  — ${DELTA}s ago" >&2
   done
   echo "" >&2

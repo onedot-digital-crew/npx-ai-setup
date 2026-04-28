@@ -14,7 +14,7 @@ _count_files() {
   local ext="$2"
   local count=0
   if [ -d "$dir" ]; then
-    count=$(find "$dir" -maxdepth 3 -name "$ext" 2>/dev/null | wc -l | tr -d ' ')
+    count=$(find "$dir" -maxdepth 3 -name "$ext" 2> /dev/null | wc -l | tr -d ' ')
   fi
   echo "$count"
 }
@@ -56,7 +56,7 @@ _count_liquid_files() {
   local dir="$1"
   local count=0
   if [ -d "$dir" ]; then
-    count=$(find "$dir" -maxdepth 2 -name "*.liquid" 2>/dev/null | wc -l | tr -d ' ')
+    count=$(find "$dir" -maxdepth 2 -name "*.liquid" 2> /dev/null | wc -l | tr -d ' ')
   fi
   echo "$count"
 }
@@ -65,7 +65,7 @@ _count_liquid_files() {
 _pkg_has() {
   local pkg_file="$1"
   local search="$2"
-  grep -q "$search" "$pkg_file" 2>/dev/null
+  grep -q "$search" "$pkg_file" 2> /dev/null
 }
 
 # Detection: nuxt-storyblok
@@ -75,7 +75,7 @@ _detect_nuxt_storyblok() {
   local has_nuxt_config=0
   local has_storyblok=0
 
-  if ls "${dir}/nuxt.config."* 1>/dev/null 2>&1; then
+  if ls "${dir}/nuxt.config."* 1> /dev/null 2>&1; then
     has_nuxt_config=1
   fi
 
@@ -129,7 +129,7 @@ _detect_laravel() {
 _detect_nextjs() {
   local dir="$1"
 
-  if ls "${dir}/next.config."* 1>/dev/null 2>&1; then
+  if ls "${dir}/next.config."* 1> /dev/null 2>&1; then
     return 0
   fi
 
@@ -144,7 +144,7 @@ _detect_nextjs() {
 _detect_nuxtjs() {
   local dir="$1"
 
-  if ls "${dir}/nuxt.config."* 1>/dev/null 2>&1; then
+  if ls "${dir}/nuxt.config."* 1> /dev/null 2>&1; then
     return 0
   fi
 

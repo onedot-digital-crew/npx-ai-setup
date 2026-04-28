@@ -16,43 +16,43 @@ show_cli_update_notice() {
 
   if [ -f "$cache" ]; then
     if [ "$(uname -s)" = "Darwin" ]; then
-      age=$(( $(date +%s) - $(stat -f %m "$cache" 2>/dev/null || echo 0) ))
+      age=$(($(date +%s) - $(stat -f %m "$cache" 2> /dev/null || echo 0)))
     else
-      age=$(( $(date +%s) - $(stat -c %Y "$cache" 2>/dev/null || echo 0) ))
+      age=$(($(date +%s) - $(stat -c %Y "$cache" 2> /dev/null || echo 0)))
     fi
     if [ "$age" -lt "$ttl" ]; then
       latest=$(tr -d '[:space:]' < "$cache")
     fi
   fi
 
-  if [ -z "$latest" ] && command -v npm >/dev/null 2>&1; then
+  if [ -z "$latest" ] && command -v npm > /dev/null 2>&1; then
     local timeout_cmd=""
-    if command -v timeout >/dev/null 2>&1; then
+    if command -v timeout > /dev/null 2>&1; then
       timeout_cmd="timeout 3"
-    elif command -v gtimeout >/dev/null 2>&1; then
+    elif command -v gtimeout > /dev/null 2>&1; then
       timeout_cmd="gtimeout 3"
     fi
     if [ -n "$timeout_cmd" ]; then
-      latest=$($timeout_cmd npm view @onedot/ai-setup version 2>/dev/null | head -n1 | tr -d '[:space:]')
+      latest=$($timeout_cmd npm view @onedot/ai-setup version 2> /dev/null | head -n1 | tr -d '[:space:]')
     else
-      latest=$(npm view @onedot/ai-setup version 2>/dev/null | head -n1 | tr -d '[:space:]')
+      latest=$(npm view @onedot/ai-setup version 2> /dev/null | head -n1 | tr -d '[:space:]')
     fi
     [ -n "$latest" ] && printf '%s\n' "$latest" > "$cache"
   fi
 
   # GitHub fallback for environments using github: installs without npm publish.
-  if [ -z "$latest" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-    latest=$(curl -fsSL --max-time 4 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/releases/latest" 2>/dev/null \
-      | jq -r '.tag_name // empty' \
-      | head -n1 \
-      | tr -d '[:space:]' \
-      | sed 's/^v//')
+  if [ -z "$latest" ] && command -v curl > /dev/null 2>&1 && command -v jq > /dev/null 2>&1; then
+    latest=$(curl -fsSL --max-time 4 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/releases/latest" 2> /dev/null |
+      jq -r '.tag_name // empty' |
+      head -n1 |
+      tr -d '[:space:]' |
+      sed 's/^v//')
     if [ -z "$latest" ]; then
-      latest=$(curl -fsSL --max-time 4 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/tags?per_page=1" 2>/dev/null \
-        | jq -r '.[0].name // empty' \
-        | head -n1 \
-        | tr -d '[:space:]' \
-        | sed 's/^v//')
+      latest=$(curl -fsSL --max-time 4 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/tags?per_page=1" 2> /dev/null |
+        jq -r '.[0].name // empty' |
+        head -n1 |
+        tr -d '[:space:]' |
+        sed 's/^v//')
     fi
     [ -n "$latest" ] && printf '%s\n' "$latest" > "$cache"
   fi
@@ -74,7 +74,7 @@ show_cli_update_notice() {
 # Called when .ai-setup.json exists. May exit the script.
 handle_version_check() {
   # Run Claude Code install method and version checks (same as fresh install)
-  if command -v claude &>/dev/null; then
+  if command -v claude &> /dev/null; then
     _check_claude_code_install_method
     _check_claude_code_version
   fi
@@ -108,7 +108,7 @@ handle_version_check() {
         ;;
       2)
         regen_ok=0
-        if command -v claude &>/dev/null; then
+        if command -v claude &> /dev/null; then
           if ask_regen_parts; then
             [ "${REGEN_SKILLS:-no}" = "yes" ] && run_skill_installation
             run_generation || regen_ok=$?
@@ -197,13 +197,20 @@ handle_version_check() {
 # Sets SCAN_* globals (changed/new/total counts per category) and SCAN_TOTAL_CHANGES.
 # Must be called before ask_update_parts() to provide change counts.
 scan_template_changes() {
-  SCAN_HOOKS_CHANGED=0; SCAN_HOOKS_NEW=0
-  SCAN_SETTINGS_CHANGED=0; SCAN_SETTINGS_NEW=0
-  SCAN_CLAUDE_MD_CHANGED=0; SCAN_CLAUDE_MD_NEW=0
-  SCAN_AGENTS_MD_CHANGED=0; SCAN_AGENTS_MD_NEW=0
-  SCAN_COMMANDS_CHANGED=0; SCAN_COMMANDS_NEW=0
-  SCAN_AGENTS_CHANGED=0; SCAN_AGENTS_NEW=0
-  SCAN_OTHER_CHANGED=0; SCAN_OTHER_NEW=0
+  SCAN_HOOKS_CHANGED=0
+  SCAN_HOOKS_NEW=0
+  SCAN_SETTINGS_CHANGED=0
+  SCAN_SETTINGS_NEW=0
+  SCAN_CLAUDE_MD_CHANGED=0
+  SCAN_CLAUDE_MD_NEW=0
+  SCAN_AGENTS_MD_CHANGED=0
+  SCAN_AGENTS_MD_NEW=0
+  SCAN_COMMANDS_CHANGED=0
+  SCAN_COMMANDS_NEW=0
+  SCAN_AGENTS_CHANGED=0
+  SCAN_AGENTS_NEW=0
+  SCAN_OTHER_CHANGED=0
+  SCAN_OTHER_NEW=0
   SCAN_TOTAL_CHANGES=0
 
   local all_mappings=("${TEMPLATE_MAP[@]}")
@@ -329,7 +336,7 @@ _process_update_mappings() {
 
     # Template differs — check if user modified the file
     local stored_cs
-    stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+    stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2> /dev/null)
 
     if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then
       # User modified — auto-overwrite with backup
@@ -401,13 +408,13 @@ run_smart_update() {
   tui_section "Template Analysis" "Scanning installed files against the current template set"
 
   # Normalize legacy skills layout in existing projects.
-  if command -v ensure_skills_alias >/dev/null 2>&1; then
+  if command -v ensure_skills_alias > /dev/null 2>&1; then
     ensure_skills_alias
   fi
-  command -v ensure_codex_skills_alias >/dev/null 2>&1 && ensure_codex_skills_alias
-  command -v ensure_gemini_skills_alias >/dev/null 2>&1 && ensure_gemini_skills_alias
-  command -v ensure_opencode_skills_alias >/dev/null 2>&1 && ensure_opencode_skills_alias
-  command -v install_skills >/dev/null 2>&1 && install_skills
+  command -v ensure_codex_skills_alias > /dev/null 2>&1 && ensure_codex_skills_alias
+  command -v ensure_gemini_skills_alias > /dev/null 2>&1 && ensure_gemini_skills_alias
+  command -v ensure_opencode_skills_alias > /dev/null 2>&1 && ensure_opencode_skills_alias
+  command -v install_skills > /dev/null 2>&1 && install_skills
 
   # Pre-scan templates to detect actual changes per category (skip if already scanned)
   if [ -z "${SCAN_TOTAL_CHANGES+x}" ]; then
@@ -451,7 +458,7 @@ run_smart_update() {
   install_context7
 
   # Warn when project settings contain misplaced CLAUDE_MEM_* keys
-  command -v scan_misplaced_mem_settings >/dev/null 2>&1 && scan_misplaced_mem_settings
+  command -v scan_misplaced_mem_settings > /dev/null 2>&1 && scan_misplaced_mem_settings
 
   # Only show summary when there was work to do
   if [ "$UPD_UPDATED" -gt 0 ] || [ "$UPD_NEW" -gt 0 ] || [ "$UPD_REMOVED" -gt 0 ] || [ "$UPD_BACKED_UP" -gt 0 ]; then
@@ -470,7 +477,7 @@ run_smart_update() {
 
   # Check context files and offer AI regeneration (skipped when called from same-version menu)
   if [ "$skip_regen" -eq 0 ]; then
-    if command -v claude &>/dev/null; then
+    if command -v claude &> /dev/null; then
       echo ""
       # Count existing .agents/context/ files (Steps 1-2)
       CTX_EXISTING=0
@@ -635,12 +642,12 @@ cleanup_obsolete_managed_files() {
   local -a old_targets=()
 
   [ -f .ai-setup.json ] || return 0
-  command -v jq >/dev/null 2>&1 || return 0
-  jq -e . .ai-setup.json >/dev/null 2>&1 || return 0
+  command -v jq > /dev/null 2>&1 || return 0
+  jq -e . .ai-setup.json > /dev/null 2>&1 || return 0
 
   while IFS= read -r target; do
     [ -n "$target" ] && old_targets+=("$target")
-  done < <(jq -r '.files | keys[]?' .ai-setup.json 2>/dev/null)
+  done < <(jq -r '.files | keys[]?' .ai-setup.json 2> /dev/null)
 
   [ "${#old_targets[@]}" -gt 0 ] || return 0
 
@@ -655,10 +662,10 @@ cleanup_obsolete_managed_files() {
       _sname=$(echo "$target" | sed 's|.claude/skills/\([^/]*\)/SKILL.md|\1|')
       if [ ! -f "$SCRIPT_DIR/templates/skills/$_sname/SKILL.template.md" ]; then
         # Clean the stale entry from .ai-setup.json so it won't be checked again
-        if command -v jq >/dev/null 2>&1; then
+        if command -v jq > /dev/null 2>&1; then
           local _tmp
-          _tmp=$(jq --arg f "$target" 'del(.files[$f])' .ai-setup.json 2>/dev/null) \
-            && echo "$_tmp" > .ai-setup.json
+          _tmp=$(jq --arg f "$target" 'del(.files[$f])' .ai-setup.json 2> /dev/null) &&
+            echo "$_tmp" > .ai-setup.json
         fi
         continue
       fi
@@ -673,7 +680,7 @@ cleanup_obsolete_managed_files() {
       continue
     fi
 
-    stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2>/dev/null)
+    stored_cs=$(jq -r --arg f "$target" '.files[$f] // empty' .ai-setup.json 2> /dev/null)
     cur_cs=$(compute_checksum "$target")
 
     if [ -n "$stored_cs" ] && [ "$stored_cs" != "$cur_cs" ]; then

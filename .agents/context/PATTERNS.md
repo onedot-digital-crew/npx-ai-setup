@@ -26,14 +26,14 @@ tests/           smoke.sh + integration.sh + claude-runtime.sh
 
 ## Module Layers
 
-| Layer | Modules | Responsibility |
-|-------|---------|---------------|
-| Entry | `bin/ai-setup.sh`, `bin/global-setup.sh` | CLI flow, arg parsing |
-| Core | `lib/core.sh`, `lib/json.sh`, `lib/_loader.sh` | TEMPLATE_MAP, JSON ops, module sourcing |
-| Install | `lib/setup.sh`, `lib/setup-skills.sh`, `lib/setup-compat.sh` | File install with checksum + smart-merge |
-| Update | `lib/update.sh`, `lib/migrate.sh`, `lib/migrations/*.sh` | Version detection, migrations |
-| Support | `lib/tui.sh`, `lib/process.sh`, `lib/detect.sh` | Terminal UI, parallel exec, stack detection |
-| Plugins | `lib/plugins.sh`, `lib/skills.sh`, `lib/boilerplate.sh` | Plugin/skill/boilerplate install |
+| Layer   | Modules                                                      | Responsibility                              |
+| ------- | ------------------------------------------------------------ | ------------------------------------------- |
+| Entry   | `bin/ai-setup.sh`, `bin/global-setup.sh`                     | CLI flow, arg parsing                       |
+| Core    | `lib/core.sh`, `lib/json.sh`, `lib/_loader.sh`               | TEMPLATE_MAP, JSON ops, module sourcing     |
+| Install | `lib/setup.sh`, `lib/setup-skills.sh`, `lib/setup-compat.sh` | File install with checksum + smart-merge    |
+| Update  | `lib/update.sh`, `lib/migrate.sh`, `lib/migrations/*.sh`     | Version detection, migrations               |
+| Support | `lib/tui.sh`, `lib/process.sh`, `lib/detect.sh`              | Terminal UI, parallel exec, stack detection |
+| Plugins | `lib/plugins.sh`, `lib/skills.sh`, `lib/boilerplate.sh`      | Plugin/skill/boilerplate install            |
 
 ## Patterns
 

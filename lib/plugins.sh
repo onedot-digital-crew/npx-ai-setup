@@ -22,9 +22,9 @@ install_claude_mem() {
     fi
 
     # Try CLI install (works if claude is available)
-    if command -v claude &>/dev/null; then
+    if command -v claude &> /dev/null; then
       echo "  🧠 Attempting Claude-Mem install via CLI..."
-      if claude plugin install claude-mem@thedotmack --scope project 2>/dev/null; then
+      if claude plugin install claude-mem@thedotmack --scope project 2> /dev/null; then
         echo "  ✅ Claude-Mem installed via CLI"
       else
         PENDING_PLUGINS="${PENDING_PLUGINS}claude-mem "
@@ -46,7 +46,7 @@ install_claude_mem_settings() {
   local target="${mem_home}/settings.json"
   local source_tpl="${TPL:-${SCRIPT_DIR:-.}/templates}/claude-mem/settings.json"
 
-  if ! mkdir -p "$mem_home" 2>/dev/null; then
+  if ! mkdir -p "$mem_home" 2> /dev/null; then
     echo "  ⚠️  Claude-Mem settings skipped: cannot create ${mem_home} (read-only home?)"
     return 0
   fi
@@ -64,10 +64,10 @@ install_claude_mem_settings() {
 
   # Merge missing keys from template without overwriting existing values.
   # jq: for each key in template, add to target only if absent.
-  if command -v jq >/dev/null 2>&1; then
+  if command -v jq > /dev/null 2>&1; then
     local tmp
     tmp=$(mktemp)
-    if jq --slurpfile tpl "$source_tpl" '$tpl[0] * . ' "$target" > "$tmp" 2>/dev/null; then
+    if jq --slurpfile tpl "$source_tpl" '$tpl[0] * . ' "$target" > "$tmp" 2> /dev/null; then
       mv "$tmp" "$target"
       echo "  🧠 Claude-Mem settings updated → ${target} (missing keys merged from template)"
     else
@@ -84,10 +84,10 @@ install_claude_mem_settings() {
 scan_misplaced_mem_settings() {
   local project_settings=".claude/settings.json"
   [ -f "$project_settings" ] || return 0
-  command -v jq >/dev/null 2>&1 || return 0
+  command -v jq > /dev/null 2>&1 || return 0
 
   local misplaced
-  misplaced=$(jq -r 'keys[] | select(startswith("CLAUDE_MEM_"))' "$project_settings" 2>/dev/null)
+  misplaced=$(jq -r 'keys[] | select(startswith("CLAUDE_MEM_"))' "$project_settings" 2> /dev/null)
   [ -z "$misplaced" ] && return 0
 
   echo ""
@@ -111,15 +111,15 @@ install_official_plugins() {
     IFS=':' read -r PNAME PDESC <<< "${OFFICIAL_PLUGINS[$i]}"
 
     # Check if already installed (plugin cache or .claude/settings.json)
-    if [ -d "${HOME}/.claude/plugins/cache/anthropics/${PNAME}" ] 2>/dev/null; then
+    if [ -d "${HOME}/.claude/plugins/cache/anthropics/${PNAME}" ] 2> /dev/null; then
       echo "  🔌 ${PNAME} already installed, skipping."
       continue
     fi
 
     # Try CLI install
-    if command -v claude &>/dev/null; then
+    if command -v claude &> /dev/null; then
       echo "  🔌 Installing ${PNAME}..."
-      if claude plugin install "${PNAME}" --scope project 2>/dev/null; then
+      if claude plugin install "${PNAME}" --scope project 2> /dev/null; then
         INSTALLED_PLUGINS="${INSTALLED_PLUGINS}${PNAME} "
         echo "  ✅ ${PNAME} installed"
       else
@@ -141,7 +141,7 @@ _mcp_add_entry() {
   entry="{\"mcpServers\":{\"${name}\":{\"command\":\"${cmd}\",\"args\":${args_json}}}}"
 
   if [ -f .mcp.json ]; then
-    if grep -q "\"${name}\"" .mcp.json 2>/dev/null; then
+    if grep -q "\"${name}\"" .mcp.json 2> /dev/null; then
       echo "  📚 ${name} already in .mcp.json, skipping."
       return 0
     fi
@@ -159,7 +159,7 @@ install_context7() {
   _mcp_add_entry "context7" "npx" '["-y","@upstash/context7-mcp"]'
 
   # Add Context7 rule to CLAUDE.md
-  if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2>/dev/null; then
+  if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2> /dev/null; then
     cat >> CLAUDE.md << 'CTX7EOF'
 
 ## Documentation Lookup
@@ -184,20 +184,20 @@ install_mcp_suggestions() {
   fi
 
   local mcp_list
-  mcp_list=$(bash "$mcp_suggest" "$stack_profile" 2>/dev/null) || mcp_list="[]"
+  mcp_list=$(bash "$mcp_suggest" "$stack_profile" 2> /dev/null) || mcp_list="[]"
 
   # If jq is not available, fall back to silent install
-  if ! command -v jq >/dev/null 2>&1 && ! command -v node >/dev/null 2>&1; then
+  if ! command -v jq > /dev/null 2>&1 && ! command -v node > /dev/null 2>&1; then
     install_context7
     return 0
   fi
 
   # Count entries
   local mcp_count
-  if command -v jq >/dev/null 2>&1; then
-    mcp_count=$(printf '%s' "$mcp_list" | jq 'length' 2>/dev/null || echo 0)
+  if command -v jq > /dev/null 2>&1; then
+    mcp_count=$(printf '%s' "$mcp_list" | jq 'length' 2> /dev/null || echo 0)
   else
-    mcp_count=$(node -e "process.stdout.write(String(JSON.parse(process.argv[1]).length))" "$mcp_list" 2>/dev/null || echo 0)
+    mcp_count=$(node -e "process.stdout.write(String(JSON.parse(process.argv[1]).length))" "$mcp_list" 2> /dev/null || echo 0)
   fi
 
   if [ "$mcp_count" -eq 0 ]; then
@@ -209,20 +209,20 @@ install_mcp_suggestions() {
   local idx=0
   while [ "$idx" -lt "$mcp_count" ]; do
     local mcp_name mcp_desc mcp_cmd mcp_args
-    if command -v jq >/dev/null 2>&1; then
+    if command -v jq > /dev/null 2>&1; then
       mcp_name=$(printf '%s' "$mcp_list" | jq -r ".[$idx].name")
       mcp_desc=$(printf '%s' "$mcp_list" | jq -r ".[$idx].description")
-      mcp_cmd=$(printf '%s' "$mcp_list"  | jq -r ".[$idx].command")
+      mcp_cmd=$(printf '%s' "$mcp_list" | jq -r ".[$idx].command")
       mcp_args=$(printf '%s' "$mcp_list" | jq -c ".[$idx].args")
     else
-      mcp_name=$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d[$idx].name)"        "$mcp_list" 2>/dev/null)
-      mcp_desc=$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d[$idx].description)" "$mcp_list" 2>/dev/null)
-      mcp_cmd=$(node -e  "const d=JSON.parse(process.argv[1]);process.stdout.write(d[$idx].command)"     "$mcp_list" 2>/dev/null)
-      mcp_args=$(node -e  "const d=JSON.parse(process.argv[1]);process.stdout.write(JSON.stringify(d[$idx].args))" "$mcp_list" 2>/dev/null)
+      mcp_name=$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d[$idx].name)" "$mcp_list" 2> /dev/null)
+      mcp_desc=$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d[$idx].description)" "$mcp_list" 2> /dev/null)
+      mcp_cmd=$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d[$idx].command)" "$mcp_list" 2> /dev/null)
+      mcp_args=$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(JSON.stringify(d[$idx].args))" "$mcp_list" 2> /dev/null)
     fi
 
     # Skip if already present in .mcp.json
-    if [ -f .mcp.json ] && grep -q "\"${mcp_name}\"" .mcp.json 2>/dev/null; then
+    if [ -f .mcp.json ] && grep -q "\"${mcp_name}\"" .mcp.json 2> /dev/null; then
       echo "  📚 ${mcp_name} already configured, skipping."
       idx=$((idx + 1))
       continue
@@ -231,7 +231,7 @@ install_mcp_suggestions() {
     if ask_yes_no_menu \
       "Add ${mcp_name} to .mcp.json?" \
       "Yes" "${mcp_name} — ${mcp_desc}" \
-      "No"  "Skip this MCP server" \
+      "No" "Skip this MCP server" \
       "yes"; then
       _mcp_add_entry "$mcp_name" "$mcp_cmd" "$mcp_args"
     else
@@ -242,8 +242,8 @@ install_mcp_suggestions() {
   done
 
   # Ensure the context7 CLAUDE.md rule is added after interactive install
-  if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2>/dev/null; then
-    if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2>/dev/null; then
+  if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2> /dev/null; then
+    if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2> /dev/null; then
       cat >> CLAUDE.md << 'CTX7EOF'
 
 ## Documentation Lookup
@@ -266,7 +266,7 @@ show_plugin_summary() {
           echo "     /plugin marketplace add thedotmack/claude-mem"
           echo "     /plugin install claude-mem"
           ;;
-*)
+        *)
           echo "     /plugin install ${PP}"
           ;;
       esac
@@ -353,7 +353,7 @@ show_next_steps() {
   printf '  %b/analyze%b           Deep codebase analysis → PATTERNS.md + AUDIT.md\n' "$TUI_CYAN" "$TUI_RESET"
   printf '  %b/review%b            Code review before committing\n' "$TUI_CYAN" "$TUI_RESET"
   printf '  %b/find-skills%b       Discover new skills from skills.sh\n' "$TUI_CYAN" "$TUI_RESET"
-  if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2>/dev/null; then
+  if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2> /dev/null; then
     printf '  %buse context7%b       Add to any prompt for up-to-date docs\n' "$TUI_CYAN" "$TUI_RESET"
   fi
   echo ""
@@ -382,16 +382,18 @@ show_update_next_steps() {
   echo ""
 
   # Check if any required CLI tools are missing or outdated — hint to run global-setup
-  if command -v _tool_installed &>/dev/null || declare -f _tool_installed &>/dev/null; then
+  if command -v _tool_installed &> /dev/null || declare -f _tool_installed &> /dev/null; then
     local tools_hint=false
     for entry in "${CLI_TOOL_REGISTRY[@]}"; do
       IFS=: read -r name pm package tier description <<< "$entry"
       [ "$tier" = "required" ] || continue
       if ! _tool_installed "$name"; then
-        tools_hint=true; break
+        tools_hint=true
+        break
       fi
       if _tool_outdated "$package" "$pm"; then
-        tools_hint=true; break
+        tools_hint=true
+        break
       fi
     done
     if [ "$tools_hint" = "true" ]; then

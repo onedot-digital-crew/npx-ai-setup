@@ -27,7 +27,7 @@ CLI_TOOL_REGISTRY=(
 
 # Returns 0 if a CLI tool is installed
 _tool_installed() {
-  command -v "$1" &>/dev/null
+  command -v "$1" &> /dev/null
 }
 
 # Returns 0 if tool can be installed (prerequisites met)
@@ -38,14 +38,14 @@ _tool_prereqs_met() {
 
   # cargo tools require cargo
   if [ "$pm" = "cargo" ]; then
-    command -v cargo &>/dev/null || return 1
+    command -v cargo &> /dev/null || return 1
   fi
 
   # Optional npm tools with API key guard
   if [ "$tier" = "optional" ] && [ "$pm" = "npm" ]; then
     case "$name" in
-      codex)  [ -n "${OPENAI_API_KEY:-}" ]  || return 1 ;;
-      gemini) [ -n "${GEMINI_API_KEY:-}" ]  || return 1 ;;
+      codex) [ -n "${OPENAI_API_KEY:-}" ] || return 1 ;;
+      gemini) [ -n "${GEMINI_API_KEY:-}" ] || return 1 ;;
     esac
   fi
 
@@ -61,7 +61,7 @@ _tool_outdated() {
 
   # npm outdated -g returns non-zero if package is outdated
   local outdated_output
-  outdated_output=$(npm outdated -g "$package" 2>/dev/null)
+  outdated_output=$(npm outdated -g "$package" 2> /dev/null)
   [ -n "$outdated_output" ] && return 0
   return 1
 }
@@ -82,8 +82,8 @@ _install_tool() {
       [ "${PIPESTATUS[0]}" -eq 0 ] && return 0 || return 1
       ;;
     brew)
-      if command -v brew &>/dev/null; then
-        brew install "$package" &>/dev/null && return 0 || return 1
+      if command -v brew &> /dev/null; then
+        brew install "$package" &> /dev/null && return 0 || return 1
       fi
       return 1
       ;;
@@ -103,30 +103,30 @@ _smoke_test() {
     rtk)
       # DB dir must exist on macOS before first use
       if [[ "$(uname -s)" == "Darwin" ]]; then
-        mkdir -p "${HOME}/Library/Application Support/rtk" 2>/dev/null || true
+        mkdir -p "${HOME}/Library/Application Support/rtk" 2> /dev/null || true
       fi
-      rtk gain &>/dev/null 2>&1
+      rtk gain &> /dev/null 2>&1
       ;;
     defuddle)
-      defuddle --version &>/dev/null 2>&1
+      defuddle --version &> /dev/null 2>&1
       ;;
     agent-browser)
-      agent-browser --version &>/dev/null 2>&1
+      agent-browser --version &> /dev/null 2>&1
       ;;
     playwright-cli)
-      playwright-cli --version &>/dev/null 2>&1
+      playwright-cli --version &> /dev/null 2>&1
       ;;
     jq)
-      echo '{}' | jq . &>/dev/null 2>&1
+      echo '{}' | jq . &> /dev/null 2>&1
       ;;
     gh)
-      gh --version &>/dev/null 2>&1 && gh auth status &>/dev/null 2>&1
+      gh --version &> /dev/null 2>&1 && gh auth status &> /dev/null 2>&1
       ;;
     delta)
-      delta --version &>/dev/null 2>&1
+      delta --version &> /dev/null 2>&1
       ;;
     *)
-      return 0  # no smoke test defined — pass silently
+      return 0 # no smoke test defined — pass silently
       ;;
   esac
 }
@@ -154,7 +154,7 @@ check_cli_tools() {
         missing_required=$((missing_required + 1))
       else
         # Check if prereqs are even possible
-        if _tool_prereqs_met "$name" "$pm" "$tier" 2>/dev/null; then
+        if _tool_prereqs_met "$name" "$pm" "$tier" 2> /dev/null; then
           tui_warn "$name (not installed - optional)"
         else
           tui_info "$name (skipped - prerequisites missing)"
@@ -199,7 +199,7 @@ install_cli_tools() {
     fi
 
     # Check prerequisites
-    if ! _tool_prereqs_met "$name" "$pm" "$tier" 2>/dev/null; then
+    if ! _tool_prereqs_met "$name" "$pm" "$tier" 2> /dev/null; then
       tui_info "$name (skipped - prerequisites missing)"
       skipped=$((skipped + 1))
       continue
@@ -211,24 +211,24 @@ install_cli_tools() {
       tui_spinner_stop ok "${name} installed"
       installed=$((installed + 1))
       # Post-install: agent-browser needs Chrome for Testing downloaded once
-      if [ "$name" = "agent-browser" ] && command -v agent-browser &>/dev/null; then
+      if [ "$name" = "agent-browser" ] && command -v agent-browser &> /dev/null; then
         tui_spinner_start "Downloading Chrome for Testing"
-        if agent-browser install &>/dev/null; then
+        if agent-browser install &> /dev/null; then
           tui_spinner_stop ok "Chrome for Testing ready"
         else
           tui_spinner_stop warn "Chrome for Testing skipped (non-fatal)"
         fi
       fi
       # Post-install: playwright-cli needs browser binaries + Claude Code skill
-      if [ "$name" = "playwright-cli" ] && command -v playwright-cli &>/dev/null; then
+      if [ "$name" = "playwright-cli" ] && command -v playwright-cli &> /dev/null; then
         tui_spinner_start "Downloading Playwright browser binaries"
-        if playwright-cli install --browser chromium &>/dev/null; then
+        if playwright-cli install --browser chromium &> /dev/null; then
           tui_spinner_stop ok "Playwright Chromium ready"
         else
           tui_spinner_stop warn "Playwright browser install skipped (non-fatal)"
         fi
         tui_spinner_start "Installing playwright-cli Claude Code skill"
-        if playwright-cli install --skills &>/dev/null; then
+        if playwright-cli install --skills &> /dev/null; then
           tui_spinner_stop ok "playwright-cli skill installed"
         else
           tui_spinner_stop warn "playwright-cli skill install skipped (non-fatal)"
@@ -250,10 +250,10 @@ install_cli_tools() {
 
   # RTK: ensure global hook is active (idempotent — safe to re-run)
   # Check hook file directly — rtk gain fails on empty DB, not only when unhooked
-  if command -v rtk &>/dev/null; then
+  if command -v rtk &> /dev/null; then
     if [ ! -f "${HOME}/.claude/hooks/rtk-rewrite.sh" ]; then
       tui_spinner_start "Activating RTK hooks"
-      if rtk init --global --auto-patch &>/dev/null; then
+      if rtk init --global --auto-patch &> /dev/null; then
         tui_spinner_stop ok "RTK hooks activated"
       else
         tui_spinner_stop warn "RTK hooks skipped (non-fatal)"
@@ -267,7 +267,7 @@ install_cli_tools() {
   for entry in "${CLI_TOOL_REGISTRY[@]}"; do
     IFS=: read -r name pm package tier description <<< "$entry"
     [ "$tier" = "required" ] || continue
-    command -v "$name" &>/dev/null || continue
+    command -v "$name" &> /dev/null || continue
     if _smoke_test "$name"; then
       tui_success "$name"
     else

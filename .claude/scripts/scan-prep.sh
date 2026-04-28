@@ -7,7 +7,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/prep-lib.sh"
 
 emit_section() {
-  local label="$1"; shift
+  local label="$1"
+  shift
   local items=("$@")
   if [[ ${#items[@]} -gt 0 ]]; then
     echo "=== ${label} (${#items[@]}) ==="
@@ -22,7 +23,7 @@ emit_section() {
 # ---------------------------------------------------------------------------
 run_npm() {
   local json
-  json=$(npm audit --json 2>/dev/null || true)
+  json=$(npm audit --json 2> /dev/null || true)
 
   if [[ -z "$json" ]]; then
     echo "ERROR: npm audit produced no output" >&2
@@ -79,7 +80,7 @@ if total == 0:
 # ---------------------------------------------------------------------------
 run_snyk() {
   local json
-  json=$(snyk test --json 2>/dev/null || true)
+  json=$(snyk test --json 2> /dev/null || true)
 
   local summary
   summary=$(echo "$json" | python3 -c '
@@ -126,7 +127,7 @@ if total == 0:
 run_pip() {
   if has pip-audit; then
     local out
-    out=$(pip-audit --format=json 2>/dev/null || true)
+    out=$(pip-audit --format=json 2> /dev/null || true)
 
     local summary
     summary=$(echo "$out" | python3 -c '
@@ -165,7 +166,7 @@ if total == 0:
     fi
 
   elif has safety; then
-    safety check --full-report 2>/dev/null || true
+    safety check --full-report 2> /dev/null || true
   else
     echo "ERROR: No Python scanner found. Install pip-audit: pip install pip-audit" >&2
     exit 1
@@ -182,7 +183,7 @@ run_bundler() {
   fi
 
   local raw
-  raw=$(bundle-audit check --update 2>/dev/null || true)
+  raw=$(bundle-audit check --update 2> /dev/null || true)
 
   local summary
   summary=$(echo "$raw" | awk '

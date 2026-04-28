@@ -11,9 +11,9 @@ STATE_FILE=".agents/context/.state"
 [ ! -f "$STATE_FILE" ] && exit 0
 
 # Age check — warn if last refresh >7 days ago
-STATE_AGE_DAYS=$(( ( $(date +%s) - $(stat -f %m "$STATE_FILE" 2>/dev/null || stat -c %Y "$STATE_FILE" 2>/dev/null || echo "0") ) / 86400 ))
+STATE_AGE_DAYS=$((($(date +%s) - $(stat -f %m "$STATE_FILE" 2> /dev/null || stat -c %Y "$STATE_FILE" 2> /dev/null || echo "0")) / 86400))
 AGE_WARNING=""
-[ "$STATE_AGE_DAYS" -gt 7 ] 2>/dev/null && AGE_WARNING="context is ${STATE_AGE_DAYS} days old"
+[ "$STATE_AGE_DAYS" -gt 7 ] 2> /dev/null && AGE_WARNING="context is ${STATE_AGE_DAYS} days old"
 
 # Read stored hashes
 STORED_PKG=""
@@ -31,20 +31,20 @@ CHANGED=""
 
 # Compare git commit count since last refresh (warn only at 5+ commits)
 # Skips gracefully in shallow clones where STORED_GIT may not exist in local history
-if [ -n "$STORED_GIT" ] && git cat-file -e "${STORED_GIT}^{commit}" 2>/dev/null; then
-  COMMIT_COUNT=$(git rev-list --count "${STORED_GIT}..HEAD" 2>/dev/null || echo "0")
-  [ "$COMMIT_COUNT" -ge 5 ] 2>/dev/null && CHANGED="${COMMIT_COUNT} commits since last context refresh"
+if [ -n "$STORED_GIT" ] && git cat-file -e "${STORED_GIT}^{commit}" 2> /dev/null; then
+  COMMIT_COUNT=$(git rev-list --count "${STORED_GIT}..HEAD" 2> /dev/null || echo "0")
+  [ "$COMMIT_COUNT" -ge 5 ] 2> /dev/null && CHANGED="${COMMIT_COUNT} commits since last context refresh"
 fi
 
 # Compare package.json
 if [ -n "$STORED_PKG" ] && [ -f "package.json" ]; then
-  CURRENT_PKG=$(cksum package.json 2>/dev/null | cut -d' ' -f1,2)
+  CURRENT_PKG=$(cksum package.json 2> /dev/null | cut -d' ' -f1,2)
   [ "$CURRENT_PKG" != "$STORED_PKG" ] && CHANGED="${CHANGED:+$CHANGED, }package.json"
 fi
 
 # Compare tsconfig.json
 if [ -n "$STORED_TSC" ] && [ -f "tsconfig.json" ]; then
-  CURRENT_TSC=$(cksum tsconfig.json 2>/dev/null | cut -d' ' -f1,2)
+  CURRENT_TSC=$(cksum tsconfig.json 2> /dev/null | cut -d' ' -f1,2)
   [ "$CURRENT_TSC" != "$STORED_TSC" ] && CHANGED="${CHANGED:+$CHANGED, }tsconfig.json"
 fi
 
@@ -52,9 +52,9 @@ fi
 GRAPH_WARNING=""
 GRAPH_FILE=".agents/context/graph.json"
 if [ -f "$GRAPH_FILE" ]; then
-  GRAPH_MTIME=$(stat -f %m "$GRAPH_FILE" 2>/dev/null || stat -c %Y "$GRAPH_FILE" 2>/dev/null || echo "0")
-  LAST_COMMIT_TIME=$(git log -1 --format=%ct 2>/dev/null || echo "0")
-  if [ "$LAST_COMMIT_TIME" -gt "$GRAPH_MTIME" ] 2>/dev/null; then
+  GRAPH_MTIME=$(stat -f %m "$GRAPH_FILE" 2> /dev/null || stat -c %Y "$GRAPH_FILE" 2> /dev/null || echo "0")
+  LAST_COMMIT_TIME=$(git log -1 --format=%ct 2> /dev/null || echo "0")
+  if [ "$LAST_COMMIT_TIME" -gt "$GRAPH_MTIME" ] 2> /dev/null; then
     GRAPH_WARNING="graph.json predates last commit"
   fi
 fi

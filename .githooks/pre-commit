@@ -3,7 +3,12 @@ set -euo pipefail
 
 if [ "${SKIP_PRECOMMIT_ROUTING:-0}" = "1" ]; then
   echo "Skipping routing check (SKIP_PRECOMMIT_ROUTING=1)."
-  exit 0
+else
+  bash tests/routing-check.sh
 fi
 
-bash tests/routing-check.sh
+if [ "${SKIP_PRECOMMIT_FORMAT:-0}" = "1" ]; then
+  echo "Skipping format check (SKIP_PRECOMMIT_FORMAT=1)."
+else
+  bash scripts/format-check.sh
+fi

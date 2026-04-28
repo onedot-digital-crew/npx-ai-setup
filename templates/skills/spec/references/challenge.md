@@ -10,6 +10,7 @@ After context-scan and before Phase 1d, present findings via one AskUserQuestion
 4. **6-month pain**: Where will this be hardest to maintain, debug, or extend?
 
 For each, show:
+
 ```
 Challenge: [concrete statement]
 Source: path/to/file:NN
@@ -17,6 +18,7 @@ Recommendation: [Weiter / Scope ändern / Ansatz überdenken]
 ```
 
 Then ask:
+
 ```
 AskUserQuestion({
   questions: [{

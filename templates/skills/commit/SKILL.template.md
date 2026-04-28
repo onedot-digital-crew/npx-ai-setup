@@ -17,9 +17,11 @@ Stages changes and creates a conventional commit message. Uses `commit-prep.sh` 
 ## Process
 
 1. **Run the prep script** (zero LLM tokens):
+
    ```
    ! bash .claude/scripts/commit-prep.sh
    ```
+
    - Output `NO_STAGED_CHANGES` → check unstaged changes via `git status --short`. If none → stop, inform user. If unstaged → continue to step 3.
    - Otherwise: output contains branch name, staged diff, staged stat, and recent commits.
 
@@ -39,6 +41,7 @@ Stages changes and creates a conventional commit message. Uses `commit-prep.sh` 
 - Session >30 tool calls: `> 💡 Naechster Schritt: /reflect — Learnings sichern`
 
 ## Rules
+
 - Never stage `.env`, credentials, or large binaries.
 - Never push — only commit locally.
 - Never skip hooks (`--no-verify`).

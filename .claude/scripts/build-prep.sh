@@ -20,7 +20,7 @@ detect_build_cmd() {
         const pref = ['build:ci','build:prod','build'];
         for (const k of pref) if (s[k]) { console.log(k); break; }
       } catch(e) {}
-    " 2>/dev/null || true)
+    " 2> /dev/null || true)
 
     if [[ -n "$scripts" ]]; then
       echo "npm run $scripts"
@@ -41,7 +41,7 @@ detect_build_cmd() {
   fi
 
   # Makefile with build target
-  if [[ -f "Makefile" ]] && grep -q "^build:" Makefile 2>/dev/null; then
+  if [[ -f "Makefile" ]] && grep -q "^build:" Makefile 2> /dev/null; then
     echo "make build"
     return
   fi
@@ -62,9 +62,9 @@ filter_errors() {
   local input="$1"
 
   # Keep lines with error keywords, limit to first 60 lines
-  echo "$input" | grep -E '(error TS|Error:|error:|ERROR|FAILED|failed|✗|× |SyntaxError|TypeError|Cannot find|does not exist|is not|has no)' \
-    | head -60 \
-    || echo "$input" | tail -40
+  echo "$input" | grep -E '(error TS|Error:|error:|ERROR|FAILED|failed|✗|× |SyntaxError|TypeError|Cannot find|does not exist|is not|has no)' |
+    head -60 ||
+    echo "$input" | tail -40
 }
 
 # ---------------------------------------------------------------------------

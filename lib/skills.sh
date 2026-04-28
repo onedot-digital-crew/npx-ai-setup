@@ -4,8 +4,8 @@
 
 # Detect timeout command availability (used by install_skill)
 TIMEOUT_CMD=""
-command -v timeout &>/dev/null && TIMEOUT_CMD="timeout 30"
-command -v gtimeout &>/dev/null && TIMEOUT_CMD="gtimeout 30"
+command -v timeout &> /dev/null && TIMEOUT_CMD="timeout 30"
+command -v gtimeout &> /dev/null && TIMEOUT_CMD="gtimeout 30"
 
 # Install bundled local skill template as fallback when registry/network install is unavailable.
 # Returns 0 when fallback was installed, 1 when no local template exists.
@@ -36,7 +36,7 @@ install_skill() {
   fi
 
   tui_spinner_start "Installing skill ${sid}"
-  if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y </dev/null >/dev/null 2>&1; then
+  if ${TIMEOUT_CMD:-} npx -y skills@latest add "$sid" --agent claude-code --agent github-copilot -y < /dev/null > /dev/null 2>&1; then
     tui_spinner_stop ok "${sid}"
     return 0
   else

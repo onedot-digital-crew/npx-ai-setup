@@ -7,8 +7,8 @@ BOILERPLATE_ORG="onedot-digital-crew"
 
 # Check if gh CLI is available and authenticated
 _gh_available() {
-  command -v gh >/dev/null 2>&1 || return 1
-  gh auth status >/dev/null 2>&1 || return 1
+  command -v gh > /dev/null 2>&1 || return 1
+  gh auth status > /dev/null 2>&1 || return 1
   return 0
 }
 
@@ -17,15 +17,15 @@ _gh_available() {
 _is_current_repo_boilerplate() {
   local system="$1"
   local repo_name
-  repo_name=$(get_boilerplate_repo "$system" 2>/dev/null) || return 1
+  repo_name=$(get_boilerplate_repo "$system" 2> /dev/null) || return 1
 
   local repo_root=""
   local current_dir=""
   local origin_url=""
 
-  if command -v git >/dev/null 2>&1; then
-    repo_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
-    origin_url=$(git remote get-url origin 2>/dev/null || true)
+  if command -v git > /dev/null 2>&1; then
+    repo_root=$(git rev-parse --show-toplevel 2> /dev/null || true)
+    origin_url=$(git remote get-url origin 2> /dev/null || true)
   fi
 
   if [ -n "$repo_root" ]; then
@@ -54,7 +54,7 @@ _gh_fetch_file() {
   local local_target="$3"
   local content
 
-  content=$(gh api "repos/${repo}/contents/${remote_path}" --jq '.content' 2>/dev/null) || return 1
+  content=$(gh api "repos/${repo}/contents/${remote_path}" --jq '.content' 2> /dev/null) || return 1
   [ -z "$content" ] && return 1
 
   mkdir -p "$(dirname "$local_target")"
@@ -62,11 +62,11 @@ _gh_fetch_file() {
   # Decode base64 (macOS: base64 -D, GNU: base64 -d) into temp file
   local tmp
   tmp=$(mktemp)
-  if echo "$content" | base64 -D > "$tmp" 2>/dev/null || echo "$content" | base64 -d > "$tmp" 2>/dev/null; then
+  if echo "$content" | base64 -D > "$tmp" 2> /dev/null || echo "$content" | base64 -d > "$tmp" 2> /dev/null; then
     # Skip if identical to existing file
-    if [ -f "$local_target" ] && diff -q "$tmp" "$local_target" >/dev/null 2>&1; then
+    if [ -f "$local_target" ] && diff -q "$tmp" "$local_target" > /dev/null 2>&1; then
       rm -f "$tmp"
-      return 2  # unchanged
+      return 2 # unchanged
     fi
     mv "$tmp" "$local_target"
     return 0
@@ -82,7 +82,7 @@ _gh_fetch_file() {
 _gh_list_dir() {
   local repo="$1"
   local remote_path="$2"
-  gh api "repos/${repo}/contents/${remote_path}" --jq '.[] | select(.type=="dir") | .path' 2>/dev/null || true
+  gh api "repos/${repo}/contents/${remote_path}" --jq '.[] | select(.type=="dir") | .path' 2> /dev/null || true
 }
 
 # Merge a remote .mcp.json into the local .mcp.json.
@@ -137,16 +137,16 @@ pull_boilerplate_files() {
 
   # Detect stack profile for skill filtering (empty = filter disabled)
   local _stack_profile=""
-  if [ "${FORCE_ALL_SKILLS:-0}" != "1" ] && [ -n "${SCRIPT_DIR:-}" ] && \
-     [ -f "${SCRIPT_DIR}/lib/detect-stack.sh" ]; then
-    _stack_profile=$(bash "${SCRIPT_DIR}/lib/detect-stack.sh" "$PWD" 2>/dev/null \
-      | grep '^stack_profile=' | cut -d= -f2 || true)
+  if [ "${FORCE_ALL_SKILLS:-0}" != "1" ] && [ -n "${SCRIPT_DIR:-}" ] &&
+    [ -f "${SCRIPT_DIR}/lib/detect-stack.sh" ]; then
+    _stack_profile=$(bash "${SCRIPT_DIR}/lib/detect-stack.sh" "$PWD" 2> /dev/null |
+      grep '^stack_profile=' | cut -d= -f2 || true)
   fi
 
   if [ "$skip_skills" != "--skip-skills" ]; then
     # --- Skills: .claude/skills/*/SKILL.md ---
     local skill_dirs
-    skill_dirs=$(_gh_list_dir "$repo" ".claude/skills" 2>/dev/null | grep -v '^$' || true)
+    skill_dirs=$(_gh_list_dir "$repo" ".claude/skills" 2> /dev/null | grep -v '^$' || true)
 
     if [ -n "$skill_dirs" ]; then
       while IFS= read -r skill_dir; do
@@ -193,7 +193,7 @@ pull_boilerplate_files() {
 
   # --- Rules: .claude/rules/<system>*.md ---
   local rules_listing
-  rules_listing=$(gh api "repos/${repo}/contents/.claude/rules" --jq '.[].name' 2>/dev/null || true)
+  rules_listing=$(gh api "repos/${repo}/contents/.claude/rules" --jq '.[].name' 2> /dev/null || true)
 
   if [ -n "$rules_listing" ]; then
     while IFS= read -r rule_file; do
@@ -216,7 +216,7 @@ pull_boilerplate_files() {
 
   # --- Agents: .claude/agents/*.md ---
   local agents_listing
-  agents_listing=$(gh api "repos/${repo}/contents/.claude/agents" --jq '.[].name' 2>/dev/null || true)
+  agents_listing=$(gh api "repos/${repo}/contents/.claude/agents" --jq '.[].name' 2> /dev/null || true)
 
   if [ -n "$agents_listing" ]; then
     mkdir -p .claude/agents
@@ -273,9 +273,9 @@ _show_manual_instructions() {
 # Prints the system name (shopify/shopware/nuxt/next/storyblok) or empty string.
 detect_installed_system() {
   # Primary: read from metadata
-  if [ -f .ai-setup.json ] && command -v jq >/dev/null 2>&1; then
+  if [ -f .ai-setup.json ] && command -v jq > /dev/null 2>&1; then
     local sys
-    sys=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+    sys=$(jq -r '.system // empty' .ai-setup.json 2> /dev/null)
     if [ -n "$sys" ] && [ "$sys" != "null" ]; then
       echo "$sys"
       return 0
@@ -286,7 +286,7 @@ detect_installed_system() {
   local rules_dir=".claude/rules"
   if [ -d "$rules_dir" ]; then
     for system_key in shopify shopware nuxt-storyblok nuxt next storyblok; do
-      if ls "${rules_dir}/${system_key}"*.md 2>/dev/null | grep -q .; then
+      if ls "${rules_dir}/${system_key}"*.md 2> /dev/null | grep -q .; then
         echo "$system_key"
         return 0
       fi
@@ -317,7 +317,7 @@ sync_boilerplate() {
     return 0
   fi
 
-  if ! get_boilerplate_repo "$system" >/dev/null 2>&1; then
+  if ! get_boilerplate_repo "$system" > /dev/null 2>&1; then
     return 0
   fi
 
@@ -341,7 +341,7 @@ has_system_config() {
   local rules_dir=".claude/rules"
   if [ -d "$rules_dir" ]; then
     for system_key in shopify shopware nuxt-storyblok nuxt next storyblok; do
-      ls "${rules_dir}/${system_key}"*.md 2>/dev/null | grep -q . && return 0
+      ls "${rules_dir}/${system_key}"*.md 2> /dev/null | grep -q . && return 0
     done
   fi
   return 1
@@ -359,22 +359,22 @@ select_boilerplate_system() {
   fi
 
   # Auto-detect framework from config files
-  if ls nuxt.config.* 1>/dev/null 2>&1; then
+  if ls nuxt.config.* 1> /dev/null 2>&1; then
     # Nuxt + Storyblok → combined boilerplate; Nuxt-only → no boilerplate repo yet
-    if [ -f "package.json" ] && grep -q '"@storyblok/' package.json 2>/dev/null; then
+    if [ -f "package.json" ] && grep -q '"@storyblok/' package.json 2> /dev/null; then
       SELECTED_SYSTEM="nuxt-storyblok"
     else
       SELECTED_SYSTEM="nuxt"
       tui_info "Detected framework: nuxt (no boilerplate pull — nuxt-only repo not yet available)"
       return 0
     fi
-  elif ls next.config.* 1>/dev/null 2>&1; then
+  elif ls next.config.* 1> /dev/null 2>&1; then
     SELECTED_SYSTEM="next"
-  elif [ -f "theme.liquid" ] || ls shopify.* 1>/dev/null 2>&1 || { [ -d "sections" ] && [ -d "snippets" ]; }; then
+  elif [ -f "theme.liquid" ] || ls shopify.* 1> /dev/null 2>&1 || { [ -d "sections" ] && [ -d "snippets" ]; }; then
     SELECTED_SYSTEM="shopify"
-  elif [ -f "shopware.yaml" ] || [ -f "config/packages/shopware.yaml" ] || \
-       ([ -f "composer.json" ] && grep -q '"shopware/' composer.json 2>/dev/null) || \
-       ([ -f "bin/console" ] && [ -d "src" ]); then
+  elif [ -f "shopware.yaml" ] || [ -f "config/packages/shopware.yaml" ] ||
+    ([ -f "composer.json" ] && grep -q '"shopware/' composer.json 2> /dev/null) ||
+    ([ -f "bin/console" ] && [ -d "src" ]); then
     SELECTED_SYSTEM="shopware"
   fi
 

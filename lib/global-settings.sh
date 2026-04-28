@@ -37,12 +37,12 @@ _gs_json_merge_permissions() {
   local target="$1"
   local broad_opt_in="$2"
 
-  if ! command -v node &>/dev/null; then
+  if ! command -v node &> /dev/null; then
     tui_warn "~/.claude/settings.json skipped merge (node not found)"
     return 1
   fi
 
-  node - "$target" "$broad_opt_in" <<'NODESCRIPT'
+  node - "$target" "$broad_opt_in" << 'NODESCRIPT'
 const fs = require('fs');
 const path = process.argv[2];
 const broadOptIn = process.argv[3] === '1';
@@ -85,11 +85,12 @@ _install_global_settings_json() {
 
   # Build the baseline settings object
   local base_settings
-  base_settings=$(cat <<EOF
+  base_settings=$(
+    cat << EOF
 {
   "_governanceProfile": "global-baseline",
   "_governanceOwnership": "Global settings stay workstation-local. Broad shell grants are optional operator choices.",
-  "_governanceOptionalBroadShellGrants": $( [ "$broad_opt_in" = "1" ] && echo true || echo false ),
+  "_governanceOptionalBroadShellGrants": $([ "$broad_opt_in" = "1" ] && echo true || echo false),
   "permissions": {
     "allow": [
       "Bash(rtk:*)"
@@ -99,12 +100,12 @@ _install_global_settings_json() {
   "statusLine": "{cwd} | {gitBranch} | claude"
 }
 EOF
-)
+  )
 
   if [ ! -f "$target" ]; then
     echo "$base_settings" > "$target"
     if [ "$broad_opt_in" = "1" ]; then
-      _gs_json_merge_permissions "$target" "$broad_opt_in" >/dev/null || true
+      _gs_json_merge_permissions "$target" "$broad_opt_in" > /dev/null || true
       tui_success "~/.claude/settings.json created with optional broad shell grants"
     else
       tui_success "~/.claude/settings.json created"
@@ -173,13 +174,13 @@ _install_statusline_config() {
     return 0
   fi
 
-  if grep -q '"statusLine"' "$target" 2>/dev/null; then
+  if grep -q '"statusLine"' "$target" 2> /dev/null; then
     tui_info "statusLine config already set, kept"
     return 0
   fi
 
-  if command -v node &>/dev/null; then
-    node - "$target" <<'NODESCRIPT'
+  if command -v node &> /dev/null; then
+    node - "$target" << 'NODESCRIPT'
 const fs = require('fs');
 const path = process.argv[2];
 let cfg = {};
@@ -210,25 +211,25 @@ check_global_settings() {
     fi
   }
 
-  _check_item "~/.claude/settings.json"           "${CLAUDE_HOME}/settings.json"
-  _check_item "~/.claude/commands/commit.md"       "${CLAUDE_HOME}/commands/commit.md"
-  _check_item "~/.claude/commands/pr.md"           "${CLAUDE_HOME}/commands/pr.md"
-  _check_item "~/.claude/rules/general.md"         "${CLAUDE_HOME}/rules/general.md"
-  _check_item "~/.claude/rules/git.md"             "${CLAUDE_HOME}/rules/git.md"
+  _check_item "~/.claude/settings.json" "${CLAUDE_HOME}/settings.json"
+  _check_item "~/.claude/commands/commit.md" "${CLAUDE_HOME}/commands/commit.md"
+  _check_item "~/.claude/commands/pr.md" "${CLAUDE_HOME}/commands/pr.md"
+  _check_item "~/.claude/rules/general.md" "${CLAUDE_HOME}/rules/general.md"
+  _check_item "~/.claude/rules/git.md" "${CLAUDE_HOME}/rules/git.md"
 
   # Check permissions in settings.json
   if [ -f "${CLAUDE_HOME}/settings.json" ]; then
-    if grep -q '"Bash(rtk:\*)"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
+    if grep -q '"Bash(rtk:\*)"' "${CLAUDE_HOME}/settings.json" 2> /dev/null; then
       tui_success "global baseline permissions in settings.json"
     else
       tui_warn "global baseline permissions not set in settings.json"
     fi
-    if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"global-baseline"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
+    if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"global-baseline"' "${CLAUDE_HOME}/settings.json" 2> /dev/null; then
       tui_success "global governance metadata"
     else
       tui_warn "global governance metadata missing"
     fi
-    if grep -q '"statusLine"' "${CLAUDE_HOME}/settings.json" 2>/dev/null; then
+    if grep -q '"statusLine"' "${CLAUDE_HOME}/settings.json" 2> /dev/null; then
       tui_success "statusLine config"
     else
       tui_warn "statusLine not configured"
@@ -241,12 +242,12 @@ check_global_settings() {
 # Configures delta as git pager/diff tool — idempotent, only when delta is installed
 # ==============================================================================
 _install_delta_config() {
-  if ! command -v delta &>/dev/null; then
+  if ! command -v delta &> /dev/null; then
     return 0
   fi
 
   local already_set
-  already_set=$(git config --global core.pager 2>/dev/null)
+  already_set=$(git config --global core.pager 2> /dev/null)
   if [ "$already_set" = "delta" ]; then
     tui_info "delta git config already set, kept"
     return 0

@@ -30,7 +30,7 @@ _lookup_hook_type() {
 
   [ -z "$settings" ] && echo "Unknown" && return
 
-  if command -v jq >/dev/null 2>&1; then
+  if command -v jq > /dev/null 2>&1; then
     local result
     result=$(jq -r --arg hook "$hook_base" '
       .hooks // {} | to_entries[] |
@@ -38,10 +38,10 @@ _lookup_hook_type() {
       .value[] | (.hooks // [])[] |
       select(.command != null and (.command | test($hook))) |
       $type
-    ' "$settings" 2>/dev/null | head -1)
+    ' "$settings" 2> /dev/null | head -1)
     echo "${result:-Unknown}"
-  elif command -v python3 >/dev/null 2>&1; then
-    python3 - "$settings" "$hook_base" <<'PYEOF'
+  elif command -v python3 > /dev/null 2>&1; then
+    python3 - "$settings" "$hook_base" << 'PYEOF'
 import json, sys
 settings_path, hook_name = sys.argv[1], sys.argv[2]
 try:
@@ -97,7 +97,7 @@ _estimate_output_tokens() {
 
     # Skip comments and blank lines
     case "$line" in
-      \#*|"") continue ;;
+      \#* | "") continue ;;
     esac
 
     # Detect heredoc start going to stdout (not >&2)
@@ -116,14 +116,14 @@ _estimate_output_tokens() {
 
     # Detect multiline variable assignment: varname='...\n  (no closing quote)
     case "$line" in
-      *">"*) : ;;  # skip redirects
+      *">"*) : ;; # skip redirects
       *"="*"'"*)
         # var='content without closing quote on this line
         # Strip leading varname=' prefix to get content
-        after_eq="${line#*=}"          # everything after first =
-        stripped="${after_eq#\'}"      # strip leading single quote
+        after_eq="${line#*=}"     # everything after first =
+        stripped="${after_eq#\'}" # strip leading single quote
         case "$stripped" in
-          *"'"*) : ;;  # closed on same line
+          *"'"*) : ;; # closed on same line
           *)
             in_multiline_var=1
             output_chars=$((output_chars + ${#stripped} + 1))
@@ -150,7 +150,7 @@ _estimate_output_tokens() {
 
     # Count jq -n / jq -Rs output (JSON objects going to stdout)
     case "$line" in
-      *"jq -n"*|*"jq -Rs"*)
+      *"jq -n"* | *"jq -Rs"*)
         output_chars=$((output_chars + 80))
         ;;
     esac
@@ -159,13 +159,13 @@ _estimate_output_tokens() {
   # Token floor: 10 (minimum overhead per hook invocation)
   [ "$output_chars" -lt 40 ] && output_chars=40
 
-  echo $(( (output_chars + 3) / 4 ))
+  echo $(((output_chars + 3) / 4))
 }
 
 # ── Cap lookup ────────────────────────────────────────────────────────────────
 _get_cap() {
   case "$1" in
-    SessionStart|PreCompact) echo "$CAP_ONE_SHOT" ;;
+    SessionStart | PreCompact) echo "$CAP_ONE_SHOT" ;;
     *) echo "$CAP_PER_TURN" ;;
   esac
 }
@@ -176,7 +176,7 @@ if [ $# -gt 0 ]; then
   HOOK_DIRS+=("$1")
 else
   [ -d "templates/claude/hooks" ] && HOOK_DIRS+=("templates/claude/hooks")
-  [ -d ".claude/hooks" ]          && HOOK_DIRS+=(".claude/hooks")
+  [ -d ".claude/hooks" ] && HOOK_DIRS+=(".claude/hooks")
 fi
 
 if [ "${#HOOK_DIRS[@]}" -eq 0 ]; then

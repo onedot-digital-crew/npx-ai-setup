@@ -10,6 +10,30 @@ permissions:
   contents: read
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install shfmt
+        run: |
+          sudo curl -sSL -o /usr/local/bin/shfmt \
+            https://github.com/mvdan/sh/releases/download/v3.13.1/shfmt_v3.13.1_linux_amd64
+          sudo chmod +x /usr/local/bin/shfmt
+          shfmt --version
+
+      - name: Install prettier
+        run: npm ci || npm install
+
+      - name: Run format check
+        run: bash scripts/format-check.sh
+
   smoke:
     runs-on: ubuntu-latest
     steps:

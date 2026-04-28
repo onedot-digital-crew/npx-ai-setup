@@ -12,58 +12,60 @@ sections:
 
 ## Hotspots
 
-| File | Lines | Risk |
-|------|-------|------|
-| `lib/tui.sh` | ~1014 | Terminal UI, spinner, escape parsing |
-| `lib/update.sh` | ~522 | Version detection, template diff, direct jq without fallback |
-| `lib/setup.sh` | ~348 | Checksum updates, smart-merge, JSON fallbacks |
-| `lib/generate.sh` | ~320 | Parallel Claude calls, set+e scope, retry logic |
-| `lib/setup-skills.sh` | ~322 | Skill symlinks, eval reference pattern |
+| File                  | Lines | Risk                                                         |
+| --------------------- | ----- | ------------------------------------------------------------ |
+| `lib/tui.sh`          | ~1014 | Terminal UI, spinner, escape parsing                         |
+| `lib/update.sh`       | ~522  | Version detection, template diff, direct jq without fallback |
+| `lib/setup.sh`        | ~348  | Checksum updates, smart-merge, JSON fallbacks                |
+| `lib/generate.sh`     | ~320  | Parallel Claude calls, set+e scope, retry logic              |
+| `lib/setup-skills.sh` | ~322  | Skill symlinks, eval reference pattern                       |
 
 ## Findings
 
 ### Critical
+
 None.
 
 ### High
+
 None. All previously reported HIGH issues resolved — see Fixed section.
 
 ### Medium
 
-| # | File | Issue |
-|---|------|-------|
-| S5 | `lib/setup-skills.sh:168,172,177` | `eval "$ref=..."` for by-ref counter — bash 3.2 workaround; caller-controlled but auditable smell |
-| R2 | `lib/generate.sh:22` | `set +e` in `run_generation()` — intentional for bash 3.2 background jobs, but `regen_failed` tracking incomplete for some subshell exits |
-| R3 | `lib/update.sh:332,601-639` | Direct `jq` calls without Node.js fallback; inconsistent with `lib/json.sh` abstraction; silent failure when jq absent |
-| R4 | `circuit-breaker.sh`, `tool-redirect.sh`, `protect-files.sh`, `post-edit-lint.sh`, `graph-context.sh`, `update-check.sh` | No `command -v jq` guard — hooks silently exit or produce no output when jq absent |
-| R5 | `lib/update.sh:13` | `/tmp` hardcoded; use `${TMPDIR:-/tmp}` for cross-platform correctness |
-| R7 | `lib/migrate.sh:73,183`, `lib/boilerplate.sh:64,93`, `lib/setup.sh:573,764`, `.claude/scripts/build-summary.sh:143` | `mktemp` without signal trap — temp files leak on SIGINT/SIGTERM |
+| #   | File                                                                                                                     | Issue                                                                                                                                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| S5  | `lib/setup-skills.sh:168,172,177`                                                                                        | `eval "$ref=..."` for by-ref counter — bash 3.2 workaround; caller-controlled but auditable smell                                         |
+| R2  | `lib/generate.sh:22`                                                                                                     | `set +e` in `run_generation()` — intentional for bash 3.2 background jobs, but `regen_failed` tracking incomplete for some subshell exits |
+| R3  | `lib/update.sh:332,601-639`                                                                                              | Direct `jq` calls without Node.js fallback; inconsistent with `lib/json.sh` abstraction; silent failure when jq absent                    |
+| R4  | `circuit-breaker.sh`, `tool-redirect.sh`, `protect-files.sh`, `post-edit-lint.sh`, `graph-context.sh`, `update-check.sh` | No `command -v jq` guard — hooks silently exit or produce no output when jq absent                                                        |
+| R5  | `lib/update.sh:13`                                                                                                       | `/tmp` hardcoded; use `${TMPDIR:-/tmp}` for cross-platform correctness                                                                    |
+| R7  | `lib/migrate.sh:73,183`, `lib/boilerplate.sh:64,93`, `lib/setup.sh:573,764`, `.claude/scripts/build-summary.sh:143`      | `mktemp` without signal trap — temp files leak on SIGINT/SIGTERM                                                                          |
 
 ### Low / Code Quality
 
-| # | Pattern | Affected |
-|---|---------|---------|
-| Q1 | `2>/dev/null` overuse (40+ locations) | Nearly all lib/ and hooks/ |
-| Q2 | Inconsistent error reporting (`tui_error` vs bare `echo`) | lib/core.sh, generate.sh, boilerplate.sh |
-| Q3 | Duplicated package.json detection | `.claude/scripts/build-prep.sh` + `lint-prep.sh` |
-| Q4 | Duplicated `ensure_*_alias` functions | `lib/setup-skills.sh` |
-| Q5 | Duplicated Node.js JSON fallback | `lib/global-settings.sh` + `lib/json.sh` |
+| #   | Pattern                                                   | Affected                                         |
+| --- | --------------------------------------------------------- | ------------------------------------------------ |
+| Q1  | `2>/dev/null` overuse (40+ locations)                     | Nearly all lib/ and hooks/                       |
+| Q2  | Inconsistent error reporting (`tui_error` vs bare `echo`) | lib/core.sh, generate.sh, boilerplate.sh         |
+| Q3  | Duplicated package.json detection                         | `.claude/scripts/build-prep.sh` + `lint-prep.sh` |
+| Q4  | Duplicated `ensure_*_alias` functions                     | `lib/setup-skills.sh`                            |
+| Q5  | Duplicated Node.js JSON fallback                          | `lib/global-settings.sh` + `lib/json.sh`         |
 
 ## Fixed (vs. previous audit)
 
-| # | Issue | Verified |
-|---|-------|---------|
-| S1 | json.sh shell-interpolation injection | Fixed — Node args via `process.argv`, no interpolation in JS string |
-| S2 | notify.sh unescaped vars | Fixed |
-| S3 | storyblok-dump.ts API token in URL | File removed |
-| S6 | circuit-breaker log world-readable | Fixed — `chmod 600` at `circuit-breaker.sh:16` |
-| R1 | npm exit code unchecked (cli-tools.sh) | Fixed — `PIPESTATUS[0]` check at `cli-tools.sh:78` |
-| R6 | transcript-ingest no rate limits | Fixed — `MAX_MEMORY_FILES=50`, `MAX_MEMORY_SIZE_KB=200` |
-| C1 | `_semver_gt()` return inverted | Fixed — `core.sh:87-96` returns correctly |
-| C2 | `is_binary` logic inverted | Not a bug — `grep -qI ""` returns 0 for text, logic correct |
-| C3 | protect-files.sh substring `env` | Fixed |
-| C4 | Backtick sanitization after heredoc | Fixed |
-| C5 | context-loader.sh YAML 2-space hardcoded | File removed (Spec 636) |
+| #   | Issue                                    | Verified                                                            |
+| --- | ---------------------------------------- | ------------------------------------------------------------------- |
+| S1  | json.sh shell-interpolation injection    | Fixed — Node args via `process.argv`, no interpolation in JS string |
+| S2  | notify.sh unescaped vars                 | Fixed                                                               |
+| S3  | storyblok-dump.ts API token in URL       | File removed                                                        |
+| S6  | circuit-breaker log world-readable       | Fixed — `chmod 600` at `circuit-breaker.sh:16`                      |
+| R1  | npm exit code unchecked (cli-tools.sh)   | Fixed — `PIPESTATUS[0]` check at `cli-tools.sh:78`                  |
+| R6  | transcript-ingest no rate limits         | Fixed — `MAX_MEMORY_FILES=50`, `MAX_MEMORY_SIZE_KB=200`             |
+| C1  | `_semver_gt()` return inverted           | Fixed — `core.sh:87-96` returns correctly                           |
+| C2  | `is_binary` logic inverted               | Not a bug — `grep -qI ""` returns 0 for text, logic correct         |
+| C3  | protect-files.sh substring `env`         | Fixed                                                               |
+| C4  | Backtick sanitization after heredoc      | Fixed                                                               |
+| C5  | context-loader.sh YAML 2-space hardcoded | File removed (Spec 636)                                             |
 
 ## Risks
 

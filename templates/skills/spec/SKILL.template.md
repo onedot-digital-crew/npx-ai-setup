@@ -24,29 +24,30 @@ Read this matrix once at start. Skip silently if a file doesn't exist.
 
 **Foundation (read every spec):**
 
-| File | Phase | Why |
-|---|---|---|
-| `.agents/context/STACK.md` | 1b | Frameworks, versions, build tooling |
-| `.agents/context/ARCHITECTURE.md` | 1d | System boundaries, layers |
-| `.agents/context/CONVENTIONS.md` | 2.3 | Code style for step descriptions |
-| `.agents/context/CONCEPT.md` | 1c | REJECT spec if misaligned |
-| `.agents/context/graph.json` | 1d | jq top-hubs query (saves grep tokens) |
-| `decisions.md` | 1e | Conflict check vs prior decisions |
+| File                              | Phase | Why                                   |
+| --------------------------------- | ----- | ------------------------------------- |
+| `.agents/context/STACK.md`        | 1b    | Frameworks, versions, build tooling   |
+| `.agents/context/ARCHITECTURE.md` | 1d    | System boundaries, layers             |
+| `.agents/context/CONVENTIONS.md`  | 2.3   | Code style for step descriptions      |
+| `.agents/context/CONCEPT.md`      | 1c    | REJECT spec if misaligned             |
+| `.agents/context/graph.json`      | 1d    | jq top-hubs query (saves grep tokens) |
+| `decisions.md`                    | 1e    | Conflict check vs prior decisions     |
 
 **Adaptive (trigger by spec content):**
 
-| Tool / File | Trigger | Phase |
-|---|---|---|
-| Context7 MCP | new dep, version bump, lib/API/SDK/cloud-service mentioned | 1e |
-| `@references/code-flow.md` | refactor / integration / behavior change in existing functions | 1d |
-| `@references/challenge.md` (heavy gate) | heavy spec (definition in Phase 1c) | 1c |
-| Assumptions table | heavy spec only | 1e |
-| `templates/context-bundles/<profile>/` | single-stack spec + bundle exists for profile | 2.2 |
-| `.agents/context/PATTERNS.md` | spec adds component/hook/route where patterns apply | 2.3 |
-| `.agents/context/LEARNINGS.md` | spec touches area with prior learnings (keyword grep) | 1d |
-| **Graph-adjacent reads** | after picking a file from graph top-hubs, also read its direct importers via `jq '.edges[] \| select(.target==$f) \| .source' \| head -5`. Skip if >10 importers (hub too central). | 1d / 2.2 |
+| Tool / File                             | Trigger                                                                                                                                                                             | Phase    |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Context7 MCP                            | new dep, version bump, lib/API/SDK/cloud-service mentioned                                                                                                                          | 1e       |
+| `@references/code-flow.md`              | refactor / integration / behavior change in existing functions                                                                                                                      | 1d       |
+| `@references/challenge.md` (heavy gate) | heavy spec (definition in Phase 1c)                                                                                                                                                 | 1c       |
+| Assumptions table                       | heavy spec only                                                                                                                                                                     | 1e       |
+| `templates/context-bundles/<profile>/`  | single-stack spec + bundle exists for profile                                                                                                                                       | 2.2      |
+| `.agents/context/PATTERNS.md`           | spec adds component/hook/route where patterns apply                                                                                                                                 | 2.3      |
+| `.agents/context/LEARNINGS.md`          | spec touches area with prior learnings (keyword grep)                                                                                                                               | 1d       |
+| **Graph-adjacent reads**                | after picking a file from graph top-hubs, also read its direct importers via `jq '.edges[] \| select(.target==$f) \| .source' \| head -5`. Skip if >10 importers (hub too central). | 1d / 2.2 |
 
 **Anti-bloat guards:**
+
 - One read per file. No re-reads.
 - Context7: max 2 lookups per spec. More → split spec (also triggers Phase 2.4 split).
 - File-count cap per spec: light max 4 context files, heavy max 7.
@@ -60,9 +61,11 @@ Run `mkdir -p specs specs/completed` to ensure directories exist.
 ## Phase 1 — Triage
 
 ### 1a. Load skills
+
 Glob `.claude/skills/*/SKILL.md`, read first 5 lines each. Apply relevant guidance.
 
 ### 1b. Context-Scan (mandatory)
+
 Spawn `context-scanner` subagent (model: haiku). See `@references/context-scan.md`.
 **On subagent failure** (timeout, quota, parse error): degrade to inline Glob for stack markers (`nuxt.config.*`, `next.config.*`, `artisan`, `composer.json`, `package.json`) and proceed with `stack_profile=unknown`.
 Read STACK.md (matrix above). SUMMARY.md is auto-imported via CLAUDE.md tier-1.
@@ -86,6 +89,7 @@ AskUserQuestion({
 If `$ARGUMENTS` is an existing `.md` file: read it first, skip question 1.
 
 ### 1c. Complexity triage
+
 Read `.agents/context/CONCEPT.md` if present. REJECT only if CONCEPT.md contains an `## Out of Scope` or `## Anti-Goals` section the spec violates. Missing sections → skip rejection.
 
 **Heavy** (single source of truth for matrix triggers): >5 files OR new dep OR cross-layer arch OR breaking change.
@@ -95,11 +99,15 @@ Heavy → run `@references/challenge.md` (4 challenges + AskUserQuestion). Stop 
 Light → skip challenge gate.
 
 ### 1d. Think it through
+
 Read ARCHITECTURE.md (matrix). If `graph.json` exists:
+
 ```bash
 jq -r '.stats.top_hubs[] | "\(.imported_by)x \(.file)"' .agents/context/graph.json | head -10
 ```
+
 Using scan + STACK + ARCHITECTURE + 1b answers, sketch:
+
 - Files/systems touched per stack profile
 - Integration path, data flow, what calls what
 - Edge cases, failure behavior, recoverability
@@ -108,6 +116,7 @@ Using scan + STACK + ARCHITECTURE + 1b answers, sketch:
 Code-flow analysis (trigger from matrix, max 5 functions): see `@references/code-flow.md`.
 
 ### 1e. Decisions + assumptions
+
 Read `decisions.md` (matrix) — flag conflicts before proceeding.
 External libs/APIs: query Context7 per matrix trigger. Never guess versions from training data.
 Heavy: scan 3-5 files, capture `Statement / Evidence / Confidence / If Wrong`. Confirm only material-scope assumptions.

@@ -4,11 +4,11 @@
 
 Always set `model:` when spawning subagents.
 
-| Model | Use for |
-|-------|---------|
-| `haiku` | ALL Explore/search/read-only agents (12× cheaper than Sonnet) — never for implementation |
-| `sonnet` | Implementation, code generation, tests — default for implementation subagents |
-| `opus` | Architecture review, spec creation |
+| Model    | Use for                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------- |
+| `haiku`  | ALL Explore/search/read-only agents (12× cheaper than Sonnet) — never for implementation |
+| `sonnet` | Implementation, code generation, tests — default for implementation subagents            |
+| `opus`   | Architecture review, spec creation                                                       |
 
 Never spawn Explore/search without `haiku`. Code-writing agents must use `sonnet`. Haiku is never for implementation.
 

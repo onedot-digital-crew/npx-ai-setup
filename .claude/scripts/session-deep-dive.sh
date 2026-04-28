@@ -15,7 +15,7 @@ if [ ! -f "$SESSION_FILE" ]; then
   exit 1
 fi
 
-python3 - "$SESSION_FILE" "$PWD" <<'PYEOF'
+python3 - "$SESSION_FILE" "$PWD" << 'PYEOF'
 import json
 import re
 import sys

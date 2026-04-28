@@ -20,7 +20,7 @@ STACK_PROFILE="${1:-default}"
 # ------------------------------------------------------------------
 # jq path: clean, single pass
 # ------------------------------------------------------------------
-if command -v jq >/dev/null 2>&1; then
+if command -v jq > /dev/null 2>&1; then
   jq -c --arg p "$STACK_PROFILE" '
     (.global // []) +
     (.profiles[$p] // [])
@@ -31,8 +31,8 @@ fi
 # ------------------------------------------------------------------
 # Fallback path: node (available on any machine with npm/npx)
 # ------------------------------------------------------------------
-if command -v node >/dev/null 2>&1; then
-  node - "$DEFAULTS_FILE" "$STACK_PROFILE" <<'NODESCRIPT'
+if command -v node > /dev/null 2>&1; then
+  node - "$DEFAULTS_FILE" "$STACK_PROFILE" << 'NODESCRIPT'
     const fs = require('fs');
     const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
     const profile = process.argv[3];
@@ -52,7 +52,8 @@ globals=""
 in_global=0
 while IFS= read -r line; do
   if printf '%s' "$line" | grep -q '"global"'; then
-    in_global=1; continue
+    in_global=1
+    continue
   fi
   if [ "$in_global" = "1" ]; then
     # Stop at closing bracket for the global array
@@ -69,11 +70,13 @@ in_profile=0
 in_target=0
 while IFS= read -r line; do
   if printf '%s' "$line" | grep -q '"profiles"'; then
-    in_profile=1; continue
+    in_profile=1
+    continue
   fi
   if [ "$in_profile" = "1" ]; then
     if printf '%s' "$line" | grep -q "\"${STACK_PROFILE}\""; then
-      in_target=1; continue
+      in_target=1
+      continue
     fi
     if [ "$in_target" = "1" ]; then
       printf '%s' "$line" | grep -qE '^\s*\]' && break
@@ -85,7 +88,7 @@ done < "$DEFAULTS_FILE"
 
 # Build output array
 all=""
-[ -n "$globals" ]       && all="${globals}"
+[ -n "$globals" ] && all="${globals}"
 [ -n "$profile_entries" ] && all="${all},${profile_entries}"
 # Strip trailing comma artefacts and wrap
 all=$(printf '%s' "$all" | sed 's/^,//;s/,$//')

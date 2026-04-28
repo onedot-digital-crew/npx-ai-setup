@@ -46,12 +46,12 @@ build_template_map() {
     # Map source path to install target path
     local target
     case "$rel" in
-      claude/*)   target=".${rel}" ;;
-      github/*)   target=".${rel}" ;;
-      agents/*)   target=".claude/${rel}" ;;
-      scripts/*)  target=".claude/${rel}" ;;
-      specs/*)    target="${rel}" ;;
-      *)          target="${rel}" ;;
+      claude/*) target=".${rel}" ;;
+      github/*) target=".${rel}" ;;
+      agents/*) target=".claude/${rel}" ;;
+      scripts/*) target=".claude/${rel}" ;;
+      specs/*) target="${rel}" ;;
+      *) target="${rel}" ;;
     esac
 
     TEMPLATE_MAP+=("templates/${rel}:${target}")
@@ -66,7 +66,7 @@ build_template_map
 get_boilerplate_repo() {
   case "$1" in
     nuxt-storyblok) echo "sb-nuxt-boilerplate" ;;
-    *)         return 1 ;;
+    *) return 1 ;;
   esac
 }
 
@@ -82,15 +82,15 @@ _semver_gt() {
   IFS=. read -ra b <<< "$2"
   for i in 0 1 2; do
     local ai=${a[$i]:-0} bi=${b[$i]:-0}
-    [ "$ai" -gt "$bi" ] 2>/dev/null && return 0
-    [ "$ai" -lt "$bi" ] 2>/dev/null && return 1
+    [ "$ai" -gt "$bi" ] 2> /dev/null && return 0
+    [ "$ai" -lt "$bi" ] 2> /dev/null && return 1
   done
-  return 1  # equal
+  return 1 # equal
 }
 
 # Get package version from package.json
 get_package_version() {
-  _json_read "$SCRIPT_DIR/package.json" '.version' 2>/dev/null || echo "unknown"
+  _json_read "$SCRIPT_DIR/package.json" '.version' 2> /dev/null || echo "unknown"
 }
 
 # Get installed version from .ai-setup.json
@@ -105,10 +105,10 @@ get_installed_version() {
 # Compute checksum for a file (sha256sum on Linux/macOS, fallback to shasum)
 compute_checksum() {
   if [ -f "$1" ]; then
-    if command -v sha256sum >/dev/null 2>&1; then
-      sha256sum "$1" 2>/dev/null | awk '{print $1}' || echo ""
+    if command -v sha256sum > /dev/null 2>&1; then
+      sha256sum "$1" 2> /dev/null | awk '{print $1}' || echo ""
     else
-      shasum -a 256 "$1" 2>/dev/null | awk '{print $1}' || echo ""
+      shasum -a 256 "$1" 2> /dev/null | awk '{print $1}' || echo ""
     fi
   else
     echo ""
@@ -137,10 +137,10 @@ write_metadata() {
   # Persist boilerplate system if detected
   if [ -n "${SELECTED_SYSTEM:-}" ]; then
     json=$(echo "$json" | jq --arg sys "$SELECTED_SYSTEM" '. + {system: $sys}')
-  elif [ -f .ai-setup.json ] && command -v jq >/dev/null 2>&1; then
+  elif [ -f .ai-setup.json ] && command -v jq > /dev/null 2>&1; then
     # Preserve existing system field on updates
     local prev_sys
-    prev_sys=$(jq -r '.system // empty' .ai-setup.json 2>/dev/null)
+    prev_sys=$(jq -r '.system // empty' .ai-setup.json 2> /dev/null)
     if [ -n "$prev_sys" ] && [ "$prev_sys" != "null" ]; then
       json=$(echo "$json" | jq --arg sys "$prev_sys" '. + {system: $sys}')
     fi
@@ -180,7 +180,8 @@ write_metadata() {
     while IFS= read -r -d '' _skill; do
       local _target="${_skill#./}"
       local _sname
-      _sname="${_target#.claude/skills/}"; _sname="${_sname%/SKILL.md}"
+      _sname="${_target#.claude/skills/}"
+      _sname="${_sname%/SKILL.md}"
       [ -f "$SCRIPT_DIR/templates/skills/$_sname/SKILL.template.md" ] || continue
       local cs
       cs=$(compute_checksum "$_target")
@@ -191,7 +192,8 @@ write_metadata() {
       local _target="${_ref#./}"
       local _sname
       local _rname
-      _sname="${_target#.claude/skills/}"; _sname="${_sname%%/references/*}"
+      _sname="${_target#.claude/skills/}"
+      _sname="${_sname%%/references/*}"
       _rname="${_target##*/}"
       [ -f "$SCRIPT_DIR/templates/skills/$_sname/references/$_rname" ] || continue
       local cs
@@ -223,14 +225,16 @@ is_current_managed_target() {
   # Skills: only protect if a matching template exists (custom skills are not tracked)
   if [[ "$target" == .claude/skills/*/SKILL.md ]]; then
     local _skill_name
-    _skill_name="${target#.claude/skills/}"; _skill_name="${_skill_name%/SKILL.md}"
+    _skill_name="${target#.claude/skills/}"
+    _skill_name="${_skill_name%/SKILL.md}"
     [ -f "$SCRIPT_DIR/templates/skills/$_skill_name/SKILL.template.md" ] && return 0
   fi
 
   if [[ "$target" == .claude/skills/*/references/*.md ]]; then
     local _skill_name
     local _ref_name
-    _skill_name="${target#.claude/skills/}"; _skill_name="${_skill_name%%/references/*}"
+    _skill_name="${target#.claude/skills/}"
+    _skill_name="${_skill_name%%/references/*}"
     _ref_name="${target##*/}"
     [ -f "$SCRIPT_DIR/templates/skills/$_skill_name/references/$_ref_name" ] && return 0
   fi
@@ -258,22 +262,22 @@ collect_project_files() {
   local max_files=${1:-80}
 
   # Try git first (10x faster)
-  if git rev-parse --git-dir >/dev/null 2>&1; then
+  if git rev-parse --git-dir > /dev/null 2>&1; then
     git ls-files -z '*.js' '*.ts' '*.jsx' '*.tsx' '*.vue' '*.svelte' \
       '*.css' '*.scss' '*.liquid' '*.php' '*.html' '*.twig' \
       '*.blade.php' '*.erb' '*.py' '*.rb' '*.go' '*.rs' '*.astro' \
-      2>/dev/null | tr '\0' '\n' | head -n "$max_files"
+      2> /dev/null | tr '\0' '\n' | head -n "$max_files"
   else
     # Fallback: optimized find with early pruning
     find . -maxdepth 4 \
       \( -name node_modules -o -name .git -o -name dist -o -name build \
-         -o -name assets -o -name .next -o -name vendor -o -name .nuxt \) -prune -o \
+      -o -name assets -o -name .next -o -name vendor -o -name .nuxt \) -prune -o \
       -type f \( \
-        -iname '*.js' -o -iname '*.ts' -o -iname '*.jsx' -o -iname '*.tsx' \
-        -o -iname '*.vue' -o -iname '*.svelte' -o -iname '*.css' -o -iname '*.scss' \
-        -o -iname '*.liquid' -o -iname '*.php' -o -iname '*.html' -o -iname '*.twig' \
-        -o -iname '*.blade.php' -o -iname '*.erb' -o -iname '*.py' -o -iname '*.rb' \
-        -o -iname '*.go' -o -iname '*.rs' -o -iname '*.astro' \
+      -iname '*.js' -o -iname '*.ts' -o -iname '*.jsx' -o -iname '*.tsx' \
+      -o -iname '*.vue' -o -iname '*.svelte' -o -iname '*.css' -o -iname '*.scss' \
+      -o -iname '*.liquid' -o -iname '*.php' -o -iname '*.html' -o -iname '*.twig' \
+      -o -iname '*.blade.php' -o -iname '*.erb' -o -iname '*.py' -o -iname '*.rb' \
+      -o -iname '*.go' -o -iname '*.rs' -o -iname '*.astro' \
       \) -print | head -n "$max_files"
   fi
 }

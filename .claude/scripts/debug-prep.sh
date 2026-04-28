@@ -21,8 +21,8 @@ echo ""
 # ---------------------------------------------------------------------------
 # Uncommitted changes (may contain partial fix attempts)
 # ---------------------------------------------------------------------------
-DIFF_STAT=$(git diff --stat 2>/dev/null || true)
-STAGED_STAT=$(git diff --cached --stat 2>/dev/null || true)
+DIFF_STAT=$(git diff --stat 2> /dev/null || true)
+STAGED_STAT=$(git diff --cached --stat 2> /dev/null || true)
 
 if [[ -n "$DIFF_STAT" || -n "$STAGED_STAT" ]]; then
   echo "=== UNCOMMITTED CHANGES ==="
@@ -41,7 +41,7 @@ if [[ -f "package.json" ]] && has node; then
       const p = ['test:unit','test:ci','test','vitest','jest'];
       for (const k of p) if (s[k]) { console.log(k); break; }
     } catch(e) {}
-  " 2>/dev/null || true)
+  " 2> /dev/null || true)
 
   if [[ -n "$TEST_CMD" ]]; then
     echo "=== TEST RESULTS ==="
@@ -108,7 +108,7 @@ done
 # ---------------------------------------------------------------------------
 # Prior debug investigations (specs/debug-*.md)
 # ---------------------------------------------------------------------------
-PRIOR=$(ls specs/debug-*.md 2>/dev/null || true)
+PRIOR=$(ls specs/debug-*.md 2> /dev/null || true)
 if [[ -n "$PRIOR" ]]; then
   echo "=== PRIOR INVESTIGATIONS ==="
   echo "$PRIOR"

@@ -38,6 +38,7 @@ Run:
 ```
 
 Fallbacks if needed:
+
 - `!git diff`
 - `!git diff --staged`
 - `!git diff main...HEAD 2>/dev/null`
@@ -47,6 +48,7 @@ If all diffs are empty, report "No changes found." and stop.
 ### 2. Stub scan
 
 Before analysis, scan for placeholders:
+
 - `throw new Error("not implemented")`, `TODO`, `FIXME`, stub returns
 - AI boilerplate comments
 - Empty catch blocks or skeleton classes with no behavior
@@ -56,6 +58,7 @@ Flag every instance as **STUB** severity. STUB blocks shipping in all modes.
 ### 3A. Quick Scan
 
 Check each changed file for:
+
 - Bugs
 - Security
 
@@ -64,6 +67,7 @@ Only report HIGH and MEDIUM confidence issues. End with PASS or BLOCK.
 ### 3B. Standard Review
 
 Read every changed file completely. Check for:
+
 - Bugs
 - Security
 - Performance
@@ -76,6 +80,7 @@ Only report HIGH and MEDIUM confidence issues. End with PASS or BLOCK.
 ### 3C. Adversarial Grill
 
 Before deep review, challenge scope:
+
 1. Does similar code already exist?
 2. Is this the smallest change that solves the problem?
 
@@ -90,6 +95,7 @@ C) Compressed review — top 3 issues only
 If A: suggest smaller scope and stop. If C: report only the top 3 issues.
 
 For full review, read every changed file completely and challenge:
+
 - Edge cases
 - Error handling
 - Security
@@ -100,6 +106,7 @@ For full review, read every changed file completely and challenge:
 - Performance, readability, missing tests, duplicates
 
 For each issue, report:
+
 - Severity: CRITICAL / HIGH / MEDIUM
 - File and line
 - Concrete failure scenario
@@ -111,8 +118,8 @@ List what was not reviewed.
 
 Create a self-verification table:
 
-| Claim | File:Line | Verified |
-|-------|-----------|----------|
+| Claim             | File:Line             | Verified           |
+| ----------------- | --------------------- | ------------------ |
 | [finding summary] | [exact file and line] | yes / no / partial |
 
 If a blocking claim cannot be verified to an exact file and line, remove it from blocking issues.
@@ -122,6 +129,7 @@ If a blocking claim cannot be verified to an exact file and line, remove it from
 Check agent existence (`ls .claude/agents/<name>.md`) before spawn. Missing optional agents skip silently.
 
 Dispatch in parallel (single message, multiple Agent calls):
+
 - Always: `code-reviewer` (required, must exist)
 - Security-sensitive changes AND `security-reviewer` exists → spawn
 - Hot path changes AND `performance-reviewer` exists → spawn
@@ -129,6 +137,7 @@ Dispatch in parallel (single message, multiple Agent calls):
 Merge agent findings into the final report and deduplicate overlaps.
 
 ## Rules
+
 - Do NOT make changes. Only report findings.
 - Read actual code before commenting.
 - Focus on bugs and security over style.

@@ -30,6 +30,7 @@ After the board output above, scan only the specs shown on the board for inconsi
 **Type D — Non-canonical status**: spec uses a synonym (`done`, `finished`, `closed`, `merged`, `resolved`, `wip`, `review`, …) instead of the canonical enum (`draft|in-progress|in-review|blocked|completed`). The board normalizes for display, but the file vocab must be canonical.
 
 If any inconsistencies are found, list them:
+
 ```
 ⚠️  Inconsistencies found:
   #NNN Title — all steps done but status is "in-progress" (Type A)
@@ -39,6 +40,7 @@ If any inconsistencies are found, list them:
 ```
 
 Use `AskUserQuestion` to ask:
+
 ```
 Fix these inconsistencies automatically?
 A) Fix all — update status and move files now
@@ -56,6 +58,7 @@ C) Skip — leave as is
 - **Option C**: Skip all fixes.
 
 ## Rules
+
 - Only write or move files during step 2 and only after user confirms.
 - If `specs/` does not exist or has no spec files, report "No specs found" and stop.
 - The default board is intentionally windowed: all open specs + latest 10 completed specs only.

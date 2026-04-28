@@ -15,9 +15,11 @@ description: "Master defensive Bash programming techniques for production-grade 
 ## Core Patterns
 
 **Strict mode** — always first line after shebang: `set -Eeuo pipefail`
+
 - `-E` inherits ERR trap in functions, `-e` exits on error, `-u` exits on unset var, `-o pipefail` fails pipe on any stage
 
 **Error trapping & cleanup:**
+
 - `trap 'echo "Error on line $LINENO"' ERR`
 - `trap 'rm -rf -- "$TMPDIR"' EXIT` combined with `TMPDIR=$(mktemp -d)`
 - Signal handling: `trap cleanup SIGTERM SIGINT`
@@ -39,11 +41,13 @@ description: "Master defensive Bash programming techniques for production-grade 
 **Arg parsing:** `while [[ $# -gt 0 ]]; do case "$1" in -v|--verbose) ...` with defaults declared at top
 
 **Script directory (non-obvious):**
+
 ```bash
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ```
 
 **Process orchestration with signals:**
+
 ```bash
 PIDS=()
 trap 'for p in "${PIDS[@]}"; do kill -0 "$p" 2>/dev/null && kill -TERM "$p"; done; wait' SIGTERM SIGINT
@@ -51,6 +55,7 @@ background_task & PIDS+=($!)
 ```
 
 **Dependency check loop:**
+
 ```bash
 missing=(); required=("jq" "curl" "git")
 for cmd in "${required[@]}"; do command -v "$cmd" &>/dev/null || missing+=("$cmd"); done

@@ -30,12 +30,12 @@ should_update_template() {
   local cat
   cat=$(get_template_category "$1")
   case "$cat" in
-    hooks)     [ "${UPD_HOOKS:-yes}" = "yes" ] ;;
-    settings)  [ "${UPD_SETTINGS:-yes}" = "yes" ] ;;
+    hooks) [ "${UPD_HOOKS:-yes}" = "yes" ] ;;
+    settings) [ "${UPD_SETTINGS:-yes}" = "yes" ] ;;
     claude_md) [ "${UPD_CLAUDE_MD:-yes}" = "yes" ] ;;
     agents_md) [ "${UPD_AGENTS_MD:-yes}" = "yes" ] ;;
-    commands)  [ "${UPD_COMMANDS:-yes}" = "yes" ] ;;
-    agents)    [ "${UPD_AGENTS:-yes}" = "yes" ] ;;
-    *)         [ "${UPD_OTHER:-yes}" = "yes" ] ;;
+    commands) [ "${UPD_COMMANDS:-yes}" = "yes" ] ;;
+    agents) [ "${UPD_AGENTS:-yes}" = "yes" ] ;;
+    *) [ "${UPD_OTHER:-yes}" = "yes" ] ;;
   esac
 }

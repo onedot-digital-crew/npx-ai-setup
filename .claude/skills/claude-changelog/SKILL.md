@@ -18,6 +18,7 @@ https://code.claude.com/docs/en/changelog
 ```
 
 Use WebFetch. Extract all entries, grouped by release date/version. Focus on sections:
+
 - New features / capabilities
 - Settings / configuration changes
 - Hook system changes
@@ -37,6 +38,7 @@ cat "${CLAUDE_PROJECT_DIR:-.}/.claude/changelog-audit.json" 2>/dev/null || echo 
 ```
 
 The state file tracks:
+
 ```json
 {
   "last_checked": "YYYY-MM-DD",
@@ -60,6 +62,7 @@ Read current setup in parallel:
 - `.ai-setup.json` — installed version
 
 Build inventory:
+
 ```
 SETUP: [N] rules, [N] hooks, [N] skills, settings snapshot
 ```
@@ -68,16 +71,17 @@ SETUP: [N] rules, [N] hooks, [N] skills, settings snapshot
 
 For each NEW changelog entry, categorize:
 
-| Category | Question |
-|----------|----------|
-| **Native feature** | Does Claude Code now natively do something we scripted/hooked? |
-| **New setting/option** | Should we add it to settings.json or CLAUDE.md? |
-| **Changed behavior** | Does our config fight the new default? |
-| **New skill/command** | Should we add it to our skill library? |
-| **Deprecated pattern** | Are we using something that's now obsolete? |
-| **Model routing** | New models or routing options that change our model-routing rules? |
+| Category               | Question                                                           |
+| ---------------------- | ------------------------------------------------------------------ |
+| **Native feature**     | Does Claude Code now natively do something we scripted/hooked?     |
+| **New setting/option** | Should we add it to settings.json or CLAUDE.md?                    |
+| **Changed behavior**   | Does our config fight the new default?                             |
+| **New skill/command**  | Should we add it to our skill library?                             |
+| **Deprecated pattern** | Are we using something that's now obsolete?                        |
+| **Model routing**      | New models or routing options that change our model-routing rules? |
 
 For each finding, produce:
+
 ```
 [ENTRY DATE] Feature: <name>
 Status: NEW / CHANGED / DEPRECATED

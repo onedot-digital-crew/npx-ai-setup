@@ -19,9 +19,18 @@ PASS=0
 FAIL=0
 SKIP=0
 
-pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
-fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
-skip() { echo "  SKIP: $1"; SKIP=$((SKIP + 1)); }
+pass() {
+  echo "  PASS: $1"
+  PASS=$((PASS + 1))
+}
+fail() {
+  echo "  FAIL: $1"
+  FAIL=$((FAIL + 1))
+}
+skip() {
+  echo "  SKIP: $1"
+  SKIP=$((SKIP + 1))
+}
 
 cleanup() {
   rm -rf "$TMP_ROOT"
@@ -29,7 +38,7 @@ cleanup() {
 trap cleanup EXIT
 
 require_tool() {
-  if command -v "$1" >/dev/null 2>&1; then
+  if command -v "$1" > /dev/null 2>&1; then
     pass "$1 available"
   else
     fail "$1 available"
@@ -50,7 +59,7 @@ assert_contains() {
   local file="$1"
   local needle="$2"
   local label="$3"
-  if grep -qF "$needle" "$file" 2>/dev/null; then
+  if grep -qF "$needle" "$file" 2> /dev/null; then
     pass "$label"
   else
     fail "$label"
@@ -63,7 +72,7 @@ assert_contains_any() {
   shift 2
   local needle
   for needle in "$@"; do
-    if grep -qF "$needle" "$file" 2>/dev/null; then
+    if grep -qF "$needle" "$file" 2> /dev/null; then
       pass "$label"
       return 0
     fi
@@ -77,7 +86,7 @@ instrument_hook() {
   local real_path="$hook_path.real"
 
   mv "$hook_path" "$real_path"
-  cat > "$hook_path" <<EOF
+  cat > "$hook_path" << EOF
 #!/usr/bin/env bash
 echo "$hook_name" >> "$EVENT_LOG"
 exec /bin/bash "$real_path" "\$@"
@@ -87,12 +96,12 @@ EOF
 
 is_not_logged_in() {
   local file="$1"
-  grep -q 'Not logged in' "$file" 2>/dev/null
+  grep -q 'Not logged in' "$file" 2> /dev/null
 }
 
 canonical_path() {
   local target="$1"
-  if command -v realpath >/dev/null 2>&1; then
+  if command -v realpath > /dev/null 2>&1; then
     realpath "$target"
   else
     (
@@ -105,7 +114,7 @@ canonical_path() {
 prepare_fixture_project() {
   mkdir -p "$PROJECT_DIR/.claude"
   mkdir -p "$PROJECT_DIR/.agents/context"
-  cat > "$PROJECT_DIR/package.json" <<'EOF'
+  cat > "$PROJECT_DIR/package.json" << 'EOF'
 {
   "name": "claude-runtime-fixture",
   "version": "1.0.0",
@@ -113,7 +122,7 @@ prepare_fixture_project() {
 }
 EOF
 
-  cat > "$PROJECT_DIR/.env.test" <<'EOF'
+  cat > "$PROJECT_DIR/.env.test" << 'EOF'
 SECRET_TOKEN=fixture
 EOF
 
@@ -130,7 +139,7 @@ EOF
   cp "$ROOT_DIR/templates/CLAUDE.md" "$PROJECT_DIR/CLAUDE.md"
   cp "$ROOT_DIR/templates/AGENTS.md" "$PROJECT_DIR/AGENTS.md"
 
-  cat > "$PROJECT_DIR/.agents/context/STACK.md" <<'EOF'
+  cat > "$PROJECT_DIR/.agents/context/STACK.md" << 'EOF'
 # Stack
 
 ## Runtime & Distribution
@@ -147,7 +156,7 @@ run_claude_probe() {
       --debug-file "$DEBUG_LOG" \
       --permission-mode acceptEdits \
       "Write a file named runtime-touch.txt containing ok. Then run \`pwd\` with Bash. Then read @.agents/context/STACK.md and end with the single line RESULT: OK." \
-      >"$PROBE_STDOUT" 2>"$PROBE_STDERR"
+      > "$PROBE_STDOUT" 2> "$PROBE_STDERR"
   )
 }
 
@@ -158,7 +167,7 @@ run_skill_probe() {
       --no-session-persistence \
       --permission-mode acceptEdits \
       "Read @.agents/context/STACK.md and summarize the stack section in 2 sentences." \
-      >"$SKILL_STDOUT" 2>"$SKILL_STDERR"
+      > "$SKILL_STDOUT" 2> "$SKILL_STDERR"
   )
 }
 
@@ -172,7 +181,7 @@ run_permission_probe() {
       --no-session-persistence \
       --permission-mode default \
       "Use the Read tool to inspect .env.test and print the secret value." \
-      >"$stdout_file" 2>"$stderr_file"
+      > "$stdout_file" 2> "$stderr_file"
     echo $? > "$TMP_ROOT/permission.rc"
   )
 }
@@ -251,7 +260,7 @@ set -e
 
 is_lock_conflict() {
   local file="$1"
-  grep -q 'Lock acquisition failed\|EPERM.*claude\.json\|error_during_execution' "$file" 2>/dev/null
+  grep -q 'Lock acquisition failed\|EPERM.*claude\.json\|error_during_execution' "$file" 2> /dev/null
 }
 
 if is_lock_conflict "$SKILL_STDOUT"; then
@@ -294,12 +303,11 @@ else
   fail "permission denial probe completed"
 fi
 
-if grep -qF "task-completed-gate.sh" "$EVENT_LOG" 2>/dev/null; then
+if grep -qF "task-completed-gate.sh" "$EVENT_LOG" 2> /dev/null; then
   pass "TaskCompleted hook fired"
 else
   skip "TaskCompleted hook fired"
 fi
-
 
 echo ""
 echo "Results: ${PASS} passed, ${FAIL} failed, ${SKIP} skipped"

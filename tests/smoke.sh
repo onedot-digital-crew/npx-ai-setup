@@ -7,8 +7,14 @@ set -euo pipefail
 PASS=0
 FAIL=0
 
-pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
-fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
+pass() {
+  echo "  PASS: $1"
+  PASS=$((PASS + 1))
+}
+fail() {
+  echo "  FAIL: $1"
+  FAIL=$((FAIL + 1))
+}
 
 echo "=== Smoke test: modular ai-setup ==="
 
@@ -99,7 +105,7 @@ CHECKS=(
 
 for check in "${CHECKS[@]}"; do
   IFS=':' read -r mod fn <<< "$check"
-  if grep -q "${fn}()" "lib/$mod" 2>/dev/null; then
+  if grep -q "${fn}()" "lib/$mod" 2> /dev/null; then
     pass "${fn}() in lib/$mod"
   else
     fail "${fn}() missing from lib/$mod"
@@ -110,7 +116,7 @@ done
 echo ""
 echo "--- Module sourcing in bin/ai-setup.sh ---"
 for mod in "${RUNTIME_MODULES[@]}"; do
-  if grep -q "$mod" bin/ai-setup.sh 2>/dev/null; then
+  if grep -q "$mod" bin/ai-setup.sh 2> /dev/null; then
     pass "bin/ai-setup.sh sources $mod"
   else
     fail "bin/ai-setup.sh does not source $mod"
@@ -120,7 +126,7 @@ done
 # Step 5: Verify package.json includes lib/
 echo ""
 echo "--- Distribution checks ---"
-if grep -q '"lib/"' package.json 2>/dev/null; then
+if grep -q '"lib/"' package.json 2> /dev/null; then
   pass "package.json includes lib/ in files"
 else
   fail "package.json missing lib/ in files"
@@ -138,7 +144,7 @@ fi
 # Step 7: Verify spec validation moved into /spec (Plan-Mode aligned)
 echo ""
 echo "--- Spec validation in /spec ---"
-if grep -q 'Phase 3 — Structural check' templates/skills/spec/SKILL.template.md 2>/dev/null; then
+if grep -q 'Phase 3 — Structural check' templates/skills/spec/SKILL.template.md 2> /dev/null; then
   pass "templates/skills/spec/SKILL.template.md has structural validation phase"
 else
   fail "templates/skills/spec/SKILL.template.md missing structural validation phase"
@@ -151,37 +157,37 @@ fi
 
 echo ""
 echo "--- Routing guidance ---"
-if grep -qi 'haiku.*explore\|explore.*haiku' .claude/rules/agents.md 2>/dev/null; then
+if grep -qi 'haiku.*explore\|explore.*haiku' .claude/rules/agents.md 2> /dev/null; then
   pass "agents.md restricts Haiku to explore agents"
 else
   fail "agents.md missing Haiku routing scope"
 fi
 
-if grep -q 'Threshold: spawn agents only for tasks requiring ≥3 distinct tool calls' .claude/rules/agents.md 2>/dev/null; then
+if grep -q 'Threshold: spawn agents only for tasks requiring ≥3 distinct tool calls' .claude/rules/agents.md 2> /dev/null; then
   pass ".claude/rules/agents.md defines a concrete spawn threshold"
 else
   fail ".claude/rules/agents.md missing concrete spawn threshold"
 fi
 
-if grep -q 'already made 8 tool calls\|Escalation rule' .claude/rules/agents.md 2>/dev/null; then
+if grep -q 'already made 8 tool calls\|Escalation rule' .claude/rules/agents.md 2> /dev/null; then
   pass ".claude/rules/agents.md adds an early parallelization threshold"
 else
   fail ".claude/rules/agents.md missing early parallelization threshold"
 fi
 
-if grep -q '8 tool calls' .claude/rules/agents.md 2>/dev/null; then
+if grep -q '8 tool calls' .claude/rules/agents.md 2> /dev/null; then
   pass "agents.md includes delegation escalation rule"
 else
   fail "agents.md missing delegation escalation rule"
 fi
 
-if grep -q 'model: haiku' .claude/skills/spec-work/SKILL.md 2>/dev/null; then
+if grep -q 'model: haiku' .claude/skills/spec-work/SKILL.md 2> /dev/null; then
   pass ".claude/skills/spec-work/SKILL.md uses Haiku-first routing for medium work"
 else
   fail ".claude/skills/spec-work/SKILL.md missing Haiku-first medium routing"
 fi
 
-if grep -q 'Review stays on Sonnet for all tiers' .claude/skills/spec-review/SKILL.md 2>/dev/null; then
+if grep -q 'Review stays on Sonnet for all tiers' .claude/skills/spec-review/SKILL.md 2> /dev/null; then
   pass ".claude/skills/spec-review/SKILL.md keeps routine review on Sonnet"
 else
   fail ".claude/skills/spec-review/SKILL.md missing explicit Sonnet-only review guidance"
@@ -190,7 +196,7 @@ fi
 # Step 8: Verify Complexity field in spec template
 echo ""
 echo "--- Spec template Complexity field ---"
-if grep -qF '**Complexity**:' specs/TEMPLATE.md 2>/dev/null; then
+if grep -qF '**Complexity**:' specs/TEMPLATE.md 2> /dev/null; then
   pass "specs/TEMPLATE.md has Complexity field in header"
 else
   fail "specs/TEMPLATE.md missing Complexity field"
@@ -252,49 +258,49 @@ done < <(find templates/scripts -maxdepth 1 -type f -name '*.sh' -print0 | sort 
 # Step 10: Verify skills alias migration is wired in both setup and update paths
 echo ""
 echo "--- Skills alias migration wiring ---"
-if grep -q 'ensure_skills_alias' bin/ai-setup.sh 2>/dev/null; then
+if grep -q 'ensure_skills_alias' bin/ai-setup.sh 2> /dev/null; then
   pass "bin/ai-setup.sh calls ensure_skills_alias on install"
 else
   fail "bin/ai-setup.sh missing ensure_skills_alias call"
 fi
 
-if grep -q 'ensure_skills_alias' lib/update.sh 2>/dev/null; then
+if grep -q 'ensure_skills_alias' lib/update.sh 2> /dev/null; then
   pass "lib/update.sh calls ensure_skills_alias during smart update"
 else
   fail "lib/update.sh missing ensure_skills_alias call"
 fi
 
-if grep -Eq 'pull_boilerplate_files "\$system" --skip-skills' lib/boilerplate.sh 2>/dev/null; then
+if grep -Eq 'pull_boilerplate_files "\$system" --skip-skills' lib/boilerplate.sh 2> /dev/null; then
   pass "lib/boilerplate.sh skips boilerplate skills during update sync"
 else
   fail "lib/boilerplate.sh update sync still pulls boilerplate skills"
 fi
 
-if grep -q '_is_current_repo_boilerplate' lib/boilerplate.sh 2>/dev/null; then
+if grep -q '_is_current_repo_boilerplate' lib/boilerplate.sh 2> /dev/null; then
   pass "lib/boilerplate.sh detects when the current repo is itself a boilerplate"
 else
   fail "lib/boilerplate.sh missing self-boilerplate detection"
 fi
 
-if grep -Eq 'Skipping boilerplate (pull|sync) \(already inside .* boilerplate repo\)' lib/boilerplate.sh 2>/dev/null; then
+if grep -Eq 'Skipping boilerplate (pull|sync) \(already inside .* boilerplate repo\)' lib/boilerplate.sh 2> /dev/null; then
   pass "lib/boilerplate.sh skips boilerplate pulls inside boilerplate repos"
 else
   fail "lib/boilerplate.sh missing skip guard for boilerplate repos"
 fi
 
-if grep -q 'install_skills' lib/update.sh 2>/dev/null; then
+if grep -q 'install_skills' lib/update.sh 2> /dev/null; then
   pass "lib/update.sh installs skills during smart update"
 else
   fail "lib/update.sh missing install_skills call"
 fi
 
-if grep -q 'repair_canonical_skill_links' lib/setup-skills.sh 2>/dev/null; then
+if grep -q 'repair_canonical_skill_links' lib/setup-skills.sh 2> /dev/null; then
   pass "lib/setup-skills.sh contains looping skill-link repair helper"
 else
   fail "lib/setup-skills.sh missing looping skill-link repair helper"
 fi
 
-if grep -Eq 'repair_canonical_skill_links .*\$canonical.*\$canonical_abs' lib/setup-skills.sh 2>/dev/null; then
+if grep -Eq 'repair_canonical_skill_links .*\$canonical.*\$canonical_abs' lib/setup-skills.sh 2> /dev/null; then
   pass "ensure_skills_alias invokes looping skill-link repair"
 else
   fail "ensure_skills_alias missing looping skill-link repair call"
@@ -303,13 +309,13 @@ fi
 # Step 11: Verify circuit breaker has spec-active threshold override
 echo ""
 echo "--- Circuit breaker spec-aware thresholds ---"
-if grep -q 'in-progress' templates/claude/hooks/circuit-breaker.sh 2>/dev/null; then
+if grep -q 'in-progress' templates/claude/hooks/circuit-breaker.sh 2> /dev/null; then
   pass "circuit-breaker.sh raises thresholds when spec is in-progress"
 else
   fail "circuit-breaker.sh missing spec-active threshold override"
 fi
 
-if grep -q 'SPEC_COUNT' templates/claude/hooks/circuit-breaker.sh 2>/dev/null; then
+if grep -q 'SPEC_COUNT' templates/claude/hooks/circuit-breaker.sh 2> /dev/null; then
   pass "circuit-breaker.sh raises thresholds further for spec-work-all batch runs"
 else
   fail "circuit-breaker.sh missing multi-spec batch detection"
@@ -322,13 +328,13 @@ else
   fail "lib/json.sh missing"
 fi
 
-if grep -q '_json_read' lib/json.sh 2>/dev/null; then
+if grep -q '_json_read' lib/json.sh 2> /dev/null; then
   pass "lib/json.sh exports _json_read"
 else
   fail "lib/json.sh missing _json_read"
 fi
 
-if grep -q '_json_merge' lib/json.sh 2>/dev/null; then
+if grep -q '_json_merge' lib/json.sh 2> /dev/null; then
   pass "lib/json.sh exports _json_merge"
 else
   fail "lib/json.sh missing _json_merge"
@@ -339,7 +345,7 @@ echo "--- Session extract active duration ---"
 SESSION_TMP=$(mktemp -d "${TMPDIR:-/tmp}/ai-setup-test.XXXXXX")
 SESSION_PROJECT_DIR="$SESSION_TMP/projects/demo-project"
 mkdir -p "$SESSION_PROJECT_DIR"
-cat > "$SESSION_PROJECT_DIR/demo-session.jsonl" <<'EOF'
+cat > "$SESSION_PROJECT_DIR/demo-session.jsonl" << 'EOF'
 {"type":"user","timestamp":"2026-03-31T10:00:00Z"}
 {"type":"assistant","timestamp":"2026-03-31T10:01:00Z","message":{"model":"claude-sonnet-4-6","content":[{"type":"text","text":"ok"}]}}
 {"type":"assistant","timestamp":"2026-03-31T12:01:00Z","message":{"model":"claude-sonnet-4-6","content":[{"type":"text","text":"still here"}]}}
@@ -366,19 +372,19 @@ SANDBOX_TMP=$(mktemp -d "${TMPDIR:-/tmp}/ai-setup-test.XXXXXX")
 cp templates/claude/settings.json "$SANDBOX_TMP/settings.json"
 
 # Verify .nuxt/** is in deny list before customization
-if grep -q 'Read(.nuxt/\*\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+if grep -q 'Read(.nuxt/\*\*)' "$SANDBOX_TMP/settings.json" 2> /dev/null; then
   pass "template settings.json contains Read(.nuxt/**) in deny"
 else
   fail "template settings.json missing Read(.nuxt/**) in deny"
 fi
 
 # Simulate nuxt customization via jq/node
-if command -v jq >/dev/null 2>&1; then
+if command -v jq > /dev/null 2>&1; then
   jq --arg patterns 'Read(.nuxt/**)|Read(.output/**)' '
     .permissions.deny |= map(
       select(. as $d | ($patterns | split("|")) | index($d) | not)
     )
-  ' "$SANDBOX_TMP/settings.json" > "$SANDBOX_TMP/settings_out.json" && \
+  ' "$SANDBOX_TMP/settings.json" > "$SANDBOX_TMP/settings_out.json" &&
     mv "$SANDBOX_TMP/settings_out.json" "$SANDBOX_TMP/settings.json"
 else
   node -e "
@@ -391,19 +397,19 @@ else
 fi
 
 # Verify .nuxt/** removed and .env* still present
-if grep -q 'Read(.nuxt/\*\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+if grep -q 'Read(.nuxt/\*\*)' "$SANDBOX_TMP/settings.json" 2> /dev/null; then
   fail "nuxt customization did not remove Read(.nuxt/**)"
 else
   pass "nuxt customization removed Read(.nuxt/**) from deny"
 fi
 
-if grep -q 'Read(.output/\*\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+if grep -q 'Read(.output/\*\*)' "$SANDBOX_TMP/settings.json" 2> /dev/null; then
   fail "nuxt customization did not remove Read(.output/**)"
 else
   pass "nuxt customization removed Read(.output/**) from deny"
 fi
 
-if grep -q 'Read(.env\*)' "$SANDBOX_TMP/settings.json" 2>/dev/null; then
+if grep -q 'Read(.env\*)' "$SANDBOX_TMP/settings.json" 2> /dev/null; then
   pass "nuxt customization preserved Read(.env*) in deny"
 else
   fail "nuxt customization incorrectly removed Read(.env*)"
@@ -412,7 +418,7 @@ fi
 rm -rf "$SANDBOX_TMP"
 
 echo "--- .claudeignore template ---"
-CLAUDEIGNORE_COUNT=$(grep -c '^[^#]' templates/.claudeignore 2>/dev/null || echo 0)
+CLAUDEIGNORE_COUNT=$(grep -c '^[^#]' templates/.claudeignore 2> /dev/null || echo 0)
 if [ "$CLAUDEIGNORE_COUNT" -ge 30 ]; then
   pass "templates/.claudeignore has ${CLAUDEIGNORE_COUNT} patterns (>= 30)"
 else
@@ -420,30 +426,28 @@ else
 fi
 
 echo "--- Governance docs ---"
-if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"project-baseline"' templates/claude/settings.json 2>/dev/null; then
+if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"project-baseline"' templates/claude/settings.json 2> /dev/null; then
   pass "template settings.json declares project-baseline governance profile"
 else
   fail "template settings.json missing governance profile metadata"
 fi
-if grep -q 'AI_SETUP_ENABLE_GLOBAL_BROAD_PERMS' lib/global-settings.sh 2>/dev/null; then
+if grep -q 'AI_SETUP_ENABLE_GLOBAL_BROAD_PERMS' lib/global-settings.sh 2> /dev/null; then
   pass "global settings gates broad shell grants behind explicit opt-in"
 else
   fail "global settings missing explicit broad-grant opt-in"
 fi
 
 echo "--- Hook registration checks ---"
-if ! grep -q '"PostCompact"' templates/claude/settings.json 2>/dev/null; then
+if ! grep -q '"PostCompact"' templates/claude/settings.json 2> /dev/null; then
   pass "PostCompact removed (dangerous auto-commit)"
 else
   fail "PostCompact still registered but should be removed"
 fi
-if ! grep -q '"SubagentStart"' templates/claude/settings.json 2>/dev/null && ! grep -q '"SubagentStop"' templates/claude/settings.json 2>/dev/null; then
+if ! grep -q '"SubagentStart"' templates/claude/settings.json 2> /dev/null && ! grep -q '"SubagentStop"' templates/claude/settings.json 2> /dev/null; then
   pass "subagent logging hooks removed (unused)"
 else
   fail "subagent logging hooks still registered"
 fi
-
-
 
 echo "--- Spec status consistency ---"
 for spec_file in specs/completed/[0-9]*.md; do
@@ -451,19 +455,19 @@ for spec_file in specs/completed/[0-9]*.md; do
   spec_name=$(basename "$spec_file" .md)
   # Skip brainstorms and research notes — they don't carry a Status field
   case "$spec_name" in
-    *-brainstorm|*-research|*research-*) continue ;;
+    *-brainstorm | *-research | *research-*) continue ;;
   esac
   # Extract status from standard markdown header or YAML frontmatter
   spec_status=""
   # Match status from: **Status**: value OR **Status:** value OR ^status: value (YAML)
-  status_line=$(grep -E '(\*\*Status\*\*:|^\*\*Status:\*\*|^status:)' "$spec_file" 2>/dev/null | head -1 || true)
+  status_line=$(grep -E '(\*\*Status\*\*:|^\*\*Status:\*\*|^status:)' "$spec_file" 2> /dev/null | head -1 || true)
   if [ -n "$status_line" ]; then
     spec_status=$(echo "$status_line" | grep -ioE '(completed|draft|in-progress|blocked|superseded)' | head -1 | tr '[:upper:]' '[:lower:]' || true)
-  elif grep -q '^status:' "$spec_file" 2>/dev/null; then
+  elif grep -q '^status:' "$spec_file" 2> /dev/null; then
     spec_status=$(grep -m1 '^status:' "$spec_file" | sed 's/status: *//')
   fi
   case "$spec_status" in
-    completed|superseded) pass "$spec_name status=$spec_status" ;;
+    completed | superseded) pass "$spec_name status=$spec_status" ;;
     "") fail "$spec_name has no parseable status field" ;;
     *) fail "$spec_name has status=$spec_status (expected completed or superseded)" ;;
   esac
@@ -472,31 +476,31 @@ done
 # Routing guidance assertions
 echo ""
 echo "--- Model routing rules ---"
-if grep -qi 'haiku' .claude/rules/agents.md 2>/dev/null; then
+if grep -qi 'haiku' .claude/rules/agents.md 2> /dev/null; then
   pass "agents.md documents Haiku routing guidance"
 else
   fail "agents.md missing Haiku routing guidance"
 fi
 
-if grep -qi 'haiku' .claude/rules/agents.md 2>/dev/null; then
+if grep -qi 'haiku' .claude/rules/agents.md 2> /dev/null; then
   pass ".claude/rules/agents.md contains haiku routing label"
 else
   fail ".claude/rules/agents.md missing haiku routing label"
 fi
 
-if grep -q 'medium.*sonnet\|sonnet' .claude/skills/spec-work/SKILL.md 2>/dev/null; then
+if grep -q 'medium.*sonnet\|sonnet' .claude/skills/spec-work/SKILL.md 2> /dev/null; then
   pass "spec-work/SKILL.md uses sonnet for medium-complexity implementation"
 else
   fail "spec-work/SKILL.md missing sonnet routing for medium-complexity tasks"
 fi
 
-if grep -q 'medium.*sonnet\|sonnet' templates/skills/spec-work/SKILL.template.md 2>/dev/null; then
+if grep -q 'medium.*sonnet\|sonnet' templates/skills/spec-work/SKILL.template.md 2> /dev/null; then
   pass "templates/skills/spec-work/SKILL.template.md uses sonnet for medium-complexity implementation"
 else
   fail "templates/skills/spec-work/SKILL.template.md missing sonnet routing for medium-complexity tasks"
 fi
 
-if grep -qi 'haiku.*explore\|explore.*haiku\|dedicated explore' .claude/rules/agents.md 2>/dev/null; then
+if grep -qi 'haiku.*explore\|explore.*haiku\|dedicated explore' .claude/rules/agents.md 2> /dev/null; then
   pass ".claude/rules/agents.md restricts haiku to dedicated explore agents"
 else
   fail ".claude/rules/agents.md missing haiku-for-explore-only restriction"
@@ -508,7 +512,7 @@ else
   fail "tests/routing-check.sh missing"
 fi
 
-if bash -n tests/routing-check.sh 2>/dev/null; then
+if bash -n tests/routing-check.sh 2> /dev/null; then
   pass "tests/routing-check.sh syntax valid"
 else
   fail "tests/routing-check.sh has syntax errors"
@@ -517,7 +521,7 @@ fi
 echo "--- Hook cleanup validation ---"
 # Verify removed hooks are not registered
 for removed_hook in "context-reinforcement" "context-monitor" "session-length" "file-index" "mcp-health" "cli-health" "tdd-checker" "permission-denied-log" "task-created-log" "config-change-audit"; do
-  if grep -q "$removed_hook" templates/claude/settings.json 2>/dev/null; then
+  if grep -q "$removed_hook" templates/claude/settings.json 2> /dev/null; then
     fail "$removed_hook still registered in template settings"
   else
     pass "$removed_hook removed from template settings"
@@ -525,7 +529,7 @@ for removed_hook in "context-reinforcement" "context-monitor" "session-length" "
 done
 
 # disableSkillShellExecution warning in CLAUDE.md
-if grep -q 'disableSkillShellExecution' templates/CLAUDE.md 2>/dev/null; then
+if grep -q 'disableSkillShellExecution' templates/CLAUDE.md 2> /dev/null; then
   pass "templates/CLAUDE.md documents disableSkillShellExecution risk"
 else
   fail "templates/CLAUDE.md missing disableSkillShellExecution warning"

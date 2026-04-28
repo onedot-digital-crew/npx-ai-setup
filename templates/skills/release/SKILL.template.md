@@ -29,6 +29,7 @@ bash .claude/scripts/release-prep.sh
 The output contains: dirty state, verify:release result, last tag, commits since tag, CHANGELOG [Unreleased], version info, and inventory counts.
 
 **Abort conditions** (check from prep output):
+
 - `UNCOMMITTED_CHANGES` → abort, commit or stash first
 - `Verify: FAIL` → fix before proceeding. If runtime validation is skipped because Claude is not authenticated, stop the release.
 - Detect version source: `package.json`, `Cargo.toml`, `pyproject.toml`, `version.txt`, or ask user
@@ -38,6 +39,7 @@ Do NOT re-run `git status`, `verify:release`, or read CHANGELOG — all data is 
 ### Phase 2: Version Bump
 
 Ask via AskUserQuestion (show commits + CHANGELOG [Unreleased]):
+
 - `patch` — bug fixes, docs, small improvements
 - `minor` — new features, new APIs, new capabilities
 - `major` — breaking changes

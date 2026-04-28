@@ -84,8 +84,8 @@ After all three agents return, present a combined inventory:
 
 For each discovered module from Agent 2, produce a structured 5W summary:
 
-| Module | What | Why | Who | When | Where |
-|--------|------|-----|-----|------|-------|
+| Module | What         | Why           | Who               | When         | Where     |
+| ------ | ------------ | ------------- | ----------------- | ------------ | --------- |
 | [name] | what it does | why it exists | who uses/calls it | when it runs | key files |
 
 Present the table to the user. Keep each cell to one sentence.
@@ -135,6 +135,7 @@ If A or B: for each selected module, generate a draft spec file at `specs/DDD-[m
 Use the next available spec number (scan `specs/` for the highest existing NNN, increment by 1 for each generated spec).
 
 After writing all specs, report:
+
 - How many specs were generated
 - File paths created
 - Suggested first spec to execute

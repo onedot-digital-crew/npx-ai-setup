@@ -17,7 +17,7 @@ section() { printf "\n=== %s ===\n\n" "$1"; }
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo "unknown")"
 printf "RELEASE_PREP_START %s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 printf "Branch: %s\n" "$BRANCH"
 
@@ -25,8 +25,8 @@ printf "Branch: %s\n" "$BRANCH"
 # 1. Dirty state check
 # ---------------------------------------------------------------------------
 section "DIRTY STATE"
-UNCOMMITTED="$(git status --porcelain 2>/dev/null || true)"
-STAGED="$(git diff --cached --name-only 2>/dev/null || true)"
+UNCOMMITTED="$(git status --porcelain 2> /dev/null || true)"
+STAGED="$(git diff --cached --name-only 2> /dev/null || true)"
 
 if [[ -n "$UNCOMMITTED" ]]; then
   printf "UNCOMMITTED_CHANGES\n%s\n" "$UNCOMMITTED"
@@ -42,7 +42,7 @@ fi
 # 2. verify:release output
 # ---------------------------------------------------------------------------
 section "VERIFY RELEASE"
-if grep -q '"verify:release"' package.json 2>/dev/null; then
+if grep -q '"verify:release"' package.json 2> /dev/null; then
   VERIFY_OUTPUT="$(npm run verify:release 2>&1)" && VERIFY_EXIT=0 || VERIFY_EXIT=$?
   printf "exit_code: %s\n" "$VERIFY_EXIT"
   printf "%s\n" "$VERIFY_OUTPUT"
@@ -55,17 +55,17 @@ fi
 # 3. Last tag + commits since
 # ---------------------------------------------------------------------------
 section "VERSION INFO"
-LAST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo "")"
-PKG_VERSION="$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")"
+LAST_TAG="$(git describe --tags --abbrev=0 2> /dev/null || echo "")"
+PKG_VERSION="$(node -p "require('./package.json').version" 2> /dev/null || echo "unknown")"
 
 printf "package.json version: %s\n" "$PKG_VERSION"
 printf "last git tag: %s\n" "${LAST_TAG:-"(none)"}"
 
 section "COMMITS SINCE LAST TAG"
 if [[ -n "$LAST_TAG" ]]; then
-  rtk_or_raw git log --oneline "${LAST_TAG}..HEAD" 2>/dev/null || echo "(no new commits)"
+  rtk_or_raw git log --oneline "${LAST_TAG}..HEAD" 2> /dev/null || echo "(no new commits)"
 else
-  rtk_or_raw git log --oneline -20 2>/dev/null || echo "(no commits)"
+  rtk_or_raw git log --oneline -20 2> /dev/null || echo "(no commits)"
 fi
 
 # ---------------------------------------------------------------------------
@@ -89,7 +89,7 @@ count_dir() {
   local dir="$1" label="$2"
   if [[ -d "$dir" ]]; then
     local n
-    n="$(find "$dir" -maxdepth 1 -type f -o -type l 2>/dev/null | wc -l | tr -d ' ')"
+    n="$(find "$dir" -maxdepth 1 -type f -o -type l 2> /dev/null | wc -l | tr -d ' ')"
     printf "%-20s %s\n" "$label" "$n"
   else
     printf "%-20s %s\n" "$label" "0 (dir missing)"
@@ -106,7 +106,7 @@ import json
 d = json.load(open('.claude/settings.json'))
 hooks = d.get('hooks', {})
 print(sum(len(v) if isinstance(v, list) else 1 for v in hooks.values()))
-" 2>/dev/null || echo "?")"
+" 2> /dev/null || echo "?")"
   printf "%-20s %s\n" "hooks:" "$HOOK_COUNT"
 fi
 

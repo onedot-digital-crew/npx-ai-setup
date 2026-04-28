@@ -10,9 +10,11 @@ sections:
 # Architecture
 
 ## Project Type
+
 CLI tool / npm package that automates Claude Code setup for new projects. Single-command installation of hooks, configuration, skills, and AI-curated context files.
 
 ## Directory Structure
+
 ```
 bin/                 # Entry points
   ai-setup.sh       # Project setup (detects stack, copies templates, generates context)
@@ -59,12 +61,14 @@ tests/              # Test suite
 ```
 
 ## Entry Points
+
 1. **ai-setup.sh** — Installs per-project configuration (run once per project)
 2. **global-setup.sh** — Installs workstation tools (run once per developer)
 3. **bin/ai-setup.sh --audit** — Validates existing installation
 4. **bin/ai-setup.sh --patch <pattern>** — Partial re-installation
 
 ## Data Flow
+
 1. **Detection:** Read package.json to infer stack (react, vue, typescript, tailwind, etc.)
 2. **Template Copy:** Copy templates/ contents to target project (.claude/, .github/, etc.)
 3. **Context Generation:** Generate STACK.md, ARCHITECTURE.md, CONVENTIONS.md based on detected stack
@@ -73,11 +77,13 @@ tests/              # Test suite
 6. **Verification:** Run tests to confirm installation
 
 ## Directory Ownership
+
 - **templates/** — end-user config (copied to projects); no dev/debug tooling
 - **.claude/** — maintainer/dev tools (metrics, debugging, hooks for this repo only)
 - **lib/skills.sh** — generic skills only; stack-specific skills belong in boilerplate repos (lib/boilerplate.sh) or via `/find-skills` on demand
 
 ## Key Patterns
+
 - **Modular bash:** Functions in lib/ modules, sourced via source_lib
 - **Hook-based safety:** Git hooks enforce security (pre-commit, post-commit)
 - **Template versioning:** All templates checked into git, versioned with package

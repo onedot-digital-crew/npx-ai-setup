@@ -24,8 +24,8 @@ echo "# Per-type totals"
 echo ""
 
 # Summarize by hook type using the audit output
-bash "$AUDIT_SCRIPT" 2>/dev/null | grep -v '^$' | grep -v '^#' | grep -v '^HOOK_TYPE' | grep -v '^---' | grep -v '^RESULT' | \
-awk '
+bash "$AUDIT_SCRIPT" 2> /dev/null | grep -v '^$' | grep -v '^#' | grep -v '^HOOK_TYPE' | grep -v '^---' | grep -v '^RESULT' |
+  awk '
   NF >= 3 {
     type = $1
     # Token column is 3rd field

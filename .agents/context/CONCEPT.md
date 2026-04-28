@@ -48,7 +48,7 @@ The core scaffolding (hooks, settings, commands) is template-based, not generate
 - **Maintainable**: updating templates in this repo propagates via version bumps
 - **Lightweight**: no LLM call needed for the deterministic parts
 
-Generation is reserved for the parts that *must* be project-specific: CLAUDE.md Commands section, ARCHITECTURE.md, STACK.md, CONVENTIONS.md. These require understanding the actual codebase.
+Generation is reserved for the parts that _must_ be project-specific: CLAUDE.md Commands section, ARCHITECTURE.md, STACK.md, CONVENTIONS.md. These require understanding the actual codebase.
 
 ## Curated Skills, Not AI Discovery
 

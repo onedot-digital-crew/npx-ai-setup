@@ -17,6 +17,7 @@ Produces a structured codebase overview via parallel agents. Use when exploring 
 ## Process
 
 ### 0a. Load existing context (alignment check)
+
 Read `.agents/context/CONCEPT.md` if present — analysis must respect documented project boundaries.
 Read `.agents/context/SUMMARY.md` if present — avoid duplicating fields that already exist.
 
@@ -33,10 +34,12 @@ git ls-files 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|py|go|rs|rb|php|java|kt|swi
 ### 1. Run the analysis
 
 **Fast mode**:
+
 - Use `@references/agents-fast-mode.md`
 - Spawn all 3 agents simultaneously
 
 **Batch mode**:
+
 - Use `@references/agents-batch-mode.md`
 - Split into batches of 8 files
 - Process in waves of 3 concurrent haiku agents
@@ -67,6 +70,7 @@ ls .agents/context/PATTERNS.md .agents/context/AUDIT.md 2>/dev/null
 If files already exist, ask before regenerating. If the user declines, stop after the report.
 
 Write:
+
 - `PATTERNS.md` from Architecture
 - `AUDIT.md` from Hotspots, Risks, Recommendations
 
@@ -94,6 +98,7 @@ git commit -m "chore: update project analysis artifacts"
 ```
 
 ## Rules
+
 - Run analysis agents in parallel.
 - `PATTERNS.md` and `AUDIT.md` are the primary deliverables.
 - If a batch fails, continue and note the gap.

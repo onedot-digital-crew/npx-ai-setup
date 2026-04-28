@@ -15,7 +15,7 @@
 # ---------------------------------------------------------------------------
 # has — check if a command exists
 # ---------------------------------------------------------------------------
-has() { command -v "$1" >/dev/null 2>&1; }
+has() { command -v "$1" > /dev/null 2>&1; }
 
 # ---------------------------------------------------------------------------
 # rtk_or_raw — run command through rtk if available, raw otherwise
@@ -34,7 +34,7 @@ rtk_or_raw() {
 # git_guard — abort if not inside a git repository
 # ---------------------------------------------------------------------------
 git_guard() {
-  if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
     echo "ERROR: Not inside a git repository" >&2
     exit 1
   fi
@@ -44,9 +44,9 @@ git_guard() {
 # main_branch — detect the main branch name (main or master)
 # ---------------------------------------------------------------------------
 main_branch() {
-  if git rev-parse --verify main >/dev/null 2>&1; then
+  if git rev-parse --verify main > /dev/null 2>&1; then
     echo "main"
-  elif git rev-parse --verify master >/dev/null 2>&1; then
+  elif git rev-parse --verify master > /dev/null 2>&1; then
     echo "master"
   else
     echo "main"

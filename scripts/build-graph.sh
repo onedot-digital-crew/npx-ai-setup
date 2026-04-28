@@ -28,7 +28,7 @@ log() { echo "[build-graph] $*" >&2; }
 
 mkdir -p "$OUTPUT_DIR"
 
-python3 - "$PROJECT_DIR" "$GRAPH_FILE" "$MANIFEST_FILE" "$TIMESTAMP" <<'PYEOF'
+python3 - "$PROJECT_DIR" "$GRAPH_FILE" "$MANIFEST_FILE" "$TIMESTAMP" << 'PYEOF'
 import sys, os, re, json
 
 project_dir   = sys.argv[1]

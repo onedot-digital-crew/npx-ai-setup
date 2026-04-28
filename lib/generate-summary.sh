@@ -23,7 +23,7 @@ fi
 _extract_profile() {
   local stack_file="$1"
   local profile
-  profile=$(grep -m1 'bundle:' "$stack_file" 2>/dev/null | sed 's/.*bundle: //;s/ v[0-9].*//')
+  profile=$(grep -m1 'bundle:' "$stack_file" 2> /dev/null | sed 's/.*bundle: //;s/ v[0-9].*//')
   echo "${profile:-unknown}"
 }
 
@@ -31,7 +31,7 @@ _extract_profile() {
 _extract_abstract() {
   local file="$1"
   local abstract
-  abstract=$(grep -m1 '^abstract:' "$file" 2>/dev/null | sed 's/^abstract: *"//;s/"$//')
+  abstract=$(grep -m1 '^abstract:' "$file" 2> /dev/null | sed 's/^abstract: *"//;s/"$//')
   echo "${abstract:-No abstract available.}"
 }
 
@@ -39,7 +39,7 @@ _extract_abstract() {
 _first_section_line() {
   local file="$1"
   # Skip comment line and frontmatter (--- blocks), return first ## heading
-  grep -m1 '^## ' "$file" 2>/dev/null || echo ""
+  grep -m1 '^## ' "$file" 2> /dev/null || echo ""
 }
 
 main() {
@@ -72,7 +72,7 @@ main() {
 
   mkdir -p "$target_dir"
 
-  cat > "${target_dir}/SUMMARY.md" <<EOF
+  cat > "${target_dir}/SUMMARY.md" << EOF
 <!-- bundle: ${profile} v1 -->
 ---
 abstract: "${stack_abstract}"

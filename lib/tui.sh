@@ -15,14 +15,14 @@ _tui_init() {
   TUI_HAS_COLOR="no"
   if [ "$TUI_IS_TTY" = "yes" ] && [ "$TUI_PLAIN" = "no" ]; then
     case "${TERM:-}" in
-      dumb|"") ;;
+      dumb | "") ;;
       *) TUI_HAS_COLOR="yes" ;;
     esac
   fi
 
   TUI_HAS_UNICODE="yes"
   case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
-    C|POSIX|"") TUI_HAS_UNICODE="no" ;;
+    C | POSIX | "") TUI_HAS_UNICODE="no" ;;
   esac
   [ "$TUI_PLAIN" = "yes" ] && TUI_HAS_UNICODE="no"
 
@@ -107,8 +107,8 @@ tui_cols() {
   _tui_init
   local cols=80
 
-  if [ "$TUI_IS_TTY" = "yes" ] && command -v tput >/dev/null 2>&1; then
-    cols=$(tput cols 2>/dev/null || echo 80)
+  if [ "$TUI_IS_TTY" = "yes" ] && command -v tput > /dev/null 2>&1; then
+    cols=$(tput cols 2> /dev/null || echo 80)
   fi
 
   [ -z "$cols" ] && cols=80
@@ -120,8 +120,8 @@ tui_rows() {
   _tui_init
   local rows=24
 
-  if [ "$TUI_IS_TTY" = "yes" ] && command -v tput >/dev/null 2>&1; then
-    rows=$(tput lines 2>/dev/null || echo 24)
+  if [ "$TUI_IS_TTY" = "yes" ] && command -v tput > /dev/null 2>&1; then
+    rows=$(tput lines 2> /dev/null || echo 24)
   fi
 
   [ -z "$rows" ] && rows=24
@@ -175,9 +175,18 @@ tui_truncate() {
   local ellipsis="..."
 
   [ "$TUI_HAS_UNICODE" = "yes" ] && ellipsis="…"
-  [ "$max" -le 0 ] && { printf ''; return 0; }
-  [ "${#text}" -le "$max" ] && { printf '%s' "$text"; return 0; }
-  [ "$max" -le "${#ellipsis}" ] && { printf '%s' "${text:0:$max}"; return 0; }
+  [ "$max" -le 0 ] && {
+    printf ''
+    return 0
+  }
+  [ "${#text}" -le "$max" ] && {
+    printf '%s' "$text"
+    return 0
+  }
+  [ "$max" -le "${#ellipsis}" ] && {
+    printf '%s' "${text:0:$max}"
+    return 0
+  }
   printf '%s%s' "${text:0:$((max - ${#ellipsis}))}" "$ellipsis"
 }
 
@@ -187,7 +196,10 @@ tui_center_block() {
   local line
 
   while IFS= read -r line; do
-    [ -z "$line" ] && { echo ""; continue; }
+    [ -z "$line" ] && {
+      echo ""
+      continue
+    }
     tui_center_line "$line" "$style"
   done
 }
@@ -226,7 +238,7 @@ tui_brand_banner() {
   fi
 
   if [ "$cols" -ge 44 ] && [ "$rows" -ge 24 ]; then
-    tui_center_block "${TUI_CYAN}" <<'EOF'
+    tui_center_block "${TUI_CYAN}" << 'EOF'
 ###################################
 ###################################
 ###################################
@@ -381,8 +393,8 @@ tui_spinner_stop() {
   local message="${2:-${TUI_SPINNER_LABEL:-Done}}"
 
   if [ -n "${TUI_SPINNER_PID:-}" ]; then
-    kill "$TUI_SPINNER_PID" 2>/dev/null || true
-    wait "$TUI_SPINNER_PID" 2>/dev/null || true
+    kill "$TUI_SPINNER_PID" 2> /dev/null || true
+    wait "$TUI_SPINNER_PID" 2> /dev/null || true
     TUI_SPINNER_PID=""
     printf '\r\033[K'
   fi
@@ -397,12 +409,12 @@ tui_spinner_stop() {
 
 tui_cleanup() {
   if [ -n "${TUI_SPINNER_PID:-}" ]; then
-    kill "$TUI_SPINNER_PID" 2>/dev/null || true
-    wait "$TUI_SPINNER_PID" 2>/dev/null || true
+    kill "$TUI_SPINNER_PID" 2> /dev/null || true
+    wait "$TUI_SPINNER_PID" 2> /dev/null || true
     TUI_SPINNER_PID=""
     printf '\r\033[K'
   fi
-  printf '\033[?25h' 2>/dev/null || true
+  printf '\033[?25h' 2> /dev/null || true
 }
 
 tui_abort_setup() {
@@ -416,11 +428,11 @@ tui_abort_setup() {
 _tui_read_escape_sequence() {
   local first="" second=""
 
-  if ! IFS= read -rsn1 -t 1 first </dev/tty; then
+  if ! IFS= read -rsn1 -t 1 first < /dev/tty; then
     return 1
   fi
 
-  if ! IFS= read -rsn1 -t 1 second </dev/tty; then
+  if ! IFS= read -rsn1 -t 1 second < /dev/tty; then
     printf '%s' "$first"
     return 0
   fi
@@ -443,7 +455,7 @@ tui_read_line() {
 
   printf '%s' "$prompt"
   while true; do
-    IFS= read -rsn1 key </dev/tty
+    IFS= read -rsn1 key < /dev/tty
     case "$key" in
       $'\x1b')
         tui_abort_setup
@@ -453,7 +465,7 @@ tui_read_line() {
         printf '%s' "$buffer"
         return 0
         ;;
-      $'\177'|$'\010')
+      $'\177' | $'\010')
         if [ -n "$buffer" ]; then
           buffer="${buffer%?}"
           printf '\b \b'
@@ -468,7 +480,7 @@ tui_read_line() {
 }
 
 ensure_valid_working_directory() {
-  if pwd -P >/dev/null 2>&1; then
+  if pwd -P > /dev/null 2>&1; then
     return 0
   fi
 
@@ -648,7 +660,7 @@ ask_single_choice_menu() {
 
   if [ "$TUI_IS_TTY" != "yes" ]; then
     local i
-    for ((i=0; i<count; i++)); do
+    for ((i = 0; i < count; i++)); do
       local label="${items[$i]%%|*}"
       local rest="${items[$i]#*|}"
       local description="${rest%%|*}"
@@ -675,12 +687,12 @@ ask_single_choice_menu() {
   fi
 
   printf '\033[?25l'
-  trap 'printf "\033[?25h"' RETURN 2>/dev/null || true
+  trap 'printf "\033[?25h"' RETURN 2> /dev/null || true
 
   local i row_lines total_lines
   row_lines=$(_tui_choice_row_lines)
   total_lines=$((count * row_lines + 1))
-  for ((i=0; i<count; i++)); do
+  for ((i = 0; i < count; i++)); do
     local label="${items[$i]%%|*}"
     local rest="${items[$i]#*|}"
     local description="${rest%%|*}"
@@ -722,7 +734,7 @@ ask_single_choice_menu() {
     esac
 
     printf "\033[${total_lines}A"
-    for ((i=0; i<count; i++)); do
+    for ((i = 0; i < count; i++)); do
       local label="${items[$i]%%|*}"
       local rest="${items[$i]#*|}"
       local description="${rest%%|*}"
@@ -797,13 +809,13 @@ ask_regen_parts() {
   printf '  %bSelect what to regenerate%b\n' "$TUI_BOLD" "$TUI_RESET"
 
   printf '\033[?25l'
-  trap 'printf "\033[?25h"' RETURN 2>/dev/null || true
+  trap 'printf "\033[?25h"' RETURN 2> /dev/null || true
 
   local row_lines total_lines
   row_lines=$(_tui_menu_row_lines)
   total_lines=$((count * row_lines + 1))
 
-  for ((i=0; i<count; i++)); do
+  for ((i = 0; i < count; i++)); do
     local checkbox="[ ]"
     [ "${checked[$i]}" -eq 1 ] && checkbox="[x]"
     if [ $i -eq $selected ]; then
@@ -838,7 +850,7 @@ ask_regen_parts() {
     esac
 
     printf "\033[${total_lines}A"
-    for ((i=0; i<count; i++)); do
+    for ((i = 0; i < count; i++)); do
       local checkbox="[ ]"
       [ "${checked[$i]}" -eq 1 ] && checkbox="[x]"
       if [ $i -eq $selected ]; then
@@ -852,7 +864,12 @@ ask_regen_parts() {
 
   printf '\033[?25h'
 
-  REGEN_CLAUDE_MD="no"; REGEN_AGENTS_MD="no"; REGEN_CONTEXT="no"; REGEN_COMMANDS="no"; REGEN_AGENTS="no"; REGEN_SKILLS="no"
+  REGEN_CLAUDE_MD="no"
+  REGEN_AGENTS_MD="no"
+  REGEN_CONTEXT="no"
+  REGEN_COMMANDS="no"
+  REGEN_AGENTS="no"
+  REGEN_SKILLS="no"
   [ "${checked[0]}" -eq 1 ] && REGEN_CLAUDE_MD="yes"
   [ "${checked[1]}" -eq 1 ] && REGEN_AGENTS_MD="yes"
   [ "${checked[2]}" -eq 1 ] && REGEN_CONTEXT="yes"
@@ -902,7 +919,7 @@ ask_update_parts() {
   cat_changes=("${SCAN_HOOKS_CHANGED:-0}" "${SCAN_SETTINGS_CHANGED:-0}" "${SCAN_CLAUDE_MD_CHANGED:-0}" "${SCAN_AGENTS_MD_CHANGED:-0}" "${SCAN_COMMANDS_CHANGED:-0}" "${SCAN_AGENTS_CHANGED:-0}" "${SCAN_OTHER_CHANGED:-0}")
   cat_news=("${SCAN_HOOKS_NEW:-0}" "${SCAN_SETTINGS_NEW:-0}" "${SCAN_CLAUDE_MD_NEW:-0}" "${SCAN_AGENTS_MD_NEW:-0}" "${SCAN_COMMANDS_NEW:-0}" "${SCAN_AGENTS_NEW:-0}" "${SCAN_OTHER_NEW:-0}")
 
-  for ((i=0; i<count; i++)); do
+  for ((i = 0; i < count; i++)); do
     local label
     label=$(_scan_category_label "${cat_changes[$i]}" "${cat_news[$i]}")
     if [ "$label" = "unchanged" ]; then
@@ -918,13 +935,13 @@ ask_update_parts() {
   printf '  %bSelect which categories to update%b\n' "$TUI_BOLD" "$TUI_RESET"
 
   printf '\033[?25l'
-  trap 'printf "\033[?25h"' RETURN 2>/dev/null || true
+  trap 'printf "\033[?25h"' RETURN 2> /dev/null || true
 
   local row_lines total_lines
   row_lines=$(_tui_menu_row_lines)
   total_lines=$((count * row_lines + 1))
 
-  for ((i=0; i<count; i++)); do
+  for ((i = 0; i < count; i++)); do
     local checkbox="[ ]"
     [ "${checked[$i]}" -eq 1 ] && checkbox="[x]"
     if [ $i -eq $selected ]; then
@@ -959,7 +976,7 @@ ask_update_parts() {
     esac
 
     printf "\033[${total_lines}A"
-    for ((i=0; i<count; i++)); do
+    for ((i = 0; i < count; i++)); do
       local checkbox="[ ]"
       [ "${checked[$i]}" -eq 1 ] && checkbox="[x]"
       if [ $i -eq $selected ]; then
@@ -973,7 +990,13 @@ ask_update_parts() {
 
   printf '\033[?25h'
 
-  UPD_HOOKS="no"; UPD_SETTINGS="no"; UPD_CLAUDE_MD="no"; UPD_AGENTS_MD="no"; UPD_COMMANDS="no"; UPD_AGENTS="no"; UPD_OTHER="no"
+  UPD_HOOKS="no"
+  UPD_SETTINGS="no"
+  UPD_CLAUDE_MD="no"
+  UPD_AGENTS_MD="no"
+  UPD_COMMANDS="no"
+  UPD_AGENTS="no"
+  UPD_OTHER="no"
   [ "${checked[0]}" -eq 1 ] && UPD_HOOKS="yes"
   [ "${checked[1]}" -eq 1 ] && UPD_SETTINGS="yes"
   [ "${checked[2]}" -eq 1 ] && UPD_CLAUDE_MD="yes"
@@ -1001,10 +1024,10 @@ ask_overwrite_modified() {
   if [ "$TUI_IS_TTY" = "yes" ]; then
     printf '%s' "$prompt"
     local answer=""
-    IFS= read -rsn1 answer </dev/tty
+    IFS= read -rsn1 answer < /dev/tty
     case "$answer" in
       $'\x1b') tui_abort_setup ;;
-      y|Y)
+      y | Y)
         printf '%s\n' "$answer"
         return 0
         ;;
@@ -1020,10 +1043,10 @@ ask_overwrite_modified() {
   fi
 
   local answer
-  IFS= read -r answer </dev/tty
+  IFS= read -r answer < /dev/tty
   [ "$answer" = $'\x1b' ] && tui_abort_setup
   case "$answer" in
-    y|Y|yes|YES|Yes) return 0 ;;
-    *)               return 1 ;;
+    y | Y | yes | YES | Yes) return 0 ;;
+    *) return 1 ;;
   esac
 }

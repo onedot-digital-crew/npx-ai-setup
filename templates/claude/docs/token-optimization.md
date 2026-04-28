@@ -6,14 +6,14 @@ This project uses a 6-layer architecture to minimize Claude's token consumption.
 
 Shell scripts in `.claude/scripts/*-prep.sh` gather data before Claude analyzes it. Green paths (e.g. `ALL_TESTS_PASSED`) cost zero LLM tokens.
 
-| Script | Green Path | Savings |
-|--------|-----------|---------|
-| `test-prep.sh` | `ALL_TESTS_PASSED` | 90%+ |
-| `scan-prep.sh` | `NO_VULNERABILITIES_FOUND` | 80-85% |
-| `commit-prep.sh` | `NO_STAGED_CHANGES` | 60-65% |
-| `review-prep.sh` | `NO_CHANGES_TO_REVIEW` | 70-75% |
-| `build-prep.sh` | `BUILD_PASSED` | 80-90% |
-| `lint-prep.sh` | `NO_LINT_ERRORS` | 80-85% |
+| Script           | Green Path                 | Savings |
+| ---------------- | -------------------------- | ------- |
+| `test-prep.sh`   | `ALL_TESTS_PASSED`         | 90%+    |
+| `scan-prep.sh`   | `NO_VULNERABILITIES_FOUND` | 80-85%  |
+| `commit-prep.sh` | `NO_STAGED_CHANGES`        | 60-65%  |
+| `review-prep.sh` | `NO_CHANGES_TO_REVIEW`     | 70-75%  |
+| `build-prep.sh`  | `BUILD_PASSED`             | 80-90%  |
+| `lint-prep.sh`   | `NO_LINT_ERRORS`           | 80-85%  |
 
 ### Writing a new prep-script
 
@@ -53,14 +53,14 @@ RTK hooks are activated via `rtk init --global` (runs during setup). They transp
 
 ### Key RTK commands
 
-| Command | What it does |
-|---------|-------------|
-| `rtk git status` | Compact status (-80%) |
-| `rtk git diff` | Condensed diff (-75%) |
-| `rtk test <cmd>` | Test output, failures only (-90%) |
-| `rtk lint` | Lint results grouped by rule (-80%) |
-| `rtk tsc` | TypeScript errors grouped by file (-80%) |
-| `rtk err <cmd>` | Errors/warnings only (-85%) |
+| Command          | What it does                             |
+| ---------------- | ---------------------------------------- |
+| `rtk git status` | Compact status (-80%)                    |
+| `rtk git diff`   | Condensed diff (-75%)                    |
+| `rtk test <cmd>` | Test output, failures only (-90%)        |
+| `rtk lint`       | Lint results grouped by rule (-80%)      |
+| `rtk tsc`        | TypeScript errors grouped by file (-80%) |
+| `rtk err <cmd>`  | Errors/warnings only (-85%)              |
 
 ## Layer 3: Hooks
 
@@ -79,11 +79,11 @@ Hooks in `.claude/hooks/` intercept tool calls:
 
 Skills use the cheapest model that can handle the task:
 
-| Model | Used for |
-|-------|---------|
-| haiku | `/commit`, explore agents, file search |
+| Model  | Used for                                        |
+| ------ | ----------------------------------------------- |
+| haiku  | `/commit`, explore agents, file search          |
 | sonnet | `/test`, `/commit`, `/release`, code generation |
-| opus | `/review` adversarial, `/spec`, architecture |
+| opus   | `/review` adversarial, `/spec`, architecture    |
 
 ## Layer 6: Green-Path Short-Circuits
 

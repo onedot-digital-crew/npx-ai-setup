@@ -4,9 +4,9 @@
 # Kill process + all child processes (Claude spawns sub-agents)
 kill_tree() {
   local pid=$1
-  pkill -P "$pid" 2>/dev/null || true
-  kill "$pid" 2>/dev/null || true
-  wait "$pid" 2>/dev/null || true
+  pkill -P "$pid" 2> /dev/null || true
+  kill "$pid" 2> /dev/null || true
+  wait "$pid" 2> /dev/null || true
 }
 
 _progress_bar_chars() {
@@ -24,7 +24,7 @@ progress_bar() {
   _tui_init
   local pid=$1 label=$2 est=${3:-120} max=${4:-600}
   local width=30 elapsed=0
-  while kill -0 "$pid" 2>/dev/null; do
+  while kill -0 "$pid" 2> /dev/null; do
     if [ "$elapsed" -ge "$max" ]; then
       kill_tree "$pid"
       printf "\r\033[K"
@@ -67,7 +67,7 @@ wait_parallel() {
   done
 
   # Reserve lines
-  for ((i=0; i<count; i++)); do echo ""; done
+  for ((i = 0; i < count; i++)); do echo ""; done
 
   local elapsed=0
 
@@ -76,7 +76,7 @@ wait_parallel() {
     # Move cursor up to overwrite
     printf "\033[${count}A"
 
-    for ((i=0; i<count; i++)); do
+    for ((i = 0; i < count; i++)); do
       local pid=${pids[$i]}
       local label=${labels[$i]}
       local est=${ests[$i]}
@@ -87,7 +87,7 @@ wait_parallel() {
         local bar
         bar=$(_progress_bar_chars "$width" 0)
         printf "\r\033[K  %b%s%b %-25s [%s] 100%% (%ds)\n" "$TUI_GREEN" "$TUI_OK" "$TUI_RESET" "$label" "$bar" "${done_at[$i]}"
-      elif ! kill -0 "$pid" 2>/dev/null; then
+      elif ! kill -0 "$pid" 2> /dev/null; then
         # Just finished
         done_at[$i]=$((elapsed > 0 ? elapsed : 1))
         local bar

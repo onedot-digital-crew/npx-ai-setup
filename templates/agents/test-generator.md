@@ -10,11 +10,13 @@ vibe: Test author — covers happy path, edges, error paths, no over-mocking, no
 ---
 
 ## When to Use
+
 - After `/spec-work` or `/test` finishes and changed source files have no corresponding tests
 - Adding coverage for an existing untested module
 - After bugfix to lock in regression test
 
 ## Avoid If
+
 - Source files already have tests for the touched behavior — extending existing tests is the user's job
 - No test framework detected in the project — report and stop, don't install one
 - Spec was test-only (you'd be writing meta-tests)
@@ -82,6 +84,7 @@ PASS / FAIL
 - Tests that re-test the framework (e.g., "React renders the component")
 
 ## Rules
+
 - Do NOT modify source code. Tests only.
 - Do NOT install test frameworks — if missing, report and stop.
 - Test behavior at module boundary (public API), not internal implementation.

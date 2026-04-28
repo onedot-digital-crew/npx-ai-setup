@@ -19,12 +19,12 @@ append_error() {
 
 # ── Determine files to check ────────────────────────────────────────────────
 # Changed files since HEAD; fall back to all .sh files if not in a git repo
-if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
-  CHANGED_SH=$(git diff --name-only HEAD 2>/dev/null | grep '\.sh$' || true)
-  STAGED_SH=$(git diff --name-only --cached 2>/dev/null | grep '\.sh$' || true)
+if command -v git > /dev/null 2>&1 && git rev-parse --git-dir > /dev/null 2>&1; then
+  CHANGED_SH=$(git diff --name-only HEAD 2> /dev/null | grep '\.sh$' || true)
+  STAGED_SH=$(git diff --name-only --cached 2> /dev/null | grep '\.sh$' || true)
   SH_FILES=$(printf '%s\n%s\n' "$CHANGED_SH" "$STAGED_SH" | sort -u | grep -v '^$' || true)
 else
-  SH_FILES=$(find . -name '*.sh' -not -path './.git/*' 2>/dev/null || true)
+  SH_FILES=$(find . -name '*.sh' -not -path './.git/*' 2> /dev/null || true)
 fi
 
 # ── bash -n syntax check ────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ while IFS= read -r f; do
 done <<< "$SH_FILES"
 
 # ── shellcheck ──────────────────────────────────────────────────────────────
-if command -v shellcheck >/dev/null 2>&1 && [ -n "$SH_FILES" ]; then
+if command -v shellcheck > /dev/null 2>&1 && [ -n "$SH_FILES" ]; then
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     [ -f "$f" ] || continue

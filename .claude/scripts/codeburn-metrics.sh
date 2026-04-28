@@ -11,20 +11,26 @@ RAW_JSON=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --period) PERIOD="${2:-30d}"; shift 2 ;;
-    --json) RAW_JSON=true; shift ;;
+    --period)
+      PERIOD="${2:-30d}"
+      shift 2
+      ;;
+    --json)
+      RAW_JSON=true
+      shift
+      ;;
     *) shift ;;
   esac
 done
 
 case "$PERIOD" in
   today) KEY="Today" ;;
-  7d)    KEY="7 Days" ;;
-  30d)   KEY="30 Days" ;;
-  *)     KEY="30 Days" ;;
+  7d) KEY="7 Days" ;;
+  30d) KEY="30 Days" ;;
+  *) KEY="30 Days" ;;
 esac
 
-if ! command -v codeburn >/dev/null 2>&1; then
+if ! command -v codeburn > /dev/null 2>&1; then
   echo "codeburn CLI not installed — skip token enrichment" >&2
   echo "install: brew install agentseal/tap/codeburn  (or see https://github.com/AgentSeal/codeburn)" >&2
   exit 1
@@ -33,7 +39,7 @@ fi
 TMP="${TMPDIR:-/tmp}/codeburn-export-$$.json"
 trap 'rm -f "$TMP"' EXIT
 
-codeburn export --format json -o "$TMP" >/dev/null 2>&1 || {
+codeburn export --format json -o "$TMP" > /dev/null 2>&1 || {
   echo "codeburn export failed" >&2
   exit 1
 }

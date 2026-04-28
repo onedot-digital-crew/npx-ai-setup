@@ -16,6 +16,7 @@ Run the full suite. "Pre-existing failure" is no excuse — fix it.
 ## Mock Audit on Dependency Changes
 
 When adding a dependency (subprocess, I/O, API call) to an existing function:
+
 - Grep for the function in test files
 - Add mocks to EVERY existing test — #1 cause of CI-only failures
 

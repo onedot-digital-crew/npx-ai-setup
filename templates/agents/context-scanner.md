@@ -9,6 +9,7 @@ max_turns: 8
 ## Task
 
 Scan this project and return a ≤1-page summary with:
+
 1. `stack_profile` — run `bash lib/detect-stack.sh 2>/dev/null | grep stack_profile` or infer from file patterns
 2. Key versions — read `package.json`, `composer.json`, or `*.toml` for top 5 runtime deps
 3. Context files present — list files in `.agents/context/` with line counts

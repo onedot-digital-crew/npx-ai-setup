@@ -49,7 +49,7 @@ log_skill_skip() {
   stacks_line=$(awk '
     /^---$/ { if (front == 0) { front = 1; next } else { exit } }
     front == 1 && /^stacks:/ { print; exit }
-  ' "$skill_file" 2>/dev/null || true)
+  ' "$skill_file" 2> /dev/null || true)
 
   # Extract the bracket value from "stacks: [...]"
   local stacks_val

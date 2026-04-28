@@ -15,17 +15,23 @@ LOCKED_HOME="$TMP_ROOT/home-locked"
 PASS=0
 FAIL=0
 
-pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
-fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
+pass() {
+  echo "  PASS: $1"
+  PASS=$((PASS + 1))
+}
+fail() {
+  echo "  FAIL: $1"
+  FAIL=$((FAIL + 1))
+}
 
 cleanup() {
-  chmod -R u+w "$TMP_ROOT" 2>/dev/null || true
+  chmod -R u+w "$TMP_ROOT" 2> /dev/null || true
   rm -rf "$TMP_ROOT"
 }
 trap cleanup EXIT
 
 require_tool() {
-  if ! command -v "$1" >/dev/null 2>&1; then
+  if ! command -v "$1" > /dev/null 2>&1; then
     echo "❌ Missing required tool for integration test: $1"
     exit 1
   fi
@@ -36,11 +42,14 @@ link_tool() {
   local source
   # type -P returns only filesystem paths, skipping shell functions/aliases/builtins.
   # Necessary because tools like find/ls may be wrapped as bash functions in some shells.
-  source="$(type -P "$tool" 2>/dev/null || true)"
+  source="$(type -P "$tool" 2> /dev/null || true)"
   if [ -z "$source" ]; then
     # Fallback: scan standard system paths directly when type -P returns nothing
     for candidate in "/usr/bin/$tool" "/bin/$tool" "/usr/local/bin/$tool" "/opt/homebrew/bin/$tool"; do
-      if [ -x "$candidate" ]; then source="$candidate"; break; fi
+      if [ -x "$candidate" ]; then
+        source="$candidate"
+        break
+      fi
     done
   fi
   if [ -z "$source" ]; then
@@ -60,7 +69,7 @@ write_toolchain() {
 
   rm -f "$BIN_DIR/npm" "$BIN_DIR/npx" "$BIN_DIR/curl"
 
-  cat > "$BIN_DIR/npm" <<'EOF'
+  cat > "$BIN_DIR/npm" << 'EOF'
 #!/bin/bash
 case "${1:-}" in
   view) exit 1 ;;
@@ -74,12 +83,12 @@ esac
 exit 0
 EOF
 
-  cat > "$BIN_DIR/npx" <<'EOF'
+  cat > "$BIN_DIR/npx" << 'EOF'
 #!/bin/bash
 exit 127
 EOF
 
-  cat > "$BIN_DIR/curl" <<'EOF'
+  cat > "$BIN_DIR/curl" << 'EOF'
 #!/bin/bash
 exit 1
 EOF
@@ -90,7 +99,7 @@ EOF
 prepare_project() {
   local project_dir="$1"
   mkdir -p "$project_dir"
-  cat > "$project_dir/package.json" <<'EOF'
+  cat > "$project_dir/package.json" << 'EOF'
 {
   "name": "integration-fixture",
   "version": "1.0.0",
@@ -107,7 +116,7 @@ run_install() {
 
   (
     cd "$project_dir"
-    HOME="$home_dir" PATH="$BIN_DIR" /bin/bash "$ROOT_DIR/bin/ai-setup.sh" >"$log_file" 2>&1 </dev/null
+    HOME="$home_dir" PATH="$BIN_DIR" /bin/bash "$ROOT_DIR/bin/ai-setup.sh" > "$log_file" 2>&1 < /dev/null
   ) || status=$?
 
   # Capture install rc but don't propagate — caller's asserts validate artifacts.
@@ -128,7 +137,7 @@ assert_log_contains() {
   local log_file="$1"
   local needle="$2"
   local label="$3"
-  if grep -qF "$needle" "$log_file" 2>/dev/null; then
+  if grep -qF "$needle" "$log_file" 2> /dev/null; then
     pass "$label"
   else
     fail "$label"
@@ -168,7 +177,7 @@ check_unsupported_flag_rejection() {
   local status=0
   (
     cd "$project_dir"
-    HOME="$home_dir" PATH="$BIN_DIR" /bin/bash "$ROOT_DIR/bin/ai-setup.sh" --audit >"$log_file" 2>&1 </dev/null
+    HOME="$home_dir" PATH="$BIN_DIR" /bin/bash "$ROOT_DIR/bin/ai-setup.sh" --audit > "$log_file" 2>&1 < /dev/null
   ) || status=$?
 
   if [ "$status" -ne 0 ]; then
@@ -203,7 +212,7 @@ echo "--- Scenario: writable home ---"
 prepare_project "$WRITABLE_PROJECT"
 mkdir -p "$WRITABLE_HOME"
 mkdir -p "$WRITABLE_HOME/.claude"
-cat > "$WRITABLE_HOME/.claude/settings.json" <<'EOF'
+cat > "$WRITABLE_HOME/.claude/settings.json" << 'EOF'
 {"statusLine":"preconfigured"}
 EOF
 WRITABLE_LOG="$TMP_ROOT/writable.log"
@@ -217,7 +226,7 @@ echo "--- Scenario: locked home (read-only global dir) ---"
 prepare_project "$LOCKED_PROJECT"
 mkdir -p "$LOCKED_HOME"
 mkdir -p "$LOCKED_HOME/.claude"
-cat > "$LOCKED_HOME/.claude/settings.json" <<'EOF'
+cat > "$LOCKED_HOME/.claude/settings.json" << 'EOF'
 {"statusLine":"preconfigured"}
 EOF
 chmod 555 "$LOCKED_HOME" "$LOCKED_HOME/.claude"

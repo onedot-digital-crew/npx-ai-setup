@@ -36,7 +36,7 @@ extract_frontmatter_key() {
     case "$line" in
       "${key}:"*)
         val="${line#${key}:}"
-        val="${val# }"   # strip single leading space (standard YAML)
+        val="${val# }" # strip single leading space (standard YAML)
         val="${val#\"}"
         val="${val%\"}"
         echo "$val"
@@ -111,10 +111,10 @@ extract_sections() {
   }
 
   # Standard set in priority order
-  emit_context_file "$CONTEXT_DIR/STACK.md"        3 "Stack"        || true
+  emit_context_file "$CONTEXT_DIR/STACK.md" 3 "Stack" || true
   emit_context_file "$CONTEXT_DIR/ARCHITECTURE.md" 3 "Architecture" || true
-  emit_context_file "$CONTEXT_DIR/AUDIT.md"        5 "Audit"        || true
-  emit_context_file "$CONTEXT_DIR/CONCEPT.md"      0 "Concept"      || true
+  emit_context_file "$CONTEXT_DIR/AUDIT.md" 5 "Audit" || true
+  emit_context_file "$CONTEXT_DIR/CONCEPT.md" 0 "Concept" || true
 
   # Auto-discover: any other *.md in context/ with frontmatter abstract:
   # (STORYBLOK.md, SHOPIFY.md, WORDPRESS.md, custom domain context, etc.)
@@ -123,7 +123,7 @@ extract_sections() {
       [ -f "$file" ] || continue
       base=$(basename "$file" .md)
       case "$base" in
-        STACK|ARCHITECTURE|AUDIT|CONCEPT|SUMMARY|PATTERNS|CONVENTIONS) continue ;;
+        STACK | ARCHITECTURE | AUDIT | CONCEPT | SUMMARY | PATTERNS | CONVENTIONS) continue ;;
       esac
       # Title-case heading: STORYBLOK -> Storyblok
       heading=$(echo "$base" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
@@ -132,11 +132,11 @@ extract_sections() {
   fi
 
   # GRAPH: top hub files (most-imported — navigation context)
-  if [ -f "$GRAPH_FILE" ] && command -v jq >/dev/null 2>&1; then
-    hub_count=$(jq -r '.stats.top_hubs | length' "$GRAPH_FILE" 2>/dev/null || echo "0")
+  if [ -f "$GRAPH_FILE" ] && command -v jq > /dev/null 2>&1; then
+    hub_count=$(jq -r '.stats.top_hubs | length' "$GRAPH_FILE" 2> /dev/null || echo "0")
     if [ "$hub_count" -gt 0 ]; then
       echo "## Top Hubs"
-      jq -r '.stats.top_hubs[] | "  - \(.file) (\(.imported_by)x imports)"' "$GRAPH_FILE" 2>/dev/null | head -5
+      jq -r '.stats.top_hubs[] | "  - \(.file) (\(.imported_by)x imports)"' "$GRAPH_FILE" 2> /dev/null | head -5
       echo ""
     fi
   fi

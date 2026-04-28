@@ -14,8 +14,8 @@ claude mcp disable <name>     # deactivate globally without removing from .mcp.j
 
 The following MCP servers are expected to be configured globally (not in project `.mcp.json`):
 
-| Server | Purpose | Install |
-|--------|---------|---------|
+| Server     | Purpose                              | Install                                                   |
+| ---------- | ------------------------------------ | --------------------------------------------------------- |
 | `context7` | Library and API documentation lookup | `claude mcp add context7 -- npx -y @upstash/context7-mcp` |
 
 If `use context7` fails, the server is not active globally. Verify with `claude mcp list`.

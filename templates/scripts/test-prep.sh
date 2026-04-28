@@ -20,7 +20,7 @@ detect_test_cmd() {
         const pref = ['test:unit','test:ci','test','vitest','jest'];
         for (const k of pref) if (s[k]) { console.log(k); break; }
       } catch(e) {}
-    " 2>/dev/null || true)
+    " 2> /dev/null || true)
 
     if [[ -n "$scripts" ]]; then
       echo "npm run $scripts"
@@ -49,7 +49,7 @@ detect_test_cmd() {
   fi
 
   # Python: pytest preferred, then unittest
-  if [[ -f "pytest.ini" ]] || [[ -f "pyproject.toml" ]] || [[ -f "setup.cfg" ]] || { [[ -d "tests" ]] && ls tests/*.py 2>/dev/null | head -1 | grep -q .; }; then
+  if [[ -f "pytest.ini" ]] || [[ -f "pyproject.toml" ]] || [[ -f "setup.cfg" ]] || { [[ -d "tests" ]] && ls tests/*.py 2> /dev/null | head -1 | grep -q .; }; then
     if has pytest; then
       echo "pytest"
       return
@@ -66,7 +66,7 @@ detect_test_cmd() {
   fi
 
   # Makefile with test target
-  if [[ -f "Makefile" ]] && grep -q "^test:" Makefile 2>/dev/null; then
+  if [[ -f "Makefile" ]] && grep -q "^test:" Makefile 2> /dev/null; then
     echo "make test"
     return
   fi
@@ -81,9 +81,9 @@ filter_failures() {
   local input="$1"
 
   # Keep lines with: FAIL, Error, error, FAILED, assert, expect, ✗, ×, ✕
-  echo "$input" | grep -E '(FAIL|Error|error|FAILED|assert|expect|✗|×|✕|at .*:[0-9]+|^  +\+|^  +-)' \
-    | head -100 \
-    || echo "$input" | tail -50
+  echo "$input" | grep -E '(FAIL|Error|error|FAILED|assert|expect|✗|×|✕|at .*:[0-9]+|^  +\+|^  +-)' |
+    head -100 ||
+    echo "$input" | tail -50
 }
 
 # ---------------------------------------------------------------------------

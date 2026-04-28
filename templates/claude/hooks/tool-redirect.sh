@@ -16,9 +16,9 @@ fi
 
 # ── 1. WebFetch → defuddle ───────────────────────────────────────────────────
 if [ "$TOOL_NAME" = "WebFetch" ]; then
-  command -v defuddle >/dev/null 2>&1 || exit 0
+  command -v defuddle > /dev/null 2>&1 || exit 0
   URL=$(echo "$INPUT" | jq -r '.tool_input.url // empty')
-  cat >&2 <<EOF
+  cat >&2 << EOF
 WebFetch blocked — defuddle first (project rule: .claude/rules/general.md).
 Saves ~80% tokens vs. WebFetch.
 
@@ -45,7 +45,7 @@ if [ "$TOOL_NAME" = "Bash" ]; then
     # head/cat/tail → Read tool
     if echo "$CMD" | grep -qE '^[[:space:]]*(head|cat|tail)[[:space:]]+[^|;&]*$'; then
       BIN=$(echo "$CMD" | grep -oE '^[[:space:]]*(head|cat|tail)' | tr -d ' ')
-      cat >&2 <<EOF
+      cat >&2 << EOF
 Bash blocked — use Read tool instead of \`$BIN\` (project rule: CLAUDE.md agents.md).
 
 Read tool supports offset/limit for partial reads and avoids line-number re-encoding.
@@ -56,7 +56,7 @@ EOF
 
     # grep → Grep tool
     if echo "$CMD" | grep -qE '^[[:space:]]*grep[[:space:]]'; then
-      cat >&2 <<EOF
+      cat >&2 << EOF
 Bash blocked — use Grep tool instead of \`grep\` (project rule: CLAUDE.md agents.md).
 
 Grep tool uses bfs/ugrep under the hood (macOS/Linux native) with better defaults and glob filtering.
@@ -66,9 +66,9 @@ EOF
     fi
 
     # find → Glob tool (only when used for listing — skip -exec/-delete/-print0)
-    if echo "$CMD" | grep -qE '^[[:space:]]*find[[:space:]]' && \
-       ! echo "$CMD" | grep -qE '\-(exec|delete|print0|prune|ok|execdir)\b'; then
-      cat >&2 <<EOF
+    if echo "$CMD" | grep -qE '^[[:space:]]*find[[:space:]]' &&
+      ! echo "$CMD" | grep -qE '\-(exec|delete|print0|prune|ok|execdir)\b'; then
+      cat >&2 << EOF
 Bash blocked — use Glob tool instead of \`find\` (project rule: CLAUDE.md agents.md).
 
 Glob supports patterns like \`**/*.ts\` and returns sorted by mtime.
@@ -81,17 +81,17 @@ EOF
   # Check for bare `git` (not prefixed with rtk)
   # Match: git at start, after &&, after ;, or after whitespace — NOT inside .git/ paths
   # Skip entirely if rtk is not installed on this workstation (avoid deadlock).
-  if command -v rtk >/dev/null 2>&1 && \
-     echo "$CMD" | grep -qE '(^|[[:space:];&])git[[:space:]]' && \
-     ! echo "$CMD" | grep -qE '(^|[[:space:];&])rtk[[:space:]]+git[[:space:]]' && \
-     ! echo "$CMD" | grep -qE '\.git/'; then
+  if command -v rtk > /dev/null 2>&1 &&
+    echo "$CMD" | grep -qE '(^|[[:space:];&])git[[:space:]]' &&
+    ! echo "$CMD" | grep -qE '(^|[[:space:];&])rtk[[:space:]]+git[[:space:]]' &&
+    ! echo "$CMD" | grep -qE '\.git/'; then
     # Extract git subcommand (first word after git, ignoring rev-range args like HASH..HEAD)
     SUBCMD=$(echo "$CMD" | grep -oE '(^|[[:space:];&])git[[:space:]]+[a-z-]+' | head -1 | awk '{print $NF}')
 
     # GitHub-specific operations → suggest gh
     case "$SUBCMD" in
-      push|pull|fetch|clone|remote)
-        cat >&2 <<EOF
+      push | pull | fetch | clone | remote)
+        cat >&2 << EOF
 Bash blocked — use \`gh\` for GitHub operations (project rule: .claude/rules/git.md).
 
 Instead of: git $SUBCMD ...
@@ -103,7 +103,7 @@ EOF
         exit 2
         ;;
       *)
-        cat >&2 <<EOF
+        cat >&2 << EOF
 Bash blocked — prefix git with rtk for token savings (project rule: CLAUDE.md).
 
 Instead of: git $SUBCMD ...

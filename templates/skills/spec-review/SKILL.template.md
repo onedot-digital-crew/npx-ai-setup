@@ -20,9 +20,11 @@ Reviews spec $ARGUMENTS and its code changes against acceptance criteria. Use af
 ## Process
 
 ### 1. Find the spec
+
 If `$ARGUMENTS` is a number, open `specs/NNN-*.md`. If empty, list specs with status `in-review` and ask. The spec must be `in-review`.
 
 ### 2. Read the spec
+
 Read Goal, Steps, Acceptance Criteria, Files to Modify, and Out of Scope. Note checked items.
 
 ### 3. Inspect code changes
@@ -39,6 +41,7 @@ Read the 5 most changed files completely; review only diff hunks for the rest. D
 ### 4. Review against spec
 
 **4a — Goal achievement**:
+
 - Verify the Goal is actually met, not just checkboxes
 - Verify acceptance criteria against diff
 - Flag Out of Scope violations
@@ -49,10 +52,12 @@ Verify each acceptance criterion with commands and file reads.
 Check `.agents/context/CONVENTIONS.md` DoD section if it exists.
 
 **4c — Code quality** (existence-checked spawns; missing optional agents skip silently):
+
 - Always: `code-reviewer` (model: sonnet) — required, must exist
 - High complexity AND `staff-reviewer` exists → spawn in parallel with code-reviewer
 
 **4d — Conditional reviewers**:
+
 - Spec touches auth/user-input/API/secrets AND `security-reviewer` exists → spawn
 - Spec touches DB/loops/rendering/data-fetching/bundle AND `performance-reviewer` exists → spawn
 
@@ -64,18 +69,22 @@ Use the `DOCTOR CHECK` section from prep output. Any FAIL blocks APPROVED.
 ### 5. Verdict
 
 **APPROVED** — All criteria met, agents returned PASS/CONCERNS:
+
 1. Status → `completed`, move to `specs/completed/`
 2. Proceed to Finishing Gate
 
 **CHANGES REQUESTED** — Agent FAIL or criteria not met:
+
 1. Add `## Review Feedback` with fix instructions, status → `in-progress`
 
 **REJECTED** — Critical security/regression:
+
 1. Status → `blocked`, add feedback, suggest next steps
 
 ### 6. Finishing Gate (APPROVED only)
 
 Ask user via `AskUserQuestion`:
+
 1. **Merge to main** — `git checkout main && git merge BRANCH && git branch -d BRANCH`
 2. **Push and create PR** — `git push -u origin BRANCH && gh pr create`
 3. **Keep branch** — report name, no changes
@@ -91,6 +100,7 @@ Clean up worktree after merge/push/discard if one exists.
 - REJECTED: `> 🔧 Naechster Schritt: Kritische Issues fixen, dann /spec-review NNN erneut`
 
 ## Rules
+
 - **Read-only** — no code changes, only spec status/feedback updates.
 - Read actual code before commenting — never speculate.
 - Focus on spec compliance and bugs over style.

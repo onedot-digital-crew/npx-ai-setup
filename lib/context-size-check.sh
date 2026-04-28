@@ -21,11 +21,11 @@ fi
 # --- Parse caps using python3 or jq ---
 read_cap() {
   local key="$1"
-  if command -v python3 >/dev/null 2>&1; then
+  if command -v python3 > /dev/null 2>&1; then
     python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(d.get(sys.argv[2], ''))" \
-      "$CAPS_FILE" "$key" 2>/dev/null
-  elif command -v jq >/dev/null 2>&1; then
-    jq -r --arg k "$key" '.[$k] // ""' "$CAPS_FILE" 2>/dev/null
+      "$CAPS_FILE" "$key" 2> /dev/null
+  elif command -v jq > /dev/null 2>&1; then
+    jq -r --arg k "$key" '.[$k] // ""' "$CAPS_FILE" 2> /dev/null
   else
     echo "" # no parser — caps unavailable
   fi
@@ -57,7 +57,7 @@ for filepath in "$CONTEXT_DIR"/*.md; do
   fi
 
   if [ "$line_count" -gt "$cap" ]; then
-    over=$(( line_count - cap ))
+    over=$((line_count - cap))
     if [ "$RELAXED" = "1" ]; then
       echo "RELAXED: $filename has $line_count lines (cap: $cap, over by $over)"
     else
@@ -73,7 +73,7 @@ done
 total_cap="$(read_cap "total_directory")"
 if [ -n "$total_cap" ]; then
   if [ "$total_lines" -gt "$total_cap" ]; then
-    over=$(( total_lines - total_cap ))
+    over=$((total_lines - total_cap))
     if [ "$RELAXED" = "1" ]; then
       echo "RELAXED TOTAL: $total_lines lines (cap: $total_cap, over by $over)"
     else

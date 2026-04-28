@@ -23,12 +23,12 @@ SCAN_DIRS="sections snippets templates layout blocks"
 
 _file_type() {
   case "${1#"$PROJECT_DIR/"}" in
-    sections/*)  echo "section" ;;
-    snippets/*)  echo "snippet" ;;
+    sections/*) echo "section" ;;
+    snippets/*) echo "snippet" ;;
     templates/*) echo "template" ;;
-    layout/*)    echo "layout" ;;
-    blocks/*)    echo "block" ;;
-    *)           echo "liquid" ;;
+    layout/*) echo "layout" ;;
+    blocks/*) echo "block" ;;
+    *) echo "liquid" ;;
   esac
 }
 
@@ -39,7 +39,7 @@ for d in $SCAN_DIRS; do
   while IFS= read -r f; do
     LIQUID_LIST="${LIQUID_LIST}${f}
 "
-  done < <(find "$dir" -maxdepth 2 -name "*.liquid" 2>/dev/null | sort)
+  done < <(find "$dir" -maxdepth 2 -name "*.liquid" 2> /dev/null | sort)
 done
 
 LIQUID_LIST=$(printf '%s' "$LIQUID_LIST" | grep -v '^$')
@@ -164,16 +164,16 @@ in_comment { next }
     if (length(frag) > 0) printf "%s\tasset\tassets/%s\n", current, frag
   }
 }
-' > "${TMPDIR_GRAPH}/all_edges.tsv" 2>/dev/null || true
+' > "${TMPDIR_GRAPH}/all_edges.tsv" 2> /dev/null || true
 
 # ---------------------------------------------------------------------------
 # Stats: top rendered snippets (render+include, shape: {file, count})
 # ---------------------------------------------------------------------------
 
-awk -F'\t' '$2=="render"||$2=="include"{print $3}' "${TMPDIR_GRAPH}/all_edges.tsv" 2>/dev/null | \
-  sort | uniq -c | sort -rn | head -10 | \
+awk -F'\t' '$2=="render"||$2=="include"{print $3}' "${TMPDIR_GRAPH}/all_edges.tsv" 2> /dev/null |
+  sort | uniq -c | sort -rn | head -10 |
   awk '{cnt=$1; $1=""; sub(/^ /,""); printf "%s\t%s\n", cnt, $0}' \
-  > "${TMPDIR_GRAPH}/top_rendered.tsv" || true
+    > "${TMPDIR_GRAPH}/top_rendered.tsv" || true
 
 # ---------------------------------------------------------------------------
 # Fix 1 [HIGH:95]: top_hubs — top 10 files by ALL incoming edges
@@ -181,13 +181,13 @@ awk -F'\t' '$2=="render"||$2=="include"{print $3}' "${TMPDIR_GRAPH}/all_edges.ts
 # Counts all relations (render, include, section, schema-block, asset, render-dynamic)
 # ---------------------------------------------------------------------------
 
-awk -F'\t' '$3!="*" && length($3)>0 {print $3}' "${TMPDIR_GRAPH}/all_edges.tsv" 2>/dev/null | \
-  sort | uniq -c | sort -rn | head -10 | \
+awk -F'\t' '$3!="*" && length($3)>0 {print $3}' "${TMPDIR_GRAPH}/all_edges.tsv" 2> /dev/null |
+  sort | uniq -c | sort -rn | head -10 |
   awk '{cnt=$1; $1=""; sub(/^ /,""); printf "%s\t%s\n", cnt, $0}' \
-  > "${TMPDIR_GRAPH}/top_hubs.tsv" || true
+    > "${TMPDIR_GRAPH}/top_hubs.tsv" || true
 
 # Referenced names for orphan detection
-awk -F'\t' '$2=="render"||$2=="include"{print $3}' "${TMPDIR_GRAPH}/all_edges.tsv" 2>/dev/null | \
+awk -F'\t' '$2=="render"||$2=="include"{print $3}' "${TMPDIR_GRAPH}/all_edges.tsv" 2> /dev/null |
   sed 's|.*/||; s|\.liquid$||' | sort -u \
   > "${TMPDIR_GRAPH}/referenced_names.txt" || true
 
@@ -198,14 +198,14 @@ awk -F'\t' '$2=="render"||$2=="include"{print $3}' "${TMPDIR_GRAPH}/all_edges.ts
 for dir_name in snippets blocks; do
   dir="${PROJECT_DIR}/${dir_name}"
   [ -d "$dir" ] || continue
-  find "$dir" -maxdepth 1 -name "*.liquid" 2>/dev/null | sort | \
-  while IFS= read -r snippet_f; do
-    snippet_name=$(basename "$snippet_f" .liquid)
-    snippet_rel="${snippet_f#"$PROJECT_DIR/"}"
-    if ! grep -qxF "$snippet_name" "${TMPDIR_GRAPH}/referenced_names.txt" 2>/dev/null; then
-      printf '%s\n' "$snippet_rel"
-    fi
-  done
+  find "$dir" -maxdepth 1 -name "*.liquid" 2> /dev/null | sort |
+    while IFS= read -r snippet_f; do
+      snippet_name=$(basename "$snippet_f" .liquid)
+      snippet_rel="${snippet_f#"$PROJECT_DIR/"}"
+      if ! grep -qxF "$snippet_name" "${TMPDIR_GRAPH}/referenced_names.txt" 2> /dev/null; then
+        printf '%s\n' "$snippet_rel"
+      fi
+    done
 done > "${TMPDIR_GRAPH}/orphans.txt" || true
 
 # ---------------------------------------------------------------------------

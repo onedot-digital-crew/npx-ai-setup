@@ -4,11 +4,11 @@
 
 Always set `model:` when spawning subagents.
 
-| Model | Use for |
-|-------|---------|
-| `haiku` | ALL Explore/search/read-only agents (12× cheaper than Sonnet) |
+| Model    | Use for                                                             |
+| -------- | ------------------------------------------------------------------- |
+| `haiku`  | ALL Explore/search/read-only agents (12× cheaper than Sonnet)       |
 | `sonnet` | Implementation, code generation, tests (default for impl subagents) |
-| `opus` | Architecture review, spec creation |
+| `opus`   | Architecture review, spec creation                                  |
 
 Never spawn Explore/search without `haiku`. Code-writing agents must use `sonnet`.
 
@@ -29,11 +29,11 @@ Full trigger/model table: `.claude/docs/agent-dispatch.md`.
 
 Three graph files may exist — each covers a different layer:
 
-| File | What it maps | When present |
-|------|-------------|--------------|
-| `.agents/context/graph.json` | JS/TS import graph (auto-generated) | JS/TS projects |
-| `.agents/context/liquid-graph.json` | Liquid section/snippet/template deps | Shopify only |
-| `graphify-out/graph.json` | Semantic community graph (opt-in) | After `/graphify build` |
+| File                                | What it maps                         | When present            |
+| ----------------------------------- | ------------------------------------ | ----------------------- |
+| `.agents/context/graph.json`        | JS/TS import graph (auto-generated)  | JS/TS projects          |
+| `.agents/context/liquid-graph.json` | Liquid section/snippet/template deps | Shopify only            |
+| `graphify-out/graph.json`           | Semantic community graph (opt-in)    | After `/graphify build` |
 
 **JS/TS import graph** (`.agents/context/graph.json`):
 
@@ -57,6 +57,7 @@ jq --arg f "components/Header.vue" \
 ## Graph-Before-Read Enforcement
 
 The `graph-before-read.sh` hook (PreToolUse: Read/Grep/Glob) enforces this rule automatically:
+
 - Read on a file >500 lines → stderr hint to check graph.json first
 - 4× Grep in a row without a graph query → hint to use graph instead
 

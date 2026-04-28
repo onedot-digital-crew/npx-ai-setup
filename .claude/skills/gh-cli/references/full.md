@@ -2,7 +2,6 @@
 
 > Full command reference for gh CLI v2.85.0. Load this file on demand when the core commands in SKILL.md are insufficient.
 
-
 # GitHub CLI (gh)
 
 Comprehensive reference for GitHub CLI (gh) - work seamlessly with GitHub from the command line.

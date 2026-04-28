@@ -11,7 +11,7 @@ CB_LOG="/tmp/claude-cb-${PROJ_HASH}.log"
 SETUP_JSON="$PROJECT_ROOT/.ai-setup.json"
 [ ! -f "$SETUP_JSON" ] && exit 0
 
-INSTALLED=$(jq -r '.version // empty' "$SETUP_JSON" 2>/dev/null | sed 's/^v//' | tr -d '[:space:]')
+INSTALLED=$(jq -r '.version // empty' "$SETUP_JSON" 2> /dev/null | sed 's/^v//' | tr -d '[:space:]')
 [ -z "$INSTALLED" ] && exit 0
 
 # Cache per project (24h TTL)
@@ -19,9 +19,9 @@ CACHE="/tmp/ai-setup-update-$(echo "$PROJECT_ROOT" | cksum | cut -d' ' -f1).txt"
 
 if [ -f "$CACHE" ]; then
   if [ "$(uname)" = "Darwin" ]; then
-    AGE=$(( $(date +%s) - $(stat -f %m "$CACHE") ))
+    AGE=$(($(date +%s) - $(stat -f %m "$CACHE")))
   else
-    AGE=$(( $(date +%s) - $(stat -c %Y "$CACHE") ))
+    AGE=$(($(date +%s) - $(stat -c %Y "$CACHE")))
   fi
 
   if [ "$AGE" -lt 86400 ]; then
@@ -32,17 +32,17 @@ if [ -f "$CACHE" ]; then
       IFS=. read -ra _a <<< "$LATEST"
       IFS=. read -ra _b <<< "$INSTALLED"
       for _i in 0 1 2; do
-        [ "${_a[$_i]:-0}" -gt "${_b[$_i]:-0}" ] 2>/dev/null && _gt=1 && break
-        [ "${_a[$_i]:-0}" -lt "${_b[$_i]:-0}" ] 2>/dev/null && break
+        [ "${_a[$_i]:-0}" -gt "${_b[$_i]:-0}" ] 2> /dev/null && _gt=1 && break
+        [ "${_a[$_i]:-0}" -lt "${_b[$_i]:-0}" ] 2> /dev/null && break
       done
       # Throttle notification: max once per 4h to avoid spamming every user prompt
       NOTIFY_STAMP="/tmp/ai-setup-update-notified-$(echo "$PROJECT_ROOT" | cksum | cut -d' ' -f1).txt"
       NOTIFY_AGE=99999
       if [ -f "$NOTIFY_STAMP" ]; then
         if [ "$(uname)" = "Darwin" ]; then
-          NOTIFY_AGE=$(( $(date +%s) - $(stat -f %m "$NOTIFY_STAMP") ))
+          NOTIFY_AGE=$(($(date +%s) - $(stat -f %m "$NOTIFY_STAMP")))
         else
-          NOTIFY_AGE=$(( $(date +%s) - $(stat -c %Y "$NOTIFY_STAMP") ))
+          NOTIFY_AGE=$(($(date +%s) - $(stat -c %Y "$NOTIFY_STAMP")))
         fi
       fi
       if [ "$_gt" -eq 1 ] && [ "$NOTIFY_AGE" -gt 14400 ]; then
@@ -59,23 +59,23 @@ fi
   LATEST=""
 
   # GitHub releases (no jq — release body can contain control chars that break jq)
-  if [ -z "$LATEST" ] && command -v curl >/dev/null 2>&1; then
-    LATEST=$(curl -fsSL --max-time 5 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/releases/latest" 2>/dev/null \
-      | grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' \
-      | head -1 \
-      | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"//;s/"//' \
-      | tr -d '[:space:]' \
-      | sed 's/^v//')
+  if [ -z "$LATEST" ] && command -v curl > /dev/null 2>&1; then
+    LATEST=$(curl -fsSL --max-time 5 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/releases/latest" 2> /dev/null |
+      grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' |
+      head -1 |
+      sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"//;s/"//' |
+      tr -d '[:space:]' |
+      sed 's/^v//')
   fi
 
   # Fallback: tags (if no releases exist yet)
-  if [ -z "$LATEST" ] && command -v curl >/dev/null 2>&1; then
-    LATEST=$(curl -fsSL --max-time 5 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/tags?per_page=1" 2>/dev/null \
-      | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' \
-      | head -1 \
-      | sed 's/.*"name"[[:space:]]*:[[:space:]]*"//;s/"//' \
-      | tr -d '[:space:]' \
-      | sed 's/^v//')
+  if [ -z "$LATEST" ] && command -v curl > /dev/null 2>&1; then
+    LATEST=$(curl -fsSL --max-time 5 "https://api.github.com/repos/onedot-digital-crew/npx-ai-setup/tags?per_page=1" 2> /dev/null |
+      grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' |
+      head -1 |
+      sed 's/.*"name"[[:space:]]*:[[:space:]]*"//;s/"//' |
+      tr -d '[:space:]' |
+      sed 's/^v//')
   fi
 
   [ -n "$LATEST" ] && printf '%s\n' "$LATEST" > "$CACHE"

@@ -38,7 +38,7 @@ is_allowlisted() {
 
 is_binary() {
   # grep -I exits 1 for binary files; use it to probe
-  grep -qI "" "$1" 2>/dev/null
+  grep -qI "" "$1" 2> /dev/null
 }
 
 # ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ while IFS= read -r file; do
   # Scan for patterns; collect matches with line numbers
   while IFS= read -r match; do
     VIOLATIONS+=("$match")
-  done < <(grep -En "$PATTERNS" "$file" 2>/dev/null | sed "s|^|${file}:|" || true)
+  done < <(grep -En "$PATTERNS" "$file" 2> /dev/null | sed "s|^|${file}:|" || true)
 
 done < <(git ls-files)
 

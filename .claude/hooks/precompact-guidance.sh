@@ -28,18 +28,18 @@ Concrete next actions — specific file to edit, command to run, spec step to co
 Compact rule: preserve ALL of the above. Detail loss here = wasted tokens re-discovering context later.'
 
 # Block compact when a spec is actively in-progress (avoid losing spec context mid-work)
-if command -v grep >/dev/null 2>&1; then
-  ACTIVE_SPEC=$(grep -rl "^Status: in-progress" "${CLAUDE_PROJECT_DIR:-.}/specs/" 2>/dev/null | head -1)
+if command -v grep > /dev/null 2>&1; then
+  ACTIVE_SPEC=$(grep -rl "^Status: in-progress" "${CLAUDE_PROJECT_DIR:-.}/specs/" 2> /dev/null | head -1)
   if [ -n "$ACTIVE_SPEC" ]; then
     SPEC_NAME=$(basename "$ACTIVE_SPEC")
-    printf '{"decision":"block","reason":"Spec %s is in-progress — compact blocked to preserve spec context. Finish or pause the spec first."}' "$SPEC_NAME" 2>/dev/null || true
+    printf '{"decision":"block","reason":"Spec %s is in-progress — compact blocked to preserve spec context. Finish or pause the spec first."}' "$SPEC_NAME" 2> /dev/null || true
     exit 0
   fi
 fi
 
-if command -v jq >/dev/null 2>&1; then
-  printf '%s' "$guidance" | jq -Rs '{"additionalContext": .}' 2>/dev/null || true
-elif command -v python3 >/dev/null 2>&1; then
-  printf '%s' "$guidance" | python3 -c 'import json,sys; print(json.dumps({"additionalContext": sys.stdin.read()}))' 2>/dev/null || true
+if command -v jq > /dev/null 2>&1; then
+  printf '%s' "$guidance" | jq -Rs '{"additionalContext": .}' 2> /dev/null || true
+elif command -v python3 > /dev/null 2>&1; then
+  printf '%s' "$guidance" | python3 -c 'import json,sys; print(json.dumps({"additionalContext": sys.stdin.read()}))' 2> /dev/null || true
 fi
 exit 0

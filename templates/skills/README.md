@@ -5,15 +5,18 @@ Claude-first, portable where practical.
 ## Frontmatter
 
 Required:
+
 - `name`
 - `description`
 
 Recommended:
+
 - `user-invocable`
 - `effort`
 - `allowed-tools`
 
 Optional:
+
 - `argument-hint`
 - `model`
 - `disable-model-invocation`
@@ -21,6 +24,7 @@ Optional:
 ## Body Structure
 
 Preferred order:
+
 1. Short opening sentence
 2. `## Process`
 3. `## Rules`

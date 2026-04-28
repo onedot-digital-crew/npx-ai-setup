@@ -28,6 +28,7 @@ Autonomous execution mode. Execute the task described in **$ARGUMENTS** fully in
 ## Overrides
 
 This mode **overrides** the following CLAUDE.md rules for this session:
+
 - "Human Approval Gates" → disabled
 - "Task Complexity Routing" → no stopping for model confirmation
 - "AskUserQuestion preference" → no questions at all

@@ -16,9 +16,9 @@ install_copilot() {
 # Map Claude Code model shorthand to OpenCode provider/model format
 _oc_model() {
   case "$1" in
-    haiku)  echo "anthropic/claude-haiku-4-5" ;;
-    opus)   echo "anthropic/claude-opus-4-6" ;;
-    *)      echo "anthropic/claude-sonnet-4-6" ;;
+    haiku) echo "anthropic/claude-haiku-4-5" ;;
+    opus) echo "anthropic/claude-opus-4-6" ;;
+    *) echo "anthropic/claude-sonnet-4-6" ;;
   esac
 }
 
@@ -30,12 +30,12 @@ generate_opencode_config() {
     return 0
   fi
 
-  command -v jq &>/dev/null || return 0
+  command -v jq &> /dev/null || return 0
 
   # MCP servers from .mcp.json
   local mcp_block="{}"
   if [ -f .mcp.json ]; then
-    mcp_block=$(jq '.mcpServers // {}' .mcp.json 2>/dev/null || echo "{}")
+    mcp_block=$(jq '.mcpServers // {}' .mcp.json 2> /dev/null || echo "{}")
   fi
 
   # Agents from .claude/agents/*.md
@@ -54,8 +54,8 @@ generate_opencode_config() {
 
       # Map tools to OpenCode permissions
       local t_read=false t_write=false t_bash=false
-      case "$atools" in *Read*|*Glob*|*Grep*) t_read=true ;; esac
-      case "$atools" in *Write*|*Edit*) t_write=true ;; esac
+      case "$atools" in *Read* | *Glob* | *Grep*) t_read=true ;; esac
+      case "$atools" in *Write* | *Edit*) t_write=true ;; esac
       case "$atools" in *Bash*) t_bash=true ;; esac
 
       agents_json=$(printf '%s' "$agents_json" | jq -c \
@@ -111,12 +111,12 @@ generate_opencode_config() {
       "mcp": $mcp,
       "agent": $agents,
       "command": $commands
-    }' > opencode.json 2>/dev/null
+    }' > opencode.json 2> /dev/null
 
   if [ -f opencode.json ]; then
     local ac=0 cc=0
-    ac=$(echo "$agents_json" | jq 'keys | length' 2>/dev/null || echo 0)
-    cc=$(echo "$commands_json" | jq 'keys | length' 2>/dev/null || echo 0)
+    ac=$(echo "$agents_json" | jq 'keys | length' 2> /dev/null || echo 0)
+    cc=$(echo "$commands_json" | jq 'keys | length' 2> /dev/null || echo 0)
     echo "  opencode.json created ($ac agents, $cc commands, OpenCode compatibility)"
   fi
 }
@@ -132,20 +132,20 @@ install_statusline_project() {
     return 0
   fi
 
-  if ! mkdir -p "${CLAUDE_HOME}" 2>/dev/null; then
+  if ! mkdir -p "${CLAUDE_HOME}" 2> /dev/null; then
     tui_warn "Statusline skipped: cannot create ${CLAUDE_HOME}"
     return 0
   fi
 
-  if ! cp "$src" "$dest" 2>/dev/null; then
+  if ! cp "$src" "$dest" 2> /dev/null; then
     tui_warn "Statusline skipped: cannot write ${dest}"
     return 0
   fi
-  chmod +x "$dest" 2>/dev/null || true
+  chmod +x "$dest" 2> /dev/null || true
 
   # Register in settings.json
-  if [ -f "$settings" ] && command -v node &>/dev/null; then
-    if ! node - "$settings" "$dest" <<'NODESCRIPT'
+  if [ -f "$settings" ] && command -v node &> /dev/null; then
+    if ! node - "$settings" "$dest" << 'NODESCRIPT'; then
 const fs = require('fs');
 const cfg_path = process.argv[2];
 const script = process.argv[3];
@@ -154,7 +154,6 @@ try { cfg = JSON.parse(fs.readFileSync(cfg_path, 'utf8')); } catch(e) { process.
 cfg.statusLine = script;
 fs.writeFileSync(cfg_path, JSON.stringify(cfg, null, 2) + '\n');
 NODESCRIPT
-    then
       tui_warn "Statusline installed, but could not update ${settings}"
     fi
   fi
