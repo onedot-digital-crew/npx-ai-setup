@@ -97,10 +97,23 @@ Specialist routing (matrix above): frontend/backend agents only when they exist 
 
 When spec modifies SKILL.md files: before step 8, spawn Haiku subagent to diff original vs trimmed. Classify each removed element as REDUNDANT or CRITICAL. Any CRITICAL → stop, re-add before completing.
 
+## Status Lifecycle (canonical vocab — enforced)
+
+| Status | Trigger | Side effect |
+|---|---|---|
+| `draft` | `/spec` created | file in `specs/NNN-*.md` |
+| `in-progress` | step 5 (this skill) | — |
+| `in-review` | step 12 start | — |
+| `blocked` | stall guard / verify-fail | stop, surface to user |
+| `completed` | step 12 review PASS | **move file to `specs/completed/NNN-*.md`** |
+
+Use ONLY these five values. Synonyms like `done`, `finished`, `closed`, `merged` are forbidden — `spec-board.sh` won't bucket them and the spec disappears from the board.
+`completed` without the file move = drift; `/spec-board` will flag it as Type B.
+
 ## Rules
 - Follow spec exactly. Check off each step. No commits during `/spec-work`.
 - Blocked → set `blocked`, ask user. Skill references → invoke via `Skill` tool.
-- `--complete`: skip steps 9-12 (changelog + verify + test + review). Use when manually verified.
+- `--complete`: skip steps 9-12 (changelog + verify + test + review). Use when manually verified. STILL set `Status: completed` AND move file to `specs/completed/`.
 - Missing optional agents never block — log skip and continue.
 
 ## Next Step

@@ -27,12 +27,15 @@ After the board output above, scan only the specs shown on the board for inconsi
 
 **Type C — Stale in-review**: spec has status `in-review` but 0 steps are checked `- [x]`. Indicates a verify-fail abort or manual status change without implementation. Needs investigation.
 
+**Type D — Non-canonical status**: spec uses a synonym (`done`, `finished`, `closed`, `merged`, `resolved`, `wip`, `review`, …) instead of the canonical enum (`draft|in-progress|in-review|blocked|completed`). The board normalizes for display, but the file vocab must be canonical.
+
 If any inconsistencies are found, list them:
 ```
 ⚠️  Inconsistencies found:
   #NNN Title — all steps done but status is "in-progress" (Type A)
   #MMM Title — status "completed" but file not in specs/completed/ (Type B)
   #PPP Title — status "in-review" but 0 steps checked (Type C — needs attention)
+  #QQQ Title — status "done" — non-canonical, should be "completed" (Type D)
 ```
 
 Use `AskUserQuestion` to ask:
@@ -47,6 +50,7 @@ C) Skip — leave as is
   - Type A: set status to `completed`, move `specs/NNN-*.md` → `specs/completed/NNN-*.md`
   - Type B: move `specs/NNN-*.md` → `specs/completed/NNN-*.md`
   - Type C: reset status to `draft` so the spec re-enters the queue for implementation
+  - Type D: rewrite status to canonical (synonym map: `done|finished|closed|merged|resolved`→`completed`, `wip|working|active`→`in-progress`, `review|reviewing`→`in-review`); if the canonical value is `completed`, also move file to `specs/completed/`
   - Report each fix.
 - **Option B**: For each inconsistency, ask individually with AskUserQuestion (Fix / Skip). For Type C, offer two fix options: "Reset to draft" or "Keep in-review (manual review needed)".
 - **Option C**: Skip all fixes.

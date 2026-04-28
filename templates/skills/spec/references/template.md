@@ -40,3 +40,9 @@
 - Use today's date (`date +%Y-%m-%d`). Filename: `NNN-lowercase-hyphens.md`.
 - Create `specs/` and `specs/completed/` if missing.
 - After split: cross-reference NNN ↔ NNN+1, note which runs first.
+
+## Status Lifecycle (canonical vocab)
+
+`Status:` MUST be one of: `draft` → `in-progress` → `in-review` → `completed` (or `blocked` from any state).
+NEVER use synonyms like `done`, `finished`, `closed`, `merged`, `resolved` — `spec-board.sh` only buckets the canonical set; anything else hides the spec from the board.
+On `completed`: ALWAYS move the file from `specs/NNN-*.md` to `specs/completed/NNN-*.md`. Status without move = drift (Type B).

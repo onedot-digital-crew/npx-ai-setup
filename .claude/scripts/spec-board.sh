@@ -144,6 +144,17 @@ progress_bar() {
   printf '[%s%s]' "$(repeat_char '#' "$filled")" "$(repeat_char '.' "$empty")"
 }
 
+# Map non-canonical status synonyms to canonical so drifted specs still render.
+# Canonical vocab: draft | in-progress | in-review | blocked | completed
+normalize_status() {
+  case "$1" in
+    done|finished|closed|merged|resolved) echo "completed" ;;
+    wip|working|active)                   echo "in-progress" ;;
+    review|reviewing)                     echo "in-review" ;;
+    *)                                    echo "$1" ;;
+  esac
+}
+
 process_spec_file() {
   local f="$1"
   local base row status_field
@@ -152,6 +163,7 @@ process_spec_file() {
   case "$base" in README.md|TEMPLATE.md|template.md) return 0 ;; esac
   row="$(parse_spec "$f")"
   status_field="$(echo "$row" | cut -d'|' -f3)"
+  status_field="$(normalize_status "$status_field")"
   case "$status_field" in
     draft)       BACKLOG+=("$row") ;;
     in-progress) INPROG+=("$row") ;;
@@ -168,6 +180,7 @@ while IFS= read -r f; do
   case "$local_base" in README.md|TEMPLATE.md|template.md) continue ;; esac
   row="$(parse_spec "$f")"
   status_field="$(echo "$row" | cut -d'|' -f3)"
+  status_field="$(normalize_status "$status_field")"
   [ "$status_field" = "completed" ] && continue
   case "$status_field" in
     draft)       BACKLOG+=("$row") ;;
