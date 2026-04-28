@@ -58,7 +58,7 @@ install_claude_mem_settings() {
 
   if [ ! -f "$target" ]; then
     cp "$source_tpl" "$target"
-    echo "  🧠 Claude-Mem settings installed → ${target} (haiku, 30 obs, skip noise tools)"
+    echo "  🧠 Claude-Mem settings installed → ${target} (haiku, MCP-only mode: 0 obs auto-injected, use mcp-search tools on demand)"
     return 0
   fi
 
