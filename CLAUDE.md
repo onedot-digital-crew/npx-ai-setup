@@ -39,6 +39,12 @@ For full details: `@.agents/context/STACK.md` (or `ARCHITECTURE.md`, `CONVENTION
 
 Use the `/test` skill only when you need Claude to analyze failures or auto-fix.
 
+## Model Routing
+- `haiku` — explore agents and direct read-only tool use only; never for implementation.
+- `sonnet` — default for implementation subagents (code generation, tests).
+- `opus` — architecture review, spec creation.
+Details: `.claude/rules/agents.md`.
+
 ## Build Artifact Rules
 
 Never read or search inside: `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`.

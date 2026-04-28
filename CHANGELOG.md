@@ -10,7 +10,57 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- feat(plugins): merge missing template keys into ~/.claude-mem/settings.json on update; warn on misplaced CLAUDE_MEM_* keys in project .claude/settings.json
+## [v2.2.2] — 2026-04-28
+
+<!-- slack-announcement -->
+:package: *@onedot/ai-setup v2.2.2 — Cleanup & Hook-Drift-Sync*
+
+*Was ist neu:*
+:wrench: *Hook-Drift fixed* — 5 Hooks waren in `.claude/hooks/` (lokal) neuer als in `templates/claude/hooks/`. Zielprojekte bekamen veraltete Versionen. Jetzt synced: `precompact-guidance` (Spec-in-progress Block), `spec-stop-guard` (case-insensitive Status), `protect-files` (Vite-Assets-Guard schlanker), `context-freshness` (Directory-Guard), `tool-redirect` (RTK_SKIP-Bypass auch lokal).
+:gear: *Effort-Levels integriert* — `xhigh` für Opus 4.7, `${CLAUDE_EFFORT}`-Awareness in `spec-work` und `analyze` Skills. `agents.md` template + lokal mit Effort-Tabelle.
+:memo: *MCP alwaysLoad* — `context7` MCP ist jetzt mit `alwaysLoad: true` konfiguriert (kein Tool-Search-Deferral). Kritische Dokumentations-Lookups immer verfügbar.
+:zap: *1h Prompt-Cache TTL* — `ENABLE_PROMPT_CACHING_1H: "1"` ins Template — alle neu installierten Projekte nutzen 1h statt 5min Cache.
+:broom: *Dead-Code raus* — `install_spec_skills()` + `SPEC_SKILLS_MAP` aus `lib/`, `Skill(spec-validate)` aus settings.local.json, doppelte Spec-IDs konsolidiert.
+:bug: *Integration-Test repariert* — pre-existing Hang in `tests/integration.sh` (find als bash function statt binary) gefixt + `claude-mem` graceful skip wenn `~/.claude-mem` read-only.
+
+*Update:* `npx github:onedot-digital-crew/npx-ai-setup`
+<!-- /slack-announcement -->
+
+### Added
+- `alwaysLoad: true` for context7 in `.mcp.json` and `templates/mcp.json` (Claude Code 2.1.121 feature)
+- `ENABLE_PROMPT_CACHING_1H: "1"` in `templates/claude/settings.json` env-Block
+- `${CLAUDE_EFFORT}` Override-Block in `spec-work` and `analyze` skill templates (xhigh/max → opus + full review agents)
+- `paths:` YAML frontmatter in `templates/claude/rules/workflow.md` for selective rule loading
+- Effort-Levels section (`medium → high → xhigh → max`) in `templates/claude/rules/agents.md`
+- Model-Routing section in root `CLAUDE.md` with haiku/sonnet/opus scope rules
+- Status reports under `specs/`: `setup-cleanup-audit-2026-04-28.md`, `setup-cleanup-audit-FULL-2026-04-28.md`, `changelog-audit-full-2026-04-28.md`
+
+### Changed
+- Sync `precompact-guidance.sh` template ← local: blocks compact when a spec is `Status: in-progress`
+- Sync `spec-stop-guard.sh` template ← local: case-insensitive status detection
+- Sync `protect-files.sh` template ← local: leaner Vite-Assets-Guard, removes deny-rule duplicates
+- Sync `context-freshness.sh` template ← local: directory-guard for Bash-CLI-repos
+- Sync `tool-redirect.sh` local ← template: `RTK_SKIP=1` emergency bypass + `command -v rtk` guard before git rewrites
+- Sync 7 skills (`analyze`, `challenge`, `commit`, `release`, `research`, `spec-work`, `spec-work-all`) frontmatter local ← template (added `effort:`, `model:`, `allowed-tools:` YAML)
+- `tool-redirect.sh` comment: "ripgrep" → "bfs/ugrep" (Claude Code 2.1.117 native search)
+- `agents.md` (.claude/rules): wording aligned with `routing-check.sh` ("default for implementation subagents", "never for implementation")
+
+### Fixed
+- (plugins): merge missing template keys into ~/.claude-mem/settings.json on update; warn on misplaced CLAUDE_MEM_* keys in project .claude/settings.json
+- (plugins): `install_claude_mem_settings` no longer hard-fails when `~/.claude-mem` is read-only — graceful skip
+- (tests): `tests/integration.sh` `link_tool` uses `type -P` instead of `command -v` to skip bash-function wrappers (find/ls); `run_install` captures install rc to `.rc` file instead of triggering `set -e`
+- (tests): `tests/claude-runtime.sh` replaces removed `/context-load STACK.md` skill with `@.agents/context/STACK.md` direct read
+- (tests): `tests/smoke.sh` removes obsolete `install_spec_skills` requirement check, removes `docs/claude-governance.md` existence check, skips brainstorm/research files in spec-status assertion
+
+### Removed
+- `lib/setup-skills.sh:install_spec_skills()` — superseded by generic `install_skills()` (loops `templates/skills/`)
+- `lib/core.sh:SPEC_SKILLS_MAP` — superseded by dynamic `TEMPLATE_MAP`
+- `lib/update.sh:367` — `SPEC_SKILLS_MAP` reference in `all_mappings`
+- `Skill(spec-validate)` from `.claude/settings.local.json` (skill cleaned up via `cleanup_known_orphans`)
+- Root files: `30` (0-byte artifact), `BACKLOG.md`, `ONBOARDING.md`, `docs/claude-governance.md`
+- Stale eval artifacts: `.claude/findings-log.md`, `.claude/token-optimizer-eval-2-response.md`, `.claude/skills/skill-creator-workspace/` (~500 KB, 50 token-optimizer eval files)
+- Duplicate brainstorm: `specs/brainstorms/113-octopus-adaptation-brainstorm.md` (moved to `specs/completed/`)
+- Spec ID 633 collision: `633-claudemd-auto-compression.md` renumbered → `648-`
 
 ## [v2.2.1] — 2026-04-24
 

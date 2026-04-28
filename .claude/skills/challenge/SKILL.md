@@ -1,10 +1,14 @@
 ---
 name: challenge
 description: "Challenge and critically evaluate this feature idea before any implementation: **$ARGUMENTS**"
+user-invocable: true
 effort: high
 model: sonnet
 argument-hint: "<feature idea or description>"
-allowed-tools: Read, Glob, Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 Challenge and critically evaluate this feature idea before any implementation: **$ARGUMENTS**
@@ -23,36 +27,35 @@ Challenge and critically evaluate this feature idea before any implementation: *
 
 ## Process
 
-### Phase 1 — Restate the Idea
+### 1. Restate the idea
 Summarize the proposed feature in 1-2 sentences in your own words to confirm understanding.
 
-### Phase 2 — Concept Fit
-Read `.agents/context/CONCEPT.md` now. If the file does not exist, skip the concept fit check entirely and note "No CONCEPT.md found — concept fit check skipped." Otherwise, evaluate:
+### 2. Concept fit
+Read `.agents/context/CONCEPT.md` if it exists. If not, note that the concept fit check was skipped. Otherwise evaluate:
 - Does this align with the project's core principles as defined in `.agents/context/CONCEPT.md`?
 - Does it fit the distinction described in CONCEPT.md (e.g., templates not generation, or the project's primary abstraction)?
 - Would this belong in the core layer, or is it scope creep?
 
 Rate concept fit: **ALIGNED / BORDERLINE / MISALIGNED** (skip if CONCEPT.md missing)
 
-### Phase 3 — Necessity
-Is this actually needed? Challenge it hard:
+### 3. Necessity
 - What problem does it solve? Is that problem real or hypothetical?
 - What happens if we don't build it? Can users work without it?
 - Is this solving a problem that users have reported, or a problem we imagined?
 
-### Phase 4 — Overhead & Maintenance Cost
+### 4. Overhead and maintenance
 - How much ongoing maintenance does this add?
 - Does it increase the surface area of the tool (more flags, more config, more docs)?
 - What breaks if this feature has a bug?
 - Does it add complexity that slows down the core promise of this project?
 
-### Phase 5 — Complexity & Risks
+### 5. Complexity and risks
 - How many files need to change?
 - Does this require new dependencies?
 - What edge cases or failure modes exist?
 - Does this interact with hooks, agents, or the CLI in unexpected ways?
 
-### Phase 6 — Simpler Alternatives
+### 6. Simpler alternatives
 List 1-3 alternatives, including:
 - A simpler version of the same idea (scope reduction)
 - A workaround that avoids building anything new
@@ -60,9 +63,9 @@ List 1-3 alternatives, including:
 
 Also scan the codebase with Glob and Grep to check if similar functionality already exists.
 
-### Phase 6b — Stakeholder Perspectives
+### 7. Stakeholder perspectives
 
-Simulate the following viewpoints. Skip any perspective that is clearly not applicable (e.g. skip UX for a CLI-only backend change — state "N/A" with a one-line reason).
+Simulate these viewpoints. Skip clearly inapplicable ones with `N/A` and one short reason.
 
 **Security Engineer** — Does this introduce attack surface, data exposure, or trust boundary issues? Are there auth, input validation, or secrets-handling concerns?
 
@@ -72,7 +75,7 @@ Simulate the following viewpoints. Skip any perspective that is clearly not appl
 
 **End User** — Does this solve a problem the user actually has? Is it discoverable without reading docs? Could it cause unintended side effects the user would not expect?
 
-### Phase 7 — Verdict
+### 8. Verdict
 
 Choose exactly one. Incorporate concerns raised in Phase 6b into the rationale.
 

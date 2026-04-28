@@ -46,7 +46,10 @@ install_claude_mem_settings() {
   local target="${mem_home}/settings.json"
   local source_tpl="${TPL:-${SCRIPT_DIR:-.}/templates}/claude-mem/settings.json"
 
-  mkdir -p "$mem_home"
+  if ! mkdir -p "$mem_home" 2>/dev/null; then
+    echo "  ⚠️  Claude-Mem settings skipped: cannot create ${mem_home} (read-only home?)"
+    return 0
+  fi
 
   if [ ! -f "$source_tpl" ]; then
     echo "  ⚠️  Claude-Mem settings template missing: ${source_tpl}"

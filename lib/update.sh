@@ -364,7 +364,7 @@ run_patch() {
     exit 1
   fi
 
-  local all_mappings=("${TEMPLATE_MAP[@]}" "${SPEC_SKILLS_MAP[@]}")
+  local all_mappings=("${TEMPLATE_MAP[@]}")
 
   local copied=0
   for mapping in "${all_mappings[@]}"; do

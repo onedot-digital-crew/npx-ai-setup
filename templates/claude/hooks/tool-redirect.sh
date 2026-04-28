@@ -59,7 +59,7 @@ EOF
       cat >&2 <<EOF
 Bash blocked — use Grep tool instead of \`grep\` (project rule: CLAUDE.md agents.md).
 
-Grep tool uses ripgrep under the hood with better defaults and glob filtering.
+Grep tool uses bfs/ugrep under the hood (macOS/Linux native) with better defaults and glob filtering.
 Only use bash \`grep\` inside pipes (cat x | grep y).
 EOF
       exit 2

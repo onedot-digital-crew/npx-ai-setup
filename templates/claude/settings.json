@@ -16,7 +16,8 @@
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "68",
     "ENABLE_TOOL_SEARCH": "auto:5",
     "MAX_MCP_OUTPUT_TOKENS": "10000",
-    "BASH_MAX_OUTPUT_LENGTH": "12000"
+    "BASH_MAX_OUTPUT_LENGTH": "12000",
+    "ENABLE_PROMPT_CACHING_1H": "1"
   },
   "sandbox": {
     "_disabledNote": "Sandbox blocks .git/ writes on macOS, breaking git add/commit. No allowedWritePaths key in schema. Disable sandbox by default; users can opt-in per project.",

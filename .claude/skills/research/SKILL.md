@@ -1,46 +1,61 @@
 ---
 name: research
-description: "Deep-researches an external repository, tool, or pattern against the existing project's Claude Code setup. Produces a comprehensive brainstorm document with prioritized adoption candidates."
+description: "Deep-researches an external repository, tool, or pattern; produces a prioritized brainstorm doc. Trigger: 'research X', 'evaluate this tool', 'look into this repo'."
+user-invocable: true
 effort: high
 model: opus
-mode: plan
 argument-hint: "<github-url or article-url>"
-allowed-tools: Read, Glob, Grep, WebFetch, WebSearch, AskUserQuestion, Agent, Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - WebFetch
+  - WebSearch
+  - AskUserQuestion
+  - Agent
+  - Bash
 ---
 
 Deep-researches an external repository, tool, or pattern. Input: $ARGUMENTS
 
-## Phase 1 — Acquire
+## Process
 
-- **GitHub repo URL**: Deep Repo Scrape (below)
-- **Article/blog URL**: WebFetch → extract patterns → Phase 2
-- **Search query**: WebSearch → WebFetch best result → Phase 2
-- **Pasted text**: extract patterns directly → Phase 2
+### 1. Acquire source material
 
-### Deep Repo Scrape (GitHub only)
+- **GitHub repo URL**: run a deep repo scrape
+- **Article/blog URL**: WebFetch and extract patterns
+- **Search query**: WebSearch, then WebFetch the best result
+- **Pasted text**: extract patterns directly
 
-Spawn parallel haiku agents — one per directory type: commands, agents/skills, hooks/scripts, config/README. Each reads raw GitHub URLs (`https://raw.githubusercontent.com/OWNER/REPO/main/PATH`). Return full content, not summaries.
+#### Deep repo scrape
 
-In parallel: detect the current project type and read relevant local context:
+Spawn parallel haiku agents by area: commands, agents/skills, hooks/scripts, config/README.
+Each agent reads raw GitHub content and returns full content, not summaries.
+
+In parallel, detect the current project type and read relevant local context:
 - **npx-ai-setup**: read `templates/`, `.claude/rules/`, `lib/plugins.sh`
 - **Other project**: read `.claude/`, `CLAUDE.md`, `package.json`, top-level config files
 
-Compile inventory:
-```
+Build an inventory:
+
+```text
 EXTERNAL: [N] commands, [N] skills, [N] hooks
 OURS:     [N] commands, [N] rules, [N] hooks
 ```
 
-## Phase 2 — Match & Compare
+### 2. Match and compare
 
-Coverage table per external item: ✅ Covered / ⚠️ Partial / ❌ Missing
+For each external item, classify:
+- ✅ Covered
+- ⚠️ Partial
+- ❌ Missing
 
-For **Partial** items: quote exact line from theirs vs. our gap.
-For **systemic patterns**: delegation structure, quality gates, scripted vs. LLM-driven.
+For partial coverage, quote exact lines showing the gap.
+Also compare systemic patterns such as delegation, quality gates, and scripted vs LLM-driven workflows.
 
-## Phase 3 — Brainstorm Document
+### 3. Write brainstorm document
 
-Write to `specs/NNN-research-[source-name].md`:
+Write `specs/NNN-research-[source-name].md`:
 
 ```markdown
 # Brainstorm: [Source] Adaptionen für [project]
@@ -59,31 +74,35 @@ Write to `specs/NNN-research-[source-name].md`:
 [Item | Value ★ | Aufwand | Empfehlung]
 ```
 
-## Phase 4 — Interview
+### 4. Interview
 
-`AskUserQuestion` — top 5 findings, which to explore deeper. Min 2 rounds.
+Use AskUserQuestion to explore the top 5 findings. Run at least 2 rounds.
 
-## Phase 5 — Philosophy Check (mandatory)
+### 5. Philosophy check
 
-Read project-specific philosophy docs if they exist (`CONCEPT.md`, `decisions.md`, `docs/architecture.md`). Per candidate: GO / PIVOT / SKIP.
+Read project-specific philosophy docs if they exist (`CONCEPT.md`, `decisions.md`, `docs/architecture.md`). For each candidate, classify:
+- GO
+- PIVOT
+- SKIP
+
+Check:
 - Does it fit the project's purpose and conventions?
-- Does it ADD or REMOVE guardrails?
-- Already covered by an existing feature?
+- Does it add or remove guardrails?
+- Is it already covered?
 
 Only GO candidates proceed.
 
-## Phase 6 — Spec Gate
+### 6. Spec gate
 
-`AskUserQuestion` multiSelect — one option per GO candidate. Create spec files for selected items.
+Use AskUserQuestion multi-select with one option per GO candidate. Create spec files for selected items.
 
 ## Rules
-
-- GitHub repos: read EVERY relevant file, not just README
-- Agents return full content, not summaries
-- Quote exact lines — no vague comparisons
-- If our version is better, say so
-- Append researched source to `README.md` under `## Links → ### Evaluated`
+- For GitHub repos, read all relevant files, not just the README.
+- Agents must return source material, not summaries.
+- Quote exact lines when comparing.
+- If our current implementation is better, say so.
+- Append the researched source to `README.md` under `## Links → ### Evaluated`.
 
 ## Next Step
 
-`/spec NNN` on selected candidate, or `/spec-board` for full pipeline.
+Run `/spec NNN` for selected candidates or `/spec-board`.

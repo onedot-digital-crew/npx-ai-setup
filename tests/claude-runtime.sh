@@ -146,7 +146,7 @@ run_claude_probe() {
       --debug hooks \
       --debug-file "$DEBUG_LOG" \
       --permission-mode acceptEdits \
-      "Write a file named runtime-touch.txt containing ok. Then run \`pwd\` with Bash. Then use /context-load STACK.md and end with the single line RESULT: OK." \
+      "Write a file named runtime-touch.txt containing ok. Then run \`pwd\` with Bash. Then read @.agents/context/STACK.md and end with the single line RESULT: OK." \
       >"$PROBE_STDOUT" 2>"$PROBE_STDERR"
   )
 }
@@ -157,7 +157,7 @@ run_skill_probe() {
     claude -p \
       --no-session-persistence \
       --permission-mode acceptEdits \
-      "/context-load STACK.md" \
+      "Read @.agents/context/STACK.md and summarize the stack section in 2 sentences." \
       >"$SKILL_STDOUT" 2>"$SKILL_STDERR"
   )
 }

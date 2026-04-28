@@ -34,7 +34,15 @@ require_tool() {
 link_tool() {
   local tool="$1"
   local source
-  source="$(command -v "$tool" 2>/dev/null || true)"
+  # type -P returns only filesystem paths, skipping shell functions/aliases/builtins.
+  # Necessary because tools like find/ls may be wrapped as bash functions in some shells.
+  source="$(type -P "$tool" 2>/dev/null || true)"
+  if [ -z "$source" ]; then
+    # Fallback: scan standard system paths directly when type -P returns nothing
+    for candidate in "/usr/bin/$tool" "/bin/$tool" "/usr/local/bin/$tool" "/opt/homebrew/bin/$tool"; do
+      if [ -x "$candidate" ]; then source="$candidate"; break; fi
+    done
+  fi
   if [ -z "$source" ]; then
     echo "❌ Required tool not found for isolated PATH: $tool"
     exit 1
@@ -95,11 +103,15 @@ run_install() {
   local project_dir="$1"
   local home_dir="$2"
   local log_file="$3"
+  local status=0
 
   (
     cd "$project_dir"
     HOME="$home_dir" PATH="$BIN_DIR" /bin/bash "$ROOT_DIR/bin/ai-setup.sh" >"$log_file" 2>&1 </dev/null
-  )
+  ) || status=$?
+
+  # Capture install rc but don't propagate — caller's asserts validate artifacts.
+  echo "$status" > "$log_file.rc"
 }
 
 assert_path_exists() {

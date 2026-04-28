@@ -67,6 +67,8 @@ Read this matrix once at start. Skip silently if a file/agent doesn't exist.
 | medium / unset | `model: sonnet` |
 | high | `model: opus` |
 
+**Effort override** (`${CLAUDE_EFFORT}`): if `xhigh` or `max`, treat all medium specs as high (spawn opus for implementation, run all optional review agents in step 12 regardless of complexity).
+
 Specialist routing (matrix above): frontend/backend agents only when they exist AND step touches matching files.
 
 7. **Execute each step**:

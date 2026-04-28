@@ -82,7 +82,6 @@ CHECKS=(
   "setup.sh:install_claude_scripts"
   "setup.sh:update_gitignore"
   "setup.sh:customize_settings_for_stack"
-  "setup-skills.sh:install_spec_skills"
   "setup-skills.sh:install_agents"
   "setup-skills.sh:repair_canonical_skill_links"
   "setup-skills.sh:ensure_skills_alias"
@@ -421,11 +420,6 @@ else
 fi
 
 echo "--- Governance docs ---"
-if [ -f docs/claude-governance.md ]; then
-  pass "docs/claude-governance.md exists"
-else
-  fail "docs/claude-governance.md missing"
-fi
 if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"project-baseline"' templates/claude/settings.json 2>/dev/null; then
   pass "template settings.json declares project-baseline governance profile"
 else
@@ -455,6 +449,10 @@ echo "--- Spec status consistency ---"
 for spec_file in specs/completed/[0-9]*.md; do
   [ -f "$spec_file" ] || continue
   spec_name=$(basename "$spec_file" .md)
+  # Skip brainstorms and research notes — they don't carry a Status field
+  case "$spec_name" in
+    *-brainstorm|*-research|*research-*) continue ;;
+  esac
   # Extract status from standard markdown header or YAML frontmatter
   spec_status=""
   # Match status from: **Status**: value OR **Status:** value OR ^status: value (YAML)

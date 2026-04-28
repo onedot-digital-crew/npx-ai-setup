@@ -28,6 +28,7 @@ git ls-files 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|py|go|rs|rb|php|java|kt|swi
 
 - **Fast mode** (≤30 files): use 3 parallel agents
 - **Batch mode** (>30 files): use batched haiku agents plus one synthesizer
+- **Effort** (`${CLAUDE_EFFORT}`): if `xhigh` or `max`, use sonnet (not haiku) for all batch agents and run a synthesizer opus pass at the end.
 
 ### 1. Run the analysis
 

@@ -1,6 +1,6 @@
 # Spec: CLAUDE.md Auto-Compression Skill
 
-> **Spec ID**: 633 | **Created**: 2026-04-13 | **Status**: draft | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 648 | **Created**: 2026-04-13 | **Status**: draft | **Complexity**: medium | **Branch**: —
 > **Related**: 632 (Output-Token Compression), 631 (Research Caveman)
 
 ## Goal

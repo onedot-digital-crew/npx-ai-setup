@@ -61,18 +61,6 @@ build_template_map() {
 # Populate TEMPLATE_MAP at startup
 build_template_map
 
-# Legacy: explicit skill mappings used by install_spec_skills() — kept for compat.
-# Superseded by install_skills() which installs all templates/skills/ generically.
-# shellcheck disable=SC2034
-SPEC_SKILLS_MAP=(
-  "templates/skills/spec-board/SKILL.template.md:.claude/skills/spec-board/SKILL.md"
-  "templates/skills/spec/SKILL.template.md:.claude/skills/spec/SKILL.md"
-  "templates/skills/spec-review/SKILL.template.md:.claude/skills/spec-review/SKILL.md"
-  "templates/skills/spec-work/SKILL.template.md:.claude/skills/spec-work/SKILL.md"
-  "templates/skills/spec-work-all/SKILL.template.md:.claude/skills/spec-work-all/SKILL.md"
-  "templates/skills/orchestrate/SKILL.template.md:.claude/skills/orchestrate/SKILL.md"
-)
-
 # System-to-boilerplate-repo mapping (org: onedot-digital-crew)
 # Uses a function instead of declare -A for bash 3.2 compatibility (macOS)
 get_boilerplate_repo() {

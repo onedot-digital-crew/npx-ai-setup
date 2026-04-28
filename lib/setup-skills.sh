@@ -1,40 +1,6 @@
 #!/bin/bash
-# Skills and agents installation: spec skills, agent templates, skill aliases
-# Requires: core.sh ($TPL, $TEMPLATE_MAP, $SPEC_SKILLS_MAP), setup.sh (_install_or_update_file)
-
-install_spec_skills() {
-  [ "${#SPEC_SKILLS_MAP[@]}" -gt 0 ] || return 0
-  tui_step "Installing spec workflow skills"
-
-  # Detect stack profile for filtering (empty = no filter)
-  local _profile=""
-  if [ "${FORCE_ALL_SKILLS:-0}" != "1" ] && [ -n "${SCRIPT_DIR:-}" ] && \
-     [ -f "${SCRIPT_DIR}/lib/detect-stack.sh" ]; then
-    _profile=$(bash "${SCRIPT_DIR}/lib/detect-stack.sh" "$PWD" 2>/dev/null \
-      | grep '^stack_profile=' | cut -d= -f2 || true)
-  fi
-
-  for mapping in "${SPEC_SKILLS_MAP[@]}"; do
-    local local_tpl="${mapping%%:*}"
-    local local_target="${mapping#*:}"
-    local skill_dir src_path skill_name
-    skill_dir="$(dirname "$local_target")"
-    src_path="$TPL/${local_tpl#templates/}"
-    skill_name="$(basename "$skill_dir")"
-    [ -f "$src_path" ] || continue
-
-    # Apply stack profile filter when profile is known and not "default"
-    if [ -n "$_profile" ] && [ "$_profile" != "default" ]; then
-      if ! skill_matches_profile "$src_path" "$_profile"; then
-        log_skill_skip "$skill_name" "$src_path" "$_profile"
-        continue
-      fi
-    fi
-
-    mkdir -p "$skill_dir"
-    _install_or_update_file "$src_path" "$local_target"
-  done
-}
+# Skills and agents installation: agent templates, skill aliases
+# Requires: core.sh ($TPL, $TEMPLATE_MAP), setup.sh (_install_or_update_file)
 
 # Install subagent templates
 install_agents() {
