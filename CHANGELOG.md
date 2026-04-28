@@ -10,6 +10,15 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+## [v2.2.3] — 2026-04-28
+
+### Removed
+- `Stop` hook registration in `templates/claude/settings.json` and local `.claude/settings.json`
+- `templates/claude/hooks/spec-stop-guard.sh` and `.claude/hooks/spec-stop-guard.sh`
+
+### Why
+Hook fired on every turn-end when any spec had `Status: in-progress`, blocking Stop with a 60s double-tap bypass. UX cost outweighed the value — spec status in markdown is sufficient documentation. Targets pick up removal on next `npx ai-setup --force-update`.
+
 ## [v2.2.2] — 2026-04-28
 
 <!-- slack-announcement -->
