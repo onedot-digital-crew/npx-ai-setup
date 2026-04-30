@@ -149,6 +149,16 @@ write_metadata() {
     fi
   fi
 
+  # Preserve .boilerplate_files SHA cache from previous manifest.
+  # _record_boilerplate_pull writes to it during sync; rebuild here would wipe the cache.
+  if [ -f .ai-setup.json ] && command -v jq > /dev/null 2>&1; then
+    local prev_bp
+    prev_bp=$(jq -c '.boilerplate_files // empty' .ai-setup.json 2> /dev/null)
+    if [ -n "$prev_bp" ] && [ "$prev_bp" != "null" ] && [ "$prev_bp" != "{}" ]; then
+      json=$(echo "$json" | jq --argjson bp "$prev_bp" '. + {boilerplate_files: $bp}')
+    fi
+  fi
+
   for mapping in "${TEMPLATE_MAP[@]}"; do
     local target="${mapping#*:}"
     if [ -f "$target" ]; then
