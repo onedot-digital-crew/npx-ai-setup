@@ -83,7 +83,7 @@ note() {
 # Files allowed to differ between .claude/ and templates/claude/
 # (intentional divergence — repo-local config vs target-project shipped config)
 ALLOWED_CONTENT_DIVERGENCE=(
-  ".claude/settings.json" # sandbox enabled locally + extra shellcheck-guard hook for bash repo
+  ".claude/settings.json" # local has rtk + sandbox tweaks; template ships baseline
 )
 
 # 1. Compare .claude/ vs templates/claude/ — content diffs

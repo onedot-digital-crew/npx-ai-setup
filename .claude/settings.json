@@ -6,7 +6,7 @@
   "_governanceDoc": "docs/claude-governance.md",
   "_governanceProfile": "project-baseline",
   "_governanceOwnership": "Project settings own repo-local permissions, hooks, and context limits. Global settings stay workstation-local and optional.",
-  "_cacheNote": "Keep tool/permission order stable \u2014 reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
+  "_cacheNote": "Keep tool/permission order stable — reordering the allow list mid-session breaks Claude's prompt cache prefix and increases cost.",
   "respectGitignore": true,
   "attribution": {
     "coAuthoredBy": true,
@@ -66,7 +66,20 @@
       "Bash(gh issue *)",
       "Bash(jq:*)",
       "Bash(curl:*)",
-      "Edit(.claude/commands)"
+      "Edit(.claude/commands)",
+      "Bash(rtk:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(awk:*)",
+      "Bash(rg:*)",
+      "Bash(diff:*)",
+      "Bash(head:*)",
+      "Bash(which:*)",
+      "Bash(test:*)",
+      "Bash(pwd:*)",
+      "Bash(bash .claude/scripts/*)"
     ],
     "deny": [
       "Read(.env*)",
@@ -170,25 +183,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/graph-context.sh",
             "timeout": 2
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "if": "Bash(grep *)|Bash(find *)|Bash(cat *)|Bash(head *)|Bash(tail *)|Bash(git *)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "WebFetch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
           }
         ]
       }

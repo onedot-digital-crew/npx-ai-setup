@@ -1,5 +1,6 @@
 node_modules/
 .DS_Store
+tmp/
 
 # Claude Code / AI Setup
 .claude/settings.local.json

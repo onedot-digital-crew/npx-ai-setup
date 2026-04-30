@@ -10,7 +10,47 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- feat: repomix Fast-Path for /analyze (opt-in, `analyze-fast.sh` + fallback), context-freshness drift-detection, measure-context-cost.sh token auditor, doctor context-trigger check, SUMMARY.md stripped of AUDIT/CONCEPT sections
+## [v2.2.4] — 2026-04-30
+
+<!-- slack-announcement -->
+:package: *@onedot/ai-setup v2.2.4 — Delegation Mandates + Drift Sync*
+
+*Was ist neu:*
+:sparkles: *Delegation Mandates* — Opus delegiert automatisch: ≥3 Bash-Calls → `bash-runner` (haiku), ≥2 Edits → `implementer` (sonnet), Arch-Review → `staff-reviewer` (opus). MUST-Trigger in CLAUDE.md + agents.md.
+:gear: *Template Drift Sync* — `.claude/` und `templates/claude/` wieder in sync (9 Diffs → 0). Pre-commit Hook + `scripts/template-drift-check.sh` verhindert künftigen Drift.
+:wrench: *agent-dispatch.md* — rewritten: 14 veraltete Einträge → 8 reale Agents mit korrekten Triggern.
+:sparkles: *repomix Fast-Path* — `/analyze` nutzt repomix als opt-in Context-Snapshot, mit Drift-Detection in context-freshness Hook.
+:wrench: *tool-redirect Cleanup* — Hook entfernt, ersetzt durch direkte `Bash(rtk:*)` + native Tool-Grants in settings.json. Weniger Hook-Latency, gleiche RTK-Coverage.
+
+*Update:* `npx github:onedot-digital-crew/npx-ai-setup`
+<!-- /slack-announcement -->
+
+### Added
+- `.claude/agents/bash-runner.md` — haiku subagent für Bash-Chains ≥3
+- `.claude/agents/implementer.md` — sonnet subagent für Edit/Write-Clusters ≥2
+- `scripts/template-drift-check.sh` — diff-rq based drift detection mit allowlists
+- `.claude/scripts/analyze-fast.sh` — repomix Fast-Path für /analyze (opt-in)
+- `.claude/scripts/measure-context-cost.sh` — token auditor
+
+### Changed
+- `staff-reviewer.md` model: sonnet → opus
+- `agent-dispatch.md` rewritten (14 stale → 8 real agents)
+- `.claude/rules/agents.md` + mandate table: 8 MUST-delegate Triggers
+- `CLAUDE.md` Delegation Mandates Block (compact, 1 Zeile + Link)
+- Pre-commit hook: drift-check eingehängt (skip via `SKIP_PRECOMMIT_DRIFT=1`)
+- Rules/hooks/scripts synced local↔templates (agents.md, general.md, mcp.md, workflow.md, context-freshness.sh, README.md)
+- `templates/CLAUDE.md` RTK constraint: explicit examples (`rtk git status`, `rtk grep ...`)
+- `.claude/settings.json` permissions.allow: `rtk:*`, `grep:*`, `find:*`, `cat:*`, `awk:*`, `rg:*`, `diff:*`, `head:*`, `which:*`, `test:*`, `pwd:*`, `bash .claude/scripts/*` (replaces tool-redirect rewrite chain)
+- `.claude/scripts/analyze-sessions.sh` Bash histogram: strip env-var prefixes, flatten heredoc multi-lines, reject JS/TS keywords leaking from embedded scripts
+- `lib/migrations/2.3.0.sh` skips tool-redirect.sh update (file removed)
+
+### Removed
+- `.claude/hooks/tool-redirect.sh` + `templates/claude/hooks/tool-redirect.sh` (replaced by direct `Bash(rtk:*)` allow + native tool grants in settings.json)
+- Matching PreToolUse hook block in `.claude/settings.json`
+
+### Specs
+- 649 completed (template drift sync), 651 completed (repomix), 652 completed (delegation mandates)
+- 647+648 superseded, 650 closed as research
 
 ## [v2.2.3] — 2026-04-28
 

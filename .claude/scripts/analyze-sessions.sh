@@ -203,16 +203,19 @@ jq -s '
   sort_by(-.count)
 ' "$TMP/events.ndjson" > "$TMP/skills.json"
 
-# Bash command histogram (first token after pipes/redirects stripped)
-jq -r 'select(.kind=="tool" and .tool=="Bash" and .cmd != null) | .cmd' \
+# Bash command histogram
+# Flatten multi-line commands so awk only sees the first command token.
+# Strip leading env-var prefixes (FOO=bar cmd) before extraction.
+# Reject shell keywords + JS/TS tokens that bleed in from heredoc-embedded scripts.
+jq -r 'select(.kind=="tool" and .tool=="Bash" and .cmd != null) | .cmd | gsub("[\\n\\r]+"; " ")' \
   "$TMP/events.ndjson" |
-  sed -E 's/^[[:space:]]*//; s/[[:space:]]+/ /g' |
+  sed -E 's/^[[:space:]]*//; s/^([A-Z_][A-Z0-9_]*=[^[:space:]]+[[:space:]]+)+//' |
   awk '{
       n=split($0, a, /[|;&><]| /);
       cmd=a[1];
-      # only keep bare command names (no slashes), reject shell keywords
-      if (cmd ~ /^[A-Za-z_][A-Za-z0-9_.-]*$/ &&
-          cmd !~ /^(for|while|if|do|done|then|else|fi|case|esac|in|true|false)$/) print cmd;
+      sub(/:$/, "", cmd);
+      if (cmd ~ /^[a-zA-Z_][a-zA-Z0-9_-]*$/ &&
+          cmd !~ /^(for|while|if|do|done|then|else|elif|fi|case|esac|in|true|false|return|exit|set|local|export|EOF|END|const|let|var|import|function|data|class|interface|type|enum|async|await|new|null|undefined|module|require|from)$/) print cmd;
     }' |
   sort | uniq -c | sort -rn | head -50 |
   awk '{printf "{\"cmd\":\"%s\",\"count\":%s}\n", $2, $1}' |

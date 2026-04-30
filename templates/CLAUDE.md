@@ -20,7 +20,7 @@ Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTION
 
 ## Hard Constraints
 
-- **RTK**: prefix ALL shell commands with `rtk`. Hook auto-rewrites where possible. Reference: `.claude/docs/rtk-reference.md`.
+- **RTK**: prefix ALL shell commands with `rtk` (e.g. `rtk git status`, `rtk grep ...`). Reference: `.claude/docs/rtk-reference.md`.
 - **Build artifacts**: never read/search `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`. Blocked via `permissions.deny`.
 - **Frontend verify**: after editing `*.vue` `*.tsx` `*.jsx` `*.liquid` `*.css` `*.scss`, invoke `/agent-browser` for visual screenshot. Type-check ≠ rendered correctly.
 - **Sandbox**: never set `dangerouslyDisableSandbox: true` without explicit user confirmation.

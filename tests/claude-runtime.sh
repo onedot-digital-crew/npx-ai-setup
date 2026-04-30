@@ -206,7 +206,6 @@ instrument_hook "protect-files.sh"
 instrument_hook "circuit-breaker.sh"
 instrument_hook "post-edit-lint.sh"
 instrument_hook "task-completed-gate.sh"
-instrument_hook "spec-stop-guard.sh"
 PROJECT_SKILLS_DIR="$(canonical_path "$PROJECT_DIR/.claude/skills")"
 
 echo ""
@@ -249,7 +248,6 @@ assert_contains "$EVENT_LOG" "context-freshness.sh" "UserPromptSubmit hook fired
 assert_contains "$EVENT_LOG" "protect-files.sh" "PreToolUse hook fired"
 assert_contains "$EVENT_LOG" "circuit-breaker.sh" "PreToolUse secondary hook fired"
 assert_contains "$EVENT_LOG" "post-edit-lint.sh" "PostToolUse hook fired"
-assert_contains "$EVENT_LOG" "spec-stop-guard.sh" "Stop hook fired"
 
 echo ""
 echo "--- Skill probe ---"

@@ -2,7 +2,7 @@
 # Migration: v2.2.x → v2.3.0
 # Fix: sandbox.enabled blocks .git/index.lock writes on macOS, breaking git add/commit.
 # Disables sandbox in existing project settings (no allowedWritePaths key in schema).
-# Also: tool-redirect.sh now skips when rtk is missing + RTK_SKIP=1 bypass env var.
+# (Note: tool-redirect.sh — formerly part of this migration — has since been removed.)
 # Idempotent: safe to run multiple times.
 
 echo "  [2.3.0] Applying migration..."
@@ -26,9 +26,9 @@ elif [ -f "$settings_file" ]; then
 fi
 
 # ------------------------------------------------------------------
-# 2. Update tool-redirect hook (rtk-missing bypass + RTK_SKIP env var)
+# 2. tool-redirect.sh removed in later release — skipped here.
+#    (Was: redirect bare grep/find/cat/git to native tools.)
 # ------------------------------------------------------------------
-_update_file "templates/claude/hooks/tool-redirect.sh" ".claude/hooks/tool-redirect.sh"
 
 # ------------------------------------------------------------------
 # 3. Update commit skill (better permission-error handling)
