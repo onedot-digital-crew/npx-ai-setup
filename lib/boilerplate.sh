@@ -45,6 +45,38 @@ _is_current_repo_boilerplate() {
   return 1
 }
 
+# Get the SHA of a remote file via gh API (single call, no content download).
+# Returns empty string on failure. Usage: _gh_get_remote_sha <org>/<repo> <remote_path>
+_gh_get_remote_sha() {
+  local repo="$1" remote_path="$2"
+  gh api "repos/${repo}/contents/${remote_path}" --jq '.sha' 2> /dev/null || echo ""
+}
+
+# Decide whether a boilerplate file needs to be fetched.
+# Compares remote SHA against the value persisted in .ai-setup.json's .boilerplate_files.
+# Returns 0 (fetch) when SHAs differ or no record exists; 1 (skip) on cache hit.
+# Empty remote SHA → fetch (treat as inconclusive, fall back to existing diff logic).
+# Usage: _should_fetch_boilerplate <local_target> <remote_sha>
+_should_fetch_boilerplate() {
+  local local_target="$1" remote_sha="$2"
+  [ -n "$remote_sha" ] || return 0
+  [ -f .ai-setup.json ] || return 0
+  local cached
+  cached=$(_json_get_boilerplate_remote_sha .ai-setup.json "$local_target")
+  [ -n "$cached" ] && [ "$cached" = "$remote_sha" ] && return 1
+  return 0
+}
+
+# Persist a successful pull into .ai-setup.json under .boilerplate_files.
+# No-op when manifest is missing (fresh installs write metadata at end of setup).
+# Usage: _record_boilerplate_pull <local_target> <remote_sha> <repo>
+_record_boilerplate_pull() {
+  local local_target="$1" remote_sha="$2" repo="$3"
+  [ -f .ai-setup.json ] || return 0
+  [ -n "$remote_sha" ] || return 0
+  _json_set_boilerplate_file .ai-setup.json "$local_target" "$remote_sha" "$repo" || return 1
+}
+
 # Fetch a single file from a GitHub repo via gh API.
 # Decodes base64 content and writes to target path.
 # Usage: _gh_fetch_file <org>/<repo> <remote_path> <local_target>
@@ -102,6 +134,7 @@ pull_boilerplate_files() {
   local pulled=0
   local failed=0
   local skipped=0
+  local unchanged=0
 
   # Detect stack profile for skill filtering (empty = filter disabled)
   local _stack_profile=""
@@ -122,6 +155,14 @@ pull_boilerplate_files() {
         skill_name=$(basename "$skill_dir")
         local remote_skill="${skill_dir}/SKILL.md"
         local local_skill=".claude/skills/${skill_name}/SKILL.md"
+
+        # Cache check: skip download entirely if remote SHA matches manifest
+        local _remote_sha
+        _remote_sha=$(_gh_get_remote_sha "$repo" "$remote_skill")
+        if ! _should_fetch_boilerplate "$local_skill" "$_remote_sha"; then
+          unchanged=$((unchanged + 1))
+          continue
+        fi
 
         # Download to temp file first so we can inspect frontmatter before install
         local _tmp_skill
@@ -144,11 +185,14 @@ pull_boilerplate_files() {
           if [ $_rc -eq 0 ]; then
             mkdir -p ".claude/skills/${skill_name}"
             mv "$_tmp_skill" "$local_skill"
+            _record_boilerplate_pull "$local_skill" "$_remote_sha" "$repo"
             tui_success "Skill: ${skill_name}"
             pulled=$((pulled + 1))
           else
-            # rc=2: unchanged — temp file holds the same content, discard
+            # rc=2: unchanged byte-content — record SHA so future pulls cache-hit
             rm -f "$_tmp_skill"
+            _record_boilerplate_pull "$local_skill" "$_remote_sha" "$repo"
+            unchanged=$((unchanged + 1))
           fi
         else
           rm -f "$_tmp_skill"
@@ -168,16 +212,26 @@ pull_boilerplate_files() {
       # Only pull rules prefixed with the system name
       if [[ "$rule_file" == "${system}"* ]]; then
         local local_rule=".claude/rules/${rule_file}"
+        local _remote_rule_sha
+        _remote_rule_sha=$(_gh_get_remote_sha "$repo" ".claude/rules/${rule_file}")
+        if ! _should_fetch_boilerplate "$local_rule" "$_remote_rule_sha"; then
+          unchanged=$((unchanged + 1))
+          continue
+        fi
         _gh_fetch_file "$repo" ".claude/rules/${rule_file}" "$local_rule"
         local _rc=$?
         if [ $_rc -eq 0 ]; then
+          _record_boilerplate_pull "$local_rule" "$_remote_rule_sha" "$repo"
           tui_success "Rule: ${rule_file}"
           pulled=$((pulled + 1))
         elif [ $_rc -eq 1 ]; then
           tui_warn "Rule fetch failed: ${rule_file}"
           failed=$((failed + 1))
+        else
+          # rc=2: byte-identical, record SHA for future cache-hit
+          _record_boilerplate_pull "$local_rule" "$_remote_rule_sha" "$repo"
+          unchanged=$((unchanged + 1))
         fi
-        # rc=2: unchanged — skip silently
       fi
     done <<< "$rules_listing"
   fi
@@ -192,16 +246,25 @@ pull_boilerplate_files() {
       [[ "$agent_file" == *.md ]] || continue
       [ "$agent_file" = "README.md" ] && continue
       local local_agent=".claude/agents/${agent_file}"
+      local _remote_agent_sha
+      _remote_agent_sha=$(_gh_get_remote_sha "$repo" ".claude/agents/${agent_file}")
+      if ! _should_fetch_boilerplate "$local_agent" "$_remote_agent_sha"; then
+        unchanged=$((unchanged + 1))
+        continue
+      fi
       _gh_fetch_file "$repo" ".claude/agents/${agent_file}" "$local_agent"
       local _rc=$?
       if [ $_rc -eq 0 ]; then
+        _record_boilerplate_pull "$local_agent" "$_remote_agent_sha" "$repo"
         tui_success "Agent: ${agent_file%.md}"
         pulled=$((pulled + 1))
       elif [ $_rc -eq 1 ]; then
         tui_warn "Agent fetch failed: ${agent_file}"
         failed=$((failed + 1))
+      else
+        _record_boilerplate_pull "$local_agent" "$_remote_agent_sha" "$repo"
+        unchanged=$((unchanged + 1))
       fi
-      # rc=2: unchanged — skip silently
     done <<< "$agents_listing"
   fi
 
@@ -211,11 +274,11 @@ pull_boilerplate_files() {
   # Use `npx ai-setup` plugin flow to add MCP servers explicitly.
 
   echo ""
-  if [ "$skipped" -gt 0 ]; then
-    tui_info "Done: ${pulled} file(s) pulled, ${skipped} skipped (profile filter), ${failed} failed"
-  else
-    tui_info "Done: ${pulled} file(s) pulled, ${failed} failed"
-  fi
+  local _summary="Done: ${pulled} file(s) pulled"
+  [ "$unchanged" -gt 0 ] && _summary="${_summary}, ${unchanged} unchanged (cache-hit)"
+  [ "$skipped" -gt 0 ] && _summary="${_summary}, ${skipped} skipped (profile filter)"
+  _summary="${_summary}, ${failed} failed"
+  tui_info "$_summary"
   echo ""
 }
 

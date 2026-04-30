@@ -88,3 +88,71 @@ _json_set_file() {
       process.stdout.write(JSON.stringify(d,null,2));" "$key" "$val"
   fi
 }
+
+# Read .boilerplate_files[KEY].remote_sha from a JSON file.
+# Returns empty string if missing — callers treat empty as "needs pull".
+# Usage: _json_get_boilerplate_remote_sha FILE KEY
+_json_get_boilerplate_remote_sha() {
+  local file="$1" key="$2"
+  [ -f "$file" ] || {
+    echo ""
+    return
+  }
+  if [ "$_JSON_CMD" = "jq" ]; then
+    jq -r --arg k "$key" '.boilerplate_files[$k].remote_sha // empty' "$file" 2> /dev/null
+  else
+    node - "$file" "$key" << 'NODESCRIPT' 2> /dev/null
+      try {
+        const d = JSON.parse(require('fs').readFileSync(process.argv[2],'utf8'));
+        const v = (d.boilerplate_files||{})[process.argv[3]]?.remote_sha;
+        if (v) process.stdout.write(String(v));
+      } catch(e) {}
+NODESCRIPT
+  fi
+}
+
+# Persist a single .boilerplate_files entry into a manifest file.
+# Atomically updates the file. Creates .boilerplate_files object if missing.
+# Usage: _json_set_boilerplate_file MANIFEST_FILE KEY REMOTE_SHA REPO
+_json_set_boilerplate_file() {
+  local file="$1" key="$2" sha="$3" repo="$4"
+  [ -f "$file" ] || return 1
+  local ts
+  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  local tmp
+  tmp=$(mktemp) || return 1
+  if [ "$_JSON_CMD" = "jq" ]; then
+    if jq --arg k "$key" --arg s "$sha" --arg r "$repo" --arg t "$ts" \
+      '.boilerplate_files = (.boilerplate_files // {}) | .boilerplate_files[$k] = {remote_sha:$s, repo:$r, fetched_at:$t}' \
+      "$file" > "$tmp" 2> /dev/null; then
+      mv "$tmp" "$file" || {
+        rm -f "$tmp"
+        return 1
+      }
+    else
+      rm -f "$tmp"
+      return 1
+    fi
+  else
+    if node - "$file" "$tmp" "$key" "$sha" "$repo" "$ts" << 'NODESCRIPT' 2> /dev/null; then
+      const fs=require('fs');
+      const f=process.argv[2], t=process.argv[3];
+      const d=JSON.parse(fs.readFileSync(f,'utf8'));
+      d.boilerplate_files = d.boilerplate_files || {};
+      d.boilerplate_files[process.argv[4]] = {
+        remote_sha: process.argv[5],
+        repo: process.argv[6],
+        fetched_at: process.argv[7],
+      };
+      fs.writeFileSync(t, JSON.stringify(d, null, 2));
+NODESCRIPT
+      mv "$tmp" "$file" || {
+        rm -f "$tmp"
+        return 1
+      }
+    else
+      rm -f "$tmp"
+      return 1
+    fi
+  fi
+}

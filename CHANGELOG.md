@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Boilerplate Pull Cache** (Spec 653): `.ai-setup.json` trackt Remote-Blob-SHA pro gepulltem File in `.boilerplate_files`. Nächster Pull holt nur Remote-SHA via `gh api`, matched gegen Cache und überspringt unveränderte Files. Stoppt Format-Drift-Diffs durch lokales Prettier-Reformatieren.
+
 ## [v2.2.4] — 2026-04-30
 
 <!-- slack-announcement -->

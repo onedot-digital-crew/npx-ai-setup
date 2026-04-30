@@ -149,6 +149,10 @@ Stack profiles: `nuxt-storyblok` | `nuxtjs` | `shopify-liquid` | `laravel` | `ne
 Use `--force-all-skills` to bypass the filter for meta-projects or multi-stack monorepos.
 `doctor.sh` reports mismatched skills already installed (drift detection).
 
+### Pull cache (`.boilerplate_files`)
+
+Each successful pull writes the GitHub blob SHA into `.ai-setup.json` under `.boilerplate_files["path"]`. The next pull asks `gh api` for the current remote SHA only and skips files where the cached SHA matches — no Format-Drift loop from local Prettier reformatting. To force a refresh, delete the file's entry from `.boilerplate_files` and re-run pull.
+
 ---
 
 ## Installation flags
