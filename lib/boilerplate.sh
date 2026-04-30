@@ -85,38 +85,6 @@ _gh_list_dir() {
   gh api "repos/${repo}/contents/${remote_path}" --jq '.[] | select(.type=="dir") | .path' 2> /dev/null || true
 }
 
-# Merge a remote .mcp.json into the local .mcp.json.
-# Never overwrites — always merges via _json_merge().
-_merge_mcp_json() {
-  local repo="$1"
-  local tmp_mcp
-  tmp_mcp=$(mktemp)
-
-  if _gh_fetch_file "$repo" ".mcp.json" "$tmp_mcp"; then
-    if _json_valid "$tmp_mcp"; then
-      if [ -f .mcp.json ] && _json_valid .mcp.json; then
-        local remote_content
-        remote_content=$(cat "$tmp_mcp")
-        _json_merge .mcp.json "$remote_content"
-        echo "  📦 .mcp.json merged from boilerplate"
-      else
-        mv "$tmp_mcp" .mcp.json
-        echo "  📦 .mcp.json copied from boilerplate"
-        return 0
-      fi
-    else
-      echo "  ⚠️  .mcp.json from boilerplate is invalid JSON, skipping" >&2
-      rm -f "$tmp_mcp"
-      return 1
-    fi
-  else
-    rm -f "$tmp_mcp"
-    return 1
-  fi
-
-  rm -f "$tmp_mcp"
-}
-
 # Pass FORCE_ALL_SKILLS=1 (env) to bypass the stack profile filter.
 # Pull all boilerplate files for a given system from the canonical repo.
 # Fresh installs pull skills, rules, agents, and .mcp.json by default.
@@ -237,8 +205,10 @@ pull_boilerplate_files() {
     done <<< "$agents_listing"
   fi
 
-  # --- MCP config: merge .mcp.json ---
-  _merge_mcp_json "$repo"
+  # NOTE: .mcp.json intentionally NOT merged from boilerplate.
+  # MCP config is project-specific (tokens, service IDs, env-bound URLs).
+  # Boilerplate servers leak unrelated services into target projects.
+  # Use `npx ai-setup` plugin flow to add MCP servers explicitly.
 
   echo ""
   if [ "$skipped" -gt 0 ]; then
