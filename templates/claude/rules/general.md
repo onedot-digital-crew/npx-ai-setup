@@ -21,7 +21,7 @@ Before implementing anything manually, check installed skills:
 
 ## External Systems & Web Fetching
 
-Lib/API/SDK/CLI/Cloud-Service docs: Context7 MUST be first (`resolve-library-id` → `query-docs`). WebFetch/WebSearch only if no match — state fallback explicitly. Applies to known libs too — training data stales.
+Library/API/SDK/CLI/Cloud-Service docs: Context7 MUST be first (`resolve-library-id` → `query-docs`). WebFetch/WebSearch only if no match — state fallback explicitly. Applies to known libs too (Nuxt, Storyblok, Shopify, Laravel, etc.) — training data stales.
 Skip Context7 only for: own-code refactor, business logic, general concepts, user-provided URL.
 Non-library web pages: `defuddle parse <url> --md`; WebFetch only if defuddle unavailable.
 

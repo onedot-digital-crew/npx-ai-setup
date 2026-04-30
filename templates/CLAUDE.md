@@ -3,12 +3,12 @@
 ## Project Context
 
 @.agents/context/SUMMARY.md
-Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTIONS.md`.
+Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTIONS.md` | `DESIGN-DECISIONS.md` (why-decisions, not how).
 
 ## Rules (load on demand)
 
 - Investigation/debug discipline → `.claude/rules/quality.md`
-- Model routing (haiku/sonnet/opus), file navigation, context offload → `.claude/rules/agents.md`
+- Model routing: haiku (explore/read-only), sonnet (code generation/default), opus (arch) → `.claude/rules/agents.md`
 - External docs (Context7 first) → `.claude/rules/general.md`
 - MCP usage (project + global servers) → `.claude/rules/mcp.md`
 - Git/commits/branches → `.claude/rules/git.md`

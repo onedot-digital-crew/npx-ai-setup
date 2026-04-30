@@ -1,6 +1,6 @@
 # Spec: Sync Drift Between `.claude/` and `templates/claude/`
 
-> **Spec ID**: 649 | **Created**: 2026-04-29 | **Status**: draft | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 649 | **Created**: 2026-04-29 | **Status**: completed | **Complexity**: medium | **Branch**: —
 
 ## Goal
 
@@ -83,17 +83,17 @@ Template-only (1):
 
 ## Steps
 
-- [ ] Step 1: `specs/649-claude-template-drift-sync.md` — review this inventory, mark each TBD with intended direction
-- [ ] Step 2: `.claude/rules/*.md` ↔ `templates/claude/rules/*.md` — diff each pair, decide source-of-truth, sync (4 files)
-- [ ] Step 3: `.claude/hooks/README.md` ↔ `templates/claude/hooks/README.md` — diff, sync
-- [ ] Step 4: `.claude/settings.json` ↔ `templates/claude/settings.json` — diff, separate "lokal-only" hooks (logging, dev tools) from "should-ship" hooks; confirm intentional divergence list
-- [ ] Step 5: Local-only scripts — for each, decide: ship to template (move to `templates/scripts/`) or keep lokal-only (document in `.claude/scripts/README.md`)
-- [ ] Step 6: `templates/scripts/build-graph.sh` — verify usage, copy to `.claude/scripts/` if used here, otherwise leave template-only
-- [ ] Step 7: Local-only skills — for each, decide: ship as template (create `templates/skills/<skill>/SKILL.template.md`) or keep lokal-only
-- [ ] Step 8: `templates/skills/graphify/` — confirm intentional template-only or also install locally
-- [ ] Step 9: `scripts/template-drift-check.sh` — new script that runs `diff -rq` between `.claude/` and the corresponding template paths, flagging unexpected drift (with allowlist for genuinely local-only files: `agents/`, `commands/`, `plans/`, `skills/`, `worktrees/`, `*.log`, `settings.local.json`, `agent-memory/`, `claude-powerline.json`, `changelog-audit.json`)
-- [ ] Step 10: `.githooks/pre-commit` — call drift-check (skippable via `SKIP_PRECOMMIT_DRIFT=1`)
-- [ ] Step 11: `.github/workflows/ci-smoke.yml` — add drift-check to CI (non-blocking warn first, blocking after grace period)
+- [x] Step 1: Inventory reviewed and updated — 5 inhaltliche Diffs (statt 6), 8 local-only scripts (statt 6)
+- [x] Step 2: `.claude/rules/*.md` synced — agents.md (template→local, richer graph docs), general.md (local→template, more libs listed), mcp.md (template→local, generic form), workflow.md (local→template, +2 spec hints)
+- [x] Step 3: `.claude/hooks/README.md` synced (local→template, +mcp_tool section)
+- [x] Step 4: `.claude/settings.json` allowlisted — sandbox.enabled + shellcheck-guard hook intentional repo-local divergence
+- [x] ~~Step 5~~: **DEFERRED** — 8 local-only scripts (analyze-fast, codeburn-metrics, liquid-graph-refresh, measure-context-cost, quality-gate, session-deep-dive, session-extract, build-summary) bleiben lokal-only via Allowlist im drift-check. Ship-Decisions = separate Audit (siehe Out of Scope)
+- [x] Step 6: `templates/scripts/build-graph.sh` → `.claude/scripts/build-graph.sh` synced (used by analyze-skill)
+- [x] ~~Step 7~~: **DEFERRED** — 4 local-only skills (bash-defensive-patterns, claude-changelog, gh-cli, orchestrate) bleiben lokal-only via Allowlist. Ship-Decisions später
+- [x] ~~Step 8~~: **DEFERRED** — graphify-skill bleibt template-only via Allowlist (opt-in tooling)
+- [x] Step 9: `scripts/template-drift-check.sh` — drift-check mit allowlists für intentional divergence, scripts, skills
+- [x] Step 10: `.githooks/pre-commit` — calls drift-check, skippable via `SKIP_PRECOMMIT_DRIFT=1`
+- [ ] ~~Step 11~~: **SKIPPED** — CI-Step Out of Scope, pre-commit reicht für Solo-Repo
 
 ## Acceptance Criteria
 

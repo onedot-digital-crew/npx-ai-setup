@@ -478,3 +478,5 @@ Repos and tools researched via `/research` — patterns analyzed, best ideas ado
 - [repowise](https://github.com/repowise-dev/repowise)
 - [graphify](https://github.com/safishamsi/graphify)
 - [lean-ctx](https://github.com/yvgude/lean-ctx)
+- [code2prompt](https://github.com/mufeedvh/code2prompt)
+- [repomix](https://github.com/yamadashy/repomix)

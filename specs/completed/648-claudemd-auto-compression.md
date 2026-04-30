@@ -1,7 +1,9 @@
 # Spec: CLAUDE.md Auto-Compression Skill
 
-> **Spec ID**: 648 | **Created**: 2026-04-13 | **Status**: draft | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 648 | **Created**: 2026-04-13 | **Status**: superseded | **Complexity**: medium | **Branch**: —
 > **Related**: 632 (Output-Token Compression), 631 (Research Caveman)
+>
+> **Closed 2026-04-30**: Obsolet durch (a) Commit `7d073c3` slim CLAUDE.md (Tabellen + Refs statt Prose, kein Kompressions-Headroom) und (b) Spec 651 repomix opt-in für externe Pack-Cases. Real-Effekt einer Auto-Compression < 5%.
 
 ## Goal
 

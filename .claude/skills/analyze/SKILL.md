@@ -21,7 +21,19 @@ Produces a structured codebase overview via parallel agents. Use when exploring 
 Read `.agents/context/CONCEPT.md` if present — analysis must respect documented project boundaries.
 Read `.agents/context/SUMMARY.md` if present — avoid duplicating fields that already exist.
 
-### 0b. Count source files
+### 0b. repomix Fast-Path (opt-in)
+
+Check if repomix is available:
+
+```bash
+which repomix 2>/dev/null && echo "AVAILABLE" || echo "FALLBACK"
+```
+
+**If AVAILABLE**: run `bash .claude/scripts/analyze-fast.sh` — returns compressed structural snapshot as XML. Skip to step 2 using this snapshot as input instead of spawning agents. This replaces the agent read-loop, not supplements it.
+
+**If FALLBACK** (or if `analyze-fast.sh` returns empty): continue with step 0c.
+
+### 0c. Count source files (fallback path only)
 
 ```bash
 git ls-files 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|py|go|rs|rb|php|java|kt|swift|vue|svelte|sh|sql)$' | grep -v -E '(\.lock|\.min\.|dist/|build/|node_modules/|vendor/|\.next/|\.nuxt/)' | wc -l
@@ -31,7 +43,7 @@ git ls-files 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|py|go|rs|rb|php|java|kt|swi
 - **Batch mode** (>30 files): use batched haiku agents plus one synthesizer
 - **Effort** (`${CLAUDE_EFFORT}`): if `xhigh` or `max`, use sonnet (not haiku) for all batch agents and run a synthesizer opus pass at the end.
 
-### 1. Run the analysis
+### 1. Run the analysis (fallback path only)
 
 **Fast mode**:
 
@@ -58,6 +70,8 @@ Return:
 ```
 
 Include only follow-up questions that match actual findings.
+
+**repomix path**: derive Architecture from XML `<directory_structure>`, Hotspots from file sizes and signature density, Risks from patterns in compressed signatures.
 
 ### 3. Persist artifacts
 

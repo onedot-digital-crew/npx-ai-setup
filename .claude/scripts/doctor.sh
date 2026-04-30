@@ -511,7 +511,35 @@ if [ -f "$_dsc_script" ] && [ -d ".agents/context" ]; then
 fi
 unset _dsc_script _dsc_out _dsc_viols _dsc_count _dsc_detail _dsc_total
 
-# 21. Hook token audit (dev-only — only runs inside npx-ai-setup repo)
+# 21. Context file read-trigger audit
+# For each .agents/context/*.md, verify a read-trigger exists somewhere in .claude/, templates/, lib/, CLAUDE.md
+if [ -d ".agents/context" ]; then
+  _ctx_no_trigger=""
+  _ctx_ok=0
+  for _ctx_file in .agents/context/*.md; do
+    [ -f "$_ctx_file" ] || continue
+    _ctx_base=$(basename "$_ctx_file" .md)
+    [ "$_ctx_base" = "SUMMARY" ] && {
+      _ctx_ok=$((_ctx_ok + 1))
+      continue
+    } # SUMMARY always loaded via @-import
+    # Strict trigger match: require "<NAME>.md" (file ref) or "@.agents/context/<NAME>" (import).
+    # Plain base-name mention in stale comments doesn't count.
+    if grep -rqE "(${_ctx_base}\.md|@\.agents/context/${_ctx_base})" CLAUDE.md .claude/ templates/ lib/ 2> /dev/null; then
+      _ctx_ok=$((_ctx_ok + 1))
+    else
+      _ctx_no_trigger="${_ctx_no_trigger}${_ctx_base} "
+    fi
+  done
+  if [ -z "$_ctx_no_trigger" ]; then
+    add_row "$PASS" "Context triggers" "All context files have read-triggers (${_ctx_ok} checked)"
+  else
+    add_row "$WARN" "Context triggers" "No read-trigger found for: ${_ctx_no_trigger}— consider adding @-ref or deleting"
+  fi
+  unset _ctx_file _ctx_base _ctx_no_trigger _ctx_ok
+fi
+
+# 22. Hook token audit (dev-only — only runs inside npx-ai-setup repo)
 if [ -f "lib/hook-token-audit.sh" ]; then
   audit_out="$(bash lib/hook-token-audit.sh 2> /dev/null || true)"
   audit_violations="$(printf '%s\n' "$audit_out" | grep -c 'VIOLATION' 2> /dev/null || echo 0)"

@@ -2,20 +2,21 @@
 
 ## Project vs Global
 
-This project's `.mcp.json` pins `context7` project-local (so every contributor gets it without global setup).
-Other MCP servers come from `~/.claude/mcp.json` (workstation-global) — add project entries only when overrides are needed.
+Project `.mcp.json` overrides global servers with the same name.
+Global servers live in `~/.claude/mcp.json` and apply to all projects.
 
 ```bash
 claude mcp list               # list all active servers
-claude mcp disable <name>     # deactivate globally without removing from .mcp.json
+claude mcp disable <name>     # deactivate without removing from .mcp.json
 ```
 
-## Expected Global Servers
+## Default MCPs
 
-The following MCP servers are expected to be configured globally (not in project `.mcp.json`):
+`context7` — Library/API docs lookup. Add "use context7" to any prompt for up-to-date docs.
+Installed globally or via `.mcp.json`. Run `npx @onedot/ai-setup` to add it to a project.
 
-| Server     | Purpose                              | Install                                                   |
-| ---------- | ------------------------------------ | --------------------------------------------------------- |
-| `context7` | Library and API documentation lookup | `claude mcp add context7 -- npx -y @upstash/context7-mcp` |
+`shopify-dev-mcp` — Liquid/GraphQL schema reference (Shopify stacks only).
+Auto-suggested by ai-setup when `theme.liquid` / `shopify.*` detected.
 
-If `use context7` fails, the server is not active globally. Verify with `claude mcp list`.
+To opt out of a default MCP: remove its entry from `.mcp.json` and run `claude mcp list` to verify.
+No auth, no tokens — both MCPs are pure npx commands.

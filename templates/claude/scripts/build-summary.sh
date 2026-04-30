@@ -1,8 +1,10 @@
 #!/bin/bash
 # build-summary.sh — Generates .agents/context/SUMMARY.md
 # Called by /context-refresh after regenerating context files.
-# Sources: STACK.md > ARCHITECTURE.md > AUDIT.md > CONCEPT.md > any other *.md
-#          in .agents/context/ with YAML frontmatter abstract:.
+# Sources: STACK.md > ARCHITECTURE.md > any other *.md in .agents/context/
+#          with YAML frontmatter abstract:.
+# Excluded from SUMMARY (have own read-triggers / would re-inject every session):
+# AUDIT.md, CONCEPT.md, DESIGN-DECISIONS.md, LEARNINGS.md, PATTERNS.md, CONVENTIONS.md.
 # Any domain-specific context file (STORYBLOK.md, SHOPIFY.md, etc.) with
 # frontmatter `abstract:` is auto-included alphabetically after the standard set.
 # Output: max 50 lines, marker <!-- GENERATED --> at top.
@@ -110,11 +112,10 @@ extract_sections() {
     echo ""
   }
 
-  # Standard set in priority order
+  # Standard set in priority order — AUDIT/CONCEPT excluded: .claudeignore blocks them,
+  # adding them to SUMMARY would re-inject into every session via @-import.
   emit_context_file "$CONTEXT_DIR/STACK.md" 3 "Stack" || true
   emit_context_file "$CONTEXT_DIR/ARCHITECTURE.md" 3 "Architecture" || true
-  emit_context_file "$CONTEXT_DIR/AUDIT.md" 5 "Audit" || true
-  emit_context_file "$CONTEXT_DIR/CONCEPT.md" 0 "Concept" || true
 
   # Auto-discover: any other *.md in context/ with frontmatter abstract:
   # (STORYBLOK.md, SHOPIFY.md, WORDPRESS.md, custom domain context, etc.)
@@ -123,7 +124,7 @@ extract_sections() {
       [ -f "$file" ] || continue
       base=$(basename "$file" .md)
       case "$base" in
-        STACK | ARCHITECTURE | AUDIT | CONCEPT | SUMMARY | PATTERNS | CONVENTIONS) continue ;;
+        STACK | ARCHITECTURE | AUDIT | CONCEPT | SUMMARY | PATTERNS | CONVENTIONS | DESIGN-DECISIONS | LEARNINGS) continue ;;
       esac
       # Title-case heading: STORYBLOK -> Storyblok
       heading=$(echo "$base" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')

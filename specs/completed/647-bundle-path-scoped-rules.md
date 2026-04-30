@@ -1,6 +1,8 @@
 # Spec: Bundle-zu-path-scoped-Rules Refactor
 
-> **Spec ID**: 647 | **Created**: 2026-04-25 | **Status**: draft | **Complexity**: medium | **Branch**: —
+> **Spec ID**: 647 | **Created**: 2026-04-25 | **Status**: superseded | **Complexity**: medium | **Branch**: —
+>
+> **Closed 2026-04-30**: Goal valide, aber Implementierung erfordert 12-18 Rules-Files mit Stack-spezifischem Inhalt (Vue/Liquid/PHP-Patterns). Ohne kuratierte Inhalte = Skelett ohne Fleisch. Reopen wenn konkreter Bedarf entsteht.
 
 ## Goal
 Context-Bundles liefern zusätzlich stack-spezifische `.claude/rules/*.md` mit `paths:` YAML-Frontmatter — lazy-load via Claude Code path-scoped rule mechanism statt eager-import.

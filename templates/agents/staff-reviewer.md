@@ -2,7 +2,7 @@
 name: staff-reviewer
 description: Skeptical staff-engineer review for high-complexity changes. Challenges architecture assumptions, flags production risks, structural problems, and shipping blockers that code-reviewer would miss.
 tools: Read, Glob, Grep, Bash
-model: sonnet
+model: opus
 max_turns: 20
 memory: project
 emoji: "🧠"

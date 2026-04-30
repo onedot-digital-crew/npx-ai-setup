@@ -14,18 +14,19 @@ paths:
 
 After completing work, suggest the logical next skill. Keep hints to one line.
 
-| After this...                                     | Suggest                                                           |
-| ------------------------------------------------- | ----------------------------------------------------------------- |
-| Code changes (edit/write)                         | `/test` — Tests laufen lassen                                     |
-| `/test` passes                                    | `/review` — Changes reviewen                                      |
-| `/review` passes                                  | `/commit` — Stagen + committen                                    |
-| `/commit` done                                    | `/pr` auf Feature-Branches, oder `/release` auf `main` / `master` |
-| Multi-file changes (3+ files, incl. config/rules) | `/spec` — erst planen, dann bauen                                 |
-| Spec erstellt oder abgeschlossen                  | `/clear` — Session leeren, Kontext-Bleed vermeiden                |
-| Session >30 tool calls                            | `/reflect` — Learnings sichern, dann `/clear`                     |
-| Build failure                                     | `! bash .claude/scripts/ci-prep.sh` dann manuell fixen            |
-| Pre-release                                       | `/release` — Version bump, CHANGELOG, Tag                         |
-| Viele neue Dateien committed (>5)                 | `/analyze` — graph.json + Context-Dateien neu generieren          |
+| After this...                                                    | Suggest                                                           |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Code changes (edit/write)                                        | `/test` — Tests laufen lassen                                     |
+| `/test` passes                                                   | `/review` — Changes reviewen                                      |
+| `/review` passes                                                 | `/commit` — Stagen + committen                                    |
+| `/commit` done                                                   | `/pr` auf Feature-Branches, oder `/release` auf `main` / `master` |
+| Planning a multi-file change (3+ files, new dep, or arch change) | `/spec` — erst planen, dann bauen                                 |
+| Spec erstellt (Status: draft)                                    | `/spec-work NNN` — Spec implementieren                            |
+| Spec erstellt oder abgeschlossen                                 | `/clear` — Session leeren, Kontext-Bleed vermeiden                |
+| Session >30 tool calls                                           | `/reflect` — Learnings sichern, dann `/clear`                     |
+| Build failure                                                    | `! bash .claude/scripts/ci-prep.sh` dann manuell fixen            |
+| Pre-release                                                      | `/release` — Version bump, CHANGELOG, Tag                         |
+| Viele neue Dateien committed (>5)                                | `/analyze` — graph.json + Context-Dateien neu generieren          |
 
 ## When to Auto-Invoke Skills
 

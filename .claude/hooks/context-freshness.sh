@@ -8,6 +8,7 @@
 # mid-session would invalidate the cache for all subsequent turns.
 
 STATE_FILE=".agents/context/.state"
+REPOMIX_HASH_FILE=".agents/context/.repomix-hash"
 [ ! -f "$STATE_FILE" ] && exit 0
 
 # Age check — warn if last refresh >7 days ago
@@ -64,6 +65,36 @@ REASON="$CHANGED"
 [ -n "$REASON" ] && [ -n "$GRAPH_WARNING" ] && REASON="$REASON, $GRAPH_WARNING" || REASON="${REASON:-$GRAPH_WARNING}"
 if [ -n "$REASON" ]; then
   echo "[CONTEXT STALE] .agents/context/ may be outdated ($REASON). Run /analyze to regenerate." >&2
+fi
+
+# repomix structural drift: if hash file exists, warn when source changed significantly
+# Hash is written by analyze-fast.sh after a successful repomix run (opt-in only)
+if [ -f "$REPOMIX_HASH_FILE" ] && command -v repomix > /dev/null 2>&1; then
+  stored_repomix_hash=$(cat "$REPOMIX_HASH_FILE" 2> /dev/null || true)
+  # Hash format must be "<timestamp>:<file_count>" — both numeric. Reject anything else (corrupt/malformed file).
+  case "$stored_repomix_hash" in
+    *:*)
+      stored_file_count="${stored_repomix_hash#*:}"
+      ;;
+    *)
+      stored_file_count=""
+      ;;
+  esac
+  # Numeric guard: must be positive integer, otherwise skip drift check
+  case "$stored_file_count" in
+    "" | *[!0-9]*) stored_file_count="" ;;
+  esac
+  if [ -n "$stored_file_count" ] && [ "$stored_file_count" -gt 0 ]; then
+    current_file_count=$(git ls-files 2> /dev/null | grep -cE '\.(ts|tsx|js|jsx|vue|php|sh|py)$' || echo "0")
+    delta=$((current_file_count - stored_file_count))
+    [ "$delta" -lt 0 ] && delta=$((-delta))
+    # Warn only if file count changed by >10% (structural drift, not just edits)
+    threshold=$((stored_file_count / 10))
+    [ "$threshold" -lt 3 ] && threshold=3
+    if [ "$delta" -ge "$threshold" ]; then
+      echo "[CONTEXT STALE] Source file count changed by ${delta} files since last repomix snapshot. Run /analyze to refresh." >&2
+    fi
+  fi
 fi
 
 # Hint: graph.json missing entirely (JS/TS project without graph)

@@ -10,6 +10,8 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- feat: repomix Fast-Path for /analyze (opt-in, `analyze-fast.sh` + fallback), context-freshness drift-detection, measure-context-cost.sh token auditor, doctor context-trigger check, SUMMARY.md stripped of AUDIT/CONCEPT sections
+
 ## [v2.2.3] — 2026-04-28
 
 ### Removed

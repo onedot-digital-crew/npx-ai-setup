@@ -12,3 +12,9 @@ if [ "${SKIP_PRECOMMIT_FORMAT:-0}" = "1" ]; then
 else
   bash scripts/format-check.sh
 fi
+
+if [ "${SKIP_PRECOMMIT_DRIFT:-0}" = "1" ]; then
+  echo "Skipping drift check (SKIP_PRECOMMIT_DRIFT=1)."
+else
+  bash scripts/template-drift-check.sh
+fi

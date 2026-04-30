@@ -32,7 +32,9 @@ run_npm() {
 
   # Extract counts per severity using python (always available on macOS/Linux)
   local summary
-  summary=$(echo "$json" | python3 -c '
+  local _py_script
+  _py_script=$(mktemp /tmp/scan-npm-XXXXXX.py)
+  cat > "$_py_script" << 'PYEOF'
 import json, sys
 
 data = json.load(sys.stdin)
@@ -42,9 +44,9 @@ vulns = {}
 if "vulnerabilities" in data:
     for name, info in data["vulnerabilities"].items():
         sev = info.get("severity", "unknown").upper()
-        vulns.setdefault(sev, []).append(
-            f"{name}@{info.get('range','?')} — fix: {info.get('fixAvailable', False)}"
-        )
+        rng = info.get("range") or "?"
+        fix = info.get("fixAvailable") or False
+        vulns.setdefault(sev, []).append(f"{name}@{rng} — fix: {fix}")
 elif "advisories" in data:
     for adv_id, info in data["advisories"].items():
         sev = info.get("severity", "unknown").upper()
@@ -54,7 +56,7 @@ elif "advisories" in data:
         fixed = info.get("patched_versions", "?")
         vulns.setdefault(sev, []).append(f"{via} ({cve_str}) — fixed in: {fixed}")
 
-for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
+for severity in ["CRITICAL", "HIGH", "MODERATE", "MEDIUM", "LOW"]:
     entries = vulns.get(severity, [])
     if entries:
         print(f"=== {severity} ({len(entries)}) ===")
@@ -64,7 +66,9 @@ for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
 total = sum(len(v) for v in vulns.values())
 if total == 0:
     print("NO_VULNERABILITIES_FOUND")
-')
+PYEOF
+  summary=$(echo "$json" | python3 "$_py_script")
+  rm -f "$_py_script"
 
   echo "$summary"
 

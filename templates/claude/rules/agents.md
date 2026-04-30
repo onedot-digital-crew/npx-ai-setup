@@ -4,13 +4,13 @@
 
 Always set `model:` when spawning subagents.
 
-| Model    | Use for                                                             |
-| -------- | ------------------------------------------------------------------- |
-| `haiku`  | ALL Explore/search/read-only agents (12× cheaper than Sonnet)       |
-| `sonnet` | Implementation, code generation, tests (default for impl subagents) |
-| `opus`   | Architecture review, spec creation                                  |
+| Model    | Use for                                                                       |
+| -------- | ----------------------------------------------------------------------------- |
+| `haiku`  | ALL Explore/search/read-only agents (12× cheaper than Sonnet)                 |
+| `sonnet` | Implementation, code generation, tests — default for implementation subagents |
+| `opus`   | Architecture review, spec creation                                            |
 
-Never spawn Explore/search without `haiku`. Code-writing agents must use `sonnet`.
+Never spawn Explore/search without `haiku`. Code-writing agents must use `sonnet`. Haiku is never for implementation.
 
 ## Effort Levels (Opus 4.7)
 
@@ -24,6 +24,24 @@ Arch review/spec work: `xhigh`. Normal code tasks: default `high`.
 - Escalation rule: if you've already made 8 tool calls on a task with no subagents, parallelize the remaining work
 
 Full trigger/model table: `.claude/docs/agent-dispatch.md`.
+
+## Delegation Mandates (Opus Main Agent)
+
+Opus stays dirigent — execution delegates to cheaper models. **MUST delegate**, not optional:
+
+| Trigger                                                                                     | Subagent               | Model    |
+| ------------------------------------------------------------------------------------------- | ---------------------- | -------- |
+| ≥3 Bash calls without architectural decisions (jq, find, log inspect, file system queries)  | `bash-runner`          | `haiku`  |
+| ≥2 Edit/Write in `lib/`, `templates/`, `.claude/scripts/`, `src/`, `components/`, `specs/`  | `implementer`          | `sonnet` |
+| Architecture skepticism on high-complexity changes (new infra, structural refactors, risks) | `staff-reviewer`       | `opus`   |
+| Code review after `implementer`-run or before merge                                         | `code-reviewer`        | `sonnet` |
+| Performance regression check on hot-path edits                                              | `performance-reviewer` | `sonnet` |
+| Security audit (auth, secrets, injection, OWASP)                                            | `security-reviewer`    | `sonnet` |
+| Missing tests after source changes                                                          | `test-generator`       | `sonnet` |
+| Stack profile detection / context-files scan                                                | `context-scanner`      | `haiku`  |
+
+**Opus self-handles**: spec creation (`/spec-work` routes by `Complexity:`), strategy discussion, architecture decisions, final quality reviews.
+**Skip delegation only for**: single-shot Bash, one-line edits, conversational answers, ≤2 tool calls total.
 
 ## Graph-Assisted Navigation
 
