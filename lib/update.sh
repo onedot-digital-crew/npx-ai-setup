@@ -242,6 +242,11 @@ scan_template_changes() {
       continue
     fi
 
+    # Skip files owned by boilerplate pull — template diff is meaningless for them
+    if _is_boilerplate_managed "$target"; then
+      continue
+    fi
+
     local tpl_cs cur_cs
     tpl_cs=$(compute_checksum "$SCRIPT_DIR/$tpl")
     cur_cs=$(compute_checksum "$target")

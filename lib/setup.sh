@@ -77,6 +77,11 @@ _install_or_update_file() {
     return 0
   fi
 
+  # Skip files owned by boilerplate pull — never overwrite with template version
+  if command -v _is_boilerplate_managed > /dev/null 2>&1 && _is_boilerplate_managed "$target"; then
+    return 0
+  fi
+
   # File exists — compare checksums
   local tpl_cs cur_cs
   tpl_cs=$(compute_checksum "$src")

@@ -155,19 +155,9 @@ _mcp_add_entry() {
 
 # Context7 MCP Server (up-to-date library docs)
 # Called directly in non-interactive paths; install_mcp_suggestions wraps this for interactive flows.
+# CLAUDE.md rule lives in templates/CLAUDE.md — no runtime mutation here (would defeat idempotency).
 install_context7() {
   _mcp_add_entry "context7" "npx" '["-y","@upstash/context7-mcp"]'
-
-  # Add Context7 rule to CLAUDE.md
-  if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2> /dev/null; then
-    cat >> CLAUDE.md << 'CTX7EOF'
-
-## Documentation Lookup
-Always use Context7 MCP when you need library/API documentation, code generation,
-setup or configuration steps. Add "use context7" to prompts or it will be auto-invoked.
-CTX7EOF
-    echo "  📚 Context7 rule added to CLAUDE.md"
-  fi
 }
 
 # MCP suggestion phase — reads mcp-defaults.json, prompts Y/N per server, merges accepted entries.
@@ -240,19 +230,6 @@ install_mcp_suggestions() {
 
     idx=$((idx + 1))
   done
-
-  # Ensure the context7 CLAUDE.md rule is added after interactive install
-  if [ -f .mcp.json ] && grep -q '"context7"' .mcp.json 2> /dev/null; then
-    if [ -f CLAUDE.md ] && ! grep -q "context7" CLAUDE.md 2> /dev/null; then
-      cat >> CLAUDE.md << 'CTX7EOF'
-
-## Documentation Lookup
-Always use Context7 MCP when you need library/API documentation, code generation,
-setup or configuration steps. Add "use context7" to prompts or it will be auto-invoked.
-CTX7EOF
-      echo "  📚 Context7 rule added to CLAUDE.md"
-    fi
-  fi
 }
 
 # Show pending plugin install instructions

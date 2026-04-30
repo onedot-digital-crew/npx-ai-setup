@@ -21,6 +21,9 @@ build_template_map() {
     local rel="${file#"$tpl_dir"/}"
     local filename="${rel##*/}"
 
+    # Skip macOS Finder metadata
+    [ "$filename" = ".DS_Store" ] && continue
+
     # Skip excluded filenames
     local excluded=false
     for excl in "${TEMPLATE_EXCLUDES[@]}"; do

@@ -35,3 +35,8 @@ CI `! bash .claude/scripts/ci-prep.sh` | Lint `! bash .claude/scripts/lint-prep.
 ## Automation (Agent SDK CLI)
 
 Non-interactive: `claude -p "<prompt>" --output-format json`. CI: `--bare` disables hooks/skills/MCP. Cost: `--max-budget-usd 0.50` / `--max-turns 20`.
+
+## Documentation Lookup
+
+Always use Context7 MCP when you need library/API documentation, code generation,
+setup or configuration steps. Add "use context7" to prompts or it will be auto-invoked.

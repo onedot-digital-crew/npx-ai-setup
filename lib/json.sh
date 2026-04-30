@@ -89,6 +89,25 @@ _json_set_file() {
   fi
 }
 
+# Return 0 when target is registered under .boilerplate_files in .ai-setup.json.
+# Used to skip template diff/install for files owned by boilerplate pull.
+# Usage: _is_boilerplate_managed <target_path>
+_is_boilerplate_managed() {
+  local target="$1"
+  [ -f .ai-setup.json ] || return 1
+  if [ "$_JSON_CMD" = "jq" ]; then
+    jq -e --arg k "$target" '.boilerplate_files[$k] // empty | length > 0' .ai-setup.json > /dev/null 2>&1
+  else
+    node - "$target" << 'NODESCRIPT' > /dev/null 2>&1
+      try {
+        const d = JSON.parse(require('fs').readFileSync('.ai-setup.json','utf8'));
+        const v = (d.boilerplate_files||{})[process.argv[2]];
+        process.exit(v ? 0 : 1);
+      } catch(e) { process.exit(1); }
+NODESCRIPT
+  fi
+}
+
 # Read .boilerplate_files[KEY].remote_sha from a JSON file.
 # Returns empty string if missing — callers treat empty as "needs pull".
 # Usage: _json_get_boilerplate_remote_sha FILE KEY
