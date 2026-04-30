@@ -35,12 +35,25 @@
     "_profileIntent": "Baseline project-local allow/deny policy. Operator mode changes are explicit choices, not hidden defaults.",
     "allow": [
       "Read(.planning/**)",
+      "Bash(rtk:*)",
       "Bash(date:*)",
       "Bash(ls:*)",
       "Bash(mkdir:*)",
       "Bash(wc:*)",
       "Bash(sort:*)",
       "Bash(tr:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(awk:*)",
+      "Bash(rg:*)",
+      "Bash(diff:*)",
+      "Bash(head:*)",
+      "Bash(which:*)",
+      "Bash(test:*)",
+      "Bash(pwd:*)",
+      "Bash(bash .claude/scripts/*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git status:*)",
@@ -160,25 +173,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/graph-context.sh",
             "timeout": 2
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "if": "Bash(grep *)|Bash(find *)|Bash(cat *)|Bash(head *)|Bash(tail *)|Bash(git *)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "WebFetch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/tool-redirect.sh"
           }
         ]
       }
