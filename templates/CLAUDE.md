@@ -10,6 +10,8 @@ Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTION
 - Investigation/debug discipline → `.claude/rules/quality.md`
 - Model routing: haiku (explore/read-only), sonnet (code generation/default), opus (arch) → `.claude/rules/agents.md`
 - External docs (Context7 first) → `.claude/rules/general.md`
+- External verification in Plan-Phase (Spec/Explore/Design) → `.claude/rules/external-verification.md`
+- **Code-Reuse Pflicht-Scan vor neuen Helpers/Types/Composables** → `.claude/rules/code-reuse.md`
 - MCP usage (project + global servers) → `.claude/rules/mcp.md`
 - Git/commits/branches → `.claude/rules/git.md`
 - Hooks token policy → `.claude/rules/hooks-token-policy.md`

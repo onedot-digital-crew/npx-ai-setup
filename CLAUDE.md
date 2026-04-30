@@ -27,6 +27,8 @@ Features müssen für mindestens einen Primary Stack nützlich sein. Generische 
 - **Zero build in diesem Repo**: pure bash, POSIX-kompatibel wo möglich.
 - **Host-Tools global, nicht pro Projekt**: Python/qmd/graphify einmal auf Dev-Machine, Skill ruft Binary.
 - **Context7 first**: externe Lib/API/SDK/CLI-Lookups via Context7, WebFetch nur als Fallback. Details: `.claude/rules/general.md`.
+- **External Verification in Plan-Phase**: Spec/Explore/Design — fremde Filter/Property/API Pflicht via Context7 verifizieren bevor Code. Details: `.claude/rules/external-verification.md`.
+- **Code-Reuse Pflicht-Scan**: vor neuer Funktion/Helper/Type/Composable — `grep` ob es das schon gibt. Details: `.claude/rules/code-reuse.md`.
 
 ## Project Context (tiered loading)
 

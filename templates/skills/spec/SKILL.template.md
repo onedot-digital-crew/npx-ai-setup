@@ -35,16 +35,16 @@ Read this matrix once at start. Skip silently if a file doesn't exist.
 
 **Adaptive (trigger by spec content):**
 
-| Tool / File                             | Trigger                                                                                                                                                                             | Phase    |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| Context7 MCP                            | new dep, version bump, lib/API/SDK/cloud-service mentioned                                                                                                                          | 1e       |
-| `@references/code-flow.md`              | refactor / integration / behavior change in existing functions                                                                                                                      | 1d       |
-| `@references/challenge.md` (heavy gate) | heavy spec (definition in Phase 1c)                                                                                                                                                 | 1c       |
-| Assumptions table                       | heavy spec only                                                                                                                                                                     | 1e       |
-| `templates/context-bundles/<profile>/`  | single-stack spec + bundle exists for profile                                                                                                                                       | 2.2      |
-| `.agents/context/PATTERNS.md`           | spec adds component/hook/route where patterns apply                                                                                                                                 | 2.3      |
-| `.agents/context/LEARNINGS.md`          | spec touches area with prior learnings (keyword grep)                                                                                                                               | 1d       |
-| **Graph-adjacent reads**                | after picking a file from graph top-hubs, also read its direct importers via `jq '.edges[] \| select(.target==$f) \| .source' \| head -5`. Skip if >10 importers (hub too central). | 1d / 2.2 |
+| Tool / File                             | Trigger                                                                                                                                                                                           | Phase    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Context7 MCP                            | new dep, version bump, lib/API/SDK/cloud-service mentioned, **built-in Filter/Property/Helper einer fremden Engine** (Liquid filters, Vue composables, Nuxt utils), **Filter-Math/Type-Coercion** | 1e       |
+| `@references/code-flow.md`              | refactor / integration / behavior change in existing functions                                                                                                                                    | 1d       |
+| `@references/challenge.md` (heavy gate) | heavy spec (definition in Phase 1c)                                                                                                                                                               | 1c       |
+| Assumptions table                       | heavy spec only                                                                                                                                                                                   | 1e       |
+| `templates/context-bundles/<profile>/`  | single-stack spec + bundle exists for profile                                                                                                                                                     | 2.2      |
+| `.agents/context/PATTERNS.md`           | spec adds component/hook/route where patterns apply                                                                                                                                               | 2.3      |
+| `.agents/context/LEARNINGS.md`          | spec touches area with prior learnings (keyword grep)                                                                                                                                             | 1d       |
+| **Graph-adjacent reads**                | after picking a file from graph top-hubs, also read its direct importers via `jq '.edges[] \| select(.target==$f) \| .source' \| head -5`. Skip if >10 importers (hub too central).               | 1d / 2.2 |
 
 **Anti-bloat guards:**
 
@@ -115,10 +115,21 @@ Using scan + STACK + ARCHITECTURE + 1b answers, sketch:
 
 Code-flow analysis (trigger from matrix, max 5 functions): see `@references/code-flow.md`.
 
-### 1e. Decisions + assumptions
+### 1e. Decisions + assumptions + external verification
 
 Read `decisions.md` (matrix) — flag conflicts before proceeding.
-External libs/APIs: query Context7 per matrix trigger. Never guess versions from training data.
+
+**External verification (Pflicht):** Siehe `.claude/rules/external-verification.md`.
+
+Trigger — Context7 vorab wenn **einer** zutrifft:
+
+- Lib/Framework/SDK/CLI/Cloud-Service genannt
+- Built-in Filter/Property/Helper einer fremden Engine touched (Liquid `image_url`/`aspect_ratio`, Vue `defineProps`, Nuxt `useFetch`)
+- Filter-Math, Type-Coercion (Float vs Int Returns)
+- Neue Dependency, Version Bump, API-Signatur
+
+Output: Spec-Section `## External References` mit verified facts pro System. Niemals raten — Pattern-Match aus Training-Data ist unzuverlässig. Cap: max 2 Lookups pro Spec, mehr → splitten.
+
 Heavy: scan 3-5 files, capture `Statement / Evidence / Confidence / If Wrong`. Confirm only material-scope assumptions.
 Light: skip assumptions table. Decisions + Context7 still apply.
 
