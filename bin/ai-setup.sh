@@ -54,16 +54,24 @@ while [[ $# -gt 0 ]]; do
       export CONTEXT_CAPS_RELAX=1
       shift
       ;;
+    --no-boilerplate)
+      export BOILERPLATE_SYNC=never
+      shift
+      ;;
+    --force-boilerplate)
+      export BOILERPLATE_SYNC=always
+      shift
+      ;;
     --reset | --system | --regenerate | --audit | --force-skills)
       echo "❌ Flag '$1' is not supported. Use the interactive setup/update flow instead."
       exit 1
       ;;
     --*)
-      echo "❌ Unsupported flag '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --force-update | --relax-context-caps"
+      echo "❌ Unsupported flag '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --force-update | --relax-context-caps | --no-boilerplate | --force-boilerplate"
       exit 1
       ;;
     *)
-      echo "❌ Unexpected argument '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --force-update | --relax-context-caps"
+      echo "❌ Unexpected argument '$1'. Supported flags: --patch <pattern> | --force-skip-graphify | --force-all-skills | --force-update | --relax-context-caps | --no-boilerplate | --force-boilerplate"
       exit 1
       ;;
   esac

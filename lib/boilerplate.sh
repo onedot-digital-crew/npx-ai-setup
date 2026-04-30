@@ -333,6 +333,28 @@ detect_installed_system() {
 # Sync boilerplate files for the detected system.
 # Called during updates to re-pull latest rules/agents from boilerplate repos
 # without overwriting project-local skills.
+# Returns 0 when the most recent .boilerplate_files[*].fetched_at is within TTL hours.
+# Empty manifest / missing field → return 1 (must sync).
+# Usage: _boilerplate_cache_fresh <ttl_hours>
+_boilerplate_cache_fresh() {
+  local ttl_hours="$1"
+  [ -f .ai-setup.json ] || return 1
+  command -v jq > /dev/null 2>&1 || return 1
+
+  local newest
+  newest=$(jq -r '[.boilerplate_files // {} | to_entries[] | .value.fetched_at] | max // empty' .ai-setup.json 2> /dev/null)
+  [ -n "$newest" ] && [ "$newest" != "null" ] || return 1
+
+  # Convert ISO8601 → epoch (macOS BSD date vs GNU date)
+  local newest_epoch now_epoch
+  newest_epoch=$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$newest" "+%s" 2> /dev/null ||
+    date -u -d "$newest" "+%s" 2> /dev/null) || return 1
+  now_epoch=$(date -u "+%s")
+
+  local age_hours=$(((now_epoch - newest_epoch) / 3600))
+  [ "$age_hours" -lt "$ttl_hours" ]
+}
+
 sync_boilerplate() {
   local system
   system=$(detect_installed_system) || true
@@ -343,6 +365,22 @@ sync_boilerplate() {
     # an update can pull an unexpected boilerplate based on project files in the
     # current working directory.
     return 0
+  fi
+
+  # Opt-out: BOILERPLATE_SYNC=never (or --no-boilerplate flag handled in update.sh)
+  local mode="${BOILERPLATE_SYNC:-auto}"
+  if [ "$mode" = "never" ]; then
+    SELECTED_SYSTEM="$system"
+    return 0
+  fi
+
+  # Auto mode: skip when cache is fresh (default 24h, override BOILERPLATE_SYNC_TTL_HOURS)
+  if [ "$mode" = "auto" ]; then
+    local ttl="${BOILERPLATE_SYNC_TTL_HOURS:-24}"
+    if _boilerplate_cache_fresh "$ttl"; then
+      SELECTED_SYSTEM="$system"
+      return 0
+    fi
   fi
 
   if ! _gh_available; then
