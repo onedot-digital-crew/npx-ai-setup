@@ -11,7 +11,6 @@ echo "  [2.1.0] Applying migration..."
 # Remove legacy agents (replaced by Claude Code built-in agents)
 # ------------------------------------------------------------------
 _remove_file ".claude/agents/perf-reviewer.md"
-_remove_file ".claude/agents/performance-reviewer.md"
 _remove_file ".claude/agents/verify-app.md"
 _remove_file ".claude/agents/frontend-developer.md"
 _remove_file ".claude/agents/backend-developer.md"

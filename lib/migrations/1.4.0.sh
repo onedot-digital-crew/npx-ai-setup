@@ -40,7 +40,6 @@ _add_file "templates/claude/rules/quality-security.md" ".claude/rules/quality-se
 _add_file "templates/WORKFLOW-GUIDE.md" "WORKFLOW-GUIDE.md"
 _add_file "templates/claude/docs/agent-dispatch.md" ".claude/docs/agent-dispatch.md"
 _add_file "templates/decisions.md" "decisions.md"
-_add_file "templates/.claudeignore" ".claudeignore"
 
 # ------------------------------------------------------------------
 # New hooks

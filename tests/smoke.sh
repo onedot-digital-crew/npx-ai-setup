@@ -417,14 +417,6 @@ fi
 
 rm -rf "$SANDBOX_TMP"
 
-echo "--- .claudeignore template ---"
-CLAUDEIGNORE_COUNT=$(grep -c '^[^#]' templates/.claudeignore 2> /dev/null || echo 0)
-if [ "$CLAUDEIGNORE_COUNT" -ge 30 ]; then
-  pass "templates/.claudeignore has ${CLAUDEIGNORE_COUNT} patterns (>= 30)"
-else
-  fail "templates/.claudeignore only has ${CLAUDEIGNORE_COUNT} patterns (expected >= 30)"
-fi
-
 echo "--- Governance docs ---"
 if grep -q '"_governanceProfile"[[:space:]]*:[[:space:]]*"project-baseline"' templates/claude/settings.json 2> /dev/null; then
   pass "template settings.json declares project-baseline governance profile"
