@@ -62,6 +62,57 @@ ls utils/              # camelCase Files? Single-purpose Files?
 
 Neuer Code muss zum bestehenden Stil passen. Nie neuen Stil einführen ohne expliziten User-Beschluss.
 
+## Package-Inventory (Pflicht vor neuem Helper)
+
+Bevor du eine Util-Funktion selbst schreibst: **prüfe installierte Dependencies**. Häufiger Fehler — Cloud-Agent baut eigenes `debounce`, obwohl `lodash-es` oder `vueuse` schon installiert sind.
+
+### Quick-Scan pro Stack
+
+```bash
+# JS/TS — alle Deps inkl. devDeps
+jq -r '.dependencies, .devDependencies | keys[]' package.json 2>/dev/null
+
+# PHP/Laravel — Composer
+jq -r '.require, ."require-dev" | keys[]' composer.json 2>/dev/null
+
+# Python
+cat requirements*.txt pyproject.toml 2>/dev/null | grep -E "^[a-zA-Z]"
+
+# Ruby
+cat Gemfile 2>/dev/null | grep "^gem"
+
+# Go
+grep "^require" go.mod 2>/dev/null
+```
+
+### Häufige Util-Libs pro Stack (vor eigenem Helper checken)
+
+| Function                                                    | Library — bevorzugt nutzen      |
+| ----------------------------------------------------------- | ------------------------------- |
+| `debounce`, `throttle`, `pick`, `omit`, `groupBy`, `uniq`   | `lodash-es`, `radash`           |
+| `useDebounce`, `useFetch`, `useStorage`, `useEventListener` | `@vueuse/core`                  |
+| Date-Format, `addDays`, `formatDistance`                    | `date-fns`, `dayjs`             |
+| Schema-Validation                                           | `zod`, `yup`, `joi`             |
+| HTTP-Client                                                 | `axios`, `ofetch`, `ky`         |
+| Type-Guards (`isNil`, `isEmpty`)                            | `lodash-es`, `radash`, `remeda` |
+| String-Casing (`camelCase`, `kebabCase`)                    | `lodash-es`, `change-case`      |
+| UUID                                                        | `nanoid`, `uuid`                |
+| Slugify                                                     | `slugify`, `slug`               |
+
+### Workflow
+
+1. `jq` Deps lesen (siehe Quick-Scan)
+2. Match gegen Function — Lib installiert? → importieren
+3. Lib nicht installiert, aber Function ist Standard-Util? → User fragen ob Lib hinzufügen statt eigenen Helper
+4. Wirklich projektspezifisch + nirgends sonst nutzbar? → eigener Helper im richtigen Layer (siehe Where-to-put)
+
+### Anti-Pattern
+
+- Eigenes `debounce` schreiben obwohl `lodash-es` in `package.json`
+- Eigene Date-Math obwohl `date-fns` installiert
+- Eigene Schema-Validation obwohl `zod` da ist
+- `lodash` (full) importieren statt `lodash-es` Tree-shake-friendly
+
 ## Type-Reuse (TS/PHP/Python typed)
 
 Vor `interface X`, `type X`, `class X`:
