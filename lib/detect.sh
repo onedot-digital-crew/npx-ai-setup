@@ -14,8 +14,6 @@ get_template_category() {
     echo "claude_md"
   elif [[ "$target" == "AGENTS.md" ]]; then
     echo "agents_md"
-  elif [[ "$target" == .claude/commands/* ]]; then
-    echo "commands"
   elif [[ "$target" == .claude/agents/* ]]; then
     echo "agents"
   else
@@ -34,7 +32,6 @@ should_update_template() {
     settings) [ "${UPD_SETTINGS:-yes}" = "yes" ] ;;
     claude_md) [ "${UPD_CLAUDE_MD:-yes}" = "yes" ] ;;
     agents_md) [ "${UPD_AGENTS_MD:-yes}" = "yes" ] ;;
-    commands) [ "${UPD_COMMANDS:-yes}" = "yes" ] ;;
     agents) [ "${UPD_AGENTS:-yes}" = "yes" ] ;;
     *) [ "${UPD_OTHER:-yes}" = "yes" ] ;;
   esac

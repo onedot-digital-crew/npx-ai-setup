@@ -206,8 +206,6 @@ scan_template_changes() {
   SCAN_CLAUDE_MD_NEW=0
   SCAN_AGENTS_MD_CHANGED=0
   SCAN_AGENTS_MD_NEW=0
-  SCAN_COMMANDS_CHANGED=0
-  SCAN_COMMANDS_NEW=0
   SCAN_AGENTS_CHANGED=0
   SCAN_AGENTS_NEW=0
   SCAN_OTHER_CHANGED=0
@@ -230,7 +228,6 @@ scan_template_changes() {
           settings) SCAN_SETTINGS_NEW=$((SCAN_SETTINGS_NEW + 1)) ;;
           claude_md) SCAN_CLAUDE_MD_NEW=$((SCAN_CLAUDE_MD_NEW + 1)) ;;
           agents_md) SCAN_AGENTS_MD_NEW=$((SCAN_AGENTS_MD_NEW + 1)) ;;
-          commands) SCAN_COMMANDS_NEW=$((SCAN_COMMANDS_NEW + 1)) ;;
           agents) SCAN_AGENTS_NEW=$((SCAN_AGENTS_NEW + 1)) ;;
           *) SCAN_OTHER_NEW=$((SCAN_OTHER_NEW + 1)) ;;
         esac
@@ -258,7 +255,6 @@ scan_template_changes() {
         settings) SCAN_SETTINGS_CHANGED=$((SCAN_SETTINGS_CHANGED + 1)) ;;
         claude_md) SCAN_CLAUDE_MD_CHANGED=$((SCAN_CLAUDE_MD_CHANGED + 1)) ;;
         agents_md) SCAN_AGENTS_MD_CHANGED=$((SCAN_AGENTS_MD_CHANGED + 1)) ;;
-        commands) SCAN_COMMANDS_CHANGED=$((SCAN_COMMANDS_CHANGED + 1)) ;;
         agents) SCAN_AGENTS_CHANGED=$((SCAN_AGENTS_CHANGED + 1)) ;;
         *) SCAN_OTHER_CHANGED=$((SCAN_OTHER_CHANGED + 1)) ;;
       esac

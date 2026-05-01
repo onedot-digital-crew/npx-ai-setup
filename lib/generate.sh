@@ -26,8 +26,7 @@ run_generation() {
   : "${REGEN_CLAUDE_MD:=yes}"
   : "${REGEN_AGENTS_MD:=${REGEN_CLAUDE_MD}}"
   : "${REGEN_CONTEXT:=yes}"
-  : "${REGEN_COMMANDS:=yes}"
-  : "${REGEN_AGENTS:=${REGEN_COMMANDS}}"
+  : "${REGEN_AGENTS:=yes}"
   # Keep a single canonical skills directory and expose it under .agents/skills as alias.
   if command -v ensure_skills_alias > /dev/null 2>&1; then
     ensure_skills_alias
@@ -38,15 +37,14 @@ run_generation() {
     regen_ai_context="yes"
   fi
 
-  # Re-deploy slash commands and/or agent templates from package templates.
-  if [ "$REGEN_COMMANDS" = "yes" ] || [ "$REGEN_AGENTS" = "yes" ]; then
-    tui_step "Updating command and agent templates"
+  # Re-deploy agent templates from package templates.
+  if [ "$REGEN_AGENTS" = "yes" ]; then
+    tui_step "Updating agent templates"
     local cmd_updated=0
     for mapping in "${TEMPLATE_MAP[@]}"; do
       local tpl="${mapping%%:*}"
       local target="${mapping#*:}"
-      if { [[ "$tpl" == templates/commands/* ]] && [ "$REGEN_COMMANDS" = "yes" ]; } ||
-        { [[ "$tpl" == templates/agents/* ]] && [ "$REGEN_AGENTS" = "yes" ]; }; then
+      if [[ "$tpl" == templates/agents/* ]]; then
         if [ -f "$SCRIPT_DIR/$tpl" ]; then
           mkdir -p "$(dirname "$target")"
           cp "$SCRIPT_DIR/$tpl" "$target"
