@@ -29,18 +29,32 @@ Full trigger/model table: `.claude/docs/agent-dispatch.md`.
 
 Opus stays dirigent — execution delegates to cheaper models. **MUST delegate**, not optional:
 
-| Trigger                                                                                     | Subagent               | Model    |
-| ------------------------------------------------------------------------------------------- | ---------------------- | -------- |
-| ≥3 Bash calls without architectural decisions (jq, find, log inspect, file system queries)  | `bash-runner`          | `haiku`  |
-| ≥2 Edit/Write in `lib/`, `templates/`, `.claude/scripts/`, `src/`, `components/`, `specs/`  | `implementer`          | `sonnet` |
-| Architecture skepticism on high-complexity changes (new infra, structural refactors, risks) | `staff-reviewer`       | `opus`   |
-| Code review after `implementer`-run or before merge                                         | `code-reviewer`        | `sonnet` |
-| Performance regression check on hot-path edits                                              | `performance-reviewer` | `sonnet` |
-| Security audit (auth, secrets, injection, OWASP)                                            | `security-reviewer`    | `sonnet` |
-| Missing tests after source changes                                                          | `test-generator`       | `sonnet` |
-| Stack profile detection / context-files scan                                                | `context-scanner`      | `haiku`  |
+| Trigger                                                                                                                                                                           | Subagent               | Model    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------- |
+| ≥3 **read-only** Bash calls (jq, find, grep, rg, git diff/log/show/status, file system queries)                                                                                   | `bash-runner`          | `haiku`  |
+| ≥2 Edit/Write with **explicit file list AND expected change** (issue list, AC checklist, spec files block)                                                                        | `implementer`          | `sonnet` |
+| Architecture skepticism on high-complexity changes (new infra, structural refactors, risks)                                                                                       | `staff-reviewer`       | `opus`   |
+| Code review after `implementer`-run or before merge                                                                                                                               | `code-reviewer`        | `sonnet` |
+| Performance regression check on **stack-gated hotpath** edits (Liquid hub snippets, Vue/Nuxt fetch+render loops, Laravel/Shopware DB loops) — never on docs/config/CSS-only diffs | `performance-reviewer` | `sonnet` |
+| Security audit (auth, secrets, injection, OWASP)                                                                                                                                  | `security-reviewer`    | `sonnet` |
+| Missing tests after source changes                                                                                                                                                | `test-generator`       | `sonnet` |
+| Stack profile detection / context-files scan                                                                                                                                      | `context-scanner`      | `haiku`  |
 
-**Opus self-handles**: spec creation (`/spec-work` routes by `Complexity:`), strategy discussion, architecture decisions, final quality reviews.
+**Hard rules:**
+
+- **bash-runner only for read-only Bash** — never mutating commands (`rm`, `mv`, `cp`, `mkdir`, `> file`, `sed -i`, `git checkout`, `git reset`, `git restore`, package installs). Mutations are Opus-self or `implementer`-explicit.
+- **implementer only when files and expected edits are explicit** — vague tasks ("refactor X", "clean up Y") stay with Opus until file list + intent is defined. Implementer refuses tasks without both.
+
+## Complexity Signals → Model
+
+| Scope                                                     | Model                   |
+| --------------------------------------------------------- | ----------------------- |
+| 1-2 files, well-defined edit                              | `haiku` or `sonnet`     |
+| 3-7 files, spec'd diff, no architecture                   | `sonnet` (implementer)  |
+| Multi-system change, new abstractions, design decision    | `opus` (main agent)     |
+| Architecture review, spec creation, structural skepticism | `opus` (staff-reviewer) |
+
+**Opus self-handles**: spec creation (`/spec-work` routes by `Complexity:`), strategy discussion, architecture decisions, mutating shell commands without an explicit file list, final quality reviews.
 **Skip delegation only for**: single-shot Bash, one-line edits, conversational answers, ≤2 tool calls total.
 
 ## Graph-Assisted Navigation
@@ -72,12 +86,13 @@ jq --arg f "components/Header.vue" \
 
 20 tokens instead of 500 for a grep. Skip if the relevant graph file is missing.
 
-## Graph-Before-Read Enforcement
+## Graph-Hints Enforcement
 
-The `graph-before-read.sh` hook (PreToolUse: Read/Grep/Glob) enforces this rule automatically:
+The `graph-hints.sh` hook (PreToolUse: Read/Edit/Grep/Glob/Bash) enforces this rule automatically:
 
 - Read on a file >500 lines → stderr hint to check graph.json first
 - 4× Grep in a row without a graph query → hint to use graph instead
+- Read/Edit on `.ts/.tsx/.vue/.liquid` → injects forward + reverse import context
 
 Opt-out: `.claude/settings.local.json` `{ "graphBeforeRead": false }`. Hook never blocks.
 

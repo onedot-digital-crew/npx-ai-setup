@@ -35,7 +35,7 @@ fi
 # Parse a single spec file, outputs: ID|TITLE|STATUS|BRANCH|DONE|TOTAL
 parse_spec() {
   local file="$1"
-  local id="" title="" status="draft" branch="" done=0 total=0
+  local id="" title="" status="draft" branch="" done=0 total=0 deps=""
   local in_steps=0
 
   case "$file" in
@@ -49,6 +49,9 @@ parse_spec() {
         id="$(printf '%s\n' "$line" | sed -n 's/^> \*\*Spec ID\*\*: \([^|]*\).*/\1/p' | tr -d ' ')"
         status="$(printf '%s\n' "$line" | sed -n 's/.*\*\*Status\*\*: \([^|]*\).*/\1/p' | tr -d ' ')"
         branch="$(printf '%s\n' "$line" | sed -n 's/.*\*\*Branch\*\*: \(.*\)$/\1/p' | sed 's/[[:space:]]*$//')"
+        ;;
+      "<!-- depends_on:"*)
+        deps="$(printf '%s\n' "$line" | sed -n 's/.*depends_on: *\[\([^]]*\)\].*/\1/p' | tr -d ' ')"
         ;;
     esac
     # Title from heading (supports "# Spec: ..." and "# Brainstorm: ...")
@@ -85,7 +88,7 @@ parse_spec() {
   if [ ${#title} -gt 30 ]; then
     title="${title:0:28}.."
   fi
-  echo "${id}|${title}|${status}|${branch}|${done}|${total}"
+  echo "${id}|${title}|${status}|${branch}|${done}|${total}|${deps}"
 }
 
 # Collect files for the board.
@@ -231,8 +234,8 @@ write_col() {
   _wline "${color}${glyph} ${label} (${count})${C_RESET}"
 
   for row in "$@"; do
-    local id title status branch done_n total marker="" mc=""
-    IFS='|' read -r id title status branch done_n total <<< "$row"
+    local id title status branch done_n total deps marker="" mc=""
+    IFS='|' read -r id title status branch done_n total deps <<< "$row"
     case "$status" in
       draft)
         marker="◻"
@@ -263,6 +266,21 @@ write_col() {
     _wline " ${mc}${marker} #${id}${C_RESET} ${title}"
     if [ "$status" = "in-progress" ] || [ "$status" = "in-review" ]; then
       _wline "   ${C_DIM}$(progress_bar "$done_n" "$total") ${done_n}/${total}${C_RESET}"
+    fi
+    if [ -n "$deps" ] && [ "$status" != "completed" ]; then
+      local blocking=""
+      local IFS_save="$IFS"
+      IFS=','
+      for dep in $deps; do
+        [ -n "$dep" ] || continue
+        if ! find "$SPECS_DIR/completed" -maxdepth 1 -name "${dep}-*.md" 2> /dev/null | grep -q .; then
+          blocking="${blocking}${blocking:+,}${dep}"
+        fi
+      done
+      IFS="$IFS_save"
+      if [ -n "$blocking" ]; then
+        _wline "   ${C_BLOCKED}⛔ blocked by ${blocking}${C_RESET}"
+      fi
     fi
   done
 }

@@ -3,7 +3,7 @@ name: explore
 description: "Read-only thinking partner before committing to a spec. Trigger: 'explore this codebase', 'understand how X works', 'find where'."
 user-invocable: true
 effort: low
-model: sonnet
+model: haiku
 allowed-tools:
   - Read
   - Glob
@@ -33,6 +33,14 @@ NEVER use: Write, Edit, NotebookEdit. This skill is strictly read-only.
 If a tool call would modify any file, stop and refuse.
 
 ## Behavior
+
+0. **Stack-scan first** — if `.agents/context/STACK.md` exists and is newer than 24 hours, read it and skip the scanner:
+
+   ```bash
+   find .agents/context/STACK.md -mtime -1 -print 2>/dev/null
+   ```
+
+   Otherwise spawn `context-scanner` (model: haiku). Inject the resulting `stack`, `conventions`, and `key_paths` block into any explorer prompt or reasoning summary.
 
 1. **Understand the question** — restate the user's question in one sentence to confirm scope.
 

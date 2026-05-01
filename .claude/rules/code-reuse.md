@@ -6,11 +6,30 @@ Vor neuer Funktion/Type/Helper/Konstante: scannen ob es das schon gibt — im Pr
 
 ```bash
 # Funktion / Helper / Composable / Type / Klasse
-grep -rn "<name>" --include="*.{ts,js,vue,php,liquid,py,rb,go}" .
+grep -rn "<name>" --include="*.{ts,js,vue,php,py,rb,go}" .
 grep -rn "type <Name>\|interface <Name>\|class <Name>\|use<Name>" .
 ```
 
 Treffer → importieren/erweitern, niemals duplizieren.
+
+## 1b. Liquid Renderer-Scan (nur Shopify)
+
+Nur wenn `.agents/context/liquid-graph.json` existiert: vor dem Edit eines Snippets oder einer Section den Liquid-Graph statt blindem Grep nutzen.
+
+```bash
+# Who renders a given snippet?
+jq -r --arg s "snippets/product-card.liquid" '.edges[] | select(.target==$s) | .source' .agents/context/liquid-graph.json
+
+# Top rendered snippets (hub ranking)
+jq -r '.stats.top_hubs[] | "\(.imported_by)x \(.file)"' .agents/context/liquid-graph.json | head -10
+
+# Orphan snippets (safe to remove candidates)
+jq -r '.stats.orphans[]' .agents/context/liquid-graph.json
+```
+
+Hub-Snippet Warning: wenn `.stats.top_hubs[]` das Ziel mit mindestens 5 Renderern listet, vor dem Edit eine einzeilige Spec-/PR-Notiz zum Renderer-Impact festhalten.
+
+Orphan Reuse: bevor ein neues Snippet entsteht, `.stats.orphans[]` auf aehnliche Namen pruefen; ein passendes Orphan ist Reuse-Kandidat statt neuer Datei.
 
 ## 2. Package-Inventory
 

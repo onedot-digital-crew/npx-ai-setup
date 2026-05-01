@@ -589,6 +589,14 @@ cleanup_known_orphans() {
     ".claude/agents/verify-app.md"
     ".claude/hooks/post-compact-restore.sh"
     ".claude/hooks/pre-compact-state.sh"
+    ".claude/hooks/graph-before-read.sh"
+    ".claude/hooks/graph-context.sh"
+    ".claude/skills/spec-review/SKILL.md"
+    ".claude/skills/spec-review"
+    ".claude/skills/release/SKILL.md"
+    ".claude/skills/release"
+    ".claude/scripts/release.sh"
+    ".claude/scripts/release-prep.sh"
     ".claude/skills/pause/SKILL.md"
     ".claude/skills/resume/SKILL.md"
     ".claude/skills/orchestrate/SKILL.md"
@@ -630,10 +638,15 @@ cleanup_known_orphans() {
     ".claude/skills/spec-validate/references/scoring.md"
   )
   for target in "${orphans[@]}"; do
-    [ -f "$target" ] || continue
-    rm -f "$target"
-    echo "  🧹 $target (obsolete — removed)"
-    UPD_REMOVED=$((UPD_REMOVED + 1))
+    if [ -d "$target" ]; then
+      rm -rf "$target"
+      echo "  🧹 $target (obsolete dir — removed)"
+      UPD_REMOVED=$((UPD_REMOVED + 1))
+    elif [ -f "$target" ]; then
+      rm -f "$target"
+      echo "  🧹 $target (obsolete — removed)"
+      UPD_REMOVED=$((UPD_REMOVED + 1))
+    fi
   done
 }
 

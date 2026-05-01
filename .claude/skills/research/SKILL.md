@@ -20,6 +20,16 @@ Deep-researches an external repository, tool, or pattern. Input: $ARGUMENTS
 
 ## Process
 
+### 0. Stack-scan
+
+If `.agents/context/STACK.md` exists and is newer than 24 hours, read it and skip the scanner:
+
+```bash
+find .agents/context/STACK.md -mtime -1 -print 2>/dev/null
+```
+
+Otherwise spawn `context-scanner` (model: haiku). Use its `stack`, `conventions`, and `key_paths` output to focus Context7/Web lookups on libraries that make sense for the current project.
+
 ### 1. Acquire source material
 
 - **GitHub repo URL**: run a deep repo scrape

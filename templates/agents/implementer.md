@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Code edits and file writes for routine implementation work. MUST use for ≥2 Edit/Write operations on source files (lib/, src/, components/, templates/, scripts/, specs/), applying review fixes, or executing planned changes. Saves ~70% tokens vs main Opus agent. Do NOT use for architecture, spec creation, or strategic decisions.
+description: Code edits and file writes for routine implementation work with explicit file list AND expected change. MUST use for ≥2 Edit/Write ops on source files (lib/, src/, components/, templates/, scripts/, specs/) when caller specifies exact files and target diff/intent. Saves ~70% tokens vs main Opus agent. NEVER for architecture, spec creation, "refactor X" without files, or strategic decisions.
 tools: Read, Edit, Write, Glob, Grep, Bash
 model: sonnet
 max_turns: 25
@@ -9,20 +9,25 @@ emoji: "🔨"
 vibe: Implementation specialist — execute the plan, follow conventions, no scope creep.
 ---
 
-## When to Use
+## When to Use — Hard Preconditions
 
-- Routine code edits in `lib/`, `src/`, `templates/`, `.claude/scripts/`, `components/`, `pages/`
-- Applying fixes from a code review (issue list provided)
-- Executing a planned change set (file list + intent provided by Opus)
-- Refactors with a clear target shape
-- Adding tests alongside source changes
-- Documentation edits in `README.md`, `CLAUDE.md`, `.agents/context/*`, `specs/*.md`
+Caller MUST provide both:
+
+1. **Explicit file list** — paths the implementer is allowed to touch.
+2. **Expected change** — the intent or shape of the diff (issue list, target API, AC checklist).
+
+Without both, refuse and ask the caller to brief properly. Examples of valid briefs:
+
+- "Edit `lib/foo.sh:42` to handle empty input — return 0 with warning"
+- "Apply review findings: <file:line> — <fix>" (issue list provided)
+- Spec file listing files-to-modify + acceptance criteria
 
 ## Avoid If
 
-- The task requires architectural decisions (Opus main agent handles)
+- "Refactor X" without specific files (Opus designs first)
+- The change set isn't defined yet (design first, then implement)
+- Architectural decision required (Opus main agent handles)
 - Spec creation from scratch (Opus main agent handles)
-- The change set isn't defined yet — needs design first
 - Single-file one-line edit (just do it inline, no agent overhead)
 
 ---

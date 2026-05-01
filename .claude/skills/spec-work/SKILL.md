@@ -44,7 +44,7 @@ Read this matrix once at start. Skip silently if a file/agent doesn't exist.
 | `code-reviewer` agent                  | Always at step 12 (low/medium complexity)                       | 12   |
 | `staff-reviewer` agent                 | Complexity=high                                                 | 12   |
 | `security-reviewer` agent              | Spec touches auth/secrets/permissions                           | 12   |
-| `performance-reviewer` agent           | Spec touches DB queries, bundle size, rendering hot paths       | 12   |
+| `performance-reviewer` agent           | Stack-gated hotpath signal (see review skill heuristic)         | 12   |
 
 **Fallback:** if a conditional agent doesn't exist (`ls .claude/agents/<name>.md`), proceed without it. Never block on missing optional agents. `code-reviewer` is the only required agent at step 12.
 
@@ -53,6 +53,7 @@ Read this matrix once at start. Skip silently if a file/agent doesn't exist.
 ## Process
 
 1. **Find spec**: `$ARGUMENTS` as number → `specs/NNN-*.md`. Filename → open directly. Empty → list drafts, ask via AskUserQuestion.
+   1b. **Dependency pre-check** (skip if `spec-deps-check.sh` missing): run `bash .claude/scripts/spec-deps-check.sh NNN`. Exit 1 → abort with the script's stderr message (e.g. `Spec 655 depends on 654(draft) — finish blockers first`). Exit 0 → continue. Specs without `depends_on` skip silently.
 2. **Read spec** — Goal, Steps, Files to Modify, Acceptance Criteria. Trust it; structure was validated in `/spec`.
 3. **High-complexity check**: If spec frontmatter `Complexity: high` AND `code-architect` agent exists → spawn for design review (model: opus). REDESIGN verdict → stop, report. Otherwise continue.
 4. **Branch + foundation**: AskUserQuestion → create `spec/NNN-<slug>` now/later/skip. Read STACK.md (matrix). Load Skill refs from spec Context.
@@ -77,7 +78,7 @@ Specialist routing (matrix above): frontend/backend agents only when they exist 
    - Implement → check off `- [x]` → if architectural choice made: append to `decisions.md` (one line).
    - **Stall guard**: 3× same failure on a step → mark `- [~]`, set `Status: blocked`, stop with diagnostic. 2 consecutive no-change steps → AskUserQuestion before continuing.
    - **Hypothesis budget**: max 2 diagnostic attempts per failure. After 2: switch strategy or ask user.
-   - No commits during work — `/spec-review` is the gate.
+   - No commits during work — `/review --spec NNN` is the gate.
 8. **Verify ACs + zero-token quality**:
    - Run lint-prep.sh / quality-gate.sh per matrix triggers (zero-token sanity).
    - For each Acceptance Criterion: run the verification command from spec, or read modified files to confirm.
@@ -89,7 +90,7 @@ Specialist routing (matrix above): frontend/backend agents only when they exist 
     - Always: `code-reviewer` (model: sonnet).
     - Add `staff-reviewer` if high complexity (when agent exists).
     - Add `security-reviewer` if auth/secrets touched (when agent exists).
-    - Add `performance-reviewer` if perf-relevant (when agent exists).
+    - Add `performance-reviewer` only if stack-gated hotpath signal matches (see review skill section 4 heuristic) AND agent exists. Pure docs/config/CSS specs skip it.
     - Reviews run in parallel (single message, multiple Agent calls).
     - FAIL → report findings, stop. PASS → `Status: completed`, move spec to `specs/completed/`.
 
@@ -119,4 +120,4 @@ Use ONLY these five values. Synonyms like `done`, `finished`, `closed`, `merged`
 
 ## Next Step
 
-> 📋 `/spec-review NNN` — validate, then `/commit`
+> 📋 `/review --spec NNN` — validate, then `/commit`

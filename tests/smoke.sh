@@ -187,12 +187,6 @@ else
   fail ".claude/skills/spec-work/SKILL.md missing Haiku-first medium routing"
 fi
 
-if grep -q 'Review stays on Sonnet for all tiers' .claude/skills/spec-review/SKILL.md 2> /dev/null; then
-  pass ".claude/skills/spec-review/SKILL.md keeps routine review on Sonnet"
-else
-  fail ".claude/skills/spec-review/SKILL.md missing explicit Sonnet-only review guidance"
-fi
-
 # Step 8: Verify Complexity field in spec template
 echo ""
 echo "--- Spec template Complexity field ---"

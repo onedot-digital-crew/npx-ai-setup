@@ -1,107 +1,109 @@
-#!/bin/bash
-# context-freshness.sh — UserPromptSubmit hook
-# Warns when .agents/context/ files may be outdated (package.json or tsconfig changed)
-# Silent pass when up-to-date or state file missing (~10ms runtime, no API calls)
+#!/usr/bin/env bash
+# context-freshness.sh — SessionStart + UserPromptSubmit hook
+# Reads .agents/context/index-manifest.json (Spec 655), compares source hashes
+# and source-file-count delta, marks artifacts stale, prints a one-line warning
+# plus a compact skill-routing map. Token budget: <300 total.
 #
-# Cache note: Warning is injected as stderr output (shown as a system message in Claude's turn),
-# NOT by editing CLAUDE.md. This preserves the prompt cache prefix — editing static layers
-# mid-session would invalidate the cache for all subsequent turns.
+# Never rebuilds. Only annotates. /index --refresh is the user's job.
 
-STATE_FILE=".agents/context/.state"
-REPOMIX_HASH_FILE=".agents/context/.repomix-hash"
-[ ! -f "$STATE_FILE" ] && exit 0
+set -o pipefail
 
-# Age check — warn if last refresh >7 days ago
-STATE_AGE_DAYS=$((($(date +%s) - $(stat -f %m "$STATE_FILE" 2> /dev/null || stat -c %Y "$STATE_FILE" 2> /dev/null || echo "0")) / 86400))
-AGE_WARNING=""
-[ "$STATE_AGE_DAYS" -gt 7 ] 2> /dev/null && AGE_WARNING="context is ${STATE_AGE_DAYS} days old"
+MANIFEST=".agents/context/index-manifest.json"
 
-# Read stored hashes
-STORED_PKG=""
-STORED_TSC=""
-STORED_GIT=""
-while IFS='=' read -r key val; do
-  case "$key" in
-    PKG_HASH) STORED_PKG="$val" ;;
-    TSCONFIG_HASH) STORED_TSC="$val" ;;
-    GIT_HASH) STORED_GIT="$val" ;;
-  esac
-done < "$STATE_FILE"
+# Skill-Map (loaded every SessionStart, ~150 tokens)
+print_skill_map() {
+  cat << 'MAP' >&2
+[SKILLS] /index (refresh ctx) /explore (read-only thinking) /spec (multi-file plan) /spec-work NNN (impl) /review (uncommitted diff) /commit /pr
+MAP
+}
 
-CHANGED=""
-
-# Compare git commit count since last refresh (warn only at 5+ commits)
-# Skips gracefully in shallow clones where STORED_GIT may not exist in local history
-if [ -n "$STORED_GIT" ] && git cat-file -e "${STORED_GIT}^{commit}" 2> /dev/null; then
-  COMMIT_COUNT=$(git rev-list --count "${STORED_GIT}..HEAD" 2> /dev/null || echo "0")
-  [ "$COMMIT_COUNT" -ge 5 ] 2> /dev/null && CHANGED="${COMMIT_COUNT} commits since last context refresh"
+# Bail early if manifest missing — print only skill map
+if [ ! -f "$MANIFEST" ]; then
+  print_skill_map
+  echo "[CONTEXT] no index-manifest. run /index to build .agents/context/." >&2
+  exit 0
 fi
 
-# Compare package.json
-if [ -n "$STORED_PKG" ] && [ -f "package.json" ]; then
-  CURRENT_PKG=$(cksum package.json 2> /dev/null | cut -d' ' -f1,2)
-  [ "$CURRENT_PKG" != "$STORED_PKG" ] && CHANGED="${CHANGED:+$CHANGED, }package.json"
-fi
+have_jq=0
+command -v jq > /dev/null 2>&1 && have_jq=1
 
-# Compare tsconfig.json
-if [ -n "$STORED_TSC" ] && [ -f "tsconfig.json" ]; then
-  CURRENT_TSC=$(cksum tsconfig.json 2> /dev/null | cut -d' ' -f1,2)
-  [ "$CURRENT_TSC" != "$STORED_TSC" ] && CHANGED="${CHANGED:+$CHANGED, }tsconfig.json"
-fi
-
-# Check graph.json staleness (older than last git commit)
-GRAPH_WARNING=""
-GRAPH_FILE=".agents/context/graph.json"
-if [ -f "$GRAPH_FILE" ]; then
-  GRAPH_MTIME=$(stat -f %m "$GRAPH_FILE" 2> /dev/null || stat -c %Y "$GRAPH_FILE" 2> /dev/null || echo "0")
-  LAST_COMMIT_TIME=$(git log -1 --format=%ct 2> /dev/null || echo "0")
-  if [ "$LAST_COMMIT_TIME" -gt "$GRAPH_MTIME" ] 2> /dev/null; then
-    GRAPH_WARNING="graph.json predates last commit"
+_sha() {
+  if command -v sha256sum > /dev/null 2>&1; then
+    sha256sum "$1" 2> /dev/null | awk '{print $1}'
+  else
+    shasum -a 256 "$1" 2> /dev/null | awk '{print $1}'
   fi
-fi
+}
 
-REASON="$CHANGED"
-[ -n "$REASON" ] && [ -n "$AGE_WARNING" ] && REASON="$REASON, $AGE_WARNING" || REASON="${REASON:-$AGE_WARNING}"
-[ -n "$REASON" ] && [ -n "$GRAPH_WARNING" ] && REASON="$REASON, $GRAPH_WARNING" || REASON="${REASON:-$GRAPH_WARNING}"
-if [ -n "$REASON" ]; then
-  echo "[CONTEXT STALE] .agents/context/ may be outdated ($REASON). Run /analyze to regenerate." >&2
-fi
+stale_sources=""
+stale_artifacts=""
 
-# repomix structural drift: if hash file exists, warn when source changed significantly
-# Hash is written by analyze-fast.sh after a successful repomix run (opt-in only)
-if [ -f "$REPOMIX_HASH_FILE" ] && command -v repomix > /dev/null 2>&1; then
-  stored_repomix_hash=$(cat "$REPOMIX_HASH_FILE" 2> /dev/null || true)
-  # Hash format must be "<timestamp>:<file_count>" — both numeric. Reject anything else (corrupt/malformed file).
-  case "$stored_repomix_hash" in
-    *:*)
-      stored_file_count="${stored_repomix_hash#*:}"
-      ;;
-    *)
-      stored_file_count=""
-      ;;
-  esac
-  # Numeric guard: must be positive integer, otherwise skip drift check
-  case "$stored_file_count" in
-    "" | *[!0-9]*) stored_file_count="" ;;
-  esac
-  if [ -n "$stored_file_count" ] && [ "$stored_file_count" -gt 0 ]; then
-    current_file_count=$(git ls-files 2> /dev/null | grep -cE '\.(ts|tsx|js|jsx|vue|php|sh|py)$' || echo "0")
-    delta=$((current_file_count - stored_file_count))
-    [ "$delta" -lt 0 ] && delta=$((-delta))
-    # Warn only if file count changed by >10% (structural drift, not just edits)
-    threshold=$((stored_file_count / 10))
-    [ "$threshold" -lt 3 ] && threshold=3
-    if [ "$delta" -ge "$threshold" ]; then
-      echo "[CONTEXT STALE] Source file count changed by ${delta} files since last repomix snapshot. Run /analyze to refresh." >&2
+if [ "$have_jq" = "1" ]; then
+  # Source hash comparison
+  while IFS=$'\t' read -r path stored_hash; do
+    [ -z "$path" ] && continue
+    [ ! -f "$path" ] && continue
+    current=$(_sha "$path")
+    if [ -n "$current" ] && [ "$current" != "$stored_hash" ]; then
+      stale_sources="${stale_sources}${path} "
+    fi
+  done < <(jq -r '.sources | to_entries[] | "\(.key)\t\(.value.hash)"' "$MANIFEST" 2> /dev/null)
+
+  # Stack profile to gate artifact mapping
+  stack=$(jq -r '.stack // "default"' "$MANIFEST" 2> /dev/null)
+
+  # Map source change to affected artifact
+  for src in $stale_sources; do
+    case "$src" in
+      package.json | package-lock.json | pnpm-lock.yaml | yarn.lock)
+        case "$stack" in
+          nuxt-storyblok | nuxtjs | nextjs) stale_artifacts="${stale_artifacts}graph.json " ;;
+        esac
+        ;;
+      composer.json | composer.lock) stale_artifacts="${stale_artifacts}context " ;;
+      shopify.theme.toml | config/settings_schema.json) stale_artifacts="${stale_artifacts}liquid-graph.json " ;;
+      nuxt.config.* | vite.config.*) stale_artifacts="${stale_artifacts}graph.json " ;;
+    esac
+  done
+
+  # Liquid file change → liquid-graph stale (Shopify only)
+  if [ "$stack" = "shopify-liquid" ] && command -v git > /dev/null 2>&1; then
+    liquid_changes=$(git diff --name-only HEAD 2> /dev/null | grep -c '\.liquid$' || echo 0)
+    if [ "${liquid_changes:-0}" -gt 0 ]; then
+      stale_artifacts="${stale_artifacts}liquid-graph.json "
     fi
   fi
+
+  # 20% file-count delta heuristic for graph.json (semantic drift)
+  case "$stack" in
+    nuxt-storyblok | nuxtjs | nextjs)
+      if command -v git > /dev/null 2>&1; then
+        # Stored count from manifest if present (top-level optional key)
+        stored_count=$(jq -r '.source_file_count // empty' "$MANIFEST" 2> /dev/null)
+        if [ -n "$stored_count" ] && [ "$stored_count" -gt 0 ] 2> /dev/null; then
+          current_count=$(git ls-files 2> /dev/null | grep -cE '\.(ts|tsx|js|jsx|vue)$' || echo 0)
+          delta=$((current_count - stored_count))
+          [ "$delta" -lt 0 ] && delta=$((-delta))
+          threshold=$((stored_count / 5))
+          [ "$threshold" -lt 5 ] && threshold=5
+          if [ "$delta" -ge "$threshold" ]; then
+            stale_artifacts="${stale_artifacts}graph.json(delta>20%) "
+          fi
+        fi
+      fi
+      ;;
+  esac
 fi
 
-# Hint: graph.json missing entirely (JS/TS project without graph)
-# Guard: only hint for JS/TS apps (src/, app/, or pages/ directory present)
-# Bash CLI repos that happen to have a package.json for npm distribution don't benefit from graph.json
-if [ ! -f "$GRAPH_FILE" ] && [ -f "package.json" ] && { [ -d "src" ] || [ -d "app" ] || [ -d "pages" ]; }; then
-  echo "[HINT] No graph.json found. Run /analyze to build the dependency graph for faster agent navigation." >&2
+# Always print skill map first
+print_skill_map
+
+# Stale warning (one line if any)
+if [ -n "$stale_artifacts" ] || [ -n "$stale_sources" ]; then
+  # Dedupe artifacts (intentional word-split on spaces)
+  # shellcheck disable=SC2086
+  uniq_art=$(echo $stale_artifacts | tr ' ' '\n' | awk 'NF && !seen[$0]++' | tr '\n' ' ')
+  echo "[CONTEXT STALE] run /index --refresh — affects: ${uniq_art:-context}" >&2
 fi
 
 exit 0

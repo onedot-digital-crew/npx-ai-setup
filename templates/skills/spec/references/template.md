@@ -5,6 +5,9 @@
 
 > **Spec ID**: NNN | **Created**: YYYY-MM-DD | **Status**: draft | **Complexity**: medium | **Branch**: —
 
+<!-- Optional: depends_on lists spec IDs that must be completed before this spec can start. Tools (spec-board, spec-work) read this and block out-of-order execution. Omit if no dependencies. -->
+<!-- depends_on: [654, 655] -->
+
 ## Goal
 [One sentence]
 
@@ -18,15 +21,33 @@
 - **Profiles affected**: nuxt-storyblok, shopify-liquid (or "all" / "single: laravel")
 - **Per-stack difference**: [what changes per stack, if any]
 
+## Architecture (optional — heavy specs)
+<!-- Cross-layer or new abstractions. Skip for single-file specs. -->
+- [Component / module name] — [responsibility]
+- Data flow: [A → B → C]
+
+## Tech Stack (optional — when spec introduces a new dep)
+- [lib@version] — [why chosen]
+
 ## Steps
-- [ ] Step 1: `path/to/file` — description
-- [ ] Step 2: `path/to/file` — description
+- [ ] Step 1: `path/to/file` — description → verify: `[command or expected output]`
+- [ ] Step 2: `path/to/file` — description → verify: `[check]`
 
 ## Acceptance Criteria
 - [ ] "[observable behavior verifiable by running a command or reading output]"
 
 ## Files to Modify
 - `path/to/file` — reason
+
+## Changes to Existing Behavior (optional, brownfield only)
+<!-- Include this block ONLY if spec modifies/removes >2 existing files. Skip for greenfield. -->
+### MODIFIED: <component>
+- Before: [behavior]
+- After: [behavior]
+
+### REMOVED: <component>
+- Reason: [why removed]
+- Migration: [how update-path handles it]
 
 ## Out of Scope
 - What is NOT part of this task (max 3 items)

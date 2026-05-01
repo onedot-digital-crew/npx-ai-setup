@@ -16,11 +16,58 @@ Dieses Setup macht Claude Code zum strukturierten Entwicklungswerkzeug statt ein
 
 ```bash
 claude                # Claude Code im Projekt oeffnen
+/index                # 1x nach Setup: Context + Graph + Manifest bauen
 /spec-board           # aktive Specs anzeigen
-/analyze              # Codebase-Analyse → PATTERNS.md + AUDIT.md (empfohlen nach Erstinstallation)
 ```
 
 Setup-Health pruefen: `! bash .claude/scripts/doctor.sh`
+
+---
+
+## Workflow Diagramm (Default-Pfade)
+
+```
+[neues Projekt]
+      │
+      ▼
+  npx ai-setup
+      │
+      ▼
+   /index ────────► .agents/context/ + graph.json + manifest
+      │
+      │  (Session-Start: Stale-Hook checkt Manifest)
+      │
+      ▼
+┌─────────────────────────────────────┐
+│  Task einschätzen                   │
+└─────────────────────────────────────┘
+      │
+      ├─ klein  ─► [edit] ─► /test ─► /review ─► /commit
+      │
+      ├─ mittel ─► /explore ─► [edit] ─► /test ─► /review ─► /commit
+      │
+      └─ groß   ─► /explore ─► /spec ─► /spec-work ─► /review --spec ─► /commit
+                                            │
+                                            └─► (intern: /test, delegation)
+```
+
+### Default-Skills (7)
+
+| Skill        | Zweck                                                   | Wann                                                      |
+| ------------ | ------------------------------------------------------- | --------------------------------------------------------- |
+| `/index`     | Context + Graph + Manifest bauen/refreshen              | 1x initial, bei Stale-Warning, nach Major-Changes         |
+| `/explore`   | Read-only Code-Verständnis, Patterns, Tradeoffs (haiku) | Vor Edit wenn Bereich unbekannt; vor Spec bei Scope-Frage |
+| `/spec`      | Plan für 3+ Files / neue Dep / Arch-Change              | Vor Code bei mittleren/großen Tasks                       |
+| `/spec-work` | Spec abarbeiten, delegiert an implementer/bash-runner   | Nach `/spec` bis ACs grün                                 |
+| `/review`    | Diff-Review (`/review --spec NNN` für Spec-Mode)        | Vor Commit, vor Merge                                     |
+| `/test`      | Test-Runner + Failure-Analyse                           | Nach Code-Edits, vor `/review`                            |
+| `/commit`    | Stagen + Conventional Commit                            | Wenn Review grün                                          |
+
+### Opt-in Skills (Power-User)
+
+`/research` (Context7-Lookup), `/challenge` (Red-Team), `/graphify` (semantischer Graph), `/discover` (Spec aus Code), `/orchestrate` (Codex/Gemini), `/agent-browser` (Visual-Check).
+
+Direkt aufrufbar, aber aus Default-Routing raus.
 
 ---
 
@@ -52,12 +99,11 @@ Der Standard-Ablauf fuer jede Aenderung die mehr als ein einzelnes File betrifft
 4. /review                        ← Uncommitted Changes reviewen
 5. /commit                        ← Stagen + Conventional Commit Message
 6. /pr                            ← PR-Titel/Body + Build-Validation
-7. /release                       ← Version bump, CHANGELOG, Tag
 ```
 
 **Spec-Lifecycle:** `draft` → `in-progress` → `in-review` → `completed`
 
-Fuer kleine Aenderungen (Typo, Config, einzelnes File) direkt mit Schritt 4-7 starten — kein Spec noetig.
+Fuer kleine Aenderungen (Typo, Config, einzelnes File) direkt mit Schritt 4-6 starten — kein Spec noetig.
 
 ### Wo anfangen?
 
@@ -71,13 +117,13 @@ Neue Idee oder Feature?
 
 ### Spec Commands
 
-| Command            | Was es tut                                                                |
-| ------------------ | ------------------------------------------------------------------------- |
-| `/spec "task"`     | Komplexitaet einschaetzen, Spec erstellen, Struktur-Check + User-Approval |
-| `/spec-work NNN`   | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
-| `/spec-work-all`   | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren          |
-| `/spec-review NNN` | Review gegen Acceptance Criteria + Finishing Gate                         |
-| `/spec-board`      | Kanban-Board aller Specs                                                  |
+| Command              | Was es tut                                                                |
+| -------------------- | ------------------------------------------------------------------------- |
+| `/spec "task"`       | Komplexitaet einschaetzen, Spec erstellen, Struktur-Check + User-Approval |
+| `/spec-work NNN`     | Spec Schritt fuer Schritt ausfuehren, ohne Commits waehrend der Umsetzung |
+| `/spec-work-all`     | Alle Draft-Specs parallel in isolierten Git Worktrees ausfuehren          |
+| `/review --spec NNN` | Review gegen Acceptance Criteria + Finishing Gate                         |
+| `/spec-board`        | Kanban-Board aller Specs                                                  |
 
 ### Code Quality
 
@@ -90,12 +136,11 @@ Schnelle Zero-Token-Checks: `! bash .claude/scripts/lint-prep.sh` bzw. `test-pre
 
 ### Build & Deploy
 
-| Command    | Was es tut                                            |
-| ---------- | ----------------------------------------------------- |
-| `/commit`  | Stagen + Conventional Commit Message generieren       |
-| `/pr`      | PR-Titel/Body draften, Build-Validation laufen lassen |
-| `/ci`      | CI-Status via `gh pr checks` / `gh run list` pruefen  |
-| `/release` | Version bump, CHANGELOG aktualisieren, Git Tag        |
+| Command   | Was es tut                                            |
+| --------- | ----------------------------------------------------- |
+| `/commit` | Stagen + Conventional Commit Message generieren       |
+| `/pr`     | PR-Titel/Body draften, Build-Validation laufen lassen |
+| `/ci`     | CI-Status via `gh pr checks` / `gh run list` pruefen  |
 
 ### Debugging & Planung
 
@@ -214,6 +259,20 @@ Circuit-Breaker greift nach 3 Edits. Stop, Problem anders beschreiben.
 
 **Sandbox blockt Pre-Commit Hook?**
 Manuell committen: `! git commit -m "msg"`
+
+---
+
+## Dev Workflow (npx-ai-setup Repo)
+
+Beim Arbeiten am ai-setup Repo selbst gilt: `templates/` ist Single Source of Truth. `.claude/` ist generierter Mirror.
+
+```bash
+bash bin/sync-local.sh           # Templates → repo-local Mirror
+bash bin/sync-local.sh --check   # Drift-Check (CI/quality-gate)
+bash bin/sync-local.sh --prune   # Orphans entfernen
+```
+
+Niemals `.claude/{agents,hooks,rules,scripts,docs,skills}` direkt editieren — naechster Sync ueberschreibt. Marketplace-Skills (agent-browser, gh-cli, orchestrate, bash-defensive-patterns) bleiben unberuehrt.
 
 ---
 

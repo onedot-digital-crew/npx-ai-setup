@@ -3,7 +3,7 @@ name: challenge
 description: "Challenge and critically evaluate this feature idea before any implementation: **$ARGUMENTS**"
 user-invocable: true
 effort: high
-model: sonnet
+model: opus
 argument-hint: "<feature idea or description>"
 allowed-tools:
   - Read

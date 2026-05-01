@@ -2,7 +2,7 @@
 
 All notable changes are recorded here automatically when specs are completed via `/spec-work`.
 
-Format: grouped by version. New entries go under `## [Unreleased]` and are moved to a versioned heading when `/release` is run.
+Format: grouped by version. New entries go under `## [Unreleased]` and are moved to a versioned heading when `bash bin/release.sh` is run (this repo only — target projects do not ship a release skill).
 
 ---
 
@@ -10,7 +10,9 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
+- **Graph + Skill Routing Cleanup** (Specs 634-640): tote Stack-Scanner entfernt, Workflow-Hints vervollstaendigt, Context-Scanner breiter eingebunden, Analyze community-aware gemacht und Graph/Liquid-Kontext in Hooks, Reviewer und Reuse-Regeln integriert.
 - **Boilerplate Pull Cache** (Spec 653): `.ai-setup.json` trackt Remote-Blob-SHA pro gepulltem File in `.boilerplate_files`. Nächster Pull holt nur Remote-SHA via `gh api`, matched gegen Cache und überspringt unveränderte Files. Stoppt Format-Drift-Diffs durch lokales Prettier-Reformatieren.
+- **Slim Setup** (Specs 654-663): single-source template sync (`bin/sync-local.sh --prune`), `/index` Context-Orchestrator, Context-Freshness Hook, Hook-Audit (10→9, `graph-hints.sh` merge), `/spec-review` → `/review --spec NNN`, Delegation-Mandates schärfen (read-only Bash + explicit-files Implementer), stack-gated Performance-Reviewer, `/release` aus Templates entfernt, Brownfield Delta-Block (`MODIFIED:` / `REMOVED:` in Specs), Spec-Dependencies via `<!-- depends_on: [NNN] -->` Frontmatter (`spec-deps-check.sh`, `/spec-board` blockiert-Marker, `/spec-work` Pre-Check). Migration: `npx ai-setup --patch` räumt alte `/release`, `/spec-review`, `graph-before-read.sh`, `graph-context.sh` automatisch weg. Release-Flow für dieses Repo via `bash bin/release.sh`.
 
 ## [v2.2.4] — 2026-04-30
 

@@ -7,6 +7,10 @@ Each batch agent receives up to 8 files:
 ```
 You are a Batch Analysis agent. Analyze these source files and report findings.
 
+Stack hint:
+Auto-import paths: [derived from .agents/context/STACK.md when stack is Nuxt/Nitro: composables/, utils/, server/utils/, app/composables/, app/utils/; Laravel: facades and service providers; Shopify Liquid: snippets render through sections/templates; otherwise none]
+Conventions: [context-scanner conventions, if available]
+
 Files to analyze:
 [list of 8 file paths]
 
@@ -14,6 +18,7 @@ For each file:
 1. Read the file completely.
 2. Note: purpose (1 sentence), key exports/functions, dependencies (imports), complexity (low/medium/high).
 3. Identify any issues: TODOs, error handling gaps, security concerns, dead code.
+4. Only report HIGH or MEDIUM confidence issues. Skip pattern-match suspicions. If unsure, omit.
 
 Also analyze cross-file patterns within this batch:
 - Which files depend on each other?
@@ -23,7 +28,7 @@ Return a structured JSON report:
 {
   "files": [{"path": "...", "purpose": "...", "exports": [...], "imports": [...], "complexity": "...", "issues": [...]}],
   "crossFilePatterns": ["..."],
-  "issues": [{"file": "...", "type": "...", "description": "..."}]
+  "issues": [{"file": "...", "type": "...", "confidence": "HIGH|MEDIUM", "description": "..."}]
 }
 ```
 
@@ -61,5 +66,6 @@ Produce a unified report with these sections:
 - 3-5 actionable items ranked by impact
 
 Resolve contradictions between batches (e.g., one batch calls a file "clean", another flags it).
+Cross-file claims (A depends on B, dual-patch, shared bug) MUST be verifiable from the batch outputs you received. If you cannot trace the claim to two batch reports that both saw the relevant files, drop the claim.
 Keep it factual and dense — no padding.
 ```

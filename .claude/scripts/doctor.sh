@@ -405,24 +405,24 @@ check_claudeignore_freshness() {
 }
 check_claudeignore_freshness
 
-# 18. graph-before-read hook vs graph.json
-gbr_hook_registered=false
+# 18. graph-hints hook vs graph.json
+gh_hook_registered=false
 if [ -f "$SETTINGS_FILE" ]; then
   if command -v python3 > /dev/null 2>&1; then
-    if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); hooks=d.get('hooks',{}); pre=hooks.get('PreToolUse',[]); print('yes' if any('graph-before-read' in str(e) for e in pre) else 'no')" "$SETTINGS_FILE" 2> /dev/null | grep -q yes; then
-      gbr_hook_registered=true
+    if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); hooks=d.get('hooks',{}); pre=hooks.get('PreToolUse',[]); print('yes' if any('graph-hints' in str(e) for e in pre) else 'no')" "$SETTINGS_FILE" 2> /dev/null | grep -q yes; then
+      gh_hook_registered=true
     fi
   elif command -v jq > /dev/null 2>&1; then
-    if jq -e '[.hooks.PreToolUse[]? | select(.. | strings | test("graph-before-read"))] | length > 0' "$SETTINGS_FILE" > /dev/null 2>&1; then
-      gbr_hook_registered=true
+    if jq -e '[.hooks.PreToolUse[]? | select(.. | strings | test("graph-hints"))] | length > 0' "$SETTINGS_FILE" > /dev/null 2>&1; then
+      gh_hook_registered=true
     fi
   fi
 fi
-if [ "$gbr_hook_registered" = "true" ]; then
-  if [ ! -f ".agents/context/graph.json" ]; then
-    add_row "$WARN" "graph-before-read" "Hook active but .agents/context/graph.json missing — hint will not fire"
+if [ "$gh_hook_registered" = "true" ]; then
+  if [ ! -f ".agents/context/graph.json" ] && [ ! -f ".agents/context/liquid-graph.json" ]; then
+    add_row "$WARN" "graph-hints" "Hook active but no graph.json/liquid-graph.json — run /index"
   else
-    add_row "$PASS" "graph-before-read" "Hook registered and graph.json present"
+    add_row "$PASS" "graph-hints" "Hook registered and graph artefact present"
   fi
 fi
 
@@ -539,7 +539,30 @@ if [ -d ".agents/context" ]; then
   unset _ctx_file _ctx_base _ctx_no_trigger _ctx_ok
 fi
 
-# 22. Hook token audit (dev-only — only runs inside npx-ai-setup repo)
+# 22. Index manifest health (Spec 655)
+_idx_manifest=".agents/context/index-manifest.json"
+if [ -f "$_idx_manifest" ]; then
+  if command -v jq > /dev/null 2>&1; then
+    _idx_stack=$(jq -r '.stack // empty' "$_idx_manifest" 2> /dev/null)
+    _idx_ver=$(jq -r '.version // empty' "$_idx_manifest" 2> /dev/null)
+    _idx_artifacts=$(jq -r '.artifacts | keys | length' "$_idx_manifest" 2> /dev/null || echo 0)
+    _idx_stale=$(jq -r '[.artifacts[] | select(.stale==true)] | length' "$_idx_manifest" 2> /dev/null || echo 0)
+    if [ -z "$_idx_stack" ] || [ -z "$_idx_ver" ]; then
+      add_row "$WARN" "Index manifest" "Manifest present but stack/version missing — run /index --refresh"
+    elif [ "${_idx_stale:-0}" -gt 0 ]; then
+      add_row "$WARN" "Index manifest" "${_idx_stale} stale artifact(s) — run /index --refresh"
+    else
+      add_row "$PASS" "Index manifest" "v${_idx_ver} stack=${_idx_stack} artifacts=${_idx_artifacts}"
+    fi
+  else
+    add_row "$PASS" "Index manifest" "Present (jq missing — skipping field check)"
+  fi
+  unset _idx_manifest _idx_stack _idx_ver _idx_artifacts
+else
+  add_row "$WARN" "Index manifest" "Missing — run /index to build .agents/context/index-manifest.json"
+fi
+
+# 23. Hook token audit (dev-only — only runs inside npx-ai-setup repo)
 if [ -f "lib/hook-token-audit.sh" ]; then
   audit_out="$(bash lib/hook-token-audit.sh 2> /dev/null || true)"
   audit_violations="$(printf '%s\n' "$audit_out" | grep -c 'VIOLATION' 2> /dev/null || echo 0)"

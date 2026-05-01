@@ -17,6 +17,12 @@ set -o pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT" || exit 2
 
+# Spec 654: prefer single-source sync check. Falls through to legacy diff
+# scan only if bin/sync-local.sh is missing (e.g. older checkouts).
+if [ -x "bin/sync-local.sh" ]; then
+  exec bash bin/sync-local.sh --check
+fi
+
 VERBOSE=0
 [ "${1:-}" = "--verbose" ] && VERBOSE=1
 
@@ -88,7 +94,7 @@ ALLOWED_CONTENT_DIVERGENCE=(
 
 # 1. Compare .claude/ vs templates/claude/ — content diffs
 check_content_drift() {
-  local pair file_local file_tpl matched
+  local file_local file_tpl matched
   while IFS= read -r line; do
     case "$line" in
       "Files "*" and "*" differ")

@@ -66,7 +66,13 @@ Glob `.claude/skills/*/SKILL.md`, read first 5 lines each. Apply relevant guidan
 
 ### 1b. Context-Scan (mandatory)
 
-Spawn `context-scanner` subagent (model: haiku). See `@references/context-scan.md`.
+If `.agents/context/STACK.md` exists and is newer than 24 hours, read it and skip the scanner:
+
+```bash
+find .agents/context/STACK.md -mtime -1 -print 2>/dev/null
+```
+
+Otherwise spawn `context-scanner` subagent (model: haiku). See `@references/context-scan.md`.
 **On subagent failure** (timeout, quota, parse error): degrade to inline Glob for stack markers (`nuxt.config.*`, `next.config.*`, `artisan`, `composer.json`, `package.json`) and proceed with `stack_profile=unknown`.
 Read STACK.md (matrix above). SUMMARY.md is auto-imported via CLAUDE.md tier-1.
 Present the scan summary in chat, then ask one consolidated AskUserQuestion call:
@@ -138,6 +144,7 @@ Light: skip assumptions table. Decisions + Context7 still apply.
 1. **Spec number**: Scan `specs/` + `specs/completed/` for highest `NNN-*.md`, increment by 1. After Write, verify uniqueness: `ls specs/NNN-*.md | wc -l` — if >1, increment NNN and re-write (race-condition guard for parallel sessions).
 2. **Analyze**: Read 2-3 most relevant source files. Reuse Phase 1 sketch.
 3. **Create**: Use template from `@references/template.md`. Apply CONVENTIONS-style (already loaded via matrix). Include **Stack Coverage** section. Each step must introduce a NEW code change — remove redundant steps, add steps for blocked flows.
+   - **Brownfield Delta-Block (opt-in)**: Wenn Spec >2 bestehende Files modifiziert oder löscht (Refactor, Rule-Change, Hook-Merge), Block `## Changes to Existing Behavior` mit Sub-Sektionen `### MODIFIED: <component>` und `### REMOVED: <component>` einfügen. Greenfield-Specs (neuer Skill, neue Datei) brauchen den Block nicht. Beispiel: Hook-Merge-Spec → `### MODIFIED: graph-context.sh` (now handles before-read), `### REMOVED: graph-before-read.sh` (merged into graph-context.sh).
 4. **Auto-split**: When >12 steps OR cross-layer architecture (frontend + backend + DB) OR >2 Context7 lookups required. Length alone is not a trigger — coherent specs may be long.
 
 ## Phase 3 — Structural check (automatic, zero tokens)

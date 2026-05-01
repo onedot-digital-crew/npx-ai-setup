@@ -55,7 +55,7 @@ Use the `/test` skill only when you need Claude to analyze failures or auto-fix.
 
 ## Delegation Mandates
 
-Opus delegates execution. **MUST**: ≥3 Bash → `bash-runner` (haiku); ≥2 Edits → `implementer` (sonnet); arch-skepsis → `staff-reviewer` (opus). Full trigger table + reviewers: `.claude/rules/agents.md`.
+Opus delegates execution. **MUST**: ≥3 **read-only** Bash → `bash-runner` (haiku, never mutations); ≥2 Edits **with explicit file list AND expected change** → `implementer` (sonnet); arch-skepsis → `staff-reviewer` (opus). Full trigger table + hard rules: `.claude/rules/agents.md`.
 
 ## Build Artifact Rules
 
