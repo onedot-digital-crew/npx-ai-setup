@@ -129,7 +129,12 @@ pull_boilerplate_files() {
   repo_name=$(get_boilerplate_repo "$system") || return 1
   local repo="${BOILERPLATE_ORG}/${repo_name}"
 
-  tui_section "Boilerplate Pull" "Pulling ${system} config from ${repo}"
+  local _section_shown=0
+  _ensure_section() {
+    [ "$_section_shown" = "1" ] && return
+    tui_section "Boilerplate Pull" "Pulling ${system} config from ${repo}"
+    _section_shown=1
+  }
 
   local pulled=0
   local failed=0
@@ -186,6 +191,7 @@ pull_boilerplate_files() {
             mkdir -p ".claude/skills/${skill_name}"
             mv "$_tmp_skill" "$local_skill"
             _record_boilerplate_pull "$local_skill" "$_remote_sha" "$repo"
+            _ensure_section
             tui_success "Skill: ${skill_name}"
             pulled=$((pulled + 1))
           else
@@ -196,6 +202,7 @@ pull_boilerplate_files() {
           fi
         else
           rm -f "$_tmp_skill"
+          _ensure_section
           tui_warn "Skill not found: ${skill_name}/SKILL.md"
           failed=$((failed + 1))
         fi
@@ -222,9 +229,11 @@ pull_boilerplate_files() {
         local _rc=$?
         if [ $_rc -eq 0 ]; then
           _record_boilerplate_pull "$local_rule" "$_remote_rule_sha" "$repo"
+          _ensure_section
           tui_success "Rule: ${rule_file}"
           pulled=$((pulled + 1))
         elif [ $_rc -eq 1 ]; then
+          _ensure_section
           tui_warn "Rule fetch failed: ${rule_file}"
           failed=$((failed + 1))
         else
@@ -256,9 +265,11 @@ pull_boilerplate_files() {
       local _rc=$?
       if [ $_rc -eq 0 ]; then
         _record_boilerplate_pull "$local_agent" "$_remote_agent_sha" "$repo"
+        _ensure_section
         tui_success "Agent: ${agent_file%.md}"
         pulled=$((pulled + 1))
       elif [ $_rc -eq 1 ]; then
+        _ensure_section
         tui_warn "Agent fetch failed: ${agent_file}"
         failed=$((failed + 1))
       else
@@ -272,6 +283,17 @@ pull_boilerplate_files() {
   # MCP config is project-specific (tokens, service IDs, env-bound URLs).
   # Boilerplate servers leak unrelated services into target projects.
   # Use `npx ai-setup` plugin flow to add MCP servers explicitly.
+
+  if [ "$pulled" -eq 0 ] && [ "$failed" -eq 0 ]; then
+    # 100% cache-hit / pure skip — silent 1-liner, no section header
+    if [ "$unchanged" -gt 0 ] || [ "$skipped" -gt 0 ]; then
+      local _quiet="Boilerplate cache fresh (${unchanged} unchanged"
+      [ "$skipped" -gt 0 ] && _quiet="${_quiet}, ${skipped} skipped"
+      _quiet="${_quiet})"
+      tui_info "$_quiet"
+    fi
+    return 0
+  fi
 
   echo ""
   local _summary="Done: ${pulled} file(s) pulled"
@@ -374,9 +396,9 @@ sync_boilerplate() {
     return 0
   fi
 
-  # Auto mode: skip when cache is fresh (default 24h, override BOILERPLATE_SYNC_TTL_HOURS)
+  # Auto mode: skip when cache is fresh (default 168h = 7d, override BOILERPLATE_SYNC_TTL_HOURS)
   if [ "$mode" = "auto" ]; then
-    local ttl="${BOILERPLATE_SYNC_TTL_HOURS:-24}"
+    local ttl="${BOILERPLATE_SYNC_TTL_HOURS:-168}"
     if _boilerplate_cache_fresh "$ttl"; then
       SELECTED_SYSTEM="$system"
       return 0
