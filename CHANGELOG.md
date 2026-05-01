@@ -10,9 +10,31 @@ Format: grouped by version. New entries go under `## [Unreleased]` and are moved
 
 ## [Unreleased]
 
-- **Graph + Skill Routing Cleanup** (Specs 634-640): tote Stack-Scanner entfernt, Workflow-Hints vervollstaendigt, Context-Scanner breiter eingebunden, Analyze community-aware gemacht und Graph/Liquid-Kontext in Hooks, Reviewer und Reuse-Regeln integriert.
-- **Boilerplate Pull Cache** (Spec 653): `.ai-setup.json` trackt Remote-Blob-SHA pro gepulltem File in `.boilerplate_files`. Nächster Pull holt nur Remote-SHA via `gh api`, matched gegen Cache und überspringt unveränderte Files. Stoppt Format-Drift-Diffs durch lokales Prettier-Reformatieren.
-- **Slim Setup** (Specs 654-663): single-source template sync (`bin/sync-local.sh --prune`), `/index` Context-Orchestrator, Context-Freshness Hook, Hook-Audit (10→9, `graph-hints.sh` merge), `/spec-review` → `/review --spec NNN`, Delegation-Mandates schärfen (read-only Bash + explicit-files Implementer), stack-gated Performance-Reviewer, `/release` aus Templates entfernt, Brownfield Delta-Block (`MODIFIED:` / `REMOVED:` in Specs), Spec-Dependencies via `<!-- depends_on: [NNN] -->` Frontmatter (`spec-deps-check.sh`, `/spec-board` blockiert-Marker, `/spec-work` Pre-Check). Migration: `npx ai-setup --patch` räumt alte `/release`, `/spec-review`, `graph-before-read.sh`, `graph-context.sh` automatisch weg. Release-Flow für dieses Repo via `bash bin/release.sh`.
+## [v2.3.0] — 2026-05-01
+
+<!-- slack-announcement -->
+:package: *@onedot/ai-setup v2.3.0 — schlanker, leiser, schlauer*
+
+*Was ihr im Projekt merkt:*
+:broom: *Weniger Setup-Müll* — `--patch` räumt 28+ veraltete Skills, tote Hooks und Doctor-Reste automatisch raus. Bestandsprojekte werden 21% kleiner ohne dass ihr was tun müsst.
+:mute: *Boilerplate Pull leise* — Statt jedes Mal prominent "Pulling..." nur noch 1 Zeile bei Cache-Hit. TTL 7 Tage statt 24h, weniger gh-API-Calls pro Setup.
+:dart: *Bessere Routing-Defaults* — Reviewer-Agents kennen jetzt den Liquid-Graph (Hub-Snippets ≥5 Renderer triggern Performance-Check), Delegation-Mandates schärfer (≥3 Bash → bash-runner, ≥2 Edits → implementer).
+
+*Migration:* `npx github:onedot-digital-crew/npx-ai-setup` — räumt automatisch auf.
+<!-- /slack-announcement -->
+
+### Added
+- `cleanup_known_orphans()` — räumt 28+ veraltete Skills, Hooks, Scripts in Bestandsprojekten per `--patch`
+
+### Changed
+- Boilerplate Pull: Section-Header nur bei echten Pulls, 1-Liner bei Cache-Hit, TTL 24h → 7d
+- `LOCAL_ONLY_SKILLS` + `LOCAL_ONLY_SCRIPTS` um `release` + `release-prep.sh` erweitert
+
+### Removed
+- `templates/scripts/{doctor,changelog-prep,docs-audit,statusline,test-setup,pr-prep,build-summary}.sh`
+- `templates/claude/hooks/{shellcheck-guard.sh,README.md}`
+- Stale Fallback-Kopien in `templates/skills/agent-browser/references/` + `templates/` (Skill wird via External-Install gepflegt, lokale Kopien waren outdated)
+- `templates/skills/release/` (setup-only, nicht für Target-Projekte)
 
 ## [v2.2.4] — 2026-04-30
 

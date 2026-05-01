@@ -158,8 +158,6 @@ check_project_artifacts() {
   assert_path_exists "$project_dir/.claude/hooks/update-check.sh" ".claude/hooks/update-check.sh created"
   assert_path_exists "$project_dir/.claude/rules/general.md" ".claude/rules/general.md created"
   assert_path_exists "$project_dir/.claude/agents/code-reviewer.md" ".claude/agents/code-reviewer.md created"
-  assert_path_exists "$project_dir/.claude/scripts/doctor.sh" ".claude/scripts/doctor.sh created"
-  assert_path_exists "$project_dir/.claude/scripts/release.sh" ".claude/scripts/release.sh created"
   assert_path_exists "$project_dir/.claude/scripts/spec-board.sh" ".claude/scripts/spec-board.sh created"
   assert_path_exists "$project_dir/.claude/skills/spec-work/SKILL.md" ".claude/skills/spec-work/SKILL.md created"
   assert_path_exists "$project_dir/specs/TEMPLATE.md" "specs/TEMPLATE.md created"
