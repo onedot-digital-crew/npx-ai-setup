@@ -660,6 +660,11 @@ cleanup_known_orphans() {
     ".claude/skills/token-optimizer"
     ".claude/skills/update"
     ".claude/skills/yolo"
+    ".claude/scripts/changelog-prep.sh"
+    ".claude/scripts/docs-audit.sh"
+    ".claude/scripts/statusline.sh"
+    ".claude/scripts/test-setup.sh"
+    ".claude/scripts/pr-prep.sh"
   )
   for target in "${orphans[@]}"; do
     if [ -d "$target" ]; then
