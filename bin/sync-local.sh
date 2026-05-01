@@ -53,6 +53,7 @@ LOCAL_ONLY_SKILLS=(
   "claude-changelog"
   "gh-cli"
   "orchestrate"
+  "release"
 )
 
 # Scripts allowed to live only in .claude/scripts (repo-local dev tools).
@@ -64,6 +65,7 @@ LOCAL_ONLY_SCRIPTS=(
   "liquid-graph-refresh.sh"
   "measure-context-cost.sh"
   "quality-gate.sh"
+  "release-prep.sh"
   "session-deep-dive.sh"
   "session-extract.sh"
 )

@@ -58,6 +58,7 @@ LOCAL_ONLY_SCRIPTS=(
   "liquid-graph-refresh.sh"
   "measure-context-cost.sh"
   "quality-gate.sh"
+  "release-prep.sh"
   "session-deep-dive.sh"
   "session-extract.sh"
   "analyze-sessions.sh"
@@ -69,6 +70,7 @@ LOCAL_ONLY_SKILLS=(
   "claude-changelog"
   "gh-cli"
   "orchestrate"
+  "release"
 )
 
 # Skills allowed to be template-only
