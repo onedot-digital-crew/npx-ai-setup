@@ -40,7 +40,6 @@ For full details: `@.agents/context/STACK.md` (or `ARCHITECTURE.md`, `CONVENTION
 - CI status: `! bash .claude/scripts/ci-prep.sh`
 - Lint check: `! bash .claude/scripts/lint-prep.sh`
 - Test check: `! bash .claude/scripts/test-prep.sh`
-- Health check: `! bash .claude/scripts/doctor.sh`
 - Quality gate (bash -n + shellcheck + smoke): `! bash .claude/scripts/quality-gate.sh`
 - Debug context: `! bash .claude/scripts/debug-prep.sh`
 

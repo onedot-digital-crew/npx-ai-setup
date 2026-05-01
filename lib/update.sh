@@ -665,6 +665,12 @@ cleanup_known_orphans() {
     ".claude/scripts/statusline.sh"
     ".claude/scripts/test-setup.sh"
     ".claude/scripts/pr-prep.sh"
+    ".claude/scripts/doctor.sh"
+    ".claude/scripts/build-summary.sh"
+    ".claude/hooks/shellcheck-guard.sh"
+    ".claude/hooks/README.md"
+    ".claude/skills/agent-browser/references"
+    ".claude/skills/agent-browser/templates"
   )
   for target in "${orphans[@]}"; do
     if [ -d "$target" ]; then

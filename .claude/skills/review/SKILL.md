@@ -163,7 +163,7 @@ Read Goal, Steps, Acceptance Criteria, Files to Modify, Out of Scope. Note check
 bash .claude/scripts/spec-review-prep.sh $ARGUMENTS
 ```
 
-Output includes branch detection, full diff, top 5 changed files, doctor results, AC progress. Read the 5 most-changed files completely; review only diff hunks for the rest. Do not re-run `git diff` or `doctor.sh`.
+Output includes branch detection, full diff, top 5 changed files, AC progress. Read the 5 most-changed files completely; review only diff hunks for the rest. Do not re-run `git diff`.
 
 ### S4. Review against spec
 

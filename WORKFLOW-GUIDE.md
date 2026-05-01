@@ -20,8 +20,6 @@ claude                # Claude Code im Projekt oeffnen
 /spec-board           # aktive Specs anzeigen
 ```
 
-Setup-Health pruefen: `! bash .claude/scripts/doctor.sh`
-
 ---
 
 ## Workflow Diagramm (Default-Pfade)

@@ -27,11 +27,11 @@ Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTION
 - **Build artifacts**: never read/search `dist/`, `.output/`, `.nuxt/`, `.next/`, `build/`, `coverage/`. Blocked via `permissions.deny`.
 - **Frontend verify**: after editing `*.vue` `*.tsx` `*.jsx` `*.liquid` `*.css` `*.scss`, invoke `/agent-browser` for visual screenshot. Type-check ≠ rendered correctly.
 - **Sandbox**: never set `dangerouslyDisableSandbox: true` without explicit user confirmation.
-- **Skill `!` exec**: prep-skills (`/test`, `/ci`, doctor, quality-gate) use `!`-prefixed shell. If org policy sets `disableSkillShellExecution: true`, those skills fail silently — fallback: run the `.sh` directly via Bash.
+- **Skill `!` exec**: prep-skills (`/test`, `/ci`, quality-gate) use `!`-prefixed shell. If org policy sets `disableSkillShellExecution: true`, those skills fail silently — fallback: run the `.sh` directly via Bash.
 
 ## CLI Shortcuts (zero tokens)
 
-CI `! bash .claude/scripts/ci-prep.sh` | Lint `! bash .claude/scripts/lint-prep.sh` | Test `! bash .claude/scripts/test-prep.sh` | Health `! bash .claude/scripts/doctor.sh` | Quality-gate `! bash .claude/scripts/quality-gate.sh` | Debug `! bash .claude/scripts/debug-prep.sh`
+CI `! bash .claude/scripts/ci-prep.sh` | Lint `! bash .claude/scripts/lint-prep.sh` | Test `! bash .claude/scripts/test-prep.sh` | Quality-gate `! bash .claude/scripts/quality-gate.sh` | Debug `! bash .claude/scripts/debug-prep.sh`
 
 ## Automation (Agent SDK CLI)
 
