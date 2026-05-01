@@ -166,6 +166,7 @@ customize_settings_for_stack
 tui_step "Writing installation metadata"
 write_metadata
 update_gitignore
+update_formatter_ignores
 
 # Detect stack profile + graphify candidate (used for context bundles + graphify prompt)
 STACK_PROFILE="default"

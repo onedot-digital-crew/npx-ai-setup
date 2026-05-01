@@ -783,3 +783,48 @@ update_gitignore() {
     echo "  Removed AGENTS.md from .gitignore (must be committed)."
   fi
 }
+
+# Ensure formatters/linters skip ai-setup managed files.
+# Prettier/ESLint/EditorConfig auto-format on save would otherwise re-quote YAML
+# and reflow indentation in templates, causing endless update loops.
+update_formatter_ignores() {
+  tui_step "Updating formatter ignore files"
+
+  local marker="# ai-setup managed (do not format)"
+  local entries=(
+    ".claude/"
+    ".agents/"
+    "AGENTS.md"
+    "CLAUDE.md"
+  )
+
+  _append_ignore_block() {
+    local file="$1"
+    if [ -f "$file" ]; then
+      grep -qF "$marker" "$file" 2> /dev/null && return 0
+      printf '\n%s\n' "$marker" >> "$file"
+    else
+      printf '%s\n' "$marker" > "$file"
+    fi
+    local entry
+    for entry in "${entries[@]}"; do
+      printf '%s\n' "$entry" >> "$file"
+    done
+  }
+
+  # Prettier — only when the project actually uses it
+  if [ -f .prettierrc ] || [ -f .prettierrc.json ] || [ -f .prettierrc.js ] ||
+    [ -f .prettierrc.cjs ] || [ -f .prettierrc.yaml ] || [ -f .prettierrc.yml ] ||
+    [ -f prettier.config.js ] || [ -f prettier.config.cjs ] ||
+    (command -v jq > /dev/null 2>&1 && [ -f package.json ] &&
+      jq -e '.prettier // .devDependencies.prettier // .dependencies.prettier' package.json > /dev/null 2>&1); then
+    _append_ignore_block .prettierignore
+  fi
+
+  # ESLint — flat config or legacy
+  if [ -f eslint.config.js ] || [ -f eslint.config.mjs ] || [ -f eslint.config.cjs ] ||
+    [ -f .eslintrc ] || [ -f .eslintrc.js ] || [ -f .eslintrc.cjs ] ||
+    [ -f .eslintrc.json ] || [ -f .eslintrc.yaml ] || [ -f .eslintrc.yml ]; then
+    _append_ignore_block .eslintignore
+  fi
+}

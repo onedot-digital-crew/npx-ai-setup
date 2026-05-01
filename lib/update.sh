@@ -170,6 +170,7 @@ handle_version_check() {
             else
               write_metadata
               update_gitignore
+              update_formatter_ignores
               echo ""
               tui_success "Migration complete (v${INSTALLED_VERSION} -> v${PACKAGE_VERSION})"
               show_update_next_steps
@@ -517,6 +518,7 @@ run_smart_update() {
   fi
 
   update_gitignore
+  update_formatter_ignores
 
   echo ""
   local _version_info="v${PACKAGE_VERSION}"
