@@ -8,6 +8,7 @@ Details on demand: `@.agents/context/STACK.md` | `ARCHITECTURE.md` | `CONVENTION
 ## Rules (load on demand)
 
 - Investigation/debug discipline → `.claude/rules/quality.md`
+- Surgical changes + goal-driven execution → `.claude/rules/discipline.md`
 - Model routing: haiku (explore/read-only), sonnet (code generation/default), opus (arch) → `.claude/rules/agents.md`
 - External docs (Context7 first) → `.claude/rules/general.md`
 - External verification in Plan-Phase (Spec/Explore/Design) → `.claude/rules/external-verification.md`

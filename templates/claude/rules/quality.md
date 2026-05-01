@@ -26,6 +26,8 @@
 - No dead code, no magic numbers without named constants
 - Logic is self-explanatory or has a comment explaining _why_
 - Keep functions under ~40 lines; inject dependencies for testability
+- **Senior-test**: would a senior engineer call this overcomplicated? If yes, simplify. 200 lines that could be 50 = rewrite.
+- No speculative flexibility/configurability that wasn't requested. No error handling for impossible scenarios.
 
 ## Debugging
 

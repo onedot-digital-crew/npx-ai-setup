@@ -6,6 +6,12 @@ Never assume import paths, function names, or API routes. Verify by reading the 
 Never fabricate configuration formats or assume config file schemas exist — check docs or existing examples first.
 When unsure about current state, run `git diff` to see what has actually changed this session.
 
+## Surface Ambiguity, Don't Pick Silently
+
+If the request has multiple plausible interpretations, present them — don't choose silently.
+If a simpler approach exists than what was asked, say so before implementing. Push back when warranted.
+If something is unclear, stop. Name what's confusing. Ask.
+
 ## Human Approval Gates
 
 Before finalizing any deliverable, present a summary and ask for confirmation.
